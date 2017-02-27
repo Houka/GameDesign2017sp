@@ -123,18 +123,12 @@ public class PlatformController extends WorldController implements ContactListen
 	private static final float  DEFAULT_GRAVITY = -14.7f;
 	/** The density for most physics objects */
 	private static final float  BASIC_DENSITY = 0.0f;
-	/** The density for a bullet */
-	private static final float  HEAVY_DENSITY = 10.0f;
 	/** Friction of most platforms */
 	private static final float  BASIC_FRICTION = 0.4f;
 	/** The restitution for all physics objects */
 	private static final float  BASIC_RESTITUTION = 0.1f;
 	/** The width of the rope bridge */
 	private static final float  BRIDGE_WIDTH = 14.0f;
-	/** Offset for bullet when firing */
-	private static final float  BULLET_OFFSET = 0.2f;
-	/** The speed of the bullet after firing */
-	private static final float  BULLET_SPEED = 20.0f;
 	/** The volume for sound effects */
 	private static final float EFFECT_VOLUME = 0.8f;
 
@@ -157,6 +151,9 @@ public class PlatformController extends WorldController implements ContactListen
 	/** Mark set to handle more sophisticated collision callbacks */
 	protected ObjectSet<Fixture> sensorFixtures;
 
+	/** The factory that manages the bullets*/
+	private BulletFactory bulletFactory;
+
 	/**
 	 * Creates and initialize a new instance of the platformer game
 	 *
@@ -169,6 +166,7 @@ public class PlatformController extends WorldController implements ContactListen
 		setFailure(false);
 		world.setContactListener(this);
 		sensorFixtures = new ObjectSet<Fixture>();
+		bulletFactory = new BulletFactory(this, scale);
 	}
 	
 	/**
@@ -298,7 +296,8 @@ public class PlatformController extends WorldController implements ContactListen
 		
 		// Add a bullet if we fire
 		if (avatar.isShooting()) {
-			createBullet();
+			bulletFactory.createBullet(avatar.isFacingRight(), avatar.getX(), avatar.getY(), bulletTexture);
+			SoundController.getInstance().play(PEW_FILE, PEW_FILE, false, EFFECT_VOLUME);
 		}
 		
 		avatar.applyForce();
@@ -309,40 +308,6 @@ public class PlatformController extends WorldController implements ContactListen
 	    // If we use sound, we must remember this.
 	    SoundController.getInstance().update();
 	}
-
-	/**
-	 * Add a new bullet to the world and send it in the right direction.
-	 */
-	private void createBullet() {
-		float offset = (avatar.isFacingRight() ? BULLET_OFFSET : -BULLET_OFFSET);
-		float radius = bulletTexture.getRegionWidth()/(2.0f*scale.x);
-		WheelObstacle bullet = new WheelObstacle(avatar.getX()+offset, avatar.getY(), radius);
-		
-	    bullet.setName("bullet");
-		bullet.setDensity(HEAVY_DENSITY);
-	    bullet.setDrawScale(scale);
-	    bullet.setTexture(bulletTexture);
-	    bullet.setBullet(true);
-	    bullet.setGravityScale(0);
-		
-		// Compute position and velocity
-		float speed  = (avatar.isFacingRight() ? BULLET_SPEED : -BULLET_SPEED);
-		bullet.setVX(speed);
-		addQueuedObject(bullet);
-		
-		SoundController.getInstance().play(PEW_FILE, PEW_FILE, false, EFFECT_VOLUME);
-	}
-	
-	/**
-	 * Remove a new bullet from the world.
-	 *
-	 * @param  bullet   the bullet to remove
-	 */
-	public void removeBullet(Obstacle bullet) {
-	    bullet.markRemoved(true);
-	    SoundController.getInstance().play(POP_FILE,POP_FILE,false,EFFECT_VOLUME);
-	}
-
 	
 	/**
 	 * Callback method for the start of a collision
@@ -369,11 +334,13 @@ public class PlatformController extends WorldController implements ContactListen
 
 			// Test bullet collision with world
 			if (bd1.getName().equals("bullet") && bd2 != avatar) {
-		        removeBullet(bd1);
+		        bulletFactory.removeBullet(bd1);
+				SoundController.getInstance().play(POP_FILE,POP_FILE,false,EFFECT_VOLUME);
 			}
 
 			if (bd2.getName().equals("bullet") && bd1 != avatar) {
-		        removeBullet(bd2);
+		        bulletFactory.removeBullet(bd2);
+				SoundController.getInstance().play(POP_FILE,POP_FILE,false,EFFECT_VOLUME);
 			}
 
 			// See if we have landed on the ground.
