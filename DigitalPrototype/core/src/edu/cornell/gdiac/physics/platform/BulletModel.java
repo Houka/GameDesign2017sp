@@ -1,5 +1,7 @@
 package edu.cornell.gdiac.physics.platform;
 
+import com.badlogic.gdx.graphics.Color;
+import edu.cornell.gdiac.physics.GameCanvas;
 import edu.cornell.gdiac.physics.obstacle.BoxObstacle;
 
 /**
@@ -11,6 +13,10 @@ import edu.cornell.gdiac.physics.obstacle.BoxObstacle;
  */
 public class BulletModel extends BoxObstacle {
 
+
+    private float XSCALE = .5f;
+    private float YSCALE = .5f;
+    
     /** Constructor for a bullet*/
     public BulletModel(float x, float y){
         super(x, y);
@@ -18,5 +24,10 @@ public class BulletModel extends BoxObstacle {
 
     public BulletModel(float x, float y, float w, float h){
         super(x, y,w,h);
+    }
+    public void draw(GameCanvas canvas) {
+        if (texture != null) {
+            canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),XSCALE,YSCALE);
+        }
     }
 }

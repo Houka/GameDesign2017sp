@@ -14,7 +14,7 @@ import edu.cornell.gdiac.physics.obstacle.Obstacle;
  */
 public class BulletFactory {
     /** Offset for bullet when firing */
-    private static final float  BULLET_OFFSET = 0.2f;
+    private static final float  BULLET_OFFSET = 2f;
     /** The speed of the bullet after firing */
     private static final float  BULLET_SPEED = 2.0f;
     /** The density for a bullet */
@@ -45,10 +45,9 @@ public class BulletFactory {
      */
     public void createBullet(boolean isFacingRight, float x, float y, TextureRegion bulletTexture) {
         float offset = (isFacingRight ? BULLET_OFFSET : -BULLET_OFFSET);
-        float width = bulletTexture.getRegionWidth()/(scale.x);
-        float height = bulletTexture.getRegionHeight()/(scale.y);
+        float width = bulletTexture.getRegionWidth()/(scale.x/.5f);
+        float height = bulletTexture.getRegionHeight()/(scale.y/.5f);
         BulletModel bullet = new BulletModel(x+offset, y, width, height);
-
         bullet.setName("bullet");
         bullet.setDensity(HEAVY_DENSITY);
         bullet.setDrawScale(scale);
