@@ -278,6 +278,12 @@ public class PlatformController extends WorldController implements ContactListen
 		return true;
 	}
 
+
+	public float getAdjustment() {
+		return (InputController.getInstance().didDecrease()?-.25f:0) +
+				(InputController.getInstance().didIncrease()?.25f:0);
+
+	}
 	/**
 	 * The core gameplay loop of this world.
 	 *
@@ -293,7 +299,16 @@ public class PlatformController extends WorldController implements ContactListen
 		avatar.setMovement(InputController.getInstance().getHorizontal() *avatar.getForce());
 		avatar.setJumping(InputController.getInstance().didPrimary());
 		avatar.setShooting(InputController.getInstance().didSecondary());
-		
+
+		//Allow for adjustments
+		float adjustment = getAdjustment();
+		if(adjustment!=0f) {
+			float newSpeed = bulletFactory.getBulletSpeed()+adjustment;
+			//System.out.println(bulletFactory.getBulletSpeed() + " + " + adjustment + " = " + newSpeed);
+			System.out.println("Speed: " + newSpeed);
+			bulletFactory.setBulletSpeed(newSpeed);
+		}
+
 		// Add a bullet if we fire
 		if (avatar.isShooting()) {
 			bulletFactory.createBullet(avatar.isFacingRight(), avatar.getX(), avatar.getY(), earthTile);
@@ -342,7 +357,10 @@ public class PlatformController extends WorldController implements ContactListen
 		        bulletFactory.removeBullet(bd2);
 				SoundController.getInstance().play(POP_FILE,POP_FILE,false,EFFECT_VOLUME);
 			}
-
+			//Riding own projectile
+			if (bd2.getName().equals("bullet") && bd1 == avatar) {
+			    avatar.setMovement(bd1.getVX());
+			}
 			// See if we have landed on the ground.
 			if ((avatar.getSensorName().equals(fd2) && avatar != bd1) ||
 				(avatar.getSensorName().equals(fd1) && avatar != bd2)) {
