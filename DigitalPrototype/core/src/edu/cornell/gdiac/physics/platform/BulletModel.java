@@ -51,7 +51,7 @@ public class BulletModel extends BoxObstacle {
 
     public void update(float delta) {
         if(xtransform<maxXScale) {
-            xtransform += delta*speed*1.5f;
+            xtransform += delta*Math.abs(speed)*1.5f;
             this.setWidth(initWidth*xtransform);
             this.resize(getWidth(),getHeight());
             this.createFixtures();
