@@ -1,6 +1,6 @@
 package edu.cornell.gdiac.physics.platform;
 
-import edu.cornell.gdiac.physics.obstacle.WheelObstacle;
+import edu.cornell.gdiac.physics.obstacle.BoxObstacle;
 
 /**
  * Created by Lu on 2/27/2017.
@@ -9,10 +9,14 @@ import edu.cornell.gdiac.physics.obstacle.WheelObstacle;
  *
  * TODO: make a BulletModel not a WheelObstacle. It should be something that acts like a rectangular platform
  */
-public class BulletModel extends WheelObstacle {
+public class BulletModel extends BoxObstacle {
 
     /** Constructor for a bullet*/
-    public BulletModel(float x, float y, float radius){
-        super(x, y, radius);
+    public BulletModel(float x, float y){
+        super(x, y);
+    }
+
+    public BulletModel(float x, float y, float w, float h){
+        super(x, y,w,h);
     }
 }

@@ -296,7 +296,7 @@ public class PlatformController extends WorldController implements ContactListen
 		
 		// Add a bullet if we fire
 		if (avatar.isShooting()) {
-			bulletFactory.createBullet(avatar.isFacingRight(), avatar.getX(), avatar.getY(), bulletTexture);
+			bulletFactory.createBullet(avatar.isFacingRight(), avatar.getX(), avatar.getY(), earthTile);
 			SoundController.getInstance().play(PEW_FILE, PEW_FILE, false, EFFECT_VOLUME);
 		}
 		
