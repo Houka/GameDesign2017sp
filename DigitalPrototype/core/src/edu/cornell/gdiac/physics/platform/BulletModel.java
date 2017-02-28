@@ -25,6 +25,8 @@ public class BulletModel extends BoxObstacle {
     private float initHeight;
     private float speed;
     private boolean growing;
+    private boolean dying;
+    private float timeToDie;
     private Vector2 scale;
 
 
@@ -34,6 +36,7 @@ public class BulletModel extends BoxObstacle {
         initWidth = x;
         initHeight = y;
         growing = true;
+        dying = false;
     }
 
     public BulletModel(float x, float y, float w, float h, float s, Vector2 scl){
@@ -46,6 +49,7 @@ public class BulletModel extends BoxObstacle {
         createFixtures();
         speed = s;
         growing = true;
+        dying = false;
         scale = scl;
     }
 
@@ -58,6 +62,11 @@ public class BulletModel extends BoxObstacle {
         } else if(growing){
             //setVX(speed);
             growing = false;
+        }
+        if(dying) {
+            timeToDie-=delta;
+            if(timeToDie<0)
+                markRemoved(true);
         }
         this.setVY(0);
     }
@@ -74,5 +83,10 @@ public class BulletModel extends BoxObstacle {
         if (texture != null) {
             canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),getScaledX(),getScaledY());
         }
+    }
+
+    public void setTimeToDie(float xd) {
+        timeToDie = xd;
+        dying = true;
     }
 }

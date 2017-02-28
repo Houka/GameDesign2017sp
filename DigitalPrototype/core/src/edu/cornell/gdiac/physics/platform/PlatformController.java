@@ -349,17 +349,24 @@ public class PlatformController extends WorldController implements ContactListen
 
 			// Test bullet collision with world
 			if (bd1.getName().equals("bullet") && bd2 != avatar) {
-		        bulletFactory.removeBullet(bd1);
+				BulletModel bullet = (BulletModel) bd2;
+				bullet.setVX(0.0f);
+				bullet.setTimeToDie(5);
 				SoundController.getInstance().play(POP_FILE,POP_FILE,false,EFFECT_VOLUME);
 			}
 
 			if (bd2.getName().equals("bullet") && bd1 != avatar) {
-		        bulletFactory.removeBullet(bd2);
+				BulletModel bullet = (BulletModel) bd2;
+			    bullet.setVX(0.0f);
+			    bullet.setTimeToDie(5);
 				SoundController.getInstance().play(POP_FILE,POP_FILE,false,EFFECT_VOLUME);
 			}
 			//Riding own projectile
 			if (bd2.getName().equals("bullet") && bd1 == avatar) {
 			    avatar.setMovement(bd1.getVX());
+			}
+			if (bd1.getName().equals("bullet") && bd2 == avatar) {
+				avatar.setMovement(bd2.getVX());
 			}
 			// See if we have landed on the ground.
 			if ((avatar.getSensorName().equals(fd2) && avatar != bd1) ||
