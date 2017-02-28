@@ -363,10 +363,10 @@ public class PlatformController extends WorldController implements ContactListen
 			}
 			//Riding own projectile
 			if (bd2.getName().equals("bullet") && bd1 == avatar) {
-			    avatar.setMovement(bd1.getVX());
+			    //avatar.setMovement(bd2.getVX());
 			}
 			if (bd1.getName().equals("bullet") && bd2 == avatar) {
-				avatar.setMovement(bd2.getVX());
+				//avatar.setMovement(bd1.getVX());
 			}
 			// See if we have landed on the ground.
 			if ((avatar.getSensorName().equals(fd2) && avatar != bd1) ||

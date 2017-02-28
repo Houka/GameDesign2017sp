@@ -29,6 +29,8 @@ public class BulletModel extends BoxObstacle {
     private float timeToDie;
     private Vector2 scale;
 
+    private final Color PAINTCOLOR = Color.RED;
+
 
     /** Constructor for a bullet*/
     public BulletModel(float x, float y){
@@ -81,7 +83,7 @@ public class BulletModel extends BoxObstacle {
 
     public void draw(GameCanvas canvas) {
         if (texture != null) {
-            canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),getScaledX(),getScaledY());
+            canvas.draw(texture, PAINTCOLOR,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),getScaledX(),getScaledY());
         }
     }
 
