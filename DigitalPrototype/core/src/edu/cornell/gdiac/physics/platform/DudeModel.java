@@ -66,6 +66,8 @@ public class DudeModel extends CapsuleObstacle {
 	private int shootCooldown;
 	/** Whether our feet are on the ground */
 	private boolean isGrounded;
+	/** Whether we've used our double jump */
+	private boolean canDoubleJump;
 	/** Whether we are actively shooting */
 	private boolean isShooting;
 	/** Ground sensor to represent our feet */
@@ -75,6 +77,7 @@ public class DudeModel extends CapsuleObstacle {
 	/** Cache for internal force calculations */
 	private Vector2 forceCache = new Vector2();
 
+    private Vector2 zeroVector = new Vector2(0,0);
 	/**
 	 * Returns left/right movement of this character.
 	 * 
@@ -126,10 +129,10 @@ public class DudeModel extends CapsuleObstacle {
 	 *
 	 * @return true if the dude is actively jumping.
 	 */
-	public boolean isJumping() {
-		return isJumping && isGrounded && jumpCooldown <= 0;
-	}
-	
+	public boolean isJumping() {return isJumping && isGrounded && jumpCooldown <= 0;}
+
+
+	public boolean isDoubleJumping(){ return isJumping && !isGrounded && canDoubleJump; }
 	/**
 	 * Sets whether the dude is actively jumping.
 	 *
@@ -139,7 +142,17 @@ public class DudeModel extends CapsuleObstacle {
 		isJumping = value; 
 	}
 
-	/**
+
+    /**
+     * Sets whether the dude can double jump.
+     *
+     * @param value whether the dude can double jump.
+     */
+    public void setCanDoubleJump(boolean value) {
+        canDoubleJump = value;
+    }
+
+    /**
 	 * Returns true if the dude is on the ground.
 	 *
 	 * @return true if the dude is on the ground.
@@ -244,6 +257,7 @@ public class DudeModel extends CapsuleObstacle {
 		isGrounded = false;
 		isShooting = false;
 		isJumping = false;
+		canDoubleJump = false;
 		faceRight = true;
 		
 		shootCooldown = 0;
@@ -315,8 +329,18 @@ public class DudeModel extends CapsuleObstacle {
 
 		// Jump!
 		if (isJumping()) {
+		    System.out.println("hi2");
 			forceCache.set(0, DUDE_JUMP);
 			body.applyLinearImpulse(forceCache,getPosition(),true);
+		}
+
+		if (isDoubleJumping()) {
+		    //dividing by sqrt 2 makes it such that from 0 velocity it goes half the height of a regular jump
+			forceCache.set(0, DUDE_JUMP/((float)Math.sqrt(2)));
+			//set velocity to 0 so that the jump height is independent of how the model is moving
+			setLinearVelocity(zeroVector);
+			body.applyLinearImpulse(forceCache,getPosition(),true);
+			setCanDoubleJump(false);
 		}
 	}
 	
@@ -325,7 +349,7 @@ public class DudeModel extends CapsuleObstacle {
 	 *
 	 * We use this method to reset cooldowns.
 	 *
-	 * @param delta Number of seconds since last animation frame
+	 * @param dt Number of seconds since last animation frame
 	 */
 	public void update(float dt) {
 		// Apply cooldowns

@@ -301,7 +301,7 @@ public class PlatformController extends WorldController implements ContactListen
 		}
 		
 		avatar.applyForce();
-	    if (avatar.isJumping()) {
+	    if (avatar.isJumping() || avatar.isDoubleJumping()) {
 	        SoundController.getInstance().play(JUMP_FILE,JUMP_FILE,false,EFFECT_VOLUME);
 	    }
 		
@@ -347,6 +347,7 @@ public class PlatformController extends WorldController implements ContactListen
 			if ((avatar.getSensorName().equals(fd2) && avatar != bd1) ||
 				(avatar.getSensorName().equals(fd1) && avatar != bd2)) {
 				avatar.setGrounded(true);
+				avatar.setCanDoubleJump(false);
 				sensorFixtures.add(avatar == bd1 ? fix2 : fix1); // Could have more than one ground
 			}
 			
@@ -386,6 +387,7 @@ public class PlatformController extends WorldController implements ContactListen
 			sensorFixtures.remove(avatar == bd1 ? fix2 : fix1);
 			if (sensorFixtures.size == 0) {
 				avatar.setGrounded(false);
+				avatar.setCanDoubleJump(true);
 			}
 		}
 	}
