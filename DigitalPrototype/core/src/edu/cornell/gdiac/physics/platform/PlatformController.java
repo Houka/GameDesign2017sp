@@ -134,7 +134,7 @@ public class PlatformController extends WorldController implements ContactListen
 
 	// Other game objects
 	/** The goal door position */
-	private static Vector2 GOAL_POS = new Vector2(4.0f,14.0f);
+	private static Vector2 GOAL_POS = new Vector2(29.5f,15.0f); // x = 4.0f, y = 14.0f
 	/** The position of the spinning barrier */
 	private static Vector2 SPIN_POS = new Vector2(13.0f,12.5f);
 	/** The initial position of the dude */
@@ -244,14 +244,6 @@ public class PlatformController extends WorldController implements ContactListen
 		avatar.setDrawScale(scale);
 		avatar.setTexture(avatarTexture);
 		addObject(avatar);
-
-		// Create rope bridge
-		dwidth  = bridgeTexture.getRegionWidth()/scale.x;
-		dheight = bridgeTexture.getRegionHeight()/scale.y;
-		RopeBridge bridge = new RopeBridge(BRIDGE_POS.x, BRIDGE_POS.y, BRIDGE_WIDTH, dwidth, dheight);
-		bridge.setTexture(bridgeTexture);
-		bridge.setDrawScale(scale);
-		addObject(bridge);
 	}
 	
 	/**

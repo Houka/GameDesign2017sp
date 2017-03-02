@@ -26,16 +26,19 @@ public class LevelParser {
 
     /** The outlines of all of the platforms */
     private static final float[][] PLATFORMS = {
-            { 1.0f, 3.0f, 6.0f, 3.0f, 6.0f, 2.5f, 1.0f, 2.5f},
-            { 6.0f, 4.0f, 9.0f, 4.0f, 9.0f, 2.5f, 6.0f, 2.5f},
-            {23.0f, 4.0f,31.0f, 4.0f,31.0f, 2.5f,23.0f, 2.5f},
-            {26.0f, 5.5f,28.0f, 5.5f,28.0f, 5.0f,26.0f, 5.0f},
-            {29.0f, 7.0f,31.0f, 7.0f,31.0f, 6.5f,29.0f, 6.5f},
-            {24.0f, 8.5f,27.0f, 8.5f,27.0f, 8.0f,24.0f, 8.0f},
-            {29.0f,10.0f,31.0f,10.0f,31.0f, 9.5f,29.0f, 9.5f},
-            {23.0f,11.5f,27.0f,11.5f,27.0f,11.0f,23.0f,11.0f},
-            {19.0f,12.5f,23.0f,12.5f,23.0f,12.0f,19.0f,12.0f},
-            { 1.0f,12.5f, 7.0f,12.5f, 7.0f,12.0f, 1.0f,12.0f}
+            // (x top left, y top left, x top right, y top right, x bottom right, y bottom left, x bottom left, y bottom right)
+
+            { 1.0f, 1.0f, 6.0f, 1.0f, 6.0f, 0.0f, 1.0f, 0.0f}, // starting platform
+            //{ 6.0f, 4.0f, 9.0f, 4.0f, 9.0f, 2.5f, 6.0f, 2.5f}, // right of starting platform
+            {23.0f, 0.0f,31.0f, 0.0f,31.0f, 1.0f,23.0f, 1.0f}, // right of bridge
+
+            {0.0f, 5.5f,4.0f, 5.5f,4.0f, 5.0f,0.0f, 5.0f}, // 6th platform on the right
+            {0.0f, 9.0f,7.0f, 9.0f,7.0f, 8.5f,0.0f, 8.5f}, // 5th platform on the right
+            // {24.0f, 8.5f,27.0f, 8.5f,27.0f, 8.0f,24.0f, 8.0f}, // 4th platform on the right
+            // {29.0f,10.0f,31.0f,10.0f,31.0f, 9.5f,29.0f, 9.5f}, // 3rd platform on the right
+            // {23.0f,11.5f,27.0f,11.5f,27.0f,11.0f,23.0f,11.0f}, // 2nd platform on the right
+            // {19.0f,12.5f,23.0f,12.5f,23.0f,12.0f,19.0f,12.0f}, // 1st platform on the right
+            { 1.0f,12.5f, 10.0f,12.5f, 10.0f,12.0f, 1.0f,12.0f} // finish platform
     };
 
     /** Creates a level parser object*/
