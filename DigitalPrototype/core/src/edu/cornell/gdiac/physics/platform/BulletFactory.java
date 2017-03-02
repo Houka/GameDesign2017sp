@@ -78,4 +78,8 @@ public class BulletFactory {
     public void setBulletSpeed(float s) {
         bullet_speed = s;
     }
+    public void collideWithWall(BulletModel bullet) {
+        bullet.setVX(0.0f);
+        bullet.setTimeToDie(5);
+    }
 }

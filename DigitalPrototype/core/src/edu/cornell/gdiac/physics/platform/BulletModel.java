@@ -103,8 +103,10 @@ public class BulletModel extends BoxObstacle {
     }
 
     public void setTimeToDie(float xd) {
-        timeToDie = xd;
-        dying = true;
+        if(!dying) {
+            timeToDie = xd;
+            dying = true;
+        }
     }
 
     public void enableGravity() {

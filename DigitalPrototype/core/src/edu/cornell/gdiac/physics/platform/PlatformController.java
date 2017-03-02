@@ -57,6 +57,8 @@ public class PlatformController extends WorldController implements ContactListen
 	
 	/** Track asset loading from all instances and subclasses */
 	private AssetState platformAssetState = AssetState.EMPTY;
+
+	private Obstacle tempObstacle;
 	
 	/**
 	 * Preloads the assets for this controller.
@@ -347,27 +349,25 @@ public class PlatformController extends WorldController implements ContactListen
 			Obstacle bd1 = (Obstacle)body1.getUserData();
 			Obstacle bd2 = (Obstacle)body2.getUserData();
 
-			// Test bullet collision with world
-			if (bd1.getName().equals("bullet") && bd2 != avatar) {
-				BulletModel bullet = (BulletModel) bd1;
-				bullet.setVX(0.0f);
-				bullet.setTimeToDie(5);
-				SoundController.getInstance().play(POP_FILE,POP_FILE,false,EFFECT_VOLUME);
+			for(int i = 0; i<2; i++) {
+
+				// Test bullet collision with world
+				if (bd1.getName().equals("bullet") && bd2 != avatar) {
+					BulletModel bullet = (BulletModel) bd1;
+					bulletFactory.collideWithWall(bullet);
+
+					SoundController.getInstance().play(POP_FILE, POP_FILE, false, EFFECT_VOLUME);
+				}
+				
+				//Riding own projectile
+				if (bd2.getName().equals("bullet") && bd1 == avatar) {
+					//avatar.setMovement(bd2.getVX());
+				}
+				tempObstacle = bd1;
+				bd1 = bd2;
+				bd2 = tempObstacle;
 			}
 
-			if (bd2.getName().equals("bullet") && bd1 != avatar) {
-				BulletModel bullet = (BulletModel) bd2;
-			    bullet.setVX(0.0f);
-			    bullet.setTimeToDie(5);
-				SoundController.getInstance().play(POP_FILE,POP_FILE,false,EFFECT_VOLUME);
-			}
-			//Riding own projectile
-			if (bd2.getName().equals("bullet") && bd1 == avatar) {
-			    //avatar.setMovement(bd2.getVX());
-			}
-			if (bd1.getName().equals("bullet") && bd2 == avatar) {
-				//avatar.setMovement(bd1.getVX());
-			}
 			// See if we have landed on the ground.
 			if ((avatar.getSensorName().equals(fd2) && avatar != bd1) ||
 				(avatar.getSensorName().equals(fd1) && avatar != bd2)) {
