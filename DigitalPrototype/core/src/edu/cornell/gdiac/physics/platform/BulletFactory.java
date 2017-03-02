@@ -14,11 +14,13 @@ import edu.cornell.gdiac.physics.obstacle.Obstacle;
  */
 public class BulletFactory {
     /** Offset for bullet when firing */
-    private static final float  BULLET_OFFSET = 0.2f;
-    /** The speed of the bullet after firing */
-    private static final float  BULLET_SPEED = 10.0f;
+    private static final float  BULLET_OFFSET = 1.5f;
+    private static final float  Y_OFFSET = .5f;
     /** The density for a bullet */
     private static final float  HEAVY_DENSITY = 10.0f;
+
+    /** The speed of the bullet after firing */
+    private static float  bullet_speed = 1.5f;
 
     /** The world that the bullets exists in */
     private WorldController world;
@@ -44,19 +46,19 @@ public class BulletFactory {
      * @param bulletTexture the bullet texture
      */
     public void createBullet(boolean isFacingRight, float x, float y, TextureRegion bulletTexture) {
-        float offset = (isFacingRight ? BULLET_OFFSET : -BULLET_OFFSET);
-        float radius = bulletTexture.getRegionWidth()/(2.0f*scale.x);
-        BulletModel bullet = new BulletModel(x+offset, y, radius);
-
+        float xOffset = (isFacingRight ? BULLET_OFFSET : -BULLET_OFFSET);
+        float width = bulletTexture.getRegionWidth()/(scale.x);
+        float height = bulletTexture.getRegionHeight()/(scale.y);
+        float speed  = (isFacingRight ? bullet_speed : -bullet_speed);
+        BulletModel bullet = new BulletModel(x+xOffset, y+Y_OFFSET, width, height,speed,scale);
         bullet.setName("bullet");
         bullet.setDensity(HEAVY_DENSITY);
         bullet.setDrawScale(scale);
         bullet.setTexture(bulletTexture);
         bullet.setBullet(true);
         bullet.setGravityScale(0);
-
+        bullet.setFixedRotation(true);
         // Compute position and velocity
-        float speed  = (isFacingRight ? BULLET_SPEED : -BULLET_SPEED);
         bullet.setVX(speed);
         world.addQueuedObject(bullet);
     }
@@ -68,5 +70,16 @@ public class BulletFactory {
      */
     public void removeBullet(Obstacle bullet) {
         bullet.markRemoved(true);
+    }
+
+    public float getBulletSpeed() {
+        return bullet_speed;
+    }
+    public void setBulletSpeed(float s) {
+        bullet_speed = s;
+    }
+    public void collideWithWall(BulletModel bullet) {
+        bullet.setVX(0.0f);
+        bullet.setTimeToDie(5);
     }
 }
