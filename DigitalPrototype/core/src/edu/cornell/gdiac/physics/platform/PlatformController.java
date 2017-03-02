@@ -248,10 +248,10 @@ public class PlatformController extends WorldController implements ContactListen
 		// Create rope bridge
 		dwidth  = bridgeTexture.getRegionWidth()/scale.x;
 		dheight = bridgeTexture.getRegionHeight()/scale.y;
-		RopeBridge bridge = new RopeBridge(BRIDGE_POS.x, BRIDGE_POS.y, BRIDGE_WIDTH, dwidth, dheight);
-		bridge.setTexture(bridgeTexture);
-		bridge.setDrawScale(scale);
-		addObject(bridge);
+		//RopeBridge bridge = new RopeBridge(BRIDGE_POS.x, BRIDGE_POS.y, BRIDGE_WIDTH, dwidth, dheight);
+		//bridge.setTexture(bridgeTexture);
+		//bridge.setDrawScale(scale);
+		//addObject(bridge);
 	}
 	
 	/**
@@ -349,7 +349,7 @@ public class PlatformController extends WorldController implements ContactListen
 
 			// Test bullet collision with world
 			if (bd1.getName().equals("bullet") && bd2 != avatar) {
-				BulletModel bullet = (BulletModel) bd2;
+				BulletModel bullet = (BulletModel) bd1;
 				bullet.setVX(0.0f);
 				bullet.setTimeToDie(5);
 				SoundController.getInstance().play(POP_FILE,POP_FILE,false,EFFECT_VOLUME);

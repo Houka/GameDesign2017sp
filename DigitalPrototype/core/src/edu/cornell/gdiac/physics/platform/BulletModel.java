@@ -16,11 +16,13 @@ public class BulletModel extends BoxObstacle {
 
 
     private float xScale = .5f;
-    private float yScale = .5f;
+    private float yScale = .25f;
     private float xtransform = 1f;
     private float ytransform = 1f;
 
     private float maxXScale = 3f;
+    private float myVY;
+    private float opacity;
     private float initWidth;
     private float initHeight;
     private float speed;
@@ -28,8 +30,9 @@ public class BulletModel extends BoxObstacle {
     private boolean dying;
     private float timeToDie;
     private Vector2 scale;
+    boolean gravity;
 
-    private final Color PAINTCOLOR = Color.RED;
+    private Color paintcolor = Color.RED;
 
 
     /** Constructor for a bullet*/
@@ -39,6 +42,9 @@ public class BulletModel extends BoxObstacle {
         initHeight = y;
         growing = true;
         dying = false;
+        myVY=0;
+        opacity = 1;
+        gravity = false;
     }
 
     public BulletModel(float x, float y, float w, float h, float s, Vector2 scl){
@@ -53,6 +59,9 @@ public class BulletModel extends BoxObstacle {
         growing = true;
         dying = false;
         scale = scl;
+        myVY = 0;
+        opacity = 1;
+        gravity = false;
     }
 
     public void update(float delta) {
@@ -67,10 +76,15 @@ public class BulletModel extends BoxObstacle {
         }
         if(dying) {
             timeToDie-=delta;
+            if(timeToDie<1) {
+                enableGravity();
+                opacity *= .99;
+            }
             if(timeToDie<0)
                 markRemoved(true);
         }
-        this.setVY(0);
+        if(!gravity)
+            this.setVY(0.0f);
     }
 
     private float getScaledX() {
@@ -82,13 +96,20 @@ public class BulletModel extends BoxObstacle {
     }
 
     public void draw(GameCanvas canvas) {
+        paintcolor.a = opacity;
         if (texture != null) {
-            canvas.draw(texture, PAINTCOLOR,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),getScaledX(),getScaledY());
+            canvas.draw(texture, paintcolor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),getScaledX(),getScaledY());
         }
     }
 
     public void setTimeToDie(float xd) {
         timeToDie = xd;
         dying = true;
+    }
+
+    public void enableGravity() {
+        gravity = true;
+        this.setGravityScale(1/3f);
+        //this.setVY(-2); //Uncomment and comment above line for constant falling
     }
 }
