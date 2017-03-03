@@ -57,6 +57,8 @@ public class PlatformController extends WorldController implements ContactListen
 	
 	/** Track asset loading from all instances and subclasses */
 	private AssetState platformAssetState = AssetState.EMPTY;
+
+	private Obstacle tempObstacle;
 	
 	/**
 	 * Preloads the assets for this controller.
@@ -248,10 +250,10 @@ public class PlatformController extends WorldController implements ContactListen
 		// Create rope bridge
 		dwidth  = bridgeTexture.getRegionWidth()/scale.x;
 		dheight = bridgeTexture.getRegionHeight()/scale.y;
-		RopeBridge bridge = new RopeBridge(BRIDGE_POS.x, BRIDGE_POS.y, BRIDGE_WIDTH, dwidth, dheight);
-		bridge.setTexture(bridgeTexture);
-		bridge.setDrawScale(scale);
-		addObject(bridge);
+		//RopeBridge bridge = new RopeBridge(BRIDGE_POS.x, BRIDGE_POS.y, BRIDGE_WIDTH, dwidth, dheight);
+		//bridge.setTexture(bridgeTexture);
+		//bridge.setDrawScale(scale);
+		//addObject(bridge);
 	}
 	
 	/**
@@ -278,6 +280,12 @@ public class PlatformController extends WorldController implements ContactListen
 		return true;
 	}
 
+
+	public float getAdjustment() {
+		return (InputController.getInstance().didDecrease()?-.25f:0) +
+				(InputController.getInstance().didIncrease()?.25f:0);
+
+	}
 	/**
 	 * The core gameplay loop of this world.
 	 *
@@ -293,15 +301,24 @@ public class PlatformController extends WorldController implements ContactListen
 		avatar.setMovement(InputController.getInstance().getHorizontal() *avatar.getForce());
 		avatar.setJumping(InputController.getInstance().didPrimary());
 		avatar.setShooting(InputController.getInstance().didSecondary());
-		
+
+		//Allow for adjustments
+		float adjustment = getAdjustment();
+		if(adjustment!=0f) {
+			float newSpeed = bulletFactory.getBulletSpeed()+adjustment;
+			//System.out.println(bulletFactory.getBulletSpeed() + " + " + adjustment + " = " + newSpeed);
+			System.out.println("Speed: " + newSpeed);
+			bulletFactory.setBulletSpeed(newSpeed);
+		}
+
 		// Add a bullet if we fire
 		if (avatar.isShooting()) {
-			bulletFactory.createBullet(avatar.isFacingRight(), avatar.getX(), avatar.getY(), bulletTexture);
+			bulletFactory.createBullet(avatar.isFacingRight(), avatar.getX(), avatar.getY(), earthTile);
 			SoundController.getInstance().play(PEW_FILE, PEW_FILE, false, EFFECT_VOLUME);
 		}
 		
 		avatar.applyForce();
-	    if (avatar.isJumping()) {
+	    if (avatar.isJumping() || avatar.isDoubleJumping()) {
 	        SoundController.getInstance().play(JUMP_FILE,JUMP_FILE,false,EFFECT_VOLUME);
 	    }
 		
@@ -332,21 +349,30 @@ public class PlatformController extends WorldController implements ContactListen
 			Obstacle bd1 = (Obstacle)body1.getUserData();
 			Obstacle bd2 = (Obstacle)body2.getUserData();
 
-			// Test bullet collision with world
-			if (bd1.getName().equals("bullet") && bd2 != avatar) {
-		        bulletFactory.removeBullet(bd1);
-				SoundController.getInstance().play(POP_FILE,POP_FILE,false,EFFECT_VOLUME);
-			}
+			for(int i = 0; i<2; i++) {
 
-			if (bd2.getName().equals("bullet") && bd1 != avatar) {
-		        bulletFactory.removeBullet(bd2);
-				SoundController.getInstance().play(POP_FILE,POP_FILE,false,EFFECT_VOLUME);
+				// Test bullet collision with world
+				if (bd1.getName().equals("bullet") && bd2 != avatar) {
+					BulletModel bullet = (BulletModel) bd1;
+					bulletFactory.collideWithWall(bullet);
+
+					SoundController.getInstance().play(POP_FILE, POP_FILE, false, EFFECT_VOLUME);
+				}
+				
+				//Riding own projectile
+				if (bd2.getName().equals("bullet") && bd1 == avatar) {
+					//avatar.setMovement(bd2.getVX());
+				}
+				tempObstacle = bd1;
+				bd1 = bd2;
+				bd2 = tempObstacle;
 			}
 
 			// See if we have landed on the ground.
 			if ((avatar.getSensorName().equals(fd2) && avatar != bd1) ||
 				(avatar.getSensorName().equals(fd1) && avatar != bd2)) {
 				avatar.setGrounded(true);
+				avatar.setCanDoubleJump(false);
 				sensorFixtures.add(avatar == bd1 ? fix2 : fix1); // Could have more than one ground
 			}
 			
@@ -386,6 +412,7 @@ public class PlatformController extends WorldController implements ContactListen
 			sensorFixtures.remove(avatar == bd1 ? fix2 : fix1);
 			if (sensorFixtures.size == 0) {
 				avatar.setGrounded(false);
+				avatar.setCanDoubleJump(true);
 			}
 		}
 	}
