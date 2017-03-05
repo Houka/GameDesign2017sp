@@ -22,9 +22,9 @@ import edu.cornell.gdiac.physics.obstacle.CapsuleObstacle;
 public class EnemyModel extends CapsuleObstacle {
     // Physics constants
     /** The density of the character */
-    private static final float ENEMY_DENSITY = 1.0f;
+    private static final float ENEMY_DENSITY = 500.0f;
     /** Cooldown (in animation frames) for shooting */
-    private static final int SHOOT_COOLDOWN = 40;
+    private static final int SHOOT_COOLDOWN = 200;
     /** Height of the sensor attached to the player's feet */
 
     //private static final float SENSOR_HEIGHT = 0.05f;
@@ -63,8 +63,16 @@ public class EnemyModel extends CapsuleObstacle {
     /** Ground sensor to represent our feet */
     private Fixture sensorFixture;
     private PolygonShape sensorShape;
+    /** The type of the current enemy (onSight or interval) */
+    private boolean onSight;
+    /** AIController for this enemy */
+    private AIController aiController;
+    /** The enemy interval (null if type is onSight) */
+    private int interval = 0;
+
     /** The id of the current enemy */
     private int enemyID = 0;
+
     /** The current horizontal movement of the character */
     //private float movement;
     /** Whether our feet are on the ground */
@@ -87,6 +95,24 @@ public class EnemyModel extends CapsuleObstacle {
     /*public float getMovement() {
         return movement;
     }*/
+
+    /**
+     * Returns id of this enemy.
+     *
+     * @return id of this enemy
+     */
+    public int getID() {
+        return enemyID;
+    }
+
+    /**
+     * Returns type of this enemy.
+     *
+     * @return type of this enemy
+     */
+    public boolean getOnSight() {
+        return onSight;
+    }
 
     /**
      * Sets left/right movement of this character.
@@ -221,7 +247,7 @@ public class EnemyModel extends CapsuleObstacle {
      * @param height	The object width in physics units
      */
     public EnemyModel(float width, float height) {
-        this(0,0,width,height);
+        this(0,0,width,height,false,false,null);
     }
 
     /**
@@ -235,23 +261,22 @@ public class EnemyModel extends CapsuleObstacle {
      * @param y  		Initial y position of the avatar center
      * @param width		The object width in physics units
      * @param height	The object width in physics units
+     * @param type      The type of the enemy (onSight or interval)
      */
-    public EnemyModel(float x, float y, float width, float height) {
+    public EnemyModel(float x, float y, float width, float height, boolean type, boolean faceRight, DudeModel avatar) {
         super(x,y,width*ENEMY_HSHRINK,height*ENEMY_VSHRINK);
         setDensity(ENEMY_DENSITY);
-        //setFriction(ENEMY_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
         setFixedRotation(true);
 
         // Gameplay attributes
-        //isGrounded = false;
         isShooting = false;
-        //isJumping = false;
-        faceRight = true;
 
         shootCooldown = 0;
-        //jumpCooldown = 0;
+        this.aiController = new AIController(this, avatar, 400);
         setName("ENEMY"+enemyID);
         enemyID++;
+        this.onSight = type;
+        this.faceRight = faceRight;
     }
 
     /**
@@ -291,37 +316,9 @@ public class EnemyModel extends CapsuleObstacle {
         return true;
     }
 
-
-    /**
-     * Applies the force to the body of this ENEMY
-     *
-     * This method should be called after the force attribute is set.
-     */
-    /*public void applyForce() {
-        if (!isActive()) {
-            return;
-        }
-
-        // Don't want to be moving. Damp out player motion
-        if (getMovement() == 0f) {
-            forceCache.set(-getDamping()*getVX(),0);
-            body.applyForce(forceCache,getPosition(),true);
-        }
-
-        // Velocity too high, clamp it
-        if (Math.abs(getVX()) >= getMaxSpeed()) {
-            setVX(Math.signum(getVX())*getMaxSpeed());
-        } else {
-            forceCache.set(getMovement(),0);
-            body.applyForce(forceCache,getPosition(),true);
-        }
-
-        // Jump!
-        if (isJumping()) {
-            forceCache.set(0, ENEMY_JUMP);
-            body.applyLinearImpulse(forceCache,getPosition(),true);
-        }
-    }*/
+    public AIController getAiController() {
+        return aiController;
+    }
 
     /**
      * Updates the object's physics state (NOT GAME LOGIC).
