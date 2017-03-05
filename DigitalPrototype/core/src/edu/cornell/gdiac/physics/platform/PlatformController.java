@@ -21,9 +21,6 @@ import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.util.*;
 import edu.cornell.gdiac.physics.*;
 import edu.cornell.gdiac.physics.obstacle.*;
-import sun.tools.java.SyntaxError;
-
-import java.util.logging.Level;
 
 /**
  * Gameplay specific controller for the platformer game.  
