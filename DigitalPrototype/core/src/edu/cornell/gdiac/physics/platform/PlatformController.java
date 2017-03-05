@@ -22,8 +22,6 @@ import edu.cornell.gdiac.util.*;
 import edu.cornell.gdiac.physics.*;
 import edu.cornell.gdiac.physics.obstacle.*;
 
-import java.util.logging.Level;
-
 /**
  * Gameplay specific controller for the platformer game.  
  *
@@ -40,6 +38,8 @@ public class PlatformController extends WorldController implements ContactListen
 	private static final String BULLET_FILE  = "platform/bullet.png";
 	/** The texture file for the bridge plank */
 	private static final String ROPE_FILE  = "platform/ropebridge.png";
+	/** The texture file for the enemy avatar */
+	private static final String ENEMY_FILE = "platform/dude.png";
 	
 	/** The sound file for a jump */
 	private static final String JUMP_FILE = "platform/jump.mp3";
@@ -54,6 +54,9 @@ public class PlatformController extends WorldController implements ContactListen
 	private TextureRegion bulletTexture;
 	/** Texture asset for the bridge plank */
 	private TextureRegion bridgeTexture;
+	/** Texture asset for enemy avatar */
+	private TextureRegion enemyTexture;
+
 	
 	/** Track asset loading from all instances and subclasses */
 	private AssetState platformAssetState = AssetState.EMPTY;
@@ -82,6 +85,8 @@ public class PlatformController extends WorldController implements ContactListen
 		assets.add(BULLET_FILE);
 		manager.load(ROPE_FILE, Texture.class);
 		assets.add(ROPE_FILE);
+		manager.load(ENEMY_FILE, Texture.class);
+		assets.add(ENEMY_FILE);
 		
 		manager.load(JUMP_FILE, Sound.class);
 		assets.add(JUMP_FILE);
@@ -109,6 +114,7 @@ public class PlatformController extends WorldController implements ContactListen
 		}
 		
 		avatarTexture = createTexture(manager,DUDE_FILE,false);
+		enemyTexture = createTexture(manager,DUDE_FILE,false);
 		bulletTexture = createTexture(manager,BULLET_FILE,false);
 		bridgeTexture = createTexture(manager,ROPE_FILE,false);
 
@@ -147,6 +153,10 @@ public class PlatformController extends WorldController implements ContactListen
 	// Physics objects for the game
 	/** Reference to the character avatar */
 	private DudeModel avatar;
+	/** Reference to an enemy avatar */
+	private EnemyModel enemy;
+	/** Reference to enemy array */
+	private Array<EnemyModel> enemies;
 	/** Reference to the goalDoor (for collision detection) */
 	private BoxObstacle goalDoor;
 
@@ -246,6 +256,25 @@ public class PlatformController extends WorldController implements ContactListen
 		avatar.setDrawScale(scale);
 		avatar.setTexture(avatarTexture);
 		addObject(avatar);
+
+		// Create 2 enemies
+		this.enemies = new Array<EnemyModel>(2);
+
+		dwidth  = enemyTexture.getRegionWidth()/scale.x;
+		dheight = enemyTexture.getRegionHeight()/scale.y;
+		enemy = new EnemyModel(DUDE_POS.x+1, DUDE_POS.y + 3, dwidth, dheight, false, true, avatar);
+		enemy.setDrawScale(scale);
+		enemy.setTexture(enemyTexture);
+		addObject(enemy);
+		enemies.add(enemy);
+
+		dwidth  = enemyTexture.getRegionWidth()/scale.x;
+		dheight = enemyTexture.getRegionHeight()/scale.y;
+		enemy = new EnemyModel(DUDE_POS.x+4, DUDE_POS.y + 5, dwidth, dheight, true, true, avatar);
+		enemy.setDrawScale(scale);
+		enemy.setTexture(enemyTexture);
+		addObject(enemy);
+		enemies.add(enemy);
 	}
 	
 	/**
@@ -293,6 +322,9 @@ public class PlatformController extends WorldController implements ContactListen
 		avatar.setMovement(InputController.getInstance().getHorizontal() *avatar.getForce());
 		avatar.setJumping(InputController.getInstance().didPrimary());
 		avatar.setShooting(InputController.getInstance().didSecondary());
+		for (EnemyModel e: enemies) {
+			e.setShooting(e.getAiController().getAction()==16);
+		}
 
 		//Allow for adjustments
 		float adjustment = getAdjustment();
@@ -307,6 +339,12 @@ public class PlatformController extends WorldController implements ContactListen
 		if (avatar.isShooting()) {
 			bulletFactory.createBullet(avatar.isFacingRight(), avatar.getX(), avatar.getY(), earthTile);
 			SoundController.getInstance().play(PEW_FILE, PEW_FILE, false, EFFECT_VOLUME);
+		}
+		for (EnemyModel e: enemies) {
+			if (e.isShooting()) {
+				bulletFactory.createBullet(e.isFacingRight(), e.getX(), e.getY(), earthTile);
+				SoundController.getInstance().play(PEW_FILE, PEW_FILE, false, EFFECT_VOLUME);
+			}
 		}
 		
 		avatar.applyForce();

@@ -20,7 +20,7 @@ public class BulletFactory {
     private static final float  HEAVY_DENSITY = 10.0f;
 
     /** The speed of the bullet after firing */
-    private static float  bullet_speed = 1.5f;
+    private static float  bullet_speed = 3.5f;
 
     /** The world that the bullets exists in */
     private WorldController world;
