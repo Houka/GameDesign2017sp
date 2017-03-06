@@ -581,7 +581,7 @@ public abstract class WorldController implements Screen {
 	 *
 	 * The method draws all objects in the order that they were added.
 	 *
-	 * @param canvas The drawing context
+	 * @param delta The drawing context
 	 */
 	public void draw(float delta) {
 		canvas.clear();
@@ -599,6 +599,11 @@ public abstract class WorldController implements Screen {
 			}
 			canvas.endDebug();
 		}
+
+		displayFont.setColor(Color.DARK_GRAY);
+		canvas.begin(); // DO NOT SCALE
+		canvas.drawText("Ammo: "+ammo, displayFont, 50f,550f);
+		canvas.end();
 		
 		// Final message
 		if (complete && !failed) {
@@ -613,6 +618,7 @@ public abstract class WorldController implements Screen {
 			canvas.end();
 		}
 	}
+	protected int ammo = 4;
 	
 	/**
 	 * Called when the Screen is resized. 
