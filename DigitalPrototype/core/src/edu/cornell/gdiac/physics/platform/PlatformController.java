@@ -398,8 +398,13 @@ public class PlatformController extends WorldController implements ContactListen
 
 				// Test bullet collision with world
 				if (bd1.getName().equals("bullet") && bd2 != avatar && bd2!=bg && !bd2.getName().equals("enemy")) {
+
 					BulletModel bullet = (BulletModel) bd1;
-					bulletFactory.collideWithWall(bullet);
+
+					if(bd2.getName().equals("bullet"))
+						bulletFactory.collideWithBullet(bullet);
+					else
+						bulletFactory.collideWithWall(bullet);
 
 					SoundController.getInstance().play(POP_FILE, POP_FILE, false, EFFECT_VOLUME);
 				}
