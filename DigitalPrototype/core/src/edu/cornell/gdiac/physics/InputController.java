@@ -70,7 +70,13 @@ public class InputController {
 	/** Whether the exit button was pressed. */
 	private boolean exitPressed;
 	private boolean exitPrevious;
-	
+
+	/** Whether the increase/decrease button was pressed. */
+	private boolean increasePrevious;
+	private boolean increasePressed;
+	private boolean decreasePrevious;
+	private boolean decreasePressed;
+
 	/** How much did we move horizontally? */
 	private float horizontal;
 	/** How much did we move vertically? */
@@ -202,7 +208,16 @@ public class InputController {
 	public boolean didExit() {
 		return exitPressed && !exitPrevious;
 	}
-	
+
+	public boolean didDecrease() {
+		return decreasePressed && !decreasePrevious;
+	}
+
+	public boolean didIncrease() {
+		return increasePressed && !increasePrevious;
+	}
+
+
 	/**
 	 * Creates a new input controller
 	 * 
@@ -236,6 +251,8 @@ public class InputController {
 		exitPrevious = exitPressed;
 		nextPrevious = nextPressed;
 		prevPrevious = prevPressed;
+		decreasePrevious = decreasePressed;
+		increasePrevious = increasePressed;
 		
 		// Check to see if a GamePad is connected
 		if (xbox.isConnected()) {
@@ -302,7 +319,9 @@ public class InputController {
 		prevPressed = (secondary && prevPressed) || (Gdx.input.isKeyPressed(Input.Keys.P));
 		nextPressed = (secondary && nextPressed) || (Gdx.input.isKeyPressed(Input.Keys.N));
 		exitPressed  = (secondary && exitPressed) || (Gdx.input.isKeyPressed(Input.Keys.ESCAPE));
-		
+		increasePressed  = (secondary && increasePressed) || (Gdx.input.isKeyPressed(Input.Keys.EQUALS));
+		decreasePressed  = (secondary && decreasePressed) || (Gdx.input.isKeyPressed(Input.Keys.MINUS));
+
 		// Directional controls
 		horizontal = (secondary ? horizontal : 0.0f);
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
