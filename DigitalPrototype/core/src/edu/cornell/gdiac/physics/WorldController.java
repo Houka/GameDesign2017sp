@@ -66,7 +66,8 @@ public abstract class WorldController implements Screen {
 	/** File to texture for walls and platforms */
 	private static String EARTH_FILE = "shared/earthtile.png";
 	/** File to texture for the win door */
-	private static String GOAL_FILE = "shared/goaldoor.png";
+	private static String GOAL_FILE = "shared/securityCamera.png";
+	private static String BG_FILE = "shared/facade.png";
 	/** Retro font for displaying messages */
 	private static String FONT_FILE = "shared/RetroGame.ttf";
 	private static int FONT_SIZE = 64;
@@ -75,6 +76,7 @@ public abstract class WorldController implements Screen {
 	protected TextureRegion earthTile;
 	/** The texture for the exit condition */
 	protected TextureRegion goalTile;
+	protected TextureRegion bgTile;
 	/** The font for giving messages to the player */
 	protected BitmapFont displayFont;
 
@@ -99,6 +101,8 @@ public abstract class WorldController implements Screen {
 		assets.add(EARTH_FILE);
 		manager.load(GOAL_FILE,Texture.class);
 		assets.add(GOAL_FILE);
+		manager.load(BG_FILE,Texture.class);
+		assets.add(BG_FILE);
 		
 		// Load the font
 		FreetypeFontLoader.FreeTypeFontLoaderParameter size2Params = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
@@ -124,9 +128,11 @@ public abstract class WorldController implements Screen {
 		}
 		
 		// Allocate the tiles
+		bgTile  = createTexture(manager,BG_FILE,true);
 		earthTile = createTexture(manager,EARTH_FILE,true);
 		goalTile  = createTexture(manager,GOAL_FILE,true);
-		
+
+
 		// Allocate the font
 		if (manager.isLoaded(FONT_FILE)) {
 			displayFont = manager.get(FONT_FILE,BitmapFont.class);
@@ -177,8 +183,8 @@ public abstract class WorldController implements Screen {
 	 */
 	protected FilmStrip createFilmStrip(AssetManager manager, String file, int rows, int cols, int size) {
 		if (manager.isLoaded(file)) {
-			FilmStrip strip = new FilmStrip(manager.get(file, Texture.class),rows,cols,size);
-			strip.getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+			TextureRegion t = createTexture(manager,file,false);
+			FilmStrip strip = new FilmStrip(t,rows,cols,size);
 			return strip;
 		}
 		return null;
@@ -336,7 +342,6 @@ public abstract class WorldController implements Screen {
 	 *
 	 * The canvas is shared across all controllers
 	 *
-	 * @param the canvas associated with this controller
 	 */
 	public GameCanvas getCanvas() {
 		return canvas;
@@ -348,7 +353,7 @@ public abstract class WorldController implements Screen {
 	 * The canvas is shared across all controllers.  Setting this value will compute
 	 * the drawing scale from the canvas size.
 	 *
-	 * @param value the canvas associated with this controller
+	 * @param canvas the canvas associated with this controller
 	 */
 	public void setCanvas(GameCanvas canvas) {
 		this.canvas = canvas;
@@ -477,7 +482,7 @@ public abstract class WorldController implements Screen {
 	 * to switch to a new game mode.  If not, the update proceeds
 	 * normally.
 	 *
-	 * @param delta Number of seconds since last animation frame
+	 * @param dt Number of seconds since last animation frame
 	 * 
 	 * @return whether to process the update loop
 	 */
@@ -529,7 +534,7 @@ public abstract class WorldController implements Screen {
 	 * This method is called after input is read, but before collisions are resolved.
 	 * The very last thing that it should do is apply forces to the appropriate objects.
 	 *
-	 * @param delta Number of seconds since last animation frame
+	 * @param dt Number of seconds since last animation frame
 	 */
 	public abstract void update(float dt);
 	
@@ -540,7 +545,7 @@ public abstract class WorldController implements Screen {
 	 * physics.  The primary method is the step() method in world.  This implementation
 	 * works for all applications and should not need to be overwritten.
 	 *
-	 * @param delta Number of seconds since last animation frame
+	 * @param dt Number of seconds since last animation frame
 	 */
 	public void postUpdate(float dt) {
 		// Add any objects created by actions

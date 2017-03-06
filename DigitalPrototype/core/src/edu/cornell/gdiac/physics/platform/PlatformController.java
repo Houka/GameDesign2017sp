@@ -33,11 +33,11 @@ import edu.cornell.gdiac.physics.obstacle.*;
  */
 public class PlatformController extends WorldController implements ContactListener {
 	/** The texture file for the character avatar (no animation) */
-	private static final String DUDE_FILE  = "platform/dude.png";
+	private static final String DUDE_FILE  = "platform/charSheet.png";
 	/** The texture file for the bullet */
-	private static final String BULLET_FILE  = "platform/bullet.png";
+	private static final String BULLET_FILE  = "shared/projectTile.png";
 	/** The texture file for the bridge plank */
-	private static final String ROPE_FILE  = "platform/ropebridge.png";
+	private static final String ROPE_FILE  = "platform/paintball.png";
 	/** The texture file for the enemy avatar */
 	private static final String ENEMY_FILE = "platform/dude.png";
 	
@@ -49,13 +49,11 @@ public class PlatformController extends WorldController implements ContactListen
 	private static final String POP_FILE = "platform/plop.mp3";
 
 	/** Texture asset for character avatar */
-	private TextureRegion avatarTexture;
+	private FilmStrip avatarTexture;
 	/** Texture asset for the bullet */
 	private TextureRegion bulletTexture;
 	/** Texture asset for the bridge plank */
 	private TextureRegion bridgeTexture;
-	/** Texture asset for enemy avatar */
-	private TextureRegion enemyTexture;
 
 	
 	/** Track asset loading from all instances and subclasses */
@@ -112,9 +110,8 @@ public class PlatformController extends WorldController implements ContactListen
 		if (platformAssetState != AssetState.LOADING) {
 			return;
 		}
-		
-		avatarTexture = createTexture(manager,DUDE_FILE,false);
-		enemyTexture = createTexture(manager,DUDE_FILE,false);
+
+		avatarTexture = createFilmStrip(manager, DUDE_FILE, 1, 6, 6);
 		bulletTexture = createTexture(manager,BULLET_FILE,false);
 		bridgeTexture = createTexture(manager,ROPE_FILE,false);
 
@@ -159,6 +156,7 @@ public class PlatformController extends WorldController implements ContactListen
 	private Array<EnemyModel> enemies;
 	/** Reference to the goalDoor (for collision detection) */
 	private BoxObstacle goalDoor;
+	private BoxObstacle bg;
 
 	/** Mark set to handle more sophisticated collision callbacks */
 	protected ObjectSet<Fixture> sensorFixtures;
@@ -219,6 +217,19 @@ public class PlatformController extends WorldController implements ContactListen
 		goalDoor.setDrawScale(scale);
 		goalDoor.setTexture(goalTile);
 		goalDoor.setName("goal");
+
+		dwidth  = bgTile.getRegionWidth()/scale.x;
+		dheight = bgTile.getRegionHeight()/scale.y;
+		bg = new BoxObstacle(dwidth/2,dheight/2,dwidth,dheight);
+		bg.setBodyType(BodyDef.BodyType.StaticBody);
+		bg.setDensity(0.0f);
+		bg.setFriction(0.0f);
+		bg.setRestitution(0.0f);
+		bg.setSensor(true);
+		bg.setDrawScale(scale);
+		bg.setTexture(bgTile);
+		bg.setName("bg");
+		addObject(bg);
 		addObject(goalDoor);
 
 	    String wname = "wall";
@@ -248,31 +259,30 @@ public class PlatformController extends WorldController implements ContactListen
 			obj.setName(pname+ii);
 			addObject(obj);
 	    }
-
+		avatarTexture.setFrame(0);
 		// Create dude
-		dwidth  = avatarTexture.getRegionWidth()/scale.x;
-		dheight = avatarTexture.getRegionHeight()/scale.y;
+		dwidth  = avatarTexture.getTextureRegion().getRegionWidth()/scale.x;
+		dheight = avatarTexture.getTextureRegion().getRegionHeight()/scale.y;
 		avatar = new DudeModel(DUDE_POS.x, DUDE_POS.y, dwidth, dheight);
 		avatar.setDrawScale(scale);
-		avatar.setTexture(avatarTexture);
+		avatar.setTexture(avatarTexture.getTextureRegion());
+		avatar.setFilmStrip(avatarTexture);
 		addObject(avatar);
 
 		// Create 2 enemies
 		this.enemies = new Array<EnemyModel>(2);
 
-		dwidth  = enemyTexture.getRegionWidth()/scale.x;
-		dheight = enemyTexture.getRegionHeight()/scale.y;
 		enemy = new EnemyModel(DUDE_POS.x+1, DUDE_POS.y + 3, dwidth, dheight, false, true, avatar);
 		enemy.setDrawScale(scale);
-		enemy.setTexture(enemyTexture);
+		enemy.setTexture(avatarTexture.getTextureRegion());
+		enemy.setName("enemy");
 		addObject(enemy);
 		enemies.add(enemy);
 
-		dwidth  = enemyTexture.getRegionWidth()/scale.x;
-		dheight = enemyTexture.getRegionHeight()/scale.y;
 		enemy = new EnemyModel(DUDE_POS.x+4, DUDE_POS.y + 5, dwidth, dheight, true, true, avatar);
 		enemy.setDrawScale(scale);
-		enemy.setTexture(enemyTexture);
+		enemy.setTexture(avatarTexture.getTextureRegion());
+		enemy.setName("enemy");
 		addObject(enemy);
 		enemies.add(enemy);
 	}
@@ -297,6 +307,9 @@ public class PlatformController extends WorldController implements ContactListen
 			setFailure(true);
 			return false;
 		}
+
+		if (isFailure())
+			return false;
 		
 		return true;
 	}
@@ -337,12 +350,14 @@ public class PlatformController extends WorldController implements ContactListen
 
 		// Add a bullet if we fire
 		if (avatar.isShooting()) {
-			bulletFactory.createBullet(avatar.isFacingRight(), avatar.getX(), avatar.getY(), earthTile);
-			SoundController.getInstance().play(PEW_FILE, PEW_FILE, false, EFFECT_VOLUME);
+			if (avatar.useAmmo()) {
+				bulletFactory.createBullet(avatar.isFacingRight(), avatar.getX(), avatar.getY(), bulletTexture, bridgeTexture);
+				SoundController.getInstance().play(PEW_FILE, PEW_FILE, false, EFFECT_VOLUME);
+			}
 		}
 		for (EnemyModel e: enemies) {
 			if (e.isShooting()) {
-				bulletFactory.createBullet(e.isFacingRight(), e.getX(), e.getY(), earthTile);
+				bulletFactory.createBullet(e.isFacingRight(), e.getX(), e.getY(), bulletTexture, bridgeTexture);
 				SoundController.getInstance().play(PEW_FILE, PEW_FILE, false, EFFECT_VOLUME);
 			}
 		}
@@ -382,34 +397,44 @@ public class PlatformController extends WorldController implements ContactListen
 			for(int i = 0; i<2; i++) {
 
 				// Test bullet collision with world
-				if (bd1.getName().equals("bullet") && bd2 != avatar) {
+				if (bd1.getName().equals("bullet") && bd2 != avatar && bd2!=bg && !bd2.getName().equals("enemy")) {
 					BulletModel bullet = (BulletModel) bd1;
 					bulletFactory.collideWithWall(bullet);
 
 					SoundController.getInstance().play(POP_FILE, POP_FILE, false, EFFECT_VOLUME);
-				}
-				
-				//Riding own projectile
-				if (bd2.getName().equals("bullet") && bd1 == avatar) {
-					//avatar.setMovement(bd2.getVX());
 				}
 				tempObstacle = bd1;
 				bd1 = bd2;
 				bd2 = tempObstacle;
 			}
 
+			//Riding own projectile
+			if (bd2.getName().equals("bullet") && bd1.equals(avatar)) {
+				avatar.setRidingVX((BulletModel) bd2);
+			}
+			//Riding own projectile
+			if (bd1.getName().equals("bullet") && bd2.equals(avatar)) {
+				avatar.setRidingVX((BulletModel) bd1);
+			}
+
 			// See if we have landed on the ground.
-			if ((avatar.getSensorName().equals(fd2) && avatar != bd1) ||
-				(avatar.getSensorName().equals(fd1) && avatar != bd2)) {
+			if ((avatar.getSensorName().equals(fd2) && avatar != bd1 && bd1!=bg) ||
+				(avatar.getSensorName().equals(fd1) && avatar != bd2 && bd2!=bg)) {
 				avatar.setGrounded(true);
 				avatar.setCanDoubleJump(false);
 				sensorFixtures.add(avatar == bd1 ? fix2 : fix1); // Could have more than one ground
 			}
 			
 			// Check for win condition
-			if ((bd1 == avatar   && bd2 == goalDoor) ||
-				(bd1 == goalDoor && bd2 == avatar)) {
+			if ((bd1.getName().equals("bullet")   && bd2 == goalDoor) ||
+				(bd1 == goalDoor && bd2.getName().equals("bullet"))) {
 				setComplete(true);
+			}
+
+			//check for lose condition
+			if ((bd1.getName().equals("enemy")   && bd2 == avatar) ||
+					(bd1 == avatar && bd2.getName().equals("enemy"))){
+				setFailure(true);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -444,6 +469,20 @@ public class PlatformController extends WorldController implements ContactListen
 				avatar.setGrounded(false);
 				avatar.setCanDoubleJump(true);
 			}
+		}
+
+		try {
+			Obstacle bd11 = (Obstacle) body1.getUserData();
+			Obstacle bd22 = (Obstacle) body2.getUserData();
+			if (bd22.getName().equals("bullet") && bd11.equals(avatar)) {
+				avatar.setRidingVX(null);
+			}
+			//Riding own projectile
+			if (bd11.getName().equals("bullet") && bd22.equals(avatar)) {
+				avatar.setRidingVX(null);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	

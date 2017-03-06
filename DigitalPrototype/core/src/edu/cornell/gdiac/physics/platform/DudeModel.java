@@ -16,6 +16,7 @@ import com.badlogic.gdx.physics.box2d.*;
 
 import edu.cornell.gdiac.physics.*;
 import edu.cornell.gdiac.physics.obstacle.*;
+import edu.cornell.gdiac.util.FilmStrip;
 
 /**
  * Player avatar for the plaform game.
@@ -40,7 +41,7 @@ public class DudeModel extends CapsuleObstacle {
 	/** Cooldown (in animation frames) for jumping */
 	private static final int JUMP_COOLDOWN = 30;
 	/** Cooldown (in animation frames) for shooting */
-	private static final int SHOOT_COOLDOWN = 40;
+	private static final int SHOOT_COOLDOWN = 50;
 	/** Height of the sensor attached to the player's feet */
 	private static final float SENSOR_HEIGHT = 0.05f;
 	/** Identifier to allow us to track the sensor in ContactListener */
@@ -73,6 +74,8 @@ public class DudeModel extends CapsuleObstacle {
 	/** Ground sensor to represent our feet */
 	private Fixture sensorFixture;
 	private PolygonShape sensorShape;
+
+	private int ammoLeft = 4;
 	
 	/** Cache for internal force calculations */
 	private Vector2 forceCache = new Vector2();
@@ -160,7 +163,17 @@ public class DudeModel extends CapsuleObstacle {
 	public boolean isGrounded() {
 		return isGrounded;
 	}
-	
+
+	public int getAmmoLeft(){ return ammoLeft; }
+	public boolean useAmmo(){
+		if (ammoLeft > 0) {
+			ammoLeft--;
+			return true;
+		}
+
+		return false;
+	}
+
 	/**
 	 * Sets whether the dude is on the ground.
 	 *
@@ -308,23 +321,28 @@ public class DudeModel extends CapsuleObstacle {
 	 *
 	 * This method should be called after the force attribute is set.
 	 */
+	private BulletModel ridingBullet = null;
+	public void setRidingVX(BulletModel b){
+		ridingBullet = b;
+	}
 	public void applyForce() {
 		if (!isActive()) {
 			return;
 		}
-		
-		// Don't want to be moving. Damp out player motion
-		if (getMovement() == 0f) {
-			forceCache.set(-getDamping()*getVX(),0);
-			body.applyForce(forceCache,getPosition(),true);
-		}
-		
-		// Velocity too high, clamp it
-		if (Math.abs(getVX()) >= getMaxSpeed()) {
-			setVX(Math.signum(getVX())*getMaxSpeed());
-		} else {
-			forceCache.set(getMovement(),0);
-			body.applyForce(forceCache,getPosition(),true);
+		if (ridingBullet!=null) {
+			// Don't want to be moving. Damp out player motion
+			if (getMovement() == 0f ) {
+				setVX(ridingBullet.getVX());
+			}else{
+				setVX(Math.signum(getMovement())*getMaxSpeed()+ridingBullet.getVX());
+			}
+		}else{
+			if (getMovement() == 0f ) {
+				setVX(0);
+			}else{
+				setVX(Math.signum(getMovement())*getMaxSpeed());
+			}
+
 		}
 
 		// Jump!
@@ -350,7 +368,9 @@ public class DudeModel extends CapsuleObstacle {
 	 *
 	 * @param dt Number of seconds since last animation frame
 	 */
+	private float tick=0;
 	public void update(float dt) {
+		tick+=1/10f;
 		// Apply cooldowns
 		if (isJumping()) {
 			jumpCooldown = JUMP_COOLDOWN;
@@ -363,8 +383,20 @@ public class DudeModel extends CapsuleObstacle {
 		} else {
 			shootCooldown = Math.max(0, shootCooldown - 1);
 		}
-		
+
+		if (getMovement() != 0)
+			filmStrip.setFrame((int)(tick%4+2));
+		else {
+			filmStrip.setFrame((int) (tick % 2));
+			tick = 0;
+		}
+		setTexture(filmStrip.getTextureRegion());
 		super.update(dt);
+	}
+
+	private FilmStrip filmStrip;
+	public void setFilmStrip(FilmStrip f){
+		filmStrip = f;
 	}
 
 	/**

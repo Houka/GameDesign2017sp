@@ -14,13 +14,13 @@ import edu.cornell.gdiac.physics.obstacle.Obstacle;
  */
 public class BulletFactory {
     /** Offset for bullet when firing */
-    private static final float  BULLET_OFFSET = 1.5f;
-    private static final float  Y_OFFSET = .5f;
+    private static final float  BULLET_OFFSET = 1.7f;
+    private static final float  Y_OFFSET = 0.25f;
     /** The density for a bullet */
     private static final float  HEAVY_DENSITY = 10.0f;
 
     /** The speed of the bullet after firing */
-    private static float  bullet_speed = 3.5f;
+    private static float  bullet_speed = 4.0f;
 
     /** The world that the bullets exists in */
     private WorldController world;
@@ -45,7 +45,7 @@ public class BulletFactory {
      * @param y the y spawn point of the bullet
      * @param bulletTexture the bullet texture
      */
-    public void createBullet(boolean isFacingRight, float x, float y, TextureRegion bulletTexture) {
+    public void createBullet(boolean isFacingRight, float x, float y, TextureRegion bulletTexture, TextureRegion headTexture) {
         float xOffset = (isFacingRight ? BULLET_OFFSET : -BULLET_OFFSET);
         float width = bulletTexture.getRegionWidth()/(scale.x);
         float height = bulletTexture.getRegionHeight()/(scale.y);
@@ -55,6 +55,7 @@ public class BulletFactory {
         bullet.setDensity(HEAVY_DENSITY);
         bullet.setDrawScale(scale);
         bullet.setTexture(bulletTexture);
+        bullet.setBulletTexture(headTexture);
         bullet.setBullet(true);
         bullet.setGravityScale(0);
         bullet.setFixedRotation(true);
@@ -68,7 +69,7 @@ public class BulletFactory {
      *
      * @param  bullet   the bullet to remove
      */
-    public void removeBullet(Obstacle bullet) {
+    public void removeBullet(BulletModel bullet) {
         bullet.markRemoved(true);
     }
 

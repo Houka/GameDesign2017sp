@@ -1,6 +1,7 @@
 package edu.cornell.gdiac.physics.platform;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import edu.cornell.gdiac.physics.GameCanvas;
 import edu.cornell.gdiac.physics.obstacle.BoxObstacle;
@@ -32,7 +33,7 @@ public class BulletModel extends BoxObstacle {
     private Vector2 scale;
     boolean gravity;
 
-    private Color paintcolor = Color.RED;
+    private Color paintcolor = Color.WHITE;
 
 
     /** Constructor for a bullet*/
@@ -65,7 +66,7 @@ public class BulletModel extends BoxObstacle {
     }
 
     public void update(float delta) {
-        if(xtransform<maxXScale) {
+        if(xtransform<maxXScale && growing) {
             xtransform += delta*Math.abs(speed)*1.5f;
             this.setWidth(initWidth*xtransform);
             this.resize(getWidth(),getHeight());
@@ -75,6 +76,7 @@ public class BulletModel extends BoxObstacle {
             growing = false;
         }
         if(dying) {
+            growing= false;
             timeToDie-=delta;
             if(timeToDie<1) {
                 enableGravity();
@@ -95,10 +97,20 @@ public class BulletModel extends BoxObstacle {
         return yScale*ytransform;
     }
 
+    private TextureRegion head;
+    public void setBulletTexture(TextureRegion t){
+        head = t;
+    }
+
     public void draw(GameCanvas canvas) {
         paintcolor.a = opacity;
         if (texture != null) {
             canvas.draw(texture, paintcolor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),getScaledX(),getScaledY());
+        }
+        if (head != null && !dying) {
+            canvas.draw(head, paintcolor,origin.x+(15+getWidth()/2*drawScale.x)*(speed < 0? -1:1),
+                    origin.y,getX()*drawScale.x+(15+getWidth()/2*drawScale.x)*(speed < 0? -1:1),getY()*drawScale.x,
+                    getAngle(),getScaledY(),getScaledY());
         }
     }
 
