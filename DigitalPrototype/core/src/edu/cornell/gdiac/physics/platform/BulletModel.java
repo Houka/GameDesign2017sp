@@ -112,12 +112,16 @@ public class BulletModel extends BoxObstacle {
                     origin.y,getX()*drawScale.x+(15+getWidth()/2*drawScale.x)*(speed < 0? -1:1),getY()*drawScale.x,
                     getAngle(),getScaledY(),getScaledY());
         }
+        //TODO Find better solution later
+        paintcolor.a = 1;
+        canvas.draw(texture, paintcolor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),0,0);
     }
 
     public void setTimeToDie(float xd) {
         if(!dying) {
             timeToDie = xd;
             dying = true;
+            growing = false;
         }
     }
 

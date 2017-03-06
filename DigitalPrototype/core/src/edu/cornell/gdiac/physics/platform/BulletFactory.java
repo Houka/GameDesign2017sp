@@ -81,6 +81,11 @@ public class BulletFactory {
     }
     public void collideWithWall(BulletModel bullet) {
         bullet.setVX(0.0f);
+        bullet.setTimeToDie(2);
+    }
+
+    public void collideWithBullet(BulletModel bullet) {
+        bullet.setVX(0.0f);
         bullet.setTimeToDie(5);
     }
 }
