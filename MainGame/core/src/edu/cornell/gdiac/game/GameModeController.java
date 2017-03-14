@@ -29,9 +29,11 @@ public class GameModeController implements ScreenListener, Disposable {
 	// Modes
 	/** Player modes*/
 	private Mode[] modes;
+	/** Asset Manager*/
+	private AssetManager manager;
 
 	/** The current player mode screen*/
-	private Screen currentScreen;
+	private int currentScreen = 0;
 	/** Listener that will update the player mode when we are done */
 	private ScreenListener listener;
 
@@ -44,19 +46,34 @@ public class GameModeController implements ScreenListener, Disposable {
 	 * TODO: param definitions
 	 */
 	public GameModeController(GameCanvas canvas, AssetManager manager) {
-		modes = new Mode[]{new MenuMode(canvas, manager), new LevelSelectionMode(canvas, manager),
-				new LevelEditorMode(canvas, manager)};
-
-		// set screen listener of all modes to this
-		for (Mode m : modes)
+		this.manager = manager;
+		modes = new Mode[]{
+				new MenuMode(canvas, manager),
+				new LevelSelectionMode(canvas, manager),
+				new LevelEditorMode(canvas, manager)
+		};
+		for (Mode m : modes) {
+			m.preLoadContent(manager);
 			m.setScreenListener(this);
+		}
 	}
 
 	// BEGIN: Getters and Setters
 	/**
 	 * TODO: fill out function definition
 	 */
-	public Screen getCurrentScreen(){ return currentScreen; }
+	public Screen getCurrentScreen(){ return modes[currentScreen]; }
+
+	/**
+	 * TODO: fill out function definition
+	 */
+	private void setCurrentScreen(int value){
+		currentScreen = value;
+
+		// prep next mode to show
+		modes[currentScreen].show();
+		modes[currentScreen].loadContent(manager);
+	}
 
 	/**
 	 * TODO: fill out function definition
@@ -72,9 +89,10 @@ public class GameModeController implements ScreenListener, Disposable {
 	 */
 	public void dispose() {
 		// Call dispose on our children
-		for (Mode m : modes)
+		for (Mode m : modes){
+			m.unloadContent(manager);
 			m.dispose();
-		currentScreen = null;
+		}
 	}
 	
 	/**
@@ -88,20 +106,19 @@ public class GameModeController implements ScreenListener, Disposable {
 	public void exitScreen(Screen screen, int exitCode) {
 		switch (exitCode){
 			case EXIT_MENU:
-				currentScreen = modes[0];
+				setCurrentScreen(0);
 				break;
 			case EXIT_LEVEL_SELECTION:
-				currentScreen = modes[1];
+				setCurrentScreen(1);
 				break;
 			case EXIT_LEVEL_EDITOR:
-				currentScreen = modes[2];
+				setCurrentScreen(2);
 				break;
 			default:
 				break;
 		}
 
-		// propagate upwards
-		currentScreen.show();
+		// propagate exit screen upwards
 		listener.exitScreen(screen, exitCode);
 	}
 

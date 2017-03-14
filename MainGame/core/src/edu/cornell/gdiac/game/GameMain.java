@@ -69,8 +69,8 @@ public class GameMain extends Game implements ScreenListener {
 		loadingMode = new LoadingMode(canvas,manager,1);
 		gameModeController = new GameModeController(canvas, manager);
 
-		loadingMode.setScreenListener(this);
 		gameModeController.setScreenListener(this);
+		loadingMode.setScreenListener(gameModeController);
 		setScreen(loadingMode);
 	}
 
@@ -81,7 +81,8 @@ public class GameMain extends Game implements ScreenListener {
 	 */
 	public void dispose() {
 		// Call dispose on our children
-		loadingMode.dispose();
+		if (loadingMode != null)
+			loadingMode.dispose();
 		loadingMode = null;
 		gameModeController.dispose();
 		gameModeController = null;
@@ -125,12 +126,12 @@ public class GameMain extends Game implements ScreenListener {
 				Gdx.app.exit();
 				break;
 			default:
-				setScreen(gameModeController.getCurrentScreen());
 				if (screen == loadingMode){
 					loadingMode.dispose();
 					loadingMode = null;
 				}
 
+				setScreen(gameModeController.getCurrentScreen());
 				break;
 		}
 	}

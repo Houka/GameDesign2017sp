@@ -26,6 +26,7 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.*;
+import edu.cornell.gdiac.game.interfaces.AssetUser;
 import edu.cornell.gdiac.game.interfaces.Completable;
 import edu.cornell.gdiac.util.*;
 import edu.cornell.gdiac.util.obstacles.*;
@@ -46,7 +47,7 @@ import static edu.cornell.gdiac.util.ScreenListener.*;
  * This is the purpose of our AssetState variable; it ensures that multiple instances
  * place nicely with the static assets.
  */
-public abstract class WorldController implements Screen, Completable {
+public abstract class WorldController implements Screen, Completable, AssetUser {
 	/**
 	 * Tracks the asset state.  Otherwise subclasses will try to load assets 
 	 */
@@ -128,45 +129,21 @@ public abstract class WorldController implements Screen, Completable {
 		if (worldAssetState != AssetState.LOADING) {
 			return;
 		}
-		
+
 		// Allocate the tiles
-		bgTile  = createTexture(manager,BG_FILE,true);
-		earthTile = createTexture(manager,EARTH_FILE,true);
-		goalTile  = createTexture(manager,GOAL_FILE,true);
+		bgTile = AssetRetriever.createTexture(manager, BG_FILE, true);
+		earthTile = AssetRetriever.createTexture(manager, EARTH_FILE, true);
+		goalTile = AssetRetriever.createTexture(manager, GOAL_FILE, true);
 
 
 		// Allocate the font
 		if (manager.isLoaded(FONT_FILE)) {
-			displayFont = manager.get(FONT_FILE,BitmapFont.class);
+			displayFont = manager.get(FONT_FILE, BitmapFont.class);
 		} else {
 			displayFont = null;
 		}
 
 		worldAssetState = AssetState.COMPLETE;
-	}
-	
-	/**
-	 * Returns a newly loaded texture region for the given file.
-	 *
-	 * This helper methods is used to set texture settings (such as scaling, and
-	 * whether or not the texture should repeat) after loading.
-	 *
-	 * @param manager 	Reference to global asset manager.
-	 * @param file		The texture (region) file
-	 * @param repeat	Whether the texture should be repeated
-	 *
-	 * @return a newly loaded texture region for the given file.
-	 */
-	protected TextureRegion createTexture(AssetManager manager, String file, boolean repeat) {
-		if (manager.isLoaded(file)) {
-			TextureRegion region = new TextureRegion(manager.get(file, Texture.class));
-			region.getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-			if (repeat) {
-				region.getTexture().setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
-			}
-			return region;
-		}
-		return null;
 	}
 	
 	/** 
@@ -459,42 +436,7 @@ public abstract class WorldController implements Screen, Completable {
 	 * @return whether to process the update loop
 	 */
 	public boolean preUpdate(float dt) {
-		InputController input = InputController.getInstance();
-		input.readInput(bounds, scale);
-		if (listener == null) {
-			return true;
-		}
 
-		// Toggle debug
-		if (input.didDebug()) {
-			debug = !debug;
-		}
-		
-		// Handle resets
-		if (input.didReset()) {
-			reset();
-		}
-		
-		// Now it is time to maybe switch screens.
-		if (input.didExit()) {
-			listener.exitScreen(this, EXIT_QUIT);
-			return false;
-		} else if (input.didAdvance()) {
-			listener.exitScreen(this, EXIT_NEXT);
-			return false;
-		} else if (input.didRetreat()) {
-			listener.exitScreen(this, EXIT_PREV);
-			return false;
-		} else if (countdown > 0) {
-			countdown--;
-		} else if (countdown == 0) {
-			if (failed) {
-				reset();
-			} else if (complete) {
-				listener.exitScreen(this, EXIT_NEXT);
-				return false;
-			}
-		}
 		return true;
 	}
 	

@@ -186,9 +186,7 @@ public class LoadingMode extends Mode {
 		super.draw();
 
 		// other elements specific to this mode
-		canvas.begin();
 		drawProgress(canvas);
-		canvas.end();
 	}
 
 	@Override
@@ -224,4 +222,9 @@ public class LoadingMode extends Mode {
 			canvas.draw(statusFrgRight,  Color.WHITE, centerX-width/2+scale*PROGRESS_CAP, centerY, scale*PROGRESS_CAP, scale*PROGRESS_HEIGHT);
 		}
 	}
+
+	// Unused functions because its loading mode
+	public void preLoadContent(AssetManager manager) {}
+	public void loadContent(AssetManager manager) {}
+	public void unloadContent(AssetManager manager) {}
 }

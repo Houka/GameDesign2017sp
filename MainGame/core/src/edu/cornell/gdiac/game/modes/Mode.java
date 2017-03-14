@@ -26,10 +26,9 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.interfaces.AssetUser;
 import edu.cornell.gdiac.game.interfaces.Completable;
 import edu.cornell.gdiac.util.ScreenListener;
-
-import static edu.cornell.gdiac.util.ScreenListener.EXIT_NOP;
 
 /**
  * Class that provides a loading screen for the state of the game.
@@ -44,7 +43,7 @@ import static edu.cornell.gdiac.util.ScreenListener.EXIT_NOP;
  * the application.  That is why we try to have as few resources as possible for this
  * loading screen.
  */
-public abstract class Mode implements Screen, Completable {
+public abstract class Mode implements Screen, Completable, AssetUser {
 	/** Standard window size (for scaling) */
 	private static int STANDARD_WIDTH  = 800;
 	/** Standard window height (for scaling) */
@@ -63,7 +62,7 @@ public abstract class Mode implements Screen, Completable {
 	/** Listener that will update the player mode when we are done */
 	private ScreenListener listener;
 	/** The exit code for when this screen completes */
-	private int exitCode = EXIT_NOP; // default it to exit code
+	private int exitCode = ScreenListener.EXIT_NOP; // default it to non existant exit code
 	/** Whether or not this mode is completed*/
 	private boolean completed;
 	/** Whether or not this mode is still active */
@@ -107,8 +106,8 @@ public abstract class Mode implements Screen, Completable {
 	 * Called when this screen should release all resources.
 	 */
 	public void dispose() {
-		 background.dispose();
-		 background = null;
+		background.dispose();
+		background = null;
 	}
 
 	/**
@@ -130,9 +129,8 @@ public abstract class Mode implements Screen, Completable {
 	 * prefer this in lecture.
 	 */
 	protected void draw() {
-		canvas.begin();
-		canvas.draw(background, 0, 0);
-		canvas.end();
+		if (background != null)
+			canvas.draw(background, 0, 0);
 	}
 
 	// ADDITIONAL SCREEN METHODS
@@ -147,7 +145,9 @@ public abstract class Mode implements Screen, Completable {
 	public void render(float delta) {
 		if (active) {
 			update(delta);
+			canvas.begin();
 			draw();
+			canvas.end();
 
 			// We are are ready, notify our listener
 			if (isComplete() && listener != null) {
@@ -163,6 +163,7 @@ public abstract class Mode implements Screen, Completable {
 		float sy = ((float)height)/STANDARD_HEIGHT;
 		scale = (sx < sy ? sx : sy);
 	}
+
 
 	// Unused functions for a mode
 	public void pause() {}
