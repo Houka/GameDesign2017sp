@@ -19,7 +19,6 @@ public interface Completable {
      * If true, the screen will advance to the next state specified by the exitCode
      *
      * @param value whether the level is completed.
-     * @param exitCode what exit code should correspond to the completed state
      */
-    void setComplete(boolean value, int exitCode);
+    void setComplete(boolean value);
 }

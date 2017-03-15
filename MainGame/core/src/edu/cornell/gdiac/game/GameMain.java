@@ -21,6 +21,7 @@ import com.badlogic.gdx.assets.loaders.*;
 import com.badlogic.gdx.assets.loaders.resolvers.*;
 
 import edu.cornell.gdiac.game.modes.LoadingMode;
+import edu.cornell.gdiac.game.modes.MenuMode;
 import edu.cornell.gdiac.util.*;
 
 /**
@@ -40,7 +41,7 @@ public class GameMain extends Game implements ScreenListener {
 	/** Player mode for the asset loadingMode screen (CONTROLLER CLASS) */
 	private LoadingMode loadingMode;
 	/** Mode Controller that loads and unloads different player modes (CONTROLLER CLASS) */
-	private GameModeController gameModeController;
+	private MenuMode menuMode;
 	
 	/**
 	 * Creates a new game from the configuration settings.
@@ -67,10 +68,13 @@ public class GameMain extends Game implements ScreenListener {
 	public void create() {
 		canvas  = new GameCanvas();
 		loadingMode = new LoadingMode(canvas,manager,1);
-		gameModeController = new GameModeController(canvas, manager);
+		menuMode = new MenuMode(canvas, manager);
 
-		gameModeController.setScreenListener(this);
-		loadingMode.setScreenListener(gameModeController);
+		loadingMode.setScreenListener(this);
+		menuMode.setScreenListener(this);
+
+		menuMode.preLoadContent(manager);
+
 		setScreen(loadingMode);
 	}
 
@@ -84,8 +88,11 @@ public class GameMain extends Game implements ScreenListener {
 		if (loadingMode != null)
 			loadingMode.dispose();
 		loadingMode = null;
-		gameModeController.dispose();
-		gameModeController = null;
+
+		menuMode.unloadContent(manager);
+		menuMode.dispose();
+		menuMode = null;
+
 		setScreen(null);
 
 		canvas.dispose();
@@ -121,18 +128,33 @@ public class GameMain extends Game implements ScreenListener {
 	 */
 	public void exitScreen(Screen screen, int exitCode) {
 		switch (exitCode){
+			case EXIT_NOP:
+				break;
 			case EXIT_QUIT:
 				// We quit the main application
 				Gdx.app.exit();
 				break;
-			default:
-				if (screen == loadingMode){
+			case EXIT_MENU:
+				if (loadingMode != null) {
 					loadingMode.dispose();
 					loadingMode = null;
+					menuMode.loadContent(manager);
 				}
 
-				setScreen(gameModeController.getCurrentScreen());
+				menuMode.reset();
+				setScreen(menuMode);
+			default:
 				break;
 		}
+	}
+
+	/**
+	 * The given screen has made a request to change its screen.
+	 *
+	 * @param from  The screen requesting to exit
+	 * @param to 	The screen to change to
+	 */
+	public void switchScreens(Screen from, Screen to){
+		setScreen(to);
 	}
 }

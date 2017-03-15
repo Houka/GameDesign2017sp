@@ -36,16 +36,8 @@ public interface ScreenListener {
 	int EXIT_NOP = -1;
 	/** Exit code for quitting the game */
 	int EXIT_QUIT = 0;
-	/** Exit code for advancing to next screen */
-	int EXIT_NEXT = 1;
 	/** Exit code for jumping back to previous screen */
-	int EXIT_PREV = 2;
-	/** Exit code for jumping back to menu screen */
-	int EXIT_MENU = 3;
-	/** Exit code for jumping back to level selection screen */
-	int EXIT_LEVEL_SELECTION = 4;
-	/** Exit code for jumping back to level editor screen */
-	int EXIT_LEVEL_EDITOR = 5;
+	int EXIT_MENU = 1;
 	
 	/**
 	 * The given screen has made a request to exit its player mode.
@@ -56,4 +48,12 @@ public interface ScreenListener {
 	 * @param exitCode The state of the screen upon exit
 	 */
 	void exitScreen(Screen screen, int exitCode);
+
+	/**
+	 * The given screen has made a request to change its screen.
+	 *
+	 * @param from  The screen requesting to exit
+	 * @param to 	The screen to change to
+	 */
+	void switchScreens(Screen from, Screen to);
 }

@@ -100,7 +100,7 @@ public class LoadingMode extends Mode {
 	 * @param millis The loading budget in milliseconds
 	 */
 	public LoadingMode(GameCanvas canvas, AssetManager manager, int millis) {
-		super(canvas, manager);
+		super(canvas, manager, ScreenListener.EXIT_MENU);
 		budget = millis;
 		
 		// Compute the dimensions from the canvas
@@ -178,7 +178,7 @@ public class LoadingMode extends Mode {
 		this.progress = manager.getProgress();
 
 		// set completion flag
-		setComplete(progress >= 1.0f, ScreenListener.EXIT_MENU);
+		setComplete(progress >= 1.0f);
 	}
 
 	@Override

@@ -26,6 +26,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.input.MainInputController;
 import edu.cornell.gdiac.game.interfaces.AssetUser;
 import edu.cornell.gdiac.game.interfaces.Completable;
 import edu.cornell.gdiac.util.ScreenListener;
@@ -58,15 +59,19 @@ public abstract class Mode implements Screen, Completable, AssetUser {
 	protected AssetManager manager;
 	/** Reference to GameCanvas created by the root */
 	protected GameCanvas canvas;
-
 	/** Listener that will update the player mode when we are done */
-	private ScreenListener listener;
+	protected ScreenListener listener;
+
 	/** The exit code for when this screen completes */
-	private int exitCode = ScreenListener.EXIT_NOP; // default it to non existant exit code
+	private int exitCode; // default it to non existant exit code
 	/** Whether or not this mode is completed*/
 	private boolean completed;
 	/** Whether or not this mode is still active */
 	private boolean active;
+	/** Whether or not debug mode is active */
+	private boolean debug;
+	/** The main input controller */
+	private MainInputController input;
 
 	/**
 	 * TODO: write description for Constructor
@@ -74,11 +79,25 @@ public abstract class Mode implements Screen, Completable, AssetUser {
 	 * @param canvas The GameCanvas to draw the textures to
 	 * @param manager The AssetManager to load in the background
 	 */
-	public Mode(GameCanvas canvas, AssetManager manager) {
+	protected Mode(GameCanvas canvas, AssetManager manager) {
+		this(canvas, manager, ScreenListener.EXIT_NOP);
+	}
+
+	/**
+	 * TODO: write description for Constructor
+	 *
+	 * @param canvas The GameCanvas to draw the textures to
+	 * @param manager The AssetManager to load in the background
+	 * @param exitCode The exit code for when this mode completes
+	 */
+	protected Mode(GameCanvas canvas, AssetManager manager, int exitCode) {
 		this.manager = manager;
 		this.canvas  = canvas;
+		this.exitCode = exitCode;
 		active = false;
 		completed = false;
+		debug  = false;
+		input = MainInputController.getInstance();
 	}
 
 	// BEGIN: Getters and Setters
@@ -87,12 +106,9 @@ public abstract class Mode implements Screen, Completable, AssetUser {
 	}
 
 	@Override
-	public void setComplete(boolean value, int exitCode) {
-		if (value){
-			this.exitCode = exitCode;
+	public void setComplete(boolean value) {
+		if (value)
 			active = false;
-		}
-
 		completed = value;
 	}
 
@@ -106,8 +122,32 @@ public abstract class Mode implements Screen, Completable, AssetUser {
 	 * Called when this screen should release all resources.
 	 */
 	public void dispose() {
-		background.dispose();
+		if (background != null)
+			background.dispose();
 		background = null;
+	}
+
+	/**
+	 * Returns whether to process the update loop
+	 *
+	 * At the start of the update loop, we check the input and
+	 * determine if we should still update
+	 *
+	 * @param dt Number of seconds since last animation frame
+	 *
+	 * @return whether to process the update loop
+	 */
+	protected boolean preUpdate(float dt) {
+		input.readInput();
+		if(input.didExit()) {
+			setComplete(true);
+			return false;
+		}else if (input.didDebug())
+			debug = !debug;
+		else if (input.didReset())
+			reset();
+
+		return true;
 	}
 
 	/**
@@ -133,7 +173,8 @@ public abstract class Mode implements Screen, Completable, AssetUser {
 			canvas.draw(background, 0, 0);
 	}
 
-	// ADDITIONAL SCREEN METHODS
+	protected void drawDebug(){};
+
 	/**
 	 * Called when the Screen should render itself.
 	 *
@@ -142,16 +183,26 @@ public abstract class Mode implements Screen, Completable, AssetUser {
 	 *
 	 * @param delta Number of seconds since last animation frame
 	 */
+	@Override
 	public void render(float delta) {
 		if (active) {
-			update(delta);
+			if (preUpdate(delta))
+				update(delta);
+
+			canvas.clear();
 			canvas.begin();
 			draw();
 			canvas.end();
 
+			if (debug) {
+				canvas.beginDebug();
+				drawDebug();
+				canvas.endDebug();
+			}
+
 			// We are are ready, notify our listener
 			if (isComplete() && listener != null) {
-				listener.exitScreen(this, exitCode);
+				onComplete();
 			}
 		}
 	}
@@ -164,6 +215,16 @@ public abstract class Mode implements Screen, Completable, AssetUser {
 		scale = (sx < sy ? sx : sy);
 	}
 
+	public void reset(){
+		setComplete(false);
+	}
+
+	/***
+	 * TODO: write spec
+	 */
+	protected void onComplete(){
+		listener.exitScreen(this, exitCode);
+	}
 
 	// Unused functions for a mode
 	public void pause() {}

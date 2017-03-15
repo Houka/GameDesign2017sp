@@ -26,6 +26,7 @@ import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.graphics.*;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.util.AssetRetriever;
+import edu.cornell.gdiac.util.ScreenListener;
 
 /**
  * Class that provides a Level Editor screen for the state of the game.
@@ -34,7 +35,7 @@ import edu.cornell.gdiac.util.AssetRetriever;
  */
 public class LevelEditorMode extends Mode {
 	// Textures necessary to support the loading screen
-	private static final String BACKGROUND_FILE = "menu/bg/menu.png";
+	private static final String BACKGROUND_FILE = "menu/bg/levelEditor.png";
 
 	/**
 	 * Creates a Level Editor Mode with the default size and position.
@@ -43,12 +44,10 @@ public class LevelEditorMode extends Mode {
 	 * @param manager The AssetManager to load in the background
 	 */
 	public LevelEditorMode(GameCanvas canvas, AssetManager manager) {
-		super(canvas, manager);
+		super(canvas, manager, ScreenListener.EXIT_MENU);
 
 		// Compute the dimensions from the canvas
 		resize(canvas.getWidth(),canvas.getHeight());
-
-		background = new Texture(BACKGROUND_FILE);
 	}
 
 	// BEGIN: Setters and Getters
