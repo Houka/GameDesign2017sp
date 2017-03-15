@@ -20,18 +20,18 @@ import com.badlogic.gdx.Input;
  * detected the X-Box controller on start-up.  This class allows us to hot-swap in
  * a controller via the new XBox360Controller class.
  */
-public class MenuInputController {
+public class SelectionInputController {
     /** The singleton instance of the input controller */
-    private static MenuInputController theController = null;
+    private static SelectionInputController theController = null;
 
     /**
      * Return the singleton instance of the input controller
      *
      * @return the singleton instance of the input controller
      */
-    public static MenuInputController getInstance() {
+    public static SelectionInputController getInstance() {
         if (theController == null) {
-            theController = new MenuInputController();
+            theController = new SelectionInputController();
         }
         return theController;
     }
@@ -51,7 +51,7 @@ public class MenuInputController {
     /**
      * Creates a new input controller
      */
-    private MenuInputController() {}
+    private SelectionInputController() {}
 
     // BEGIN: Getters and Setters
     public boolean didUp() {

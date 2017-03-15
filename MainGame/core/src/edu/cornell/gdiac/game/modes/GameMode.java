@@ -23,6 +23,7 @@ import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.interfaces.ScreenListener;
 import edu.cornell.gdiac.util.*;
 import edu.cornell.gdiac.util.obstacles.*;
 
@@ -121,7 +122,8 @@ public class GameMode extends Mode {
 	 * @param gravity	The gravitational force on this Box2d world
 	 */
 	protected GameMode(GameCanvas canvas, AssetManager manager,Rectangle bounds, Vector2 gravity) {
-		super(canvas, manager, ScreenListener.EXIT_MENU);
+		super(canvas, manager);
+		onExit = ScreenListener.EXIT_MENU;
 		this.scaleVector.x = canvas.getWidth()/bounds.getWidth();
 		this.scaleVector.y = canvas.getHeight()/bounds.getHeight();
 		assets = new Array<String>();

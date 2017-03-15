@@ -16,7 +16,7 @@ public interface Completable {
     /**
      * Sets whether the screen is completed.
      *
-     * If true, the screen will advance to the next state specified by the exitCode
+     * If true, the screen will advance to the next state specified by the onExit
      *
      * @param value whether the level is completed.
      */

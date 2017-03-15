@@ -26,7 +26,7 @@ import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.graphics.*;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.util.AssetRetriever;
-import edu.cornell.gdiac.util.ScreenListener;
+import edu.cornell.gdiac.game.interfaces.ScreenListener;
 
 /**
  * Class that provides a Level Editor screen for the state of the game.
@@ -44,7 +44,8 @@ public class LevelEditorMode extends Mode {
 	 * @param manager The AssetManager to load in the background
 	 */
 	public LevelEditorMode(GameCanvas canvas, AssetManager manager) {
-		super(canvas, manager, ScreenListener.EXIT_MENU);
+		super(canvas, manager);
+		onExit = ScreenListener.EXIT_MENU;
 
 		// Compute the dimensions from the canvas
 		resize(canvas.getWidth(),canvas.getHeight());

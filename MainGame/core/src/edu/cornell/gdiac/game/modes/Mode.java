@@ -29,7 +29,8 @@ import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.input.MainInputController;
 import edu.cornell.gdiac.game.interfaces.AssetUser;
 import edu.cornell.gdiac.game.interfaces.Completable;
-import edu.cornell.gdiac.util.ScreenListener;
+import edu.cornell.gdiac.game.interfaces.Exitable;
+import edu.cornell.gdiac.game.interfaces.ScreenListener;
 
 /**
  * Class that provides a loading screen for the state of the game.
@@ -44,7 +45,7 @@ import edu.cornell.gdiac.util.ScreenListener;
  * the application.  That is why we try to have as few resources as possible for this
  * loading screen.
  */
-public abstract class Mode implements Screen, Completable, AssetUser {
+public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	/** Standard window size (for scaling) */
 	private static int STANDARD_WIDTH  = 800;
 	/** Standard window height (for scaling) */
@@ -63,7 +64,9 @@ public abstract class Mode implements Screen, Completable, AssetUser {
 	protected ScreenListener listener;
 
 	/** The exit code for when this screen completes */
-	private int exitCode; // default it to non existant exit code
+	protected int onExit = ScreenListener.EXIT_NOP; // default it to non existant exit code
+	/** Whether or not this mode is completed*/
+	private boolean exit;
 	/** Whether or not this mode is completed*/
 	private boolean completed;
 	/** Whether or not this mode is still active */
@@ -80,21 +83,10 @@ public abstract class Mode implements Screen, Completable, AssetUser {
 	 * @param manager The AssetManager to load in the background
 	 */
 	protected Mode(GameCanvas canvas, AssetManager manager) {
-		this(canvas, manager, ScreenListener.EXIT_NOP);
-	}
-
-	/**
-	 * TODO: write description for Constructor
-	 *
-	 * @param canvas The GameCanvas to draw the textures to
-	 * @param manager The AssetManager to load in the background
-	 * @param exitCode The exit code for when this mode completes
-	 */
-	protected Mode(GameCanvas canvas, AssetManager manager, int exitCode) {
 		this.manager = manager;
 		this.canvas  = canvas;
-		this.exitCode = exitCode;
 		active = false;
+		exit = false;
 		completed = false;
 		debug  = false;
 		input = MainInputController.getInstance();
@@ -116,6 +108,12 @@ public abstract class Mode implements Screen, Completable, AssetUser {
 	public boolean isComplete() {
 		return completed;
 	}
+
+	@Override
+	public void setExit(boolean value){ exit = value; }
+
+	@Override
+	public boolean isExit(){ return exit; }
 	// END: Getters and Setters
 
 	/**
@@ -140,7 +138,7 @@ public abstract class Mode implements Screen, Completable, AssetUser {
 	protected boolean preUpdate(float dt) {
 		input.readInput();
 		if(input.didExit()) {
-			setComplete(true);
+			setExit(true);
 			return false;
 		}else if (input.didDebug())
 			debug = !debug;
@@ -201,9 +199,10 @@ public abstract class Mode implements Screen, Completable, AssetUser {
 			}
 
 			// We are are ready, notify our listener
-			if (isComplete() && listener != null) {
+			if (isExit() && listener != null)
+				onExit();
+			if (isComplete() && listener != null)
 				onComplete();
-			}
 		}
 	}
 
@@ -216,6 +215,7 @@ public abstract class Mode implements Screen, Completable, AssetUser {
 	}
 
 	public void reset(){
+		setExit(false);
 		setComplete(false);
 	}
 
@@ -223,8 +223,9 @@ public abstract class Mode implements Screen, Completable, AssetUser {
 	 * TODO: write spec
 	 */
 	protected void onComplete(){
-		listener.exitScreen(this, exitCode);
+		onExit();
 	}
+	private void onExit(){ listener.exitScreen(this, onExit); }
 
 	// Unused functions for a mode
 	public void pause() {}

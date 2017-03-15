@@ -21,7 +21,7 @@
  * Based on original Optimization Lab by Don Holden, 2007
  * LibGDX version, 2/2/2015
  */
- package edu.cornell.gdiac.util;
+ package edu.cornell.gdiac.game.interfaces;
 
 import com.badlogic.gdx.Screen;
 
@@ -42,7 +42,7 @@ public interface ScreenListener {
 	/**
 	 * The given screen has made a request to exit its player mode.
 	 *
-	 * The value exitCode can be used to implement menu options.
+	 * The value onExit can be used to implement menu options.
 	 *
 	 * @param screen   The screen requesting to exit
 	 * @param exitCode The state of the screen upon exit

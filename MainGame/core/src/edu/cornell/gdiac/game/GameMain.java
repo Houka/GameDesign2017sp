@@ -20,9 +20,9 @@ import com.badlogic.gdx.graphics.g2d.freetype.*;
 import com.badlogic.gdx.assets.loaders.*;
 import com.badlogic.gdx.assets.loaders.resolvers.*;
 
+import edu.cornell.gdiac.game.interfaces.ScreenListener;
 import edu.cornell.gdiac.game.modes.LoadingMode;
 import edu.cornell.gdiac.game.modes.MenuMode;
-import edu.cornell.gdiac.util.*;
 
 /**
  * Root class for a LibGDX.  
@@ -121,7 +121,7 @@ public class GameMain extends Game implements ScreenListener {
 	/**
 	 * The given screen has made a request to exit its player mode.
 	 *
-	 * The value exitCode can be used to implement menu options.
+	 * The value onExit can be used to implement menu options.
 	 *
 	 * @param screen   The screen requesting to exit
 	 * @param exitCode The state of the screen upon exit

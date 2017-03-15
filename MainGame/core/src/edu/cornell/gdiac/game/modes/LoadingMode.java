@@ -26,7 +26,7 @@ import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import edu.cornell.gdiac.game.GameCanvas;
-import edu.cornell.gdiac.util.*;
+import edu.cornell.gdiac.game.interfaces.ScreenListener;
 
 /**
  * Class that provides a loading screen for the state of the game.
@@ -100,7 +100,8 @@ public class LoadingMode extends Mode {
 	 * @param millis The loading budget in milliseconds
 	 */
 	public LoadingMode(GameCanvas canvas, AssetManager manager, int millis) {
-		super(canvas, manager, ScreenListener.EXIT_MENU);
+		super(canvas, manager);
+		onExit = ScreenListener.EXIT_MENU;
 		budget = millis;
 		
 		// Compute the dimensions from the canvas

@@ -27,9 +27,9 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import edu.cornell.gdiac.game.GameCanvas;
-import edu.cornell.gdiac.game.input.MenuInputController;
+import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
-import edu.cornell.gdiac.util.ScreenListener;
+import edu.cornell.gdiac.game.interfaces.ScreenListener;
 
 /**
  * Class that provides a menu screen for the state of the game.
@@ -56,7 +56,7 @@ public class MenuMode extends Mode {
 	private int selected = 0;
 
 	/** Input controller for menu selection */
-	private MenuInputController input;
+	private SelectionInputController input;
 
 	/**
 	 * Creates a MenuMode with the default size and position.
@@ -65,7 +65,8 @@ public class MenuMode extends Mode {
 	 * @param manager The AssetManager to load in the background
 	 */
 	public MenuMode(GameCanvas canvas, AssetManager manager) {
-		super(canvas, manager, ScreenListener.EXIT_QUIT);
+		super(canvas, manager);
+		onExit = ScreenListener.EXIT_QUIT;
 
 		// Compute the dimensions from the canvas
 		resize(canvas.getWidth(),canvas.getHeight());
@@ -75,7 +76,7 @@ public class MenuMode extends Mode {
 			new LevelEditorMode(canvas, manager)
 		};
 
-		input = MenuInputController.getInstance();
+		input = SelectionInputController.getInstance();
 	}
 
 	// BEGIN: Setters and Getters
@@ -123,7 +124,7 @@ public class MenuMode extends Mode {
 	@Override
 	protected void update(float delta) {
 		if (input.didDown())
-			selected=(selected+1)%modeNames.length;
+			selected=(selected+1) % modeNames.length;
 		else if (input.didUp())
 			selected=(selected-1 < 0)? modeNames.length-1 : selected-1;
 		else if (input.didSelect())
@@ -179,5 +180,10 @@ public class MenuMode extends Mode {
 			manager.unload(FONT_FILE);
 		for(Mode m: modes)
 			m.unloadContent(manager);
+	}
+
+	public void reset(){
+		super.reset();
+		selected = 0;
 	}
 }
