@@ -96,7 +96,6 @@ public class MenuMode extends Mode {
 			super.onComplete();
 		else {
 			modes[selected].loadContent(manager);
-			modes[selected].reset();
 			listener.switchScreens(this, modes[selected]);
 		}
 	}
@@ -112,17 +111,9 @@ public class MenuMode extends Mode {
 	}
 
 	@Override
-	protected boolean preUpdate(float dt){
-		if (super.preUpdate(dt)) {
-			input.readInput();
-			return true;
-		}
-
-		return false;
-	}
-
-	@Override
 	protected void update(float delta) {
+		input.readInput();
+
 		if (input.didDown())
 			selected=(selected+1) % modeNames.length;
 		else if (input.didUp())
@@ -180,10 +171,5 @@ public class MenuMode extends Mode {
 			manager.unload(FONT_FILE);
 		for(Mode m: modes)
 			m.unloadContent(manager);
-	}
-
-	public void reset(){
-		super.reset();
-		selected = 0;
 	}
 }

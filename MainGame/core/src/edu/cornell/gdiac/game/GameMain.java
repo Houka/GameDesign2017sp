@@ -141,7 +141,6 @@ public class GameMain extends Game implements ScreenListener {
 					menuMode.loadContent(manager);
 				}
 
-				menuMode.reset();
 				setScreen(menuMode);
 			default:
 				break;

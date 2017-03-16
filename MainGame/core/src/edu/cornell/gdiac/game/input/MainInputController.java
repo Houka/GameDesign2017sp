@@ -13,11 +13,7 @@ package edu.cornell.gdiac.game.input;
 import com.badlogic.gdx.*;
 
 /**
- * Class for reading player input. 
- *
- * This supports both a keyboard and X-Box controller. In previous solutions, we only 
- * detected the X-Box controller on start-up.  This class allows us to hot-swap in
- * a controller via the new XBox360Controller class.
+ * Class for reading player input.
  */
 public class MainInputController {
     /** The singleton instance of the input controller */
@@ -36,14 +32,12 @@ public class MainInputController {
     }
 
     // Fields to manage buttons
-    /** Whether the reset button was pressed. */
     private boolean resetPressed;
-    private boolean resetPrevious;
-    /** Whether the debug toggle was pressed. */
     private boolean debugPressed;
-    private boolean debugPrevious;
-    /** Whether the exit button was pressed. */
     private boolean exitPressed;
+
+    private boolean resetPrevious;
+    private boolean debugPrevious;
     private boolean exitPrevious;
 
     /**

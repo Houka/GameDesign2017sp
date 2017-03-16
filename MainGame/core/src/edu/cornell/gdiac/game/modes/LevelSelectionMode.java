@@ -39,8 +39,14 @@ import edu.cornell.gdiac.game.interfaces.ScreenListener;
  */
 public class LevelSelectionMode extends Mode {
 	// TODO: remove this once we have working json file loading in assetmanager
-	private static final int NUM_LEVELS = 20;
+	private static final String[] NUM_LEVELS = {
+			"1","1","1","1","1",
+			"1","1","1","1","1",
+			"1","1","1","1","1",
+			"1","1","1","1","1",
+			"1","1","1","1","1"};
 	private static final int TOTAL_COLUMNS = 10;
+	private static final int TOTAL_ROWS = (int)Math.ceil((float)NUM_LEVELS.length/TOTAL_COLUMNS);
 	private static final int BORDER_X = 20;
 	private static final int BORDER_Y = 20;
 
@@ -56,7 +62,10 @@ public class LevelSelectionMode extends Mode {
 	/** Input controller for menu selection */
 	private SelectionInputController input;
 	/** The position of the level that the player is selecting */
-	private Vector2 selected;
+	private int selected;
+	/** The Game mode where players can play*/
+	private GameMode gameMode;
+
 
 	/**
 	 * Creates a LevelSelectionMode with the default size and position.
@@ -72,41 +81,45 @@ public class LevelSelectionMode extends Mode {
 		resize(canvas.getWidth(),canvas.getHeight());
 
 		input = SelectionInputController.getInstance();
-		selected = new Vector2(0,0);
+		gameMode = new GameMode(canvas,manager);
+		selected = 0;
 	}
 
 	// BEGIN: Setters and Getters
 
 	// END: Setters and Getters
+	@Override
+	public void setScreenListener(ScreenListener listener) {
+		super.setScreenListener(listener);
+		gameMode.setScreenListener(listener);
+	}
 
 	@Override
 	public void dispose() {
 		super.dispose();
-
-	}
-
-	@Override
-	protected boolean preUpdate(float dt){
-		if (super.preUpdate(dt)) {
-			input.readInput();
-			return true;
-		}
-
-		return false;
 	}
 
 	@Override
 	protected void update(float delta) {
-		if (input.didUp())
-			selected.y=(selected.y >= NUM_LEVELS/TOTAL_COLUMNS - 1)? 0:selected.y+1;
-		else if (input.didDown())
-			selected.y=(selected.y <= 0)? NUM_LEVELS/TOTAL_COLUMNS-1 : selected.y-1;
+		input.readInput();
+
+		if (input.didDown())
+			selected = (selected+TOTAL_COLUMNS >= NUM_LEVELS.length)?	selected : selected+TOTAL_COLUMNS;
+		else if (input.didUp())
+			selected = (selected < TOTAL_COLUMNS) ? selected : selected - TOTAL_COLUMNS;
 		else if (input.didRight())
-			selected.x=(selected.x+1) % TOTAL_COLUMNS;
+			selected=(selected+1) % NUM_LEVELS.length;
 		else if (input.didLeft())
-			selected.x=(selected.x <= 0)? TOTAL_COLUMNS-1 : selected.x-1;
+			selected=(selected <= 0)? NUM_LEVELS.length -1 : selected-1;
 		else if (input.didSelect())
 			setComplete(true);
+	}
+
+	@Override
+	protected void onComplete(){
+		gameMode.loadContent(manager);
+		gameMode.loadLevel(NUM_LEVELS[selected]);
+		listener.switchScreens(this, gameMode);
 	}
 
 	@Override
@@ -114,14 +127,19 @@ public class LevelSelectionMode extends Mode {
 		super.draw();
 
 		for (int i = 0; i < TOTAL_COLUMNS; i++){
-			for (int j = 0; j < NUM_LEVELS/TOTAL_COLUMNS; j++) {
-				if ((selected.x + (selected.y*TOTAL_COLUMNS)) == (i + (j*TOTAL_COLUMNS)))
+			for (int j = 0; j < TOTAL_ROWS; j++) {
+				if (selected == convertToIndex(i,j))
 					displayFont.setColor(Color.RED);
 				else
 					displayFont.setColor(Color.WHITE);
-				canvas.drawText("" + ((i+1) + (j*TOTAL_COLUMNS)), displayFont,
-						i * ((canvas.getWidth()-BORDER_X*2)/TOTAL_COLUMNS)+BORDER_X,
-						canvas.getHeight() - j * displayFont.getLineHeight() - BORDER_Y);
+
+				if (convertToIndex(i,j) < NUM_LEVELS.length) {
+					canvas.drawText("" + (convertToIndex(i, j) + 1), displayFont,
+							i * ((canvas.getWidth() - BORDER_X * 2) / TOTAL_COLUMNS) + BORDER_X,
+							canvas.getHeight() - j * displayFont.getLineHeight() - BORDER_Y);
+				}else{
+					break;
+				}
 			}
 		}
 	}
@@ -136,6 +154,7 @@ public class LevelSelectionMode extends Mode {
 		size2Params.fontParameters.size = FONT_SIZE;
 		manager.load(FONT_FILE, BitmapFont.class, size2Params);
 
+		gameMode.preLoadContent(manager);
 	}
 
 	@Override
@@ -147,6 +166,8 @@ public class LevelSelectionMode extends Mode {
 			displayFont = manager.get(FONT_FILE, BitmapFont.class);
 		else
 			displayFont = null;
+
+		// TODO: loads all the level json files
 	}
 
 	@Override
@@ -154,11 +175,11 @@ public class LevelSelectionMode extends Mode {
 		if (manager.isLoaded(BACKGROUND_FILE)) {
 			manager.unload(BACKGROUND_FILE);
 		}
+
+		gameMode.unloadContent(manager);
 	}
 
-	@Override
-	public void reset(){
-		super.reset();
-		selected.set(0,0);
+	private int convertToIndex(int x, int y){
+		return x + (y*TOTAL_COLUMNS);
 	}
 }

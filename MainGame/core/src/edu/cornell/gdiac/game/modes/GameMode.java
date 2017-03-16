@@ -24,6 +24,7 @@ import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
+import edu.cornell.gdiac.game.levelLoading.LevelLoader;
 import edu.cornell.gdiac.util.*;
 import edu.cornell.gdiac.util.obstacles.*;
 
@@ -60,13 +61,16 @@ public class GameMode extends Mode {
 	protected Array<String> assets;
 	/** All the objects in the world. */
 	protected PooledList<Obstacle> objects  = new PooledList<Obstacle>();
-	/** Queue for adding objects */
-	protected PooledList<Obstacle> addQueue = new PooledList<Obstacle>();
 
 	/** The Box2D world */
 	protected World world;
 	/** The boundary of the world */
 	protected Rectangle bounds;
+
+	/** The level this game mode loads in */
+	private String levelFile;
+	/** The level loader */
+	private LevelLoader levelLoader;
 
 	/** The world scale Vector */
 	private Vector2 scaleVector;
@@ -124,10 +128,10 @@ public class GameMode extends Mode {
 	protected GameMode(GameCanvas canvas, AssetManager manager,Rectangle bounds, Vector2 gravity) {
 		super(canvas, manager);
 		onExit = ScreenListener.EXIT_MENU;
-		this.scaleVector.x = canvas.getWidth()/bounds.getWidth();
-		this.scaleVector.y = canvas.getHeight()/bounds.getHeight();
+		scaleVector = new Vector2(canvas.getWidth()/bounds.getWidth(), canvas.getHeight()/bounds.getHeight());
 		assets = new Array<String>();
 		world = new World(gravity,false);
+		levelLoader = new LevelLoader();
 		this.bounds = new Rectangle(bounds);
 		complete = false;
 		failed = false;
@@ -146,10 +150,9 @@ public class GameMode extends Mode {
 			obj.deactivatePhysics(world);
 		}
 		objects.clear();
-		addQueue.clear();
 		world.dispose();
+		levelLoader.dispose();
 		objects = null;
-		addQueue = null;
 		bounds = null;
 		scaleVector = null;
 		world  = null;
@@ -157,17 +160,13 @@ public class GameMode extends Mode {
 	}
 
 	/**
-	 *
-	 * Adds a physics object in to the insertion queue.
-	 *
-	 * Objects on the queue are added just before collision processing.  We do this to 
-	 * control object creation.
-	 *
-	 * param obj The object to add
+	 * TODO: write desc for level setting.. should populate the level
 	 */
-	public void addQueuedObject(Obstacle obj) {
-		assert inBounds(obj) : "Object is not in bounds";
-		addQueue.add(obj);
+	public void loadLevel(String levelFile){
+		this.levelFile = levelFile;
+
+		levelLoader.loadLevel(levelFile, scaleVector);
+		resize(levelLoader.getBounds().width, levelLoader.getBounds().height);
 	}
 
 	/**
@@ -195,30 +194,12 @@ public class GameMode extends Mode {
 		boolean vert  = (bounds.y <= obj.getY() && obj.getY() <= bounds.y+bounds.height);
 		return horiz && vert;
 	}
-	
-	/**
-	 * Resets the status of the game so that we can play again.
-	 *
-	 * This method disposes of the world and creates a new one.
-	 */
+
+	@Override
 	public void reset(){
-
-	};
-	
-	/**
-	 * Returns whether to process the update loop
-	 *
-	 * At the start of the update loop, we check if it is time
-	 * to switch to a new game mode.  If not, the update proceeds
-	 * normally.
-	 *
-	 * @param dt Number of seconds since last animation frame
-	 * 
-	 * @return whether to process the update loop
-	 */
-	public boolean preUpdate(float dt) {
-
-		return true;
+		super.reset();
+		if (!levelFile.isEmpty())
+			loadLevel(levelFile);
 	}
 	
 	/**
@@ -232,6 +213,7 @@ public class GameMode extends Mode {
 	 * @param dt Number of seconds since last animation frame
 	 */
 	public void update(float dt){
+		//TODO: update all entity controllers and their respective models
 
 		postUpdate(dt);
 	};
@@ -247,8 +229,8 @@ public class GameMode extends Mode {
 	 */
 	public void postUpdate(float dt) {
 		// Add any objects created by actions
-		while (!addQueue.isEmpty()) {
-			addObject(addQueue.poll());
+		while (!levelLoader.getAddQueue().isEmpty()) {
+			addObject(levelLoader.getAddQueue().poll());
 		}
 		
 		// Turn the physics engine crank.
@@ -304,18 +286,20 @@ public class GameMode extends Mode {
 	 */
 	public void resize(int width, int height) {
 		// TODO: implement
+		bounds.width = width;
+		bounds.height = height;
 	}
 
 
 
 	@Override
 	public void preLoadContent(AssetManager manager) {
-
+		levelLoader.preLoadContent(manager);
 	}
 
 	@Override
 	public void loadContent(AssetManager manager) {
-
+		levelLoader.loadContent(manager);
 	}
 
 	@Override
@@ -325,5 +309,7 @@ public class GameMode extends Mode {
 				manager.unload(s);
 			}
 		}
+
+		levelLoader.unloadContent(manager);
 	}
 }

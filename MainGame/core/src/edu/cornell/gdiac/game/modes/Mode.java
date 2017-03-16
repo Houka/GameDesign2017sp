@@ -135,7 +135,7 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	 *
 	 * @return whether to process the update loop
 	 */
-	protected boolean preUpdate(float dt) {
+	private boolean preUpdate(float dt) {
 		input.readInput();
 		if(input.didExit()) {
 			setExit(true);
@@ -231,5 +231,8 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	public void pause() {}
 	public void resume() {}
 	public void show() { active = true;}
-	public void hide() {active = false;}
+	public void hide() {
+		reset();
+		active = false;
+	}
 }

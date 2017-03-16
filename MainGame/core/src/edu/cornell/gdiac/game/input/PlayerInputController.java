@@ -16,18 +16,18 @@ import com.badlogic.gdx.Input;
 /**
  * Class for reading player input.
  */
-public class SelectionInputController {
+public class PlayerInputController {
     /** The singleton instance of the input controller */
-    private static SelectionInputController theController = null;
+    private static PlayerInputController theController = null;
 
     /**
      * Return the singleton instance of the input controller
      *
      * @return the singleton instance of the input controller
      */
-    public static SelectionInputController getInstance() {
+    public static PlayerInputController getInstance() {
         if (theController == null) {
-            theController = new SelectionInputController();
+            theController = new PlayerInputController();
         }
         return theController;
     }
@@ -48,7 +48,7 @@ public class SelectionInputController {
     /**
      * Creates a new input controller
      */
-    private SelectionInputController() {}
+    private PlayerInputController() {}
 
     // BEGIN: Getters and Setters
     public boolean didUp() {
