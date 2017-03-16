@@ -137,13 +137,14 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	 */
 	private boolean preUpdate(float dt) {
 		input.readInput();
-		if(input.didExit()) {
-			setExit(true);
-			return false;
-		}else if (input.didDebug())
+		if (input.didDebug())
 			debug = !debug;
 		else if (input.didReset())
 			reset();
+		else if(input.didExit()) {
+			setExit(true);
+			return false;
+		}
 
 		return true;
 	}

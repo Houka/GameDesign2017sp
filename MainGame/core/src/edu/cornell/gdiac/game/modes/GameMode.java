@@ -198,6 +198,11 @@ public class GameMode extends Mode {
 	@Override
 	public void reset(){
 		super.reset();
+
+		for(Obstacle obj:objects)
+			obj.deactivatePhysics(world);
+		objects.clear();
+
 		if (!levelFile.isEmpty())
 			loadLevel(levelFile);
 	}
@@ -216,7 +221,7 @@ public class GameMode extends Mode {
 		//TODO: update all entity controllers and their respective models
 
 		postUpdate(dt);
-	};
+	}
 	
 	/**
 	 * Processes physics
@@ -246,8 +251,7 @@ public class GameMode extends Mode {
 			if (obj.isRemoved()) {
 				obj.deactivatePhysics(world);
 				entry.remove();
-			} else {
-				// Note that update is called last!
+			}else{
 				obj.update(dt);
 			}
 		}

@@ -68,6 +68,9 @@ public class LevelLoader implements AssetUser, Disposable{
      * TODO: write desc... loads the level based on the json file. adds the (Obstacle) object into addQueue
      */
     public void loadLevel(String JSONFile, Vector2 scale){
+        // reset queue of objects
+        addQueue.clear();
+
         populateLevel(scale);
 
         //sets the new world bounds
