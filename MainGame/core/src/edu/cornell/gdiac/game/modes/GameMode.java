@@ -67,11 +67,15 @@ public class GameMode extends Mode {
 
 	/** All the objects in the world. */
 	protected PooledList<Obstacle> objects  = new PooledList<Obstacle>();
+	/** All the Entity Controllers in the world */
+	private PooledList<EntityController> entityControllers = new PooledList<EntityController>();
 
 	/** The Box2D world */
 	private World world;
 	/** The boundary of the world */
 	private Rectangle bounds;
+	/** The player */
+	private PlayerModel player;
 
 	/** The level this game mode loads in */
 	private String levelFile;
@@ -87,8 +91,6 @@ public class GameMode extends Mode {
 	/** Whether we have failed at this world (and need a reset) */
 	private boolean failed;
 
-	/** Entity Controllers */
-	private EntityController[] entityControllers;
 	
 	/**
 	 * Creates a new game world with the default values.
@@ -141,16 +143,25 @@ public class GameMode extends Mode {
 		world = new World(gravity,false);
 		levelLoader = new LevelLoader(scaleVector);
 		this.bounds = new Rectangle(bounds);
-		entityControllers = new EntityController[]{
-			new PlayerController(), new EnemyController()
-		};
 		complete = false;
 		failed = false;
 		active = false;
 	}
 
 	// BEGIN: Setters and Getters
+	/**
+	 * TODO: write desc
+	 */
+	private boolean trySetPlayer(){
+		for (Obstacle obj:levelLoader.getAddQueue()) {
+			if (obj.getName().equals("player")) {
+				player = (PlayerModel) obj;
+				return true;
+			}
+		}
 
+		return false;
+	}
 	// END: Setters and Getters
 
 	@Override
@@ -159,9 +170,9 @@ public class GameMode extends Mode {
 			obj.deactivatePhysics(world);
 		}
 		objects.clear();
+		entityControllers.clear();
 		world.dispose();
 		levelLoader.dispose();
-		entityControllers = null;
 		levelLoader = null;
 		objects = null;
 		bounds = null;
@@ -177,6 +188,7 @@ public class GameMode extends Mode {
 		for(Obstacle obj:objects)
 			obj.deactivatePhysics(world);
 		objects.clear();
+		entityControllers.clear();
 
 		if (!levelFile.isEmpty())
 			loadLevel(levelFile);
@@ -187,7 +199,7 @@ public class GameMode extends Mode {
 		//TODO: update all entity controllers and their respective models
 
 		for(EntityController e: entityControllers)
-			e.update(dt);;
+			e.update(dt);
 
 		postUpdate(dt);
 	}
@@ -238,14 +250,8 @@ public class GameMode extends Mode {
 		levelLoader.loadLevel(levelFile);
 		resize(levelLoader.getBounds().width, levelLoader.getBounds().height);
 
-		for(Obstacle obj: levelLoader.getAddQueue()){
-			if(obj.getName().equals("player")){
-				entityControllers[0].setPlayer((PlayerModel)obj);
-				entityControllers[1].setPlayer((PlayerModel)obj);
-			}else if (obj.getName().equals("enemy")){
-				//TODO: for enemies
-			}
-		}
+		if (!trySetPlayer())
+			System.out.println("Error: level file ("+levelFile+") does not have a player");
 	}
 
 	/**
@@ -291,6 +297,19 @@ public class GameMode extends Mode {
 		assert inBounds(obj) : "Object is not in bounds";
 		objects.add(obj);
 		obj.activatePhysics(world);
+
+		addEntityController(obj);
+	}
+
+	/**
+	 * TODO: write desc
+	 */
+	private void addEntityController(Obstacle obj){
+		// if its an enemy or player, add a new entity controller to it
+		if (obj.getName().equals("player"))
+			entityControllers.add(new PlayerController(player));
+		else if (obj.getName().equals("enemy"))
+			entityControllers.add(new EnemyController(player,(EnemyModel)obj));
 	}
 
 	/**

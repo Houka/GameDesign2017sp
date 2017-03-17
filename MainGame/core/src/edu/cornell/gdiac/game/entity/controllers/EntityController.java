@@ -8,14 +8,9 @@ import edu.cornell.gdiac.game.entity.models.PlayerModel;
  * TODO: write class desc
  */
 public abstract class EntityController {
-    private PlayerModel player;
+    protected PlayerModel player;
 
-    public EntityController(){}
-
-    // BEGIN: Setters and Getters
-    public void setPlayer(PlayerModel player){this.player = player;}
-    public PlayerModel getPlayer(){ return player; }
-    // END: Setters and Getters
+    public EntityController(PlayerModel player){ this.player = player;}
 
     public abstract void update(float dt);
 }

@@ -122,6 +122,67 @@ public class EnemyModel extends CapsuleObstacle {
         return true;
     }
 
+    // BEGIN: Setters and Getters
+    /**
+     * Returns left/right movement of this character.
+     *
+     * This is the result of input times dude force.
+     *
+     * @return left/right movement of this character.
+     */
+    public float getMovement() {
+        return movement;
+    }
+
+    /**
+     * Sets left/right movement of this character.
+     *
+     * This is the result of input times dude force.
+     *
+     * @param value left/right movement of this character.
+     */
+    public void setMovement(float value) {
+        movement = value;
+        // Change facing if appropriate
+        if (movement < 0) {
+            isFacingRight = false;
+        } else if (movement > 0) {
+            isFacingRight = true;
+        }
+    }
+
+    /**
+     * Returns true if this character is facing right
+     *
+     * @return true if this character is facing right
+     */
+    public boolean isFacingRight() {
+        return isFacingRight;
+    }
+
+    /**
+     * Sets facing direction of this character.
+     *
+     * @param value whether this character is facing right
+     */
+    public void setFacingRight(boolean value) {
+        isFacingRight = value;
+    }
+
+    // END: Setters and Getters
+
+    public void applyForce() {
+        if (!isActive()) {
+            return;
+        }
+
+        if (getMovement() == 0f ) {
+            setVX(0);
+        }else{
+            setVX(Math.signum(getMovement()));
+        }
+    }
+
     /**
      * Updates the object's physics state (NOT GAME LOGIC).
      *

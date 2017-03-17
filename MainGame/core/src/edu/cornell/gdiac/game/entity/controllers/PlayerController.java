@@ -1,5 +1,6 @@
 package edu.cornell.gdiac.game.entity.controllers;
 
+import edu.cornell.gdiac.game.entity.models.PlayerModel;
 import edu.cornell.gdiac.game.input.PlayerInputController;
 
 /**
@@ -10,7 +11,8 @@ import edu.cornell.gdiac.game.input.PlayerInputController;
 public class PlayerController extends EntityController {
     private PlayerInputController input;
 
-    public PlayerController(){
+    public PlayerController(PlayerModel player){
+        super(player);
         input = PlayerInputController.getInstance();
     }
 
@@ -18,12 +20,12 @@ public class PlayerController extends EntityController {
     public void update(float dt) {
         input.readInput();
 
-        getPlayer().setMovement(input.getHorizontal());
-        getPlayer().setJumping(input.didJump());
-        getPlayer().setShooting(input.didShoot());
-        getPlayer().applyForce();
+        player.setMovement(input.getHorizontal());
+        player.setJumping(input.didJump());
+        player.setShooting(input.didShoot());
+        player.applyForce();
 
         //TODO remove this and put it in collision controller
-        getPlayer().setGrounded(true);
+        player.setGrounded(true);
     }
 }
