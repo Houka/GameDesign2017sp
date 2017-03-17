@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.interfaces.Shooter;
 import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
 
 /**
@@ -22,7 +23,7 @@ import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
  * Note that this class returns to static loading.  That is because there are
  * no other subclasses that we might loop through.
  */
-public class PlayerModel extends CapsuleObstacle {
+public class PlayerModel extends CapsuleObstacle implements Shooter {
     // Physics constants
     /** The density of the character */
     private static final float PLAYER_DENSITY = 1.0f;
@@ -151,20 +152,12 @@ public class PlayerModel extends CapsuleObstacle {
         }
     }
 
-    /**
-     * Returns true if the dude is actively firing.
-     *
-     * @return true if the dude is actively firing.
-     */
+    @Override
     public boolean isShooting() {
         return isShooting && shootCooldown <= 0;
     }
 
-    /**
-     * Sets whether the dude is actively firing.
-     *
-     * @param value whether the dude is actively firing.
-     */
+    @Override
     public void setShooting(boolean value) {
         isShooting = value;
     }
@@ -236,11 +229,7 @@ public class PlayerModel extends CapsuleObstacle {
         return SENSOR_NAME;
     }
 
-    /**
-     * Returns true if this character is facing right
-     *
-     * @return true if this character is facing right
-     */
+    @Override
     public boolean isFacingRight() {
         return isFacingRight;
     }

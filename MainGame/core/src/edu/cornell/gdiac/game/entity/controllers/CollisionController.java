@@ -60,7 +60,7 @@ public class CollisionController implements ContactListener {
     }
 
     private void handelCollision(WallModel obj1, PaintballModel obj2){
-
+        obj2.markRemoved(true);
     }
 
     // Collision end handlers

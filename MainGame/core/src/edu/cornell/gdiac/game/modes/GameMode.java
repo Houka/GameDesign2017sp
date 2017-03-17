@@ -18,10 +18,7 @@ package edu.cornell.gdiac.game.modes;
 
 import java.util.Iterator;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.GameCanvas;
@@ -29,10 +26,11 @@ import edu.cornell.gdiac.game.entity.controllers.CollisionController;
 import edu.cornell.gdiac.game.entity.controllers.EnemyController;
 import edu.cornell.gdiac.game.entity.controllers.EntityController;
 import edu.cornell.gdiac.game.entity.controllers.PlayerController;
+import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
 import edu.cornell.gdiac.game.entity.models.EnemyModel;
 import edu.cornell.gdiac.game.entity.models.PlayerModel;
-import edu.cornell.gdiac.game.input.PlayerInputController;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
+import edu.cornell.gdiac.game.interfaces.Shooter;
 import edu.cornell.gdiac.game.levelLoading.LevelLoader;
 import edu.cornell.gdiac.util.*;
 import edu.cornell.gdiac.util.obstacles.*;
@@ -60,14 +58,14 @@ public class GameMode extends Mode {
 	public static final int WORLD_POSIT = 2;
 	
 	/** Width of the game world in Box2d units */
-	protected static final float DEFAULT_WIDTH  = 32.0f;
+	private static final float DEFAULT_WIDTH  = 32.0f;
 	/** Height of the game world in Box2d units */
-	protected static final float DEFAULT_HEIGHT = 18.0f;
+	private static final float DEFAULT_HEIGHT = 18.0f;
 	/** The default value of gravity (going down) */
-	protected static final float DEFAULT_GRAVITY = -4.9f;
+	private static final float DEFAULT_GRAVITY = -4.9f;
 
 	/** All the objects in the world. */
-	protected PooledList<Obstacle> objects  = new PooledList<Obstacle>();
+	private PooledList<Obstacle> objects  = new PooledList<Obstacle>();
 	/** All the Entity Controllers in the world */
 	private PooledList<EntityController> entityControllers = new PooledList<EntityController>();
 
@@ -77,18 +75,18 @@ public class GameMode extends Mode {
 	private Rectangle bounds;
 	/** The player */
 	private PlayerModel player;
+	/** The factory that creates projectiles */
+	private PaintballFactory paintballFactory;
 
-	/** The level this game mode loads in */
-	private String levelFile;
 	/** The level loader */
 	private LevelLoader levelLoader;
+	/** The level this game mode loads in */
+	private String levelFile;
 
 	/** The world scale Vector */
 	private Vector2 scaleVector;
-	/** Whether or not this is an active controller */
-	private boolean active;
 	/** Whether we have completed this level */
-	private boolean complete;
+	private boolean succeeded;
 	/** Whether we have failed at this world (and need a reset) */
 	private boolean failed;
 
@@ -103,7 +101,7 @@ public class GameMode extends Mode {
 	 * @param canvas The GameCanvas to draw the textures to
 	 * @param manager The AssetManager to load in the background
 	 */
-	protected GameMode(GameCanvas canvas, AssetManager manager) {
+	public GameMode(GameCanvas canvas, AssetManager manager) {
 		this(canvas, manager, new Rectangle(0,0,DEFAULT_WIDTH,DEFAULT_HEIGHT),
 			 new Vector2(0,DEFAULT_GRAVITY));
 	}
@@ -121,7 +119,7 @@ public class GameMode extends Mode {
 	 * @param height	The height in Box2d coordinates
 	 * @param gravity	The downward gravity
 	 */
-	protected GameMode(GameCanvas canvas, AssetManager manager,float width, float height, float gravity) {
+	public GameMode(GameCanvas canvas, AssetManager manager,float width, float height, float gravity) {
 		this(canvas, manager, new Rectangle(0,0,width,height), new Vector2(0,gravity));
 	}
 
@@ -137,17 +135,19 @@ public class GameMode extends Mode {
 	 * @param bounds	The game bounds in Box2d coordinates
 	 * @param gravity	The gravitational force on this Box2d world
 	 */
-	protected GameMode(GameCanvas canvas, AssetManager manager,Rectangle bounds, Vector2 gravity) {
+	public GameMode(GameCanvas canvas, AssetManager manager,Rectangle bounds, Vector2 gravity) {
 		super(canvas, manager);
 		onExit = ScreenListener.EXIT_MENU;
 		scaleVector = new Vector2(canvas.getWidth()/bounds.getWidth(), canvas.getHeight()/bounds.getHeight());
+
 		world = new World(gravity,false);
 		world.setContactListener(new CollisionController());
+		paintballFactory = new PaintballFactory(scaleVector);
 		levelLoader = new LevelLoader(scaleVector);
 		this.bounds = new Rectangle(bounds);
-		complete = false;
+
+		succeeded = false;
 		failed = false;
-		active = false;
 	}
 
 	// BEGIN: Setters and Getters
@@ -203,6 +203,12 @@ public class GameMode extends Mode {
 		for(EntityController e: entityControllers)
 			e.update(dt);
 
+		// projectile creation
+		for(Obstacle obj: objects){
+			if(obj instanceof Shooter && ((Shooter) obj).isShooting())
+				addObject(paintballFactory.createPaintball(obj.getX(),obj.getY(),((Shooter) obj).isFacingRight()));
+		}
+
 		postUpdate(dt);
 	}
 
@@ -231,14 +237,17 @@ public class GameMode extends Mode {
 
 	@Override
 	public void preLoadContent(AssetManager manager) {
+		paintballFactory.preLoadContent(manager);
 		levelLoader.preLoadContent(manager);
 	}
 	@Override
 	public void loadContent(AssetManager manager) {
+		paintballFactory.loadContent(manager);
 		levelLoader.loadContent(manager);
 	}
 	@Override
 	public void unloadContent(AssetManager manager) {
+		paintballFactory.unloadContent(manager);
 		levelLoader.unloadContent(manager);
 	}
 
@@ -265,7 +274,7 @@ public class GameMode extends Mode {
 	 *
 	 * @param dt Number of seconds since last animation frame
 	 */
-	public void postUpdate(float dt) {
+	private void postUpdate(float dt) {
 		// Add any objects created by actions
 		while (!levelLoader.getAddQueue().isEmpty()) {
 			addObject(levelLoader.getAddQueue().poll());
@@ -295,7 +304,7 @@ public class GameMode extends Mode {
 	 *
 	 * param obj The object to add
 	 */
-	protected void addObject(Obstacle obj) {
+	private void addObject(Obstacle obj) {
 		assert inBounds(obj) : "Object is not in bounds";
 		objects.add(obj);
 		obj.activatePhysics(world);
@@ -323,7 +332,7 @@ public class GameMode extends Mode {
 	 *
 	 * @return true if the object is in bounds.
 	 */
-	public boolean inBounds(Obstacle obj) {
+	private boolean inBounds(Obstacle obj) {
 		boolean horiz = (bounds.x <= obj.getX() && obj.getX() <= bounds.x+bounds.width);
 		boolean vert  = (bounds.y <= obj.getY() && obj.getY() <= bounds.y+bounds.height);
 		return horiz && vert;

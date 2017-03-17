@@ -154,8 +154,8 @@ public class LevelLoader implements AssetUser, Disposable{
     public void loadContent(AssetManager manager) {
         bgTile  = AssetRetriever.createTexture(manager,BG_FILE,true);
         earthTile = AssetRetriever.createTexture(manager,EARTH_FILE,true);
-        goalTile  = AssetRetriever.createTexture(manager,GOAL_FILE,true);
-        enemyTexture  = AssetRetriever.createTexture(manager,ENEMY_FILE,true);
+        goalTile  = AssetRetriever.createTexture(manager,GOAL_FILE,false);
+        enemyTexture  = AssetRetriever.createTexture(manager,ENEMY_FILE,false);
         playerTexture = AssetRetriever.createTexture(manager, CHARACTER_FILE, false);
     }
 

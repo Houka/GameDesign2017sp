@@ -35,22 +35,12 @@ public class PaintballModel extends BoxObstacle {
 
     private Color paintcolor = Color.WHITE;
 
-
-    /** Constructor for a bullet*/
-    public PaintballModel(float x, float y){
-        super(x, y);
-        initWidth = x;
-        initHeight = y;
-        growing = true;
-        dying = false;
-        myVY=0;
-        opacity = 1;
-        gravity = false;
-        setName("paintball");
-    }
-
+    /**
+     *  TODO: write constructor desc
+     */
     public PaintballModel(float x, float y, float w, float h, float s, Vector2 scl){
         super(x,y,w,h);
+        setName("paintball");
         initWidth = w*xScale;
         initHeight = h*yScale;
         setWidth(initWidth);
@@ -64,7 +54,6 @@ public class PaintballModel extends BoxObstacle {
         myVY = 0;
         opacity = 1;
         gravity = false;
-        setName("paintball");
     }
 
     public void update(float delta) {
@@ -99,21 +88,12 @@ public class PaintballModel extends BoxObstacle {
         return yScale*ytransform;
     }
 
-    private TextureRegion head;
-    public void setBulletTexture(TextureRegion t){
-        head = t;
-    }
-
     public void draw(GameCanvas canvas) {
         paintcolor.a = opacity;
         if (texture != null) {
             canvas.draw(texture, paintcolor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),getScaledX(),getScaledY());
         }
-        if (head != null && !dying) {
-            canvas.draw(head, paintcolor,origin.x+(15+getWidth()/2*drawScale.x)*(speed < 0? -1:1),
-                    origin.y,getX()*drawScale.x+(15+getWidth()/2*drawScale.x)*(speed < 0? -1:1),getY()*drawScale.x,
-                    getAngle(),getScaledY(),getScaledY());
-        }
+
         //TODO Find better solution later
         paintcolor.a = 1;
         canvas.draw(texture, paintcolor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),0,0);
