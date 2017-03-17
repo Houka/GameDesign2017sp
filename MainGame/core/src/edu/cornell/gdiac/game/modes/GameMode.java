@@ -18,6 +18,7 @@ package edu.cornell.gdiac.game.modes;
 
 import java.util.Iterator;
 
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.physics.box2d.*;
@@ -28,6 +29,7 @@ import edu.cornell.gdiac.game.entity.controllers.EntityController;
 import edu.cornell.gdiac.game.entity.controllers.PlayerController;
 import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
 import edu.cornell.gdiac.game.entity.models.EnemyModel;
+import edu.cornell.gdiac.game.entity.models.HUDModel;
 import edu.cornell.gdiac.game.entity.models.PlayerModel;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
 import edu.cornell.gdiac.game.interfaces.Shooter;
@@ -50,6 +52,9 @@ import edu.cornell.gdiac.util.obstacles.*;
  * place nicely with the static assets.
  */
 public class GameMode extends Mode {
+	/** Retro font for displaying messages */
+	private static String FONT_FILE = "fonts/RetroGame.ttf";
+
 	/** The amount of time for a physics engine step. */
 	public static final float WORLD_STEP = 1/60.0f;
 	/** Number of velocity iterations for the constrain solvers */
@@ -77,6 +82,8 @@ public class GameMode extends Mode {
 	private PlayerModel player;
 	/** The factory that creates projectiles */
 	private PaintballFactory paintballFactory;
+	/** The hud of this world */
+	private HUDModel hud;
 
 	/** The level loader */
 	private LevelLoader levelLoader;
@@ -145,6 +152,8 @@ public class GameMode extends Mode {
 		paintballFactory = new PaintballFactory(scaleVector);
 		levelLoader = new LevelLoader(scaleVector);
 		this.bounds = new Rectangle(bounds);
+		hud = new HUDModel(canvas.getWidth(), canvas.getHeight());
+		hud.setDrawScale(scaleVector);
 
 		succeeded = false;
 		failed = false;
@@ -175,6 +184,7 @@ public class GameMode extends Mode {
 		entityControllers.clear();
 		world.dispose();
 		levelLoader.dispose();
+		hud = null;
 		levelLoader = null;
 		objects = null;
 		bounds = null;
@@ -194,6 +204,8 @@ public class GameMode extends Mode {
 
 		if (!levelFile.isEmpty())
 			loadLevel(levelFile);
+
+		hud.reset();
 	}
 
 	@Override
@@ -205,8 +217,14 @@ public class GameMode extends Mode {
 
 		// projectile creation
 		for(Obstacle obj: objects){
-			if(obj instanceof Shooter && ((Shooter) obj).isShooting())
-				addObject(paintballFactory.createPaintball(obj.getX(),obj.getY(),((Shooter) obj).isFacingRight()));
+			if(obj instanceof Shooter && ((Shooter) obj).isShooting()) {
+				if (obj.getName().equals("player") && hud.useAmmo())
+					// player shooting
+					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
+				else if (!obj.getName().equals("player"))
+					// enemies shooting
+					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
+			}
 		}
 
 		postUpdate(dt);
@@ -217,6 +235,8 @@ public class GameMode extends Mode {
 		for(Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
+
+		hud.draw(canvas);
 	}
 
 	@Override
@@ -244,6 +264,8 @@ public class GameMode extends Mode {
 	public void loadContent(AssetManager manager) {
 		paintballFactory.loadContent(manager);
 		levelLoader.loadContent(manager);
+		if (manager.isLoaded(FONT_FILE))
+			hud.setFont(manager.get(FONT_FILE, BitmapFont.class));
 	}
 	@Override
 	public void unloadContent(AssetManager manager) {

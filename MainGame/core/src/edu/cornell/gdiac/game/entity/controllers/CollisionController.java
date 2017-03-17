@@ -9,6 +9,7 @@ import edu.cornell.gdiac.util.obstacles.Obstacle;
  *
  * object names so far
  *  background
+ *  hud
  *  goal
  *  enemy
  *  player
