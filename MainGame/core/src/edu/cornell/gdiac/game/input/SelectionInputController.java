@@ -26,9 +26,8 @@ public class SelectionInputController {
      * @return the singleton instance of the input controller
      */
     public static SelectionInputController getInstance() {
-        if (theController == null) {
+        if (theController == null)
             theController = new SelectionInputController();
-        }
         return theController;
     }
 

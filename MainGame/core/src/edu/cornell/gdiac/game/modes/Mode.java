@@ -24,7 +24,9 @@ package edu.cornell.gdiac.game.modes;
 
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.input.MainInputController;
 import edu.cornell.gdiac.game.interfaces.AssetUser;
@@ -47,12 +49,11 @@ import edu.cornell.gdiac.game.interfaces.ScreenListener;
  */
 public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	/** Standard window size (for scaling) */
-	private static int STANDARD_WIDTH  = 800;
+	private static int STANDARD_WIDTH  = 1024;
 	/** Standard window height (for scaling) */
-	private static int STANDARD_HEIGHT = 700;
-
+	private static int STANDARD_HEIGHT = 576;
 	/** Scaling factor for when the student changes the resolution. */
-	protected float scale;
+	protected Vector2 scale;
 	/** Background texture for start-up */
 	protected Texture background;
 
@@ -85,6 +86,7 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	protected Mode(GameCanvas canvas, AssetManager manager) {
 		this.manager = manager;
 		this.canvas  = canvas;
+		scale = new Vector2(1,1);
 		active = false;
 		exit = false;
 		completed = false;
@@ -169,7 +171,7 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	 */
 	protected void draw() {
 		if (background != null)
-			canvas.draw(background, 0, 0);
+			canvas.draw(background, Color.WHITE, 0, 0, 0,0, 0f, scale.x, scale.y);
 	}
 
 	protected void drawDebug(){};
@@ -210,9 +212,7 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	@Override
 	public void resize(int width, int height) {
 		// Compute the drawing scale
-		float sx = ((float)width)/STANDARD_WIDTH;
-		float sy = ((float)height)/STANDARD_HEIGHT;
-		scale = (sx < sy ? sx : sy);
+		scale.set(Math.max(1,(float) width/STANDARD_WIDTH), Math.max(1,(float) height/STANDARD_HEIGHT));
 	}
 
 	public void reset(){

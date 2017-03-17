@@ -76,10 +76,6 @@ public class LevelSelectionMode extends Mode {
 	public LevelSelectionMode(GameCanvas canvas, AssetManager manager) {
 		super(canvas, manager);
 		onExit = ScreenListener.EXIT_MENU;
-
-		// Compute the dimensions from the canvas
-		resize(canvas.getWidth(),canvas.getHeight());
-
 		input = SelectionInputController.getInstance();
 		gameMode = new GameMode(canvas,manager);
 		selected = 0;

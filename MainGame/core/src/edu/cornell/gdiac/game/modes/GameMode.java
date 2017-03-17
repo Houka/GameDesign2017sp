@@ -18,11 +18,15 @@ package edu.cornell.gdiac.game.modes;
 
 import java.util.Iterator;
 
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.entity.models.PlayerModel;
+import edu.cornell.gdiac.game.input.PlayerInputController;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
 import edu.cornell.gdiac.game.levelLoading.LevelLoader;
 import edu.cornell.gdiac.util.*;
@@ -57,15 +61,13 @@ public class GameMode extends Mode {
 	/** The default value of gravity (going down) */
 	protected static final float DEFAULT_GRAVITY = -4.9f;
 
-	/** Track all loaded assets (for unloading purposes) */
-	protected Array<String> assets;
 	/** All the objects in the world. */
 	protected PooledList<Obstacle> objects  = new PooledList<Obstacle>();
 
 	/** The Box2D world */
-	protected World world;
+	private World world;
 	/** The boundary of the world */
-	protected Rectangle bounds;
+	private Rectangle bounds;
 
 	/** The level this game mode loads in */
 	private String levelFile;
@@ -80,6 +82,9 @@ public class GameMode extends Mode {
 	private boolean complete;
 	/** Whether we have failed at this world (and need a reset) */
 	private boolean failed;
+
+	/** The player object */
+	private PlayerModel player;
 	
 	/**
 	 * Creates a new game world with the default values.
@@ -129,9 +134,8 @@ public class GameMode extends Mode {
 		super(canvas, manager);
 		onExit = ScreenListener.EXIT_MENU;
 		scaleVector = new Vector2(canvas.getWidth()/bounds.getWidth(), canvas.getHeight()/bounds.getHeight());
-		assets = new Array<String>();
 		world = new World(gravity,false);
-		levelLoader = new LevelLoader();
+		levelLoader = new LevelLoader(scaleVector);
 		this.bounds = new Rectangle(bounds);
 		complete = false;
 		failed = false;
@@ -141,10 +145,8 @@ public class GameMode extends Mode {
 	// BEGIN: Setters and Getters
 
 	// END: Setters and Getters
-	
-	/**
-	 * Dispose of all (non-static) resources allocated to this mode.
-	 */
+
+	@Override
 	public void dispose() {
 		for(Obstacle obj : objects) {
 			obj.deactivatePhysics(world);
@@ -152,11 +154,67 @@ public class GameMode extends Mode {
 		objects.clear();
 		world.dispose();
 		levelLoader.dispose();
+		levelLoader = null;
 		objects = null;
 		bounds = null;
 		scaleVector = null;
 		world  = null;
 		canvas = null;
+	}
+
+	@Override
+	public void reset(){
+		super.reset();
+
+		for(Obstacle obj:objects)
+			obj.deactivatePhysics(world);
+		objects.clear();
+
+		if (!levelFile.isEmpty())
+			loadLevel(levelFile);
+	}
+
+	@Override
+	public void update(float dt){
+		//TODO: update all entity controllers and their respective models
+
+		postUpdate(dt);
+	}
+
+	@Override
+	public void draw() {
+		for(Obstacle obj : objects) {
+			obj.draw(canvas);
+		}
+	}
+
+	@Override
+	protected void drawDebug(){
+		for(Obstacle obj : objects) {
+			obj.drawDebug(canvas);
+		}
+	}
+
+	@Override
+	public void resize(int width, int height) {
+		// TODO: implement
+		if (bounds != null) {
+			bounds.width = width;
+			bounds.height = height;
+		}
+	}
+
+	@Override
+	public void preLoadContent(AssetManager manager) {
+		levelLoader.preLoadContent(manager);
+	}
+	@Override
+	public void loadContent(AssetManager manager) {
+		levelLoader.loadContent(manager);
+	}
+	@Override
+	public void unloadContent(AssetManager manager) {
+		levelLoader.unloadContent(manager);
 	}
 
 	/**
@@ -165,8 +223,43 @@ public class GameMode extends Mode {
 	public void loadLevel(String levelFile){
 		this.levelFile = levelFile;
 
-		levelLoader.loadLevel(levelFile, scaleVector);
+		// load rest of level entities
+		levelLoader.loadLevel(levelFile, player);
 		resize(levelLoader.getBounds().width, levelLoader.getBounds().height);
+	}
+
+	/**
+	 * Processes physics
+	 *
+	 * Once the update phase is over, but before we draw, we are ready to handle
+	 * physics.  The primary method is the step() method in world.  This implementation
+	 * works for all applications and should not need to be overwritten.
+	 *
+	 * @param dt Number of seconds since last animation frame
+	 */
+	public void postUpdate(float dt) {
+		// Add any objects created by actions
+		while (!levelLoader.getAddQueue().isEmpty()) {
+			addObject(levelLoader.getAddQueue().poll());
+		}
+
+		// Turn the physics engine crank.
+		world.step(WORLD_STEP,WORLD_VELOC,WORLD_POSIT);
+
+		// Garbage collect the deleted objects.
+		// Note how we use the linked list nodes to delete O(1) in place.
+		// This is O(n) without copying.
+		Iterator<PooledList<Obstacle>.Entry> iterator = objects.entryIterator();
+		while (iterator.hasNext()) {
+			PooledList<Obstacle>.Entry entry = iterator.next();
+			Obstacle obj = entry.getValue();
+			if (obj.isRemoved()) {
+				obj.deactivatePhysics(world);
+				entry.remove();
+			}else{
+				obj.update(dt);
+			}
+		}
 	}
 
 	/**
@@ -193,127 +286,5 @@ public class GameMode extends Mode {
 		boolean horiz = (bounds.x <= obj.getX() && obj.getX() <= bounds.x+bounds.width);
 		boolean vert  = (bounds.y <= obj.getY() && obj.getY() <= bounds.y+bounds.height);
 		return horiz && vert;
-	}
-
-	@Override
-	public void reset(){
-		super.reset();
-
-		for(Obstacle obj:objects)
-			obj.deactivatePhysics(world);
-		objects.clear();
-
-		if (!levelFile.isEmpty())
-			loadLevel(levelFile);
-	}
-	
-	/**
-	 * The core gameplay loop of this world.
-	 *
-	 * This method contains the specific update code for this mini-game. It does
-	 * not handle collisions, as those are managed by the parent class GameMode.
-	 * This method is called after input is read, but before collisions are resolved.
-	 * The very last thing that it should do is apply forces to the appropriate objects.
-	 *
-	 * @param dt Number of seconds since last animation frame
-	 */
-	public void update(float dt){
-		//TODO: update all entity controllers and their respective models
-
-		postUpdate(dt);
-	}
-	
-	/**
-	 * Processes physics
-	 *
-	 * Once the update phase is over, but before we draw, we are ready to handle
-	 * physics.  The primary method is the step() method in world.  This implementation
-	 * works for all applications and should not need to be overwritten.
-	 *
-	 * @param dt Number of seconds since last animation frame
-	 */
-	public void postUpdate(float dt) {
-		// Add any objects created by actions
-		while (!levelLoader.getAddQueue().isEmpty()) {
-			addObject(levelLoader.getAddQueue().poll());
-		}
-		
-		// Turn the physics engine crank.
-		world.step(WORLD_STEP,WORLD_VELOC,WORLD_POSIT);
-
-		// Garbage collect the deleted objects.
-		// Note how we use the linked list nodes to delete O(1) in place.
-		// This is O(n) without copying.
-		Iterator<PooledList<Obstacle>.Entry> iterator = objects.entryIterator();
-		while (iterator.hasNext()) {
-			PooledList<Obstacle>.Entry entry = iterator.next();
-			Obstacle obj = entry.getValue();
-			if (obj.isRemoved()) {
-				obj.deactivatePhysics(world);
-				entry.remove();
-			}else{
-				obj.update(dt);
-			}
-		}
-	}
-	
-	/**
-	 * Draw the physics objects to the canvas
-	 *
-	 * For simple worlds, this method is enough by itself.  It will need
-	 * to be overriden if the world needs fancy backgrounds or the like.
-	 *
-	 * The method draws all objects in the order that they were added.
-	 *
-	 */
-	public void draw() {
-		for(Obstacle obj : objects) {
-			obj.draw(canvas);
-		}
-	}
-
-	@Override
-	protected void drawDebug(){
-		for(Obstacle obj : objects) {
-			obj.drawDebug(canvas);
-		}
-	}
-	
-	/**
-	 * Called when the Screen is resized. 
-	 *
-	 * This can happen at any point during a non-paused state but will never happen 
-	 * before a call to show().
-	 *
-	 * @param width  The new width in pixels
-	 * @param height The new height in pixels
-	 */
-	public void resize(int width, int height) {
-		// TODO: implement
-		bounds.width = width;
-		bounds.height = height;
-	}
-
-
-
-	@Override
-	public void preLoadContent(AssetManager manager) {
-		levelLoader.preLoadContent(manager);
-	}
-
-	@Override
-	public void loadContent(AssetManager manager) {
-		levelLoader.loadContent(manager);
-	}
-
-	@Override
-	public void unloadContent(AssetManager manager) {
-		for(String s : assets) {
-			if (manager.isLoaded(s)) {
-				manager.unload(s);
-			}
-		}
-
-		levelLoader.unloadContent(manager);
 	}
 }

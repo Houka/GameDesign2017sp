@@ -46,9 +46,6 @@ public class LevelEditorMode extends Mode {
 	public LevelEditorMode(GameCanvas canvas, AssetManager manager) {
 		super(canvas, manager);
 		onExit = ScreenListener.EXIT_MENU;
-
-		// Compute the dimensions from the canvas
-		resize(canvas.getWidth(),canvas.getHeight());
 	}
 
 	// BEGIN: Setters and Getters

@@ -81,6 +81,8 @@ public class LoadingMode extends Mode {
 	private int centerY;
 	/** The x-coordinate of the center of the progress bar */
 	private int centerX;
+	/** scaling */
+	private float scale;
 
 	/** Current progress (0 to 1) of the asset manager */
 	private float progress;
@@ -103,26 +105,23 @@ public class LoadingMode extends Mode {
 		super(canvas, manager);
 		onExit = ScreenListener.EXIT_MENU;
 		budget = millis;
-		
-		// Compute the dimensions from the canvas
-		resize(canvas.getWidth(),canvas.getHeight());
 
 		// Load the next two images immediately.
 		background = new Texture(BACKGROUND_FILE);
 		statusBar  = new Texture(PROGRESS_FILE);
-		
+
 		// No progress so far.		
 		progress   = 0;
 
 		// Break up the status bar texture into regions
-		statusBkgLeft   = new TextureRegion(statusBar,0,0,PROGRESS_CAP,PROGRESS_HEIGHT);
+		statusBkgLeft   = new TextureRegion(statusBar,0,0,PROGRESS_CAP+1,PROGRESS_HEIGHT);
 		statusBkgRight  = new TextureRegion(statusBar,statusBar.getWidth()-PROGRESS_CAP,0,PROGRESS_CAP,PROGRESS_HEIGHT);
-		statusBkgMiddle = new TextureRegion(statusBar,PROGRESS_CAP,0,PROGRESS_MIDDLE,PROGRESS_HEIGHT);
+		statusBkgMiddle = new TextureRegion(statusBar,PROGRESS_CAP+1,0,PROGRESS_MIDDLE,PROGRESS_HEIGHT);
 
 		int offset = statusBar.getHeight()-PROGRESS_HEIGHT;
-		statusFrgLeft   = new TextureRegion(statusBar,0,offset,PROGRESS_CAP,PROGRESS_HEIGHT);
+		statusFrgLeft   = new TextureRegion(statusBar,0,offset,PROGRESS_CAP+1,PROGRESS_HEIGHT);
 		statusFrgRight  = new TextureRegion(statusBar,statusBar.getWidth()-PROGRESS_CAP,offset,PROGRESS_CAP,PROGRESS_HEIGHT);
-		statusFrgMiddle = new TextureRegion(statusBar,PROGRESS_CAP,offset,PROGRESS_MIDDLE,PROGRESS_HEIGHT);
+		statusFrgMiddle = new TextureRegion(statusBar,PROGRESS_CAP+1,offset,PROGRESS_MIDDLE,PROGRESS_HEIGHT);
 
 		// this mode is the current one
 		show();
@@ -194,7 +193,11 @@ public class LoadingMode extends Mode {
 	public void resize(int width, int height) {
 		super.resize(width,height);
 
-		// Compute the drawing scale for the progress bar
+		// Compute the drawing scale
+		float sx = ((float)width)/1024;
+		float sy = ((float)height)/576;
+		scale = (sx < sy ? sx : sy);
+
 		this.width = (int)(BAR_WIDTH_RATIO*width);
 		centerY = (int)(BAR_HEIGHT_RATIO*height);
 		centerX = width/2;
@@ -209,18 +212,18 @@ public class LoadingMode extends Mode {
 	 *
 	 * @param canvas The drawing context
 	 */	
-	private void drawProgress(GameCanvas canvas) {	
-		canvas.draw(statusBkgLeft,   Color.WHITE, centerX-width/2, centerY, scale*PROGRESS_CAP, scale*PROGRESS_HEIGHT);
-		canvas.draw(statusBkgRight,  Color.WHITE, centerX+width/2-scale*PROGRESS_CAP, centerY, scale*PROGRESS_CAP, scale*PROGRESS_HEIGHT);
-		canvas.draw(statusBkgMiddle, Color.WHITE, centerX-width/2+scale*PROGRESS_CAP, centerY, width-2*scale*PROGRESS_CAP, scale*PROGRESS_HEIGHT);
+	private void drawProgress(GameCanvas canvas) {
+		canvas.draw(statusBkgLeft, Color.WHITE, centerX - width / 2, centerY, scale * PROGRESS_CAP, scale * PROGRESS_HEIGHT);
+		canvas.draw(statusBkgRight, Color.WHITE, centerX + width / 2 - scale * PROGRESS_CAP, centerY, scale * PROGRESS_CAP, scale * PROGRESS_HEIGHT);
+		canvas.draw(statusBkgMiddle, Color.WHITE, centerX - width / 2 + scale * PROGRESS_CAP, centerY, width - 2 * scale * PROGRESS_CAP, scale * PROGRESS_HEIGHT);
 
-		canvas.draw(statusFrgLeft,   Color.WHITE, centerX-width/2, centerY, scale*PROGRESS_CAP, scale*PROGRESS_HEIGHT);
+		canvas.draw(statusFrgLeft, Color.WHITE, centerX - width / 2, centerY, scale * PROGRESS_CAP, scale * PROGRESS_HEIGHT);
 		if (progress > 0) {
-			float span = progress*(width-2*scale*PROGRESS_CAP)/2.0f;
-			canvas.draw(statusFrgRight,  Color.WHITE, centerX-width/2+scale*PROGRESS_CAP+span, centerY, scale*PROGRESS_CAP, scale*PROGRESS_HEIGHT);
-			canvas.draw(statusFrgMiddle, Color.WHITE, centerX-width/2+scale*PROGRESS_CAP, centerY, span, scale*PROGRESS_HEIGHT);
+			float span = progress * (width - 2 * scale * PROGRESS_CAP) / 2.0f;
+			canvas.draw(statusFrgRight, Color.WHITE, centerX - width / 2 + scale * PROGRESS_CAP + span, centerY, scale * PROGRESS_CAP, scale * PROGRESS_HEIGHT);
+			canvas.draw(statusFrgMiddle, Color.WHITE, centerX - width / 2 + scale * PROGRESS_CAP, centerY, span, scale * PROGRESS_HEIGHT);
 		} else {
-			canvas.draw(statusFrgRight,  Color.WHITE, centerX-width/2+scale*PROGRESS_CAP, centerY, scale*PROGRESS_CAP, scale*PROGRESS_HEIGHT);
+			canvas.draw(statusFrgRight, Color.WHITE, centerX - width / 2 + scale * PROGRESS_CAP, centerY, scale * PROGRESS_CAP, scale * PROGRESS_HEIGHT);
 		}
 	}
 

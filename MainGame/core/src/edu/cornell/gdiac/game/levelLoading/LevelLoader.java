@@ -26,7 +26,9 @@ public class LevelLoader implements AssetUser, Disposable{
     private static String EARTH_FILE = "character/earthtile.png";
     private static String GOAL_FILE = "character/securityCamera.png";
     private static String BG_FILE = "character/facade.png";
-    private static final String PLAYER_FILE  = "character/charStatic.png";
+    private static String ENEMY_FILE = "character/dude.png";
+    private static String CHARACTER_FILE = "character/charStatic.png";
+
 
     private static final float  BASIC_DENSITY = 0.0f;
     private static final float  BASIC_FRICTION = 0.4f;
@@ -34,17 +36,11 @@ public class LevelLoader implements AssetUser, Disposable{
     private static Vector2 GOAL_POS = new Vector2(29.5f,15.0f); // x = 4.0f, y = 14.0f
     private static Vector2 DUDE_POS = new Vector2(2.5f, 5.0f);
 
-    protected TextureRegion earthTile;
-    protected TextureRegion goalTile;
-    protected TextureRegion bgTile;
-    private BoxObstacle goalDoor;
-    private BoxObstacle bg;
-    private TextureRegion avatarTexture;
-
-    /** Reference to the character avatar */
-    private PlayerModel avatar;
-    /** Reference to an enemy avatar */
-    private EnemyModel enemy;
+    private TextureRegion earthTile;
+    private TextureRegion goalTile;
+    private TextureRegion bgTile;
+    private TextureRegion enemyTexture;
+    private TextureRegion playerTexture;
 
     // Vars that we do need for this class in the end
     /**TODO:write desc*/
@@ -53,9 +49,10 @@ public class LevelLoader implements AssetUser, Disposable{
     private PooledList<Obstacle> addQueue = new PooledList<Obstacle>();
     /**TODO:write desc*/
     private LevelParser levelParser;
+    private Vector2 scale;
 
-    public LevelLoader(){
-        bounds = new Rectangle(0,0,32,18);
+    public LevelLoader(Vector2 scale){
+        this.scale = scale;
         levelParser = new LevelParser();
     }
 
@@ -67,15 +64,21 @@ public class LevelLoader implements AssetUser, Disposable{
     /**
      * TODO: write desc... loads the level based on the json file. adds the (Obstacle) object into addQueue
      */
-    public void loadLevel(String JSONFile, Vector2 scale){
+    public void loadLevel(String JSONFile, PlayerModel player){
         // reset queue of objects
         addQueue.clear();
 
-        populateLevel(scale);
+        //sets the new world bounds TODO: do this with json values
+        bounds = new Rectangle(0,0,32,18);
 
-        //sets the new world bounds
-        bounds.width = 32;
-        bounds.height = 18;
+        populateLevel();
+
+        // set player
+        player = new PlayerModel(DUDE_POS.x, DUDE_POS.y, playerTexture.getRegionWidth() / scale.x,
+                playerTexture.getRegionHeight() / scale.y);
+        player.setDrawScale(scale);
+        player.setTexture(playerTexture);
+        addQueuedObject(player);
     }
 
     /**
@@ -83,23 +86,11 @@ public class LevelLoader implements AssetUser, Disposable{
      *
      * TODO: base this function off json data
      */
-    private void populateLevel(Vector2 scale) {
-        // Add level goal
-        float dwidth  = goalTile.getRegionWidth()/scale.x;
-        float dheight = goalTile.getRegionHeight()/scale.y;
-        goalDoor = new BoxObstacle(GOAL_POS.x,GOAL_POS.y,dwidth,dheight);
-        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
-        goalDoor.setDensity(0.0f);
-        goalDoor.setFriction(0.0f);
-        goalDoor.setRestitution(0.0f);
-        goalDoor.setSensor(true);
-        goalDoor.setDrawScale(scale);
-        goalDoor.setTexture(goalTile);
-        goalDoor.setName("goal");
-
-        dwidth  = bgTile.getRegionWidth()/scale.x;
-        dheight = bgTile.getRegionHeight()/scale.y;
-        bg = new BoxObstacle(dwidth/2,dheight/2,dwidth,dheight);
+    private void populateLevel() {
+        // add background
+        float dwidth  = bgTile.getRegionWidth()/scale.x;
+        float dheight = bgTile.getRegionHeight()/scale.y;
+        BoxObstacle bg = new BoxObstacle(dwidth/2,dheight/2,dwidth,dheight);
         bg.setBodyType(BodyDef.BodyType.StaticBody);
         bg.setDensity(0.0f);
         bg.setFriction(0.0f);
@@ -109,6 +100,19 @@ public class LevelLoader implements AssetUser, Disposable{
         bg.setTexture(bgTile);
         bg.setName("bg");
         addQueuedObject(bg);
+
+        // Add level goal
+        dwidth  = goalTile.getRegionWidth()/scale.x;
+        dheight = goalTile.getRegionHeight()/scale.y;
+        BoxObstacle goalDoor = new BoxObstacle(GOAL_POS.x,GOAL_POS.y,dwidth,dheight);
+        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
+        goalDoor.setDensity(0.0f);
+        goalDoor.setFriction(0.0f);
+        goalDoor.setRestitution(0.0f);
+        goalDoor.setSensor(true);
+        goalDoor.setDrawScale(scale);
+        goalDoor.setTexture(goalTile);
+        goalDoor.setName("goal");
         addQueuedObject(goalDoor);
 
         String wname = "wall";
@@ -139,23 +143,17 @@ public class LevelLoader implements AssetUser, Disposable{
             addQueuedObject(obj);
         }
 
-        // Create dude
-        dwidth  = avatarTexture.getRegionWidth()/scale.x;
-        dheight = avatarTexture.getRegionHeight()/scale.y;
-        avatar = new PlayerModel(DUDE_POS.x, DUDE_POS.y, dwidth, dheight);
-        avatar.setDrawScale(scale);
-        avatar.setTexture(avatarTexture);
-        addQueuedObject(avatar);
-
         // Create 2 enemies
-        enemy = new EnemyModel(DUDE_POS.x+1, DUDE_POS.y + 3, dwidth, dheight, true);
+        dwidth  = enemyTexture.getRegionWidth()/scale.x;
+        dheight = enemyTexture.getRegionHeight()/scale.y;
+        EnemyModel enemy = new EnemyModel(DUDE_POS.x+1, DUDE_POS.y + 3, dwidth, dheight, true);
         enemy.setDrawScale(scale);
-        enemy.setTexture(avatarTexture);
+        enemy.setTexture(enemyTexture);
         addQueuedObject(enemy);
 
         enemy = new EnemyModel(DUDE_POS.x+4, DUDE_POS.y + 5, dwidth, dheight, true);
         enemy.setDrawScale(scale);
-        enemy.setTexture(avatarTexture);
+        enemy.setTexture(enemyTexture);
         addQueuedObject(enemy);
     }
 
@@ -175,12 +173,12 @@ public class LevelLoader implements AssetUser, Disposable{
 
     @Override
     public void preLoadContent(AssetManager manager) {
-
         // Load the shared tiles.
         manager.load(EARTH_FILE,Texture.class);
         manager.load(GOAL_FILE,Texture.class);
         manager.load(BG_FILE,Texture.class);
-        manager.load(PLAYER_FILE, Texture.class);
+        manager.load(ENEMY_FILE,Texture.class);
+        manager.load(CHARACTER_FILE, Texture.class);
     }
 
     @Override
@@ -188,12 +186,17 @@ public class LevelLoader implements AssetUser, Disposable{
         bgTile  = AssetRetriever.createTexture(manager,BG_FILE,true);
         earthTile = AssetRetriever.createTexture(manager,EARTH_FILE,true);
         goalTile  = AssetRetriever.createTexture(manager,GOAL_FILE,true);
-        avatarTexture = AssetRetriever.createTexture(manager, PLAYER_FILE, false);
+        enemyTexture  = AssetRetriever.createTexture(manager,ENEMY_FILE,true);
+        playerTexture = AssetRetriever.createTexture(manager, CHARACTER_FILE, false);
     }
 
     @Override
     public void unloadContent(AssetManager manager) {
-
+        manager.unload(BG_FILE);
+        manager.unload(EARTH_FILE);
+        manager.unload(GOAL_FILE);
+        manager.unload(ENEMY_FILE);
+        manager.unload(CHARACTER_FILE);
     }
 
     @Override

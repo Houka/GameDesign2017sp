@@ -37,13 +37,15 @@ public class PlayerInputController {
     private boolean downPressed;
     private boolean leftPressed;
     private boolean rightPressed;
-    private boolean selectPressed;
+    private boolean shootPressed;
+    private boolean jumpPressed;
 
     private boolean upPrevious;
     private boolean downPrevious;
     private boolean leftPrevious;
     private boolean rightPrevious;
-    private boolean selectPrevious;
+    private boolean shootPrevious;
+    private boolean jumpPrevious;
 
     /**
      * Creates a new input controller
@@ -63,9 +65,10 @@ public class PlayerInputController {
     public boolean didRight() {
         return rightPressed && !rightPrevious;
     }
-    public boolean didSelect() {
-        return selectPressed && !selectPrevious;
+    public boolean didShoot() {
+        return shootPressed && !shootPrevious;
     }
+    public boolean didJump() { return jumpPressed && !jumpPrevious; }
     // END: Getters and Setters
 
     /**
@@ -79,7 +82,8 @@ public class PlayerInputController {
         downPrevious  = downPressed;
         leftPrevious = leftPressed;
         rightPrevious = rightPressed;
-        selectPrevious = selectPressed;
+        shootPrevious = shootPressed;
+        jumpPrevious = jumpPressed;
 
         readKeyboard(false);
     }
@@ -95,6 +99,7 @@ public class PlayerInputController {
         downPressed  = (secondary && downPressed) || (Gdx.input.isKeyPressed(Input.Keys.DOWN));
         leftPressed  = (secondary && leftPressed) || (Gdx.input.isKeyPressed(Input.Keys.LEFT));
         rightPressed  = (secondary && rightPressed) || (Gdx.input.isKeyPressed(Input.Keys.RIGHT));
-        selectPressed  = (secondary && selectPressed) || (Gdx.input.isKeyPressed(Input.Keys.ENTER));
+        shootPressed = (secondary && shootPressed) || (Gdx.input.isKeyPressed(Input.Keys.Z));
+        jumpPressed = (secondary && jumpPressed) || (Gdx.input.isKeyPressed(Input.Keys.X));
     }
 }

@@ -67,10 +67,6 @@ public class MenuMode extends Mode {
 	public MenuMode(GameCanvas canvas, AssetManager manager) {
 		super(canvas, manager);
 		onExit = ScreenListener.EXIT_QUIT;
-
-		// Compute the dimensions from the canvas
-		resize(canvas.getWidth(),canvas.getHeight());
-
 		modes = new Mode[]{
 			new LevelSelectionMode(canvas, manager),
 			new LevelEditorMode(canvas, manager)

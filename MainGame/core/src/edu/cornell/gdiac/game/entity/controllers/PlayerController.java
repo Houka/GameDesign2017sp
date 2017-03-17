@@ -6,4 +6,8 @@ package edu.cornell.gdiac.game.entity.controllers;
  * TODO: write class desc
  */
 public class PlayerController extends EntityController {
+    @Override
+    public void update() {
+
+    }
 }

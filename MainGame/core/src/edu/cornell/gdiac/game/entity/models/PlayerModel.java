@@ -101,6 +101,11 @@ public class PlayerModel extends CapsuleObstacle {
         jumpCooldown = 0;
     }
 
+    @Override
+    public void setDimension(float width, float height) {
+        super.setDimension(width*PLAYER_HSHRINK, height*PLAYER_VSHRINK);
+    }
+
     /**
      * Creates the physics Body(s) for this object, adding them to the world.
      *
