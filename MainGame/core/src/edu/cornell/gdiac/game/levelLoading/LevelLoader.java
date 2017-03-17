@@ -11,6 +11,7 @@ import edu.cornell.gdiac.game.entity.models.EnemyModel;
 import edu.cornell.gdiac.game.entity.models.PlayerModel;
 import edu.cornell.gdiac.game.interfaces.AssetUser;
 import edu.cornell.gdiac.util.AssetRetriever;
+import edu.cornell.gdiac.util.FileReaderWriter;
 import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
@@ -33,6 +34,7 @@ public class LevelLoader implements AssetUser, Disposable{
     private static final float  BASIC_DENSITY = 0.0f;
     private static final float  BASIC_FRICTION = 0.4f;
     private static final float  BASIC_RESTITUTION = 0.1f;
+    //these will be changed to non-constants that call other stuff
     private static Vector2 GOAL_POS = new Vector2(29.5f,15.0f); // x = 4.0f, y = 14.0f
     private static Vector2 DUDE_POS = new Vector2(2.5f, 5.0f);
 
@@ -66,6 +68,8 @@ public class LevelLoader implements AssetUser, Disposable{
      */
     public void loadLevel(String JSONFile, PlayerModel player){
         // reset queue of objects
+        FileReaderWriter f = new FileReaderWriter();
+        f.loadLevel("JSON/sample.json");
         addQueue.clear();
 
         //sets the new world bounds TODO: do this with json values
@@ -73,7 +77,7 @@ public class LevelLoader implements AssetUser, Disposable{
 
         populateLevel();
 
-        // set player
+        // set player NOTE: THIS WILL GO IN POPULATE LEVEL
         player = new PlayerModel(DUDE_POS.x, DUDE_POS.y, playerTexture.getRegionWidth() / scale.x,
                 playerTexture.getRegionHeight() / scale.y);
         player.setDrawScale(scale);
@@ -101,7 +105,7 @@ public class LevelLoader implements AssetUser, Disposable{
         bg.setName("bg");
         addQueuedObject(bg);
 
-        // Add level goal
+        // Add level goal (WILL NEED GET TARGET)
         dwidth  = goalTile.getRegionWidth()/scale.x;
         dheight = goalTile.getRegionHeight()/scale.y;
         BoxObstacle goalDoor = new BoxObstacle(GOAL_POS.x,GOAL_POS.y,dwidth,dheight);

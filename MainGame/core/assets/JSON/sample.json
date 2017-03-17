@@ -1,0 +1,54 @@
+{
+  "objects":{
+    "platforms":[
+      {
+        "x":3,
+        "y":3,
+        "x2":100,
+        "y2":50
+      },
+      {
+        "x2":100,
+        "y2":200,
+        "width":100,
+        "height":50
+      }
+    ],
+    "player":{
+      "x":4,
+      "y":5
+    },
+    "enemies":[
+      {
+        "type":0,
+        "x":100,
+        "y":201,
+        "isFacingRight":1
+      },
+      {
+        "type":0,
+        "x":100,
+        "y":201,
+        "isFacingRight":0
+      }],
+    "resources":[
+      {
+        "type":1,
+        "x":100,
+        "y":210
+      }
+    ],
+    "target":{
+      "x":500,
+      "y":700,
+      "dir":0
+    }
+  },
+  "state":{
+    "left wall width":100,
+    "right wall width":100,
+    "starting ammo":4,
+    "next level":"level2.json"
+  }
+}
+
