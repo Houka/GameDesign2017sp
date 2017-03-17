@@ -25,6 +25,7 @@ import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.entity.controllers.CollisionController;
 import edu.cornell.gdiac.game.entity.controllers.EnemyController;
 import edu.cornell.gdiac.game.entity.controllers.EntityController;
 import edu.cornell.gdiac.game.entity.controllers.PlayerController;
@@ -141,6 +142,7 @@ public class GameMode extends Mode {
 		onExit = ScreenListener.EXIT_MENU;
 		scaleVector = new Vector2(canvas.getWidth()/bounds.getWidth(), canvas.getHeight()/bounds.getHeight());
 		world = new World(gravity,false);
+		world.setContactListener(new CollisionController());
 		levelLoader = new LevelLoader(scaleVector);
 		this.bounds = new Rectangle(bounds);
 		complete = false;

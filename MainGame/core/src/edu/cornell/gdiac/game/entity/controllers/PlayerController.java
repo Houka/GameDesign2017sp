@@ -24,8 +24,5 @@ public class PlayerController extends EntityController {
         player.setJumping(input.didJump());
         player.setShooting(input.didShoot());
         player.applyForce();
-
-        //TODO remove this and put it in collision controller
-        player.setGrounded(true);
     }
 }

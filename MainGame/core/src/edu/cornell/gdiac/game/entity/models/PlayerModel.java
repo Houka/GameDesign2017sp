@@ -33,7 +33,7 @@ public class PlayerModel extends CapsuleObstacle {
     /** The maximum character speed */
     private static final float PLAYER_MAXSPEED = 5.0f;
     /** The impulse for the character jump */
-    private static final float PLAYER_JUMP = 5.5f;
+    private static final float PLAYER_JUMP = 3.5f;
     /** Cooldown (in animation frames) for jumping */
     private static final int JUMP_COOLDOWN = 30;
     /** Cooldown (in animation frames) for shooting */
@@ -41,7 +41,7 @@ public class PlayerModel extends CapsuleObstacle {
     /** Height of the sensor attached to the player's feet */
     private static final float SENSOR_HEIGHT = 0.05f;
     /** Identifier to allow us to track the sensor in ContactListener */
-    private static final String SENSOR_NAME = "DudeGroundSensor";
+    private static final String SENSOR_NAME = "PlayerGroundSensor";
 
     // This is to fit the image to a tigher hitbox
     /** The amount to shrink the body fixture (vertically) relative to the image */
