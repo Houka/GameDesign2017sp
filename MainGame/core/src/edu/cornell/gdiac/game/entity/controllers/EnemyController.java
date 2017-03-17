@@ -7,7 +7,7 @@ package edu.cornell.gdiac.game.entity.controllers;
  */
 public class EnemyController extends EntityController {
     @Override
-    public void update() {
+    public void update(float dt) {
 
     }
 }

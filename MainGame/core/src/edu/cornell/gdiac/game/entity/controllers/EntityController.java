@@ -17,5 +17,5 @@ public abstract class EntityController {
     public PlayerModel getPlayer(){ return player; }
     // END: Setters and Getters
 
-    public abstract void update();
+    public abstract void update(float dt);
 }

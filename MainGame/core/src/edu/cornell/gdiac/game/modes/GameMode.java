@@ -25,6 +25,10 @@ import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.entity.controllers.EnemyController;
+import edu.cornell.gdiac.game.entity.controllers.EntityController;
+import edu.cornell.gdiac.game.entity.controllers.PlayerController;
+import edu.cornell.gdiac.game.entity.models.EnemyModel;
 import edu.cornell.gdiac.game.entity.models.PlayerModel;
 import edu.cornell.gdiac.game.input.PlayerInputController;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
@@ -83,8 +87,8 @@ public class GameMode extends Mode {
 	/** Whether we have failed at this world (and need a reset) */
 	private boolean failed;
 
-	/** The player object */
-	private PlayerModel player;
+	/** Entity Controllers */
+	private EntityController[] entityControllers;
 	
 	/**
 	 * Creates a new game world with the default values.
@@ -137,6 +141,9 @@ public class GameMode extends Mode {
 		world = new World(gravity,false);
 		levelLoader = new LevelLoader(scaleVector);
 		this.bounds = new Rectangle(bounds);
+		entityControllers = new EntityController[]{
+			new PlayerController(), new EnemyController()
+		};
 		complete = false;
 		failed = false;
 		active = false;
@@ -154,6 +161,7 @@ public class GameMode extends Mode {
 		objects.clear();
 		world.dispose();
 		levelLoader.dispose();
+		entityControllers = null;
 		levelLoader = null;
 		objects = null;
 		bounds = null;
@@ -177,6 +185,9 @@ public class GameMode extends Mode {
 	@Override
 	public void update(float dt){
 		//TODO: update all entity controllers and their respective models
+
+		for(EntityController e: entityControllers)
+			e.update(dt);;
 
 		postUpdate(dt);
 	}
@@ -224,8 +235,17 @@ public class GameMode extends Mode {
 		this.levelFile = levelFile;
 
 		// load rest of level entities
-		levelLoader.loadLevel(levelFile, player);
+		levelLoader.loadLevel(levelFile);
 		resize(levelLoader.getBounds().width, levelLoader.getBounds().height);
+
+		for(Obstacle obj: levelLoader.getAddQueue()){
+			if(obj.getName().equals("player")){
+				entityControllers[0].setPlayer((PlayerModel)obj);
+				entityControllers[1].setPlayer((PlayerModel)obj);
+			}else if (obj.getName().equals("enemy")){
+				//TODO: for enemies
+			}
+		}
 	}
 
 	/**

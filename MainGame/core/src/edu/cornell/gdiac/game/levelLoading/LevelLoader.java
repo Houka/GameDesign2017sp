@@ -64,7 +64,7 @@ public class LevelLoader implements AssetUser, Disposable{
     /**
      * TODO: write desc... loads the level based on the json file. adds the (Obstacle) object into addQueue
      */
-    public void loadLevel(String JSONFile, PlayerModel player){
+    public void loadLevel(String JSONFile){
         // reset queue of objects
         addQueue.clear();
 
@@ -74,7 +74,7 @@ public class LevelLoader implements AssetUser, Disposable{
         populateLevel();
 
         // set player
-        player = new PlayerModel(DUDE_POS.x, DUDE_POS.y, playerTexture.getRegionWidth() / scale.x,
+        PlayerModel player = new PlayerModel(DUDE_POS.x, DUDE_POS.y, playerTexture.getRegionWidth() / scale.x,
                 playerTexture.getRegionHeight() / scale.y);
         player.setDrawScale(scale);
         player.setTexture(playerTexture);
