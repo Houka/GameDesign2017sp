@@ -69,12 +69,12 @@ public class LevelLoader implements AssetUser, Disposable{
     public void loadLevel(String JSONFile, PlayerModel player){
         // reset queue of objects
         FileReaderWriter f = new FileReaderWriter();
-        f.loadLevel("JSON/sample.json");
         addQueue.clear();
 
         //sets the new world bounds TODO: do this with json values
         bounds = new Rectangle(0,0,32,18);
 
+        levelParser.loadLevel("JSON/sample.json");
         populateLevel();
 
         // set player NOTE: THIS WILL GO IN POPULATE LEVEL
