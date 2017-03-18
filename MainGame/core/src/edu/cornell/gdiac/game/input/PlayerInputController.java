@@ -35,17 +35,18 @@ public class PlayerInputController {
     // Fields to manage buttons
     private boolean upPressed;
     private boolean downPressed;
-    private boolean leftPressed;
-    private boolean rightPressed;
     private boolean shootPressed;
     private boolean jumpPressed;
 
     private boolean upPrevious;
     private boolean downPrevious;
-    private boolean leftPrevious;
-    private boolean rightPrevious;
     private boolean shootPrevious;
     private boolean jumpPrevious;
+
+    /** How much did we move horizontally? */
+    private float horizontal;
+    /** How much did we move vertically? */
+    private float vertical;
 
     /**
      * Creates a new input controller
@@ -59,16 +60,32 @@ public class PlayerInputController {
     public boolean didDown() {
         return downPressed && !downPrevious;
     }
-    public boolean didLeft() {
-        return leftPressed && !leftPrevious;
-    }
-    public boolean didRight() {
-        return rightPressed && !rightPrevious;
-    }
     public boolean didShoot() {
         return shootPressed && !shootPrevious;
     }
     public boolean didJump() { return jumpPressed && !jumpPrevious; }
+
+    /**
+     * Returns the amount of sideways movement.
+     *
+     * -1 = left, 1 = right, 0 = still
+     *
+     * @return the amount of sideways movement.
+     */
+    public float getHorizontal() {
+        return horizontal;
+    }
+
+    /**
+     * Returns the amount of vertical movement.
+     *
+     * -1 = down, 1 = up, 0 = still
+     *
+     * @return the amount of vertical movement.
+     */
+    public float getVertical() {
+        return vertical;
+    }
     // END: Getters and Setters
 
     /**
@@ -80,8 +97,6 @@ public class PlayerInputController {
         // Helps us ignore buttons that are held down
         upPrevious  = upPressed;
         downPrevious  = downPressed;
-        leftPrevious = leftPressed;
-        rightPrevious = rightPressed;
         shootPrevious = shootPressed;
         jumpPrevious = jumpPressed;
 
@@ -97,9 +112,24 @@ public class PlayerInputController {
         // Give priority to gamepad results
         upPressed  = (secondary && upPressed) || (Gdx.input.isKeyPressed(Input.Keys.UP));
         downPressed  = (secondary && downPressed) || (Gdx.input.isKeyPressed(Input.Keys.DOWN));
-        leftPressed  = (secondary && leftPressed) || (Gdx.input.isKeyPressed(Input.Keys.LEFT));
-        rightPressed  = (secondary && rightPressed) || (Gdx.input.isKeyPressed(Input.Keys.RIGHT));
         shootPressed = (secondary && shootPressed) || (Gdx.input.isKeyPressed(Input.Keys.Z));
         jumpPressed = (secondary && jumpPressed) || (Gdx.input.isKeyPressed(Input.Keys.X));
+
+        // Directional controls
+        horizontal = (secondary ? horizontal : 0.0f);
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            horizontal += 1.0f;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            horizontal -= 1.0f;
+        }
+
+        vertical = (secondary ? vertical : 0.0f);
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            vertical += 1.0f;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            vertical -= 1.0f;
+        }
     }
 }

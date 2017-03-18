@@ -7,8 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.Disposable;
-import edu.cornell.gdiac.game.entity.models.EnemyModel;
-import edu.cornell.gdiac.game.entity.models.PlayerModel;
+import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.game.interfaces.AssetUser;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.util.FileReaderWriter;
@@ -29,12 +28,12 @@ public class LevelLoader implements AssetUser, Disposable{
     private static String BG_FILE = "character/facade.png";
     private static String ENEMY_FILE = "character/dude.png";
     private static String CHARACTER_FILE = "character/charStatic.png";
-
+    
 
     private static final float  BASIC_DENSITY = 0.0f;
     private static final float  BASIC_FRICTION = 0.4f;
     private static final float  BASIC_RESTITUTION = 0.1f;
-    //these will be changed to non-constants that call other stuff
+
     private static Vector2 GOAL_POS = new Vector2(29.5f,15.0f); // x = 4.0f, y = 14.0f
     private static Vector2 DUDE_POS = new Vector2(2.5f, 5.0f);
 
@@ -66,7 +65,7 @@ public class LevelLoader implements AssetUser, Disposable{
     /**
      * TODO: write desc... loads the level based on the json file. adds the (Obstacle) object into addQueue
      */
-    public void loadLevel(String JSONFile, PlayerModel player){
+    public void loadLevel(String JSONFile){
         // reset queue of objects
         FileReaderWriter f = new FileReaderWriter();
         addQueue.clear();
@@ -77,8 +76,8 @@ public class LevelLoader implements AssetUser, Disposable{
         levelParser.loadLevel("JSON/sample.json");
         populateLevel();
 
-        // set player NOTE: THIS WILL GO IN POPULATE LEVEL
-        player = new PlayerModel(DUDE_POS.x, DUDE_POS.y, playerTexture.getRegionWidth() / scale.x,
+        // set player
+        PlayerModel player = new PlayerModel(DUDE_POS.x, DUDE_POS.y, playerTexture.getRegionWidth() / scale.x,
                 playerTexture.getRegionHeight() / scale.y);
         player.setDrawScale(scale);
         player.setTexture(playerTexture);
@@ -94,56 +93,30 @@ public class LevelLoader implements AssetUser, Disposable{
         // add background
         float dwidth  = bgTile.getRegionWidth()/scale.x;
         float dheight = bgTile.getRegionHeight()/scale.y;
-        BoxObstacle bg = new BoxObstacle(dwidth/2,dheight/2,dwidth,dheight);
-        bg.setBodyType(BodyDef.BodyType.StaticBody);
-        bg.setDensity(0.0f);
-        bg.setFriction(0.0f);
-        bg.setRestitution(0.0f);
-        bg.setSensor(true);
+        BoxObstacle bg = new BackgroundModel(dwidth/2,dheight/2,dwidth,dheight);
         bg.setDrawScale(scale);
         bg.setTexture(bgTile);
-        bg.setName("bg");
         addQueuedObject(bg);
 
         // Add level goal (WILL NEED GET TARGET)
         dwidth  = goalTile.getRegionWidth()/scale.x;
         dheight = goalTile.getRegionHeight()/scale.y;
-        BoxObstacle goalDoor = new BoxObstacle(GOAL_POS.x,GOAL_POS.y,dwidth,dheight);
-        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
-        goalDoor.setDensity(0.0f);
-        goalDoor.setFriction(0.0f);
-        goalDoor.setRestitution(0.0f);
-        goalDoor.setSensor(true);
+        BoxObstacle goalDoor = new GoalModel(GOAL_POS.x,GOAL_POS.y,dwidth,dheight);
         goalDoor.setDrawScale(scale);
         goalDoor.setTexture(goalTile);
-        goalDoor.setName("goal");
         addQueuedObject(goalDoor);
 
-        String wname = "wall";
         for (int ii = 0; ii < levelParser.getWalls().length; ii++) {
-            PolygonObstacle obj;
-            obj = new PolygonObstacle(levelParser.getWalls()[ii], 0, 0);
-            obj.setBodyType(BodyDef.BodyType.StaticBody);
-            obj.setDensity(BASIC_DENSITY);
-            obj.setFriction(BASIC_FRICTION);
-            obj.setRestitution(BASIC_RESTITUTION);
+            PolygonObstacle obj = new WallModel(levelParser.getWalls()[ii]);
             obj.setDrawScale(scale);
             obj.setTexture(earthTile);
-            obj.setName(wname+ii);
             addQueuedObject(obj);
         }
 
-        String pname = "platform";
         for (int ii = 0; ii < levelParser.getPlatforms().length; ii++) {
-            PolygonObstacle obj;
-            obj = new PolygonObstacle(levelParser.getPlatforms()[ii], 0, 0);
-            obj.setBodyType(BodyDef.BodyType.StaticBody);
-            obj.setDensity(BASIC_DENSITY);
-            obj.setFriction(BASIC_FRICTION);
-            obj.setRestitution(BASIC_RESTITUTION);
+            PolygonObstacle obj = new PlatformModel(levelParser.getPlatforms()[ii]);
             obj.setDrawScale(scale);
             obj.setTexture(earthTile);
-            obj.setName(pname+ii);
             addQueuedObject(obj);
         }
 
@@ -189,8 +162,8 @@ public class LevelLoader implements AssetUser, Disposable{
     public void loadContent(AssetManager manager) {
         bgTile  = AssetRetriever.createTexture(manager,BG_FILE,true);
         earthTile = AssetRetriever.createTexture(manager,EARTH_FILE,true);
-        goalTile  = AssetRetriever.createTexture(manager,GOAL_FILE,true);
-        enemyTexture  = AssetRetriever.createTexture(manager,ENEMY_FILE,true);
+        goalTile  = AssetRetriever.createTexture(manager,GOAL_FILE,false);
+        enemyTexture  = AssetRetriever.createTexture(manager,ENEMY_FILE,false);
         playerTexture = AssetRetriever.createTexture(manager, CHARACTER_FILE, false);
     }
 

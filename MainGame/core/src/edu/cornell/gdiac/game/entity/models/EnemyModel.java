@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.interfaces.Shooter;
 import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
 
 
@@ -23,7 +24,7 @@ import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
  * Note that this class returns to static loading.  That is because there are
  * no other subclasses that we might loop through.
  */
-public class EnemyModel extends CapsuleObstacle {
+public class EnemyModel extends CapsuleObstacle implements Shooter {
     // Physics constants
     /** The density of the character */
     private static final float ENEMY_DENSITY = 1.0f;
@@ -120,6 +121,68 @@ public class EnemyModel extends CapsuleObstacle {
         sensorFixture.setUserData(getSensorName());
 
         return true;
+    }
+
+    // BEGIN: Setters and Getters
+    /**
+     * Returns left/right movement of this character.
+     *
+     * This is the result of input times dude force.
+     *
+     * @return left/right movement of this character.
+     */
+    public float getMovement() {
+        return movement;
+    }
+
+    /**
+     * Sets left/right movement of this character.
+     *
+     * This is the result of input times dude force.
+     *
+     * @param value left/right movement of this character.
+     */
+    public void setMovement(float value) {
+        movement = value;
+        // Change facing if appropriate
+        if (movement < 0) {
+            isFacingRight = false;
+        } else if (movement > 0) {
+            isFacingRight = true;
+        }
+    }
+
+    @Override
+    public boolean isFacingRight() {
+        return isFacingRight;
+    }
+
+    /**
+     * Sets facing direction of this character.
+     *
+     * @param value whether this character is facing right
+     */
+    public void setFacingRight(boolean value) {
+        isFacingRight = value;
+    }
+
+    @Override
+    public boolean isShooting() {return isShooting && shootCooldown <= 0;}
+
+    @Override
+    public void setShooting(boolean value) {isShooting = value;}
+    // END: Setters and Getters
+
+    public void applyForce() {
+        if (!isActive()) {
+            return;
+        }
+
+        if (getMovement() == 0f ) {
+            setVX(0);
+        }else{
+            setVX(Math.signum(getMovement()));
+        }
     }
 
     /**
