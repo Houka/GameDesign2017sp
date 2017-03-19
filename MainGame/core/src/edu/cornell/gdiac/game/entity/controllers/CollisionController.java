@@ -21,8 +21,6 @@ import edu.cornell.gdiac.util.obstacles.Obstacle;
  *  PlayerGroundSensor
  */
 public class CollisionController implements ContactListener {
-    float paintballToWallDuration = 2f;
-    float paintballToPaintballDuration = 5f;
 
     public CollisionController(){}
 
@@ -56,20 +54,20 @@ public class CollisionController implements ContactListener {
     }
 
     private void handleCollision(PaintballModel obj1, PaintballModel obj2){
-        obj1.setTimeToDie(this.paintballToPaintballDuration);
-        obj2.setTimeToDie(this.paintballToPaintballDuration);
+        obj1.setTimeToDie(obj1.getPaintballToPaintballDuration());
+        obj2.setTimeToDie(obj2.getPaintballToPaintballDuration());
         obj1.fixX(0f);
         obj2.fixX(0f);
 
     }
 
     private void handleCollision(PlatformModel obj1, PaintballModel obj2){
-        obj2.setTimeToDie(this.paintballToWallDuration);
+        obj2.setTimeToDie(obj2.getPaintballToWallDuration());
         obj2.fixX(0f);
     }
 
     private void handleCollision(WallModel obj1, PaintballModel obj2){
-        obj2.setTimeToDie(this.paintballToWallDuration);
+        obj2.setTimeToDie(obj2.getPaintballToPlatformDuration());
         obj2.fixX(0f);
     }
 
@@ -87,7 +85,6 @@ public class CollisionController implements ContactListener {
 
     }
     // END: Collision handlers
-
 
     /**
      * TODO: write desc

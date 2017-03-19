@@ -17,12 +17,15 @@ import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 public class PaintballModel extends BoxObstacle {
 
 
-    private float xScale = .5f;
-    private float yScale = .25f;
+    private float xScale;
+    private float yScale;
     private float xtransform = 1f;
     private float ytransform = 1f;
+    private float paintballToPaintballDuration;
+    private float paintballToWallDuration;
+    private float paintballToPlatformDuration;
 
-    private float maxXScale = 3f;
+    private float maxXScale;
     private float myVY;
     private float opacity;
     private float initWidth;
@@ -39,9 +42,12 @@ public class PaintballModel extends BoxObstacle {
     /**
      *  TODO: write constructor desc
      */
-    public PaintballModel(float x, float y, float w, float h, float s, Vector2 scl){
+    public PaintballModel(float x, float y, float w, float h, float s, float xScl, float yScl, Vector2 scl){
         super(x,y,w,h);
         setName("paintball");
+        xScale = xScl;
+        yScale = yScl;
+        maxXScale = 6*xScale;
         initWidth = w*xScale;
         initHeight = h*yScale;
         setWidth(initWidth);
@@ -117,5 +123,52 @@ public class PaintballModel extends BoxObstacle {
 
     public void fixX(float val) {
         speed=val;
+    }
+
+    public void setYScale(float val) {
+        yScale=val;
+    }
+    public void setXScale(float val) {
+        xScale=val;
+    }
+    public void setMaxXScale(float val) {
+        maxXScale=val;
+    }
+
+    public void setPaintballToWallDuration(float paintballToWallDuration) {
+        this.paintballToWallDuration = paintballToWallDuration;
+    }
+
+    public void setPaintballToPlatformDuration(float paintballToPlatformDuration) {
+        this.paintballToPlatformDuration = paintballToPlatformDuration;
+    }
+
+    public void setPaintballToPaintballDuration(float paintballToPaintballDuration) {
+        this.paintballToPaintballDuration = paintballToPaintballDuration;
+    }
+
+    public float getYScale() {
+        return yScale;
+    }
+    public float getXScale() {
+        return yScale;
+    }
+    public float getMaxXScale() {
+        return maxXScale;
+    }
+    public float getSpeed() {
+        return speed;
+    }
+
+    public float getPaintballToPaintballDuration() {
+        return paintballToPaintballDuration;
+    }
+
+    public float getPaintballToWallDuration() {
+        return paintballToWallDuration;
+    }
+
+    public float getPaintballToPlatformDuration() {
+        return paintballToPlatformDuration;
     }
 }
