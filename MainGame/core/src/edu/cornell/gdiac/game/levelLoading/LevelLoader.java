@@ -15,7 +15,7 @@ import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
-
+import java.util.Arrays;
 import java.awt.*;
 
 /**
@@ -28,7 +28,7 @@ public class LevelLoader implements AssetUser, Disposable{
     private static String BG_FILE = "character/facade.png";
     private static String ENEMY_FILE = "character/dude.png";
     private static String CHARACTER_FILE = "character/charStatic.png";
-    
+
 
     private static final float  BASIC_DENSITY = 0.0f;
     private static final float  BASIC_FRICTION = 0.4f;
@@ -67,18 +67,19 @@ public class LevelLoader implements AssetUser, Disposable{
      */
     public void loadLevel(String JSONFile){
         // reset queue of objects
-        FileReaderWriter f = new FileReaderWriter();
         addQueue.clear();
 
         //sets the new world bounds TODO: do this with json values
         bounds = new Rectangle(0,0,32,18);
-
-        levelParser.loadLevel("JSON/sample.json");
+        LevelCreator c = new LevelCreator();
+        c.writeDemoJson();
+        levelParser.loadLevel("JSON/default.json");
         populateLevel();
 
         // set player
-        PlayerModel player = new PlayerModel(DUDE_POS.x, DUDE_POS.y, playerTexture.getRegionWidth() / scale.x,
-                playerTexture.getRegionHeight() / scale.y);
+        float[] playerData = levelParser.getPlayer();
+        PlayerModel player = new PlayerModel(playerData[0], playerData[1],
+                playerTexture.getRegionWidth() / scale.x, playerTexture.getRegionHeight() / scale.y);
         player.setDrawScale(scale);
         player.setTexture(playerTexture);
         addQueuedObject(player);
@@ -98,40 +99,45 @@ public class LevelLoader implements AssetUser, Disposable{
         bg.setTexture(bgTile);
         addQueuedObject(bg);
 
-        // Add level goal (WILL NEED GET TARGET)
+        // Add level goal
         dwidth  = goalTile.getRegionWidth()/scale.x;
         dheight = goalTile.getRegionHeight()/scale.y;
-        BoxObstacle goalDoor = new GoalModel(GOAL_POS.x,GOAL_POS.y,dwidth,dheight);
+        float[] target = levelParser.getTarget();
+        BoxObstacle goalDoor = new GoalModel(target[0],target[1],dwidth,dheight);
         goalDoor.setDrawScale(scale);
         goalDoor.setTexture(goalTile);
         addQueuedObject(goalDoor);
 
-        for (int ii = 0; ii < levelParser.getWalls().length; ii++) {
-            PolygonObstacle obj = new WallModel(levelParser.getWalls()[ii]);
+        //add walls
+        float[][] walls = levelParser.getWalls();
+        for (int ii = 0; ii < walls.length; ii++) {
+            PolygonObstacle obj = new WallModel(walls[ii]);
             obj.setDrawScale(scale);
             obj.setTexture(earthTile);
             addQueuedObject(obj);
         }
 
-        for (int ii = 0; ii < levelParser.getPlatforms().length; ii++) {
-            PolygonObstacle obj = new PlatformModel(levelParser.getPlatforms()[ii]);
+        float[][] platforms = levelParser.getPlatforms();
+        for (int ii = 0; ii < platforms.length; ii++) {
+            PolygonObstacle obj = new PlatformModel(platforms[ii]);
             obj.setDrawScale(scale);
             obj.setTexture(earthTile);
             addQueuedObject(obj);
         }
 
-        // Create 2 enemies
+        // Create enemies
+        float[][] enemies = levelParser.getEnemies();
         dwidth  = enemyTexture.getRegionWidth()/scale.x;
         dheight = enemyTexture.getRegionHeight()/scale.y;
-        EnemyModel enemy = new EnemyModel(DUDE_POS.x+1, DUDE_POS.y + 3, dwidth, dheight, true);
-        enemy.setDrawScale(scale);
-        enemy.setTexture(enemyTexture);
-        addQueuedObject(enemy);
+        EnemyModel enemy;
+        for (int ii = 0; ii < enemies.length; ii++) {
+            enemy = new EnemyModel(enemies[ii][1], enemies[ii][2], dwidth, dheight, enemies[ii][3] == 1.0f);
+            enemy.setDrawScale(scale);
+            enemy.setTexture(enemyTexture);
+            addQueuedObject(enemy);
+        }
 
-        enemy = new EnemyModel(DUDE_POS.x+4, DUDE_POS.y + 5, dwidth, dheight, true);
-        enemy.setDrawScale(scale);
-        enemy.setTexture(enemyTexture);
-        addQueuedObject(enemy);
+
     }
 
     /**
@@ -195,5 +201,14 @@ public class LevelLoader implements AssetUser, Disposable{
         boolean horiz = (bounds.x <= obj.getX() && obj.getX() <= bounds.x+bounds.width);
         boolean vert  = (bounds.y <= obj.getY() && obj.getY() <= bounds.y+bounds.height);
         return horiz && vert;
+    }
+
+    private void printMatrix(float[][] matrix) {
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                System.out.print(matrix[i][j] + " ");
+            }
+            System.out.println();
+        }
     }
 }

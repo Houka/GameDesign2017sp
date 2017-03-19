@@ -14,15 +14,12 @@ import java.io.*;
 //
 public class FileReaderWriter {
 
-
-
     /**
      * loads all level data
      * populates platforms, walls, enemies, player, target, resources
      */
     public String readJson(String JsonFile){
         try {
-            System.out.println(JsonFile);
             String content = new Scanner(new File(JsonFile)).useDelimiter("\\Z").next();
             return content;
         }
