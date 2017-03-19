@@ -44,7 +44,12 @@ public class Sidebar {
         Sidebar.addSlider("Gravity",-30f,0f,-20.0f);
         Sidebar.addSlider("Jump Height",1f,10f, 5.5f);
         Sidebar.addSlider("Player Speed",1f,10f,5.0f);
-        Sidebar.addSlider("Bullet Width",1f,6.5f,5.5f);
+        Sidebar.addSlider("Bullet Height",.1f,.5f,.25f);
+        Sidebar.addSlider("Bullet Width",.5f,6.5f,3f);
+        Sidebar.addSlider("Bullet Speed",1f,7.5f,3.2f);
+        Sidebar.addSlider("Bullet-Bullet Stick Time",0f,10f,5f);
+        Sidebar.addSlider("Bullet-Wall Stick Time",0f,10f,5f);
+
 
     }
 
@@ -87,7 +92,7 @@ public class Sidebar {
                     JLabel label = (JLabel) s.getLabelTable().get(i);
                     label.setPreferredSize(new Dimension(100,10));
                     label.setSize(label.getPreferredSize());
-                    label.setText(String.valueOf((i/100f)*(max-min)+min));
+                    label.setText(String.valueOf(Math.round(((i/100f)*(max-min)+min)*100)/100f));
                 }
                 s.setBorder(
                         BorderFactory.createEmptyBorder(0,0,10,0));

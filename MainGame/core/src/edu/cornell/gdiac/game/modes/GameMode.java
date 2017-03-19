@@ -436,5 +436,6 @@ public class GameMode extends Mode implements Settable {
 	@Override
 	public void applySettings() {
 		world.setGravity(new Vector2(0, Sidebar.getValue("Gravity")));
+		PaintballFactory.applySettings();
 	}
 }

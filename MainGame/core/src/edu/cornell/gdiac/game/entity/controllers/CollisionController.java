@@ -21,69 +21,96 @@ import edu.cornell.gdiac.util.obstacles.Obstacle;
  *  PlayerGroundSensor
  */
 public class CollisionController implements ContactListener {
+
     public CollisionController(){}
 
     // BEGIN: Collision handlers
-    private void handelCollision(PlayerModel obj1, EnemyModel obj2){
+    private void handleCollision(PlayerModel obj1, EnemyModel obj2){
 
     }
 
-    private void handelCollision(PlayerModel obj1, GoalModel obj2){
+    private void handleCollision(PlayerModel obj1, GoalModel obj2){
 
     }
 
-    private void handelCollision(PlayerModel obj1, PlatformModel obj2){
+    private void handleCollision(PlayerModel obj1, PlatformModel obj2){
         obj1.setGrounded(true);
     }
 
-    private void handelCollision(PlayerModel obj1, WallModel obj2){
+    private void handleCollision(PlayerModel obj1, WallModel obj2){
 
     }
 
-    private void handelCollision(PlayerModel obj1, PaintballModel obj2){
+    private void handleCollision(PlayerModel obj1, PaintballModel obj2){
         obj1.setGrounded(true);
     }
 
-    private void handelCollision(EnemyModel obj1, PaintballModel obj2){
+    private void handleCollision(EnemyModel obj1, PaintballModel obj2){
 
     }
 
-    private void handelCollision(GoalModel obj1, PaintballModel obj2){
+    private void handleCollision(GoalModel obj1, PaintballModel obj2){
 
     }
 
-    private void handelCollision(PaintballModel obj1, PaintballModel obj2){
+    private void handleCollision(PaintballModel obj1, PaintballModel obj2){
+        if(obj1.isDead() || obj2.isDead())
+            return;
+
+        float oneSign = obj1.getVX() / Math.abs(obj1.getVX());
+        float twoSign = obj2.getVX() / Math.abs(obj2.getVX());
+        if(oneSign == twoSign) {
+            if(obj1.getPosition().x*oneSign<obj2.getPosition().x*oneSign) {
+                obj2.setTimeToDie(0);
+            } else {
+                obj1.setTimeToDie(0);
+            }
+            return;
+        }
+
+        if(obj2.isDying())
+            obj1.setTimeToDie(obj2.getTimeToDie());
+        else
+            obj1.setTimeToDie(obj1.getPaintballToPaintballDuration());
+
+        if(obj1.isDying())
+            obj2.setTimeToDie(obj1.getTimeToDie());
+        else
+            obj2.setTimeToDie(obj2.getPaintballToPaintballDuration());
+        obj1.fixX(0f);
+        obj2.fixX(0f);
 
     }
 
-    private void handelCollision(PlatformModel obj1, PaintballModel obj2){
-
+    private void handleCollision(PlatformModel obj1, PaintballModel obj2){
+        obj2.setTimeToDie(obj2.getPaintballToWallDuration());
+        obj2.fixX(0f);
     }
 
-    private void handelCollision(WallModel obj1, PaintballModel obj2){
-        obj2.markRemoved(true);
+    private void handleCollision(WallModel obj1, PaintballModel obj2){
+        obj2.setTimeToDie(obj2.getPaintballToPlatformDuration());
+        obj2.fixX(0f);
     }
 
-    private void handelCollision(PlayerModel obj1, AmmoDepotModel obj2) {
+    private void handleCollision(PlayerModel obj1, AmmoDepotModel obj2) {
         obj2.setUsed(true);
         obj2.markRemoved(true);
     }
 
     // Collision end handlers
 
-    private void handelEndCollision(PlayerModel obj1,PlatformModel obj2){
+    private void handleEndCollision(PlayerModel obj1,PlatformModel obj2){
         obj1.setGrounded(false);
     }
 
-    private void handelEndCollision(PlayerModel obj1,WallModel obj2){
+    private void handleEndCollision(PlayerModel obj1,WallModel obj2){
 
     }
 
-    private void handelEndCollision(PlayerModel obj1,PaintballModel obj2){
+    private void handleEndCollision(PlayerModel obj1,PaintballModel obj2){
         obj1.setGrounded(false);
     }
     // END: Collision handlers
-
 
     /**
      * TODO: write desc
@@ -91,29 +118,29 @@ public class CollisionController implements ContactListener {
     private void processObstacleCollision(Obstacle obj1, Obstacle obj2){
         if (obj1.getName().equals("player")) {
             if (obj2.getName().equals("enemy"))
-                handelCollision((PlayerModel)obj1, (EnemyModel) obj2);
+                handleCollision((PlayerModel)obj1, (EnemyModel) obj2);
             else if (obj2.getName().equals("goal"))
-                handelCollision((PlayerModel)obj1,(GoalModel) obj2);
+                handleCollision((PlayerModel)obj1,(GoalModel) obj2);
             else if (obj2.getName().equals("platform"))
-                handelCollision((PlayerModel)obj1,(PlatformModel) obj2);
+                handleCollision((PlayerModel)obj1,(PlatformModel) obj2);
             else if (obj2.getName().equals("wall"))
-                handelCollision((PlayerModel)obj1,(WallModel) obj2);
+                handleCollision((PlayerModel)obj1,(WallModel) obj2);
             else if (obj2.getName().equals("paintball"))
-                handelCollision((PlayerModel)obj1,(PaintballModel) obj2);
+                handleCollision((PlayerModel)obj1,(PaintballModel) obj2);
             else if (obj2.getName().equals("ammoDepot"))
-                handelCollision((PlayerModel)obj1, (AmmoDepotModel) obj2);
+                handleCollision((PlayerModel)obj1, (AmmoDepotModel) obj2);
         }
         else if (obj1.getName().equals("paintball")) {
             if (obj2.getName().equals("enemy"))
-                handelCollision((EnemyModel)obj2, (PaintballModel) obj1);
+                handleCollision((EnemyModel)obj2, (PaintballModel) obj1);
             else if (obj2.getName().equals("goal"))
-                handelCollision((GoalModel)obj2,(PaintballModel) obj1);
+                handleCollision((GoalModel)obj2,(PaintballModel) obj1);
             else if (obj2.getName().equals("platform"))
-                handelCollision((PlatformModel)obj2,(PaintballModel) obj1);
+                handleCollision((PlatformModel)obj2,(PaintballModel) obj1);
             else if (obj2.getName().equals("wall"))
-                handelCollision((WallModel)obj2,(PaintballModel) obj1);
+                handleCollision((WallModel)obj2,(PaintballModel) obj1);
             else if (obj2.getName().equals("paintball"))
-                handelCollision((PaintballModel)obj2,(PaintballModel) obj1);
+                handleCollision((PaintballModel)obj2,(PaintballModel) obj1);
         }
     }
 
@@ -123,11 +150,11 @@ public class CollisionController implements ContactListener {
     private void processObstacleEndCollision(Obstacle obj1, Obstacle obj2){
         if (obj1.getName().equals("player")) {
             if (obj2.getName().equals("platform"))
-                handelEndCollision((PlayerModel)obj1,(PlatformModel) obj2);
+                handleEndCollision((PlayerModel)obj1,(PlatformModel) obj2);
             else if (obj2.getName().equals("wall"))
-                handelEndCollision((PlayerModel)obj1,(WallModel) obj2);
+                handleEndCollision((PlayerModel)obj1,(WallModel) obj2);
             else if (obj2.getName().equals("paintball"))
-                handelEndCollision((PlayerModel)obj1,(PaintballModel) obj2);
+                handleEndCollision((PlayerModel)obj1,(PaintballModel) obj2);
         }
     }
 
