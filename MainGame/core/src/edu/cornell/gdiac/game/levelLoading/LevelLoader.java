@@ -73,8 +73,6 @@ public class LevelLoader implements AssetUser, Disposable{
 
         //sets the new world bounds TODO: do this with json values
         bounds = new Rectangle(0,0,32,18);
-        LevelCreator c = new LevelCreator();
-        c.writeDemoJson();
         levelParser.loadLevel("JSON/default.json");
         populateLevel();
 
