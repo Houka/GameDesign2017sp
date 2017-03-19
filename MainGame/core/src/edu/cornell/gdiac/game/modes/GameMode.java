@@ -17,9 +17,7 @@
 package edu.cornell.gdiac.game.modes;
 
 import java.util.Iterator;
-import java.util.Set;
 
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.assets.*;
@@ -34,7 +32,6 @@ import edu.cornell.gdiac.game.entity.models.AmmoDepotModel;
 import edu.cornell.gdiac.game.entity.models.EnemyModel;
 import edu.cornell.gdiac.game.entity.models.HUDModel;
 import edu.cornell.gdiac.game.entity.models.PlayerModel;
-import edu.cornell.gdiac.game.input.PlayerInputController;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
 import edu.cornell.gdiac.game.interfaces.Settable;
 import edu.cornell.gdiac.game.interfaces.Shooter;
@@ -141,15 +138,6 @@ public class GameMode extends Mode implements Settable {
 	 */
 	private boolean failed;
 
-	/**
-	 * Gravity
-	 */
-	private float gravity;
-
-	/**
-	 * Input
-	 */
-	private PlayerInputController input;
 
 	/**
 	 * Creates a new game world with the default values.
@@ -264,21 +252,18 @@ public class GameMode extends Mode implements Settable {
 
 	@Override
 	public void update(float dt) {
-		//TODO: update all entity controllers and their respective models
-
 		for (EntityController e : entityControllers)
 			e.update(dt);
 
 		applySettings();
-		// projectile creation
 		for(Obstacle obj: objects){
 			if(obj instanceof Settable)
 				((Settable) obj).applySettings();
 			if(obj instanceof Shooter)
 				updateShooter(obj);
 			if(obj instanceof AmmoDepotModel && ((AmmoDepotModel) obj).isUsed()) {
-				int newAmmo = Math.min(hud.getAmmoLeft()+((AmmoDepotModel) obj).getAmmoAmount(), hud.getStartingAmmo());
-				hud.setAmmoLeft(newAmmo);
+				// TODO: find better solution for hud communication with other objs
+				hud.addAmmo(((AmmoDepotModel) obj).getAmmoAmount());
 			}
 		}
 
@@ -287,7 +272,6 @@ public class GameMode extends Mode implements Settable {
 
 	@Override
 	public void draw() {
-
 		canvas.setCameraY(player.getY());
 
 		for (Obstacle obj : objects) {
@@ -338,11 +322,8 @@ public class GameMode extends Mode implements Settable {
 	 */
 	public void loadLevel(String levelFile) {
 		this.levelFile = levelFile;
-
-		// load rest of level entities
 		levelLoader.loadLevel(levelFile);
 		resize(levelLoader.getBounds().width, levelLoader.getBounds().height);
-
 		if (!trySetPlayer())
 			System.out.println("Error: level file (" + levelFile + ") does not have a player");
 	}
@@ -363,7 +344,7 @@ public class GameMode extends Mode implements Settable {
 
 	/**
 	 * Processes physics
-	 * <p>
+	 *
 	 * Once the update phase is over, but before we draw, we are ready to handle
 	 * physics.  The primary method is the step() method in world.  This implementation
 	 * works for all applications and should not need to be overwritten.
@@ -397,8 +378,8 @@ public class GameMode extends Mode implements Settable {
 
 	/**
 	 * Immediately adds the object to the physics world
-	 * <p>
-	 * param obj The object to add
+	 *
+	 * @param obj The object to add
 	 */
 	private void addObject(Obstacle obj) {
 		assert inBounds(obj) : "Object is not in bounds";
@@ -410,9 +391,9 @@ public class GameMode extends Mode implements Settable {
 
 	/**
 	 * TODO: write desc
+	 * if its an enemy or player, add a new entity controller to it
 	 */
 	private void addEntityController(Obstacle obj) {
-		// if its an enemy or player, add a new entity controller to it
 		if (obj.getName().equals("player"))
 			entityControllers.add(new PlayerController(player));
 		else if (obj.getName().equals("enemy"))
@@ -421,7 +402,6 @@ public class GameMode extends Mode implements Settable {
 
 	/**
 	 * Returns true if the object is in bounds.
-	 * <p>
 	 * This assertion is useful for debugging the physics.
 	 *
 	 * @param obj The object to check.
