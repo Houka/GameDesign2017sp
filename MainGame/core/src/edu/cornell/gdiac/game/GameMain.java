@@ -23,6 +23,9 @@ import com.badlogic.gdx.assets.loaders.resolvers.*;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
 import edu.cornell.gdiac.game.modes.LoadingMode;
 import edu.cornell.gdiac.game.modes.MenuMode;
+import edu.cornell.gdiac.util.sidebar.Sidebar;
+
+import javax.swing.*;
 
 /**
  * Root class for a LibGDX.  
@@ -69,13 +72,13 @@ public class GameMain extends Game implements ScreenListener {
 		canvas  = new GameCanvas();
 		loadingMode = new LoadingMode(canvas,manager,1);
 		menuMode = new MenuMode(canvas, manager);
-
 		loadingMode.setScreenListener(this);
 		menuMode.setScreenListener(this);
 
 		menuMode.preLoadContent(manager);
 
 		setScreen(loadingMode);
+
 	}
 
 	/** 

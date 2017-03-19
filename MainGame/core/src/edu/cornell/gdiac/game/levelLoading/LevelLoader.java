@@ -122,7 +122,7 @@ public class LevelLoader implements AssetUser, Disposable{
         enemy.setTexture(enemyTexture);
         addQueuedObject(enemy);
 
-        enemy = new EnemyModel(DUDE_POS.x+25, DUDE_POS.y + 5, dwidth, dheight, true, true, 0);
+        enemy = new EnemyModel(DUDE_POS.x+3, DUDE_POS.y + 5, dwidth, dheight, true, true, 0);
         enemy.setDrawScale(scale);
         enemy.setTexture(enemyTexture);
         addQueuedObject(enemy);

@@ -46,7 +46,6 @@ public class EnemyController extends EntityController {
         shotTicks++;
         if (enemy.isStunned()) {
             stunTicks++;
-            System.out.println("Stun Ticks: " + stunTicks);
         }
         if (stunTicks > stunTime) {
             enemy.setStunned(false);
@@ -56,17 +55,5 @@ public class EnemyController extends EntityController {
         enemy.setShootCooldown(enemy.getShootCooldown() - 1);
         enemy.setFacingRight(player.getPosition().x > enemy.getPosition().x);
         enemy.setShooting(canShoot(enemy, player) && !enemy.isStunned());
-
-        if (!enemy.isOnSight()) {
-            System.out.println(enemy.isShooting());
-            System.out.println("Shot Cooldown: "+enemy.getShootCooldown());
-            System.out.println("Shot Ticks: "+shotTicks);
-        }
-
-//      if (enemy.isOnSight()) {
-//          System.out.println(enemy.isShooting());
-//          System.out.println("Shot Cooldown: "+enemy.getShootCooldown());
-//          System.out.println("Shot Ticks: "+shotTicks);
-//      }
     }
 }

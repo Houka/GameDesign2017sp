@@ -31,6 +31,7 @@ import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
+import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 /**
  * Class that provides a Level Selection screen for the state of the game.
@@ -115,6 +116,8 @@ public class LevelSelectionMode extends Mode {
 	protected void onComplete(){
 		gameMode.loadContent(manager);
 		gameMode.loadLevel(NUM_LEVELS[selected]);
+		// TODO: remove, for tech demo and testing values
+		Sidebar.defaultBootup();
 		listener.switchScreens(this, gameMode);
 	}
 

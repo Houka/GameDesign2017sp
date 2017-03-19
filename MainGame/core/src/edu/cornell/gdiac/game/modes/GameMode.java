@@ -218,14 +218,8 @@ public class GameMode extends Mode {
 
 		// projectile creation
 		for(Obstacle obj: objects){
-			if(obj instanceof Shooter && ((Shooter) obj).isShooting()) {
-				if (obj.getName().equals("player") && hud.useAmmo())
-					// player shooting
-					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
-				else if (!obj.getName().equals("player"))
-					// enemies shooting
-					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
-			}
+			if(obj instanceof Shooter)
+				updateShooter(obj);
 			if(obj instanceof AmmoDepotModel && ((AmmoDepotModel) obj).isUsed()) {
 				int newAmmo = Math.min(hud.getAmmoLeft()+((AmmoDepotModel) obj).getAmmoAmount(), hud.getStartingAmmo());
 				hud.setAmmoLeft(newAmmo);
@@ -292,6 +286,20 @@ public class GameMode extends Mode {
 
 		if (!trySetPlayer())
 			System.out.println("Error: level file ("+levelFile+") does not have a player");
+	}
+
+	/**
+	 * TODO: write desc
+	 */
+	private void updateShooter(Obstacle obj) {
+		if (((Shooter)obj).isShooting()) {
+			if (obj.getName().equals("player") && hud.useAmmo())
+				// player shooting
+				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
+			else if (!obj.getName().equals("player"))
+				// enemies shooting
+				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
+		}
 	}
 
 	/**
