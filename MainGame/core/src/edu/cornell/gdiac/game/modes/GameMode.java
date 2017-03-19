@@ -418,14 +418,4 @@ public class GameMode extends Mode {
 	public float getGravity() {
 		return gravity;
 	}
-
-	/*public void scrollUp() {
-		input = PlayerInputController.getInstance();
-		if(input.didJump()) {
-			System.out.println("did jump");
-			for (Obstacle obj : objects) {
-				obj.setY(obj.getY() - player.getY());
-			}
-		}
-	}*/
 }
