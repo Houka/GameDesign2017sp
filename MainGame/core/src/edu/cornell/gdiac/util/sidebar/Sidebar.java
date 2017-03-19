@@ -27,7 +27,6 @@ public class Sidebar {
         frame.getContentPane().add(panel);
         panel.add(Box.createRigidArea(new Dimension(0,10)));
 
-        //Display the window.
         frame.pack();
         frame.setVisible(true);
 
@@ -73,13 +72,10 @@ public class Sidebar {
                     JLabel label = (JLabel) s.getLabelTable().get(i);
                     label.setPreferredSize(new Dimension(100,10));
                     label.setSize(label.getPreferredSize());
-                    System.out.println(String.valueOf((i/100f)*(max-min)+min));
                     label.setText(String.valueOf((i/100f)*(max-min)+min));
                 }
                 s.setBorder(
                         BorderFactory.createEmptyBorder(0,0,10,0));
-                //Font font = new Font("Serif", Font.ITALIC, 15);
-                //s.setFont(font);
                 panel.add(l);
                 panel.add(s);
                 panel.add(Box.createRigidArea(new Dimension(0,10)));
@@ -102,7 +98,6 @@ public class Sidebar {
                 b.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        System.out.println(theMap.get(bname));
                         theMap.put(bname,theMap.get(bname)+1);
                         value++;
                     }

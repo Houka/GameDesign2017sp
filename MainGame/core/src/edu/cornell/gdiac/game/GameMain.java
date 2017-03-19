@@ -72,14 +72,12 @@ public class GameMain extends Game implements ScreenListener {
 		canvas  = new GameCanvas();
 		loadingMode = new LoadingMode(canvas,manager,1);
 		menuMode = new MenuMode(canvas, manager);
-		//Sidebar sidebar = new Sidebar(this); //TODO: remove
 		loadingMode.setScreenListener(this);
 		menuMode.setScreenListener(this);
 
 		menuMode.preLoadContent(manager);
 
 		setScreen(loadingMode);
-		bootupSidebarTool();
 
 	}
 
