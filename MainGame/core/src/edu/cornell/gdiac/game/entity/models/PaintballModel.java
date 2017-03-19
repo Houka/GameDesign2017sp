@@ -3,6 +3,7 @@ package edu.cornell.gdiac.game.entity.models;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 
@@ -78,6 +79,7 @@ public class PaintballModel extends BoxObstacle {
         }
         if(!gravity)
             this.setVY(0.0f);
+        this.setVX(speed);
     }
 
     private float getScaledX() {
@@ -111,5 +113,9 @@ public class PaintballModel extends BoxObstacle {
         gravity = true;
         this.setGravityScale(1/3f);
         //this.setVY(-2); //Uncomment and comment above line for constant falling
+    }
+
+    public void fixX(float val) {
+        speed=val;
     }
 }
