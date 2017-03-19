@@ -30,6 +30,8 @@ public class HUDModel extends BoxObstacle {
     }
 
     // BEGIN: Setters and Getters
+    public int getStartingAmmo() { return startingAmmo;}
+
     public void setFont(BitmapFont font){
         this.font = font;
     }

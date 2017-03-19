@@ -77,7 +77,8 @@ public class LevelParser {
             while (iter.hasNext()){
                 tempJson = iter.next();
                 tempArray = new float[] {tempJson.get("type").asFloat(), tempJson.get("x").asFloat(),
-                        tempJson.get("y").asFloat(), tempJson.get("isFacingRight").asFloat()};
+                        tempJson.get("y").asFloat(), tempJson.get("isFacingRight").asFloat(),
+                        tempJson.get("interval").asFloat()};
                 enemyList.add(tempArray);
             }
             float[][] newEnemiesArray = new float[enemyList.size()][4];

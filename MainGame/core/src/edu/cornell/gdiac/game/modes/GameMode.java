@@ -17,7 +17,9 @@
 package edu.cornell.gdiac.game.modes;
 
 import java.util.Iterator;
+import java.util.Set;
 
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.assets.*;
@@ -28,14 +30,18 @@ import edu.cornell.gdiac.game.entity.controllers.EnemyController;
 import edu.cornell.gdiac.game.entity.controllers.EntityController;
 import edu.cornell.gdiac.game.entity.controllers.PlayerController;
 import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
+import edu.cornell.gdiac.game.entity.models.AmmoDepotModel;
 import edu.cornell.gdiac.game.entity.models.EnemyModel;
 import edu.cornell.gdiac.game.entity.models.HUDModel;
 import edu.cornell.gdiac.game.entity.models.PlayerModel;
+import edu.cornell.gdiac.game.input.PlayerInputController;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
+import edu.cornell.gdiac.game.interfaces.Settable;
 import edu.cornell.gdiac.game.interfaces.Shooter;
 import edu.cornell.gdiac.game.levelLoading.LevelLoader;
 import edu.cornell.gdiac.util.*;
 import edu.cornell.gdiac.util.obstacles.*;
+import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 /**
  * Base class for a world-specific controller.
@@ -51,103 +57,150 @@ import edu.cornell.gdiac.util.obstacles.*;
  * This is the purpose of our AssetState variable; it ensures that multiple instances
  * place nicely with the static assets.
  */
-public class GameMode extends Mode {
-	/** Retro font for displaying messages */
+public class GameMode extends Mode implements Settable {
+	/**
+	 * Retro font for displaying messages
+	 */
 	private static String FONT_FILE = "fonts/RetroGame.ttf";
 
-	/** The amount of time for a physics engine step. */
-	public static final float WORLD_STEP = 1/60.0f;
-	/** Number of velocity iterations for the constrain solvers */
+	/**
+	 * The amount of time for a physics engine step.
+	 */
+	public static final float WORLD_STEP = 1 / 60.0f;
+	/**
+	 * Number of velocity iterations for the constrain solvers
+	 */
 	public static final int WORLD_VELOC = 6;
-	/** Number of position iterations for the constrain solvers */
+	/**
+	 * Number of position iterations for the constrain solvers
+	 */
 	public static final int WORLD_POSIT = 2;
-	
-	/** Width of the game world in Box2d units */
-	private static final float DEFAULT_WIDTH  = 32.0f;
-	/** Height of the game world in Box2d units */
-	private static final float DEFAULT_HEIGHT = 18.0f;
-	/** The default value of gravity (going down) */
-	private static final float DEFAULT_GRAVITY = -4.9f;
 
-	/** All the objects in the world. */
-	private PooledList<Obstacle> objects  = new PooledList<Obstacle>();
-	/** All the Entity Controllers in the world */
+	/**
+	 * Width of the game world in Box2d units
+	 */
+	private static final float DEFAULT_WIDTH = 32.0f;
+	/**
+	 * Height of the game world in Box2d units
+	 */
+	private static final float DEFAULT_HEIGHT = 18.0f;
+	/**
+	 * The default value of gravity (going down)
+	 */
+	private static final float DEFAULT_GRAVITY = -20.0f;
+
+	/**
+	 * All the objects in the world.
+	 */
+	private PooledList<Obstacle> objects = new PooledList<Obstacle>();
+	/**
+	 * All the Entity Controllers in the world
+	 */
 	private PooledList<EntityController> entityControllers = new PooledList<EntityController>();
 
-	/** The Box2D world */
+	/**
+	 * The Box2D world
+	 */
 	private World world;
-	/** The boundary of the world */
+	/**
+	 * The boundary of the world
+	 */
 	private Rectangle bounds;
-	/** The player */
+	/**
+	 * The player
+	 */
 	private PlayerModel player;
-	/** The factory that creates projectiles */
+	/**
+	 * The factory that creates projectiles
+	 */
 	private PaintballFactory paintballFactory;
-	/** The hud of this world */
+	/**
+	 * The hud of this world
+	 */
 	private HUDModel hud;
 
-	/** The level loader */
+	/**
+	 * The level loader
+	 */
 	private LevelLoader levelLoader;
-	/** The level this game mode loads in */
+	/**
+	 * The level this game mode loads in
+	 */
 	private String levelFile;
 
-	/** The world scale Vector */
+	/**
+	 * The world scale Vector
+	 */
 	private Vector2 scaleVector;
-	/** Whether we have completed this level */
+	/**
+	 * Whether we have completed this level
+	 */
 	private boolean succeeded;
-	/** Whether we have failed at this world (and need a reset) */
+	/**
+	 * Whether we have failed at this world (and need a reset)
+	 */
 	private boolean failed;
 
-	
+	/**
+	 * Gravity
+	 */
+	private float gravity;
+
+	/**
+	 * Input
+	 */
+	private PlayerInputController input;
+
 	/**
 	 * Creates a new game world with the default values.
-	 *
+	 * <p>
 	 * The game world is scaled so that the screen coordinates do not agree
 	 * with the Box2d coordinates.  The bounds are in terms of the Box2d
 	 * world, not the screen.
 	 *
-	 * @param canvas The GameCanvas to draw the textures to
+	 * @param canvas  The GameCanvas to draw the textures to
 	 * @param manager The AssetManager to load in the background
 	 */
 	public GameMode(GameCanvas canvas, AssetManager manager) {
-		this(canvas, manager, new Rectangle(0,0,DEFAULT_WIDTH,DEFAULT_HEIGHT),
-			 new Vector2(0,DEFAULT_GRAVITY));
+		this(canvas, manager, new Rectangle(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT),
+				new Vector2(0, DEFAULT_GRAVITY));
 	}
 
 	/**
 	 * Creates a new game world
-	 *
+	 * <p>
 	 * The game world is scaled so that the screen coordinates do not agree
 	 * with the Box2d coordinates.  The bounds are in terms of the Box2d
 	 * world, not the screen.
 	 *
-	 * @param canvas The GameCanvas to draw the textures to
+	 * @param canvas  The GameCanvas to draw the textures to
 	 * @param manager The AssetManager to load in the background
-	 * @param width  	The width in Box2d coordinates
-	 * @param height	The height in Box2d coordinates
-	 * @param gravity	The downward gravity
+	 * @param width   The width in Box2d coordinates
+	 * @param height  The height in Box2d coordinates
+	 * @param gravity The downward gravity
 	 */
-	public GameMode(GameCanvas canvas, AssetManager manager,float width, float height, float gravity) {
-		this(canvas, manager, new Rectangle(0,0,width,height), new Vector2(0,gravity));
+	public GameMode(GameCanvas canvas, AssetManager manager, float width, float height, float gravity) {
+		this(canvas, manager, new Rectangle(0, 0, width, height), new Vector2(0, gravity));
 	}
 
 	/**
 	 * Creates a new game world
-	 *
+	 * <p>
 	 * The game world is scaled so that the screen coordinates do not agree
 	 * with the Box2d coordinates.  The bounds are in terms of the Box2d
 	 * world, not the screen.
 	 *
-	 * @param canvas The GameCanvas to draw the textures to
+	 * @param canvas  The GameCanvas to draw the textures to
 	 * @param manager The AssetManager to load in the background
-	 * @param bounds	The game bounds in Box2d coordinates
-	 * @param gravity	The gravitational force on this Box2d world
+	 * @param bounds  The game bounds in Box2d coordinates
+	 * @param gravity The gravitational force on this Box2d world
 	 */
-	public GameMode(GameCanvas canvas, AssetManager manager,Rectangle bounds, Vector2 gravity) {
+	public GameMode(GameCanvas canvas, AssetManager manager, Rectangle bounds, Vector2 gravity) {
 		super(canvas, manager);
 		onExit = ScreenListener.EXIT_MENU;
-		scaleVector = new Vector2(canvas.getWidth()/bounds.getWidth(), canvas.getHeight()/bounds.getHeight());
+		scaleVector = new Vector2(canvas.getWidth() / bounds.getWidth(), canvas.getHeight() / bounds.getHeight());
 
-		world = new World(gravity,false);
+		world = new World(gravity, false);
 		world.setContactListener(new CollisionController());
 		paintballFactory = new PaintballFactory(scaleVector);
 		levelLoader = new LevelLoader(scaleVector);
@@ -160,11 +213,12 @@ public class GameMode extends Mode {
 	}
 
 	// BEGIN: Setters and Getters
+
 	/**
 	 * TODO: write desc
 	 */
-	private boolean trySetPlayer(){
-		for (Obstacle obj:levelLoader.getAddQueue()) {
+	private boolean trySetPlayer() {
+		for (Obstacle obj : levelLoader.getAddQueue()) {
 			if (obj.getName().equals("player")) {
 				player = (PlayerModel) obj;
 				return true;
@@ -177,7 +231,7 @@ public class GameMode extends Mode {
 
 	@Override
 	public void dispose() {
-		for(Obstacle obj : objects) {
+		for (Obstacle obj : objects) {
 			obj.deactivatePhysics(world);
 		}
 		objects.clear();
@@ -189,15 +243,15 @@ public class GameMode extends Mode {
 		objects = null;
 		bounds = null;
 		scaleVector = null;
-		world  = null;
+		world = null;
 		canvas = null;
 	}
 
 	@Override
-	public void reset(){
+	public void reset() {
 		super.reset();
 
-		for(Obstacle obj:objects)
+		for (Obstacle obj : objects)
 			obj.deactivatePhysics(world);
 		objects.clear();
 		entityControllers.clear();
@@ -209,21 +263,22 @@ public class GameMode extends Mode {
 	}
 
 	@Override
-	public void update(float dt){
+	public void update(float dt) {
 		//TODO: update all entity controllers and their respective models
 
-		for(EntityController e: entityControllers)
+		for (EntityController e : entityControllers)
 			e.update(dt);
 
+		applySettings();
 		// projectile creation
 		for(Obstacle obj: objects){
-			if(obj instanceof Shooter && ((Shooter) obj).isShooting()) {
-				if (obj.getName().equals("player") && hud.useAmmo())
-					// player shooting
-					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
-				else if (!obj.getName().equals("player"))
-					// enemies shooting
-					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
+			if(obj instanceof Settable)
+				((Settable) obj).applySettings();
+			if(obj instanceof Shooter)
+				updateShooter(obj);
+			if(obj instanceof AmmoDepotModel && ((AmmoDepotModel) obj).isUsed()) {
+				int newAmmo = Math.min(hud.getAmmoLeft()+((AmmoDepotModel) obj).getAmmoAmount(), hud.getStartingAmmo());
+				hud.setAmmoLeft(newAmmo);
 			}
 		}
 
@@ -232,7 +287,10 @@ public class GameMode extends Mode {
 
 	@Override
 	public void draw() {
-		for(Obstacle obj : objects) {
+
+		canvas.setCameraY(player.getY());
+
+		for (Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
 
@@ -240,8 +298,8 @@ public class GameMode extends Mode {
 	}
 
 	@Override
-	protected void drawDebug(){
-		for(Obstacle obj : objects) {
+	protected void drawDebug() {
+		for (Obstacle obj : objects) {
 			obj.drawDebug(canvas);
 		}
 	}
@@ -260,6 +318,7 @@ public class GameMode extends Mode {
 		paintballFactory.preLoadContent(manager);
 		levelLoader.preLoadContent(manager);
 	}
+
 	@Override
 	public void loadContent(AssetManager manager) {
 		paintballFactory.loadContent(manager);
@@ -267,6 +326,7 @@ public class GameMode extends Mode {
 		if (manager.isLoaded(FONT_FILE))
 			hud.setFont(manager.get(FONT_FILE, BitmapFont.class));
 	}
+
 	@Override
 	public void unloadContent(AssetManager manager) {
 		paintballFactory.unloadContent(manager);
@@ -276,7 +336,7 @@ public class GameMode extends Mode {
 	/**
 	 * TODO: write desc for level setting.. should populate the level
 	 */
-	public void loadLevel(String levelFile){
+	public void loadLevel(String levelFile) {
 		this.levelFile = levelFile;
 
 		// load rest of level entities
@@ -284,12 +344,26 @@ public class GameMode extends Mode {
 		resize(levelLoader.getBounds().width, levelLoader.getBounds().height);
 
 		if (!trySetPlayer())
-			System.out.println("Error: level file ("+levelFile+") does not have a player");
+			System.out.println("Error: level file (" + levelFile + ") does not have a player");
+	}
+
+	/**
+	 * TODO: write desc
+	 */
+	private void updateShooter(Obstacle obj) {
+		if (((Shooter)obj).isShooting()) {
+			if (obj.getName().equals("player") && hud.useAmmo())
+				// player shooting
+				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
+			else if (!obj.getName().equals("player"))
+				// enemies shooting
+				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
+		}
 	}
 
 	/**
 	 * Processes physics
-	 *
+	 * <p>
 	 * Once the update phase is over, but before we draw, we are ready to handle
 	 * physics.  The primary method is the step() method in world.  This implementation
 	 * works for all applications and should not need to be overwritten.
@@ -303,7 +377,7 @@ public class GameMode extends Mode {
 		}
 
 		// Turn the physics engine crank.
-		world.step(WORLD_STEP,WORLD_VELOC,WORLD_POSIT);
+		world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
 
 		// Garbage collect the deleted objects.
 		// Note how we use the linked list nodes to delete O(1) in place.
@@ -315,7 +389,7 @@ public class GameMode extends Mode {
 			if (obj.isRemoved()) {
 				obj.deactivatePhysics(world);
 				entry.remove();
-			}else{
+			} else {
 				obj.update(dt);
 			}
 		}
@@ -323,7 +397,7 @@ public class GameMode extends Mode {
 
 	/**
 	 * Immediately adds the object to the physics world
-	 *
+	 * <p>
 	 * param obj The object to add
 	 */
 	private void addObject(Obstacle obj) {
@@ -337,26 +411,30 @@ public class GameMode extends Mode {
 	/**
 	 * TODO: write desc
 	 */
-	private void addEntityController(Obstacle obj){
+	private void addEntityController(Obstacle obj) {
 		// if its an enemy or player, add a new entity controller to it
 		if (obj.getName().equals("player"))
 			entityControllers.add(new PlayerController(player));
 		else if (obj.getName().equals("enemy"))
-			entityControllers.add(new EnemyController(player,(EnemyModel)obj));
+			entityControllers.add(new EnemyController(player, (EnemyModel) obj));
 	}
 
 	/**
 	 * Returns true if the object is in bounds.
-	 *
+	 * <p>
 	 * This assertion is useful for debugging the physics.
 	 *
 	 * @param obj The object to check.
-	 *
 	 * @return true if the object is in bounds.
 	 */
 	private boolean inBounds(Obstacle obj) {
-		boolean horiz = (bounds.x <= obj.getX() && obj.getX() <= bounds.x+bounds.width);
-		boolean vert  = (bounds.y <= obj.getY() && obj.getY() <= bounds.y+bounds.height);
+		boolean horiz = (bounds.x <= obj.getX() && obj.getX() <= bounds.x + bounds.width);
+		boolean vert = (bounds.y <= obj.getY() && obj.getY() <= bounds.y + bounds.height);
 		return horiz && vert;
+	}
+
+	@Override
+	public void applySettings() {
+		world.setGravity(new Vector2(0, Sidebar.getValue("Gravity")));
 	}
 }

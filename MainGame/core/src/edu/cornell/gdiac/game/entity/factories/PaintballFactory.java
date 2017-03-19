@@ -20,7 +20,7 @@ public class PaintballFactory implements AssetUser {
     /** The density for a Paintball */
     private static final float HEAVY_DENSITY = 10.0f;
     /** The speed of the Paintball after firing */
-    private static final float INITIAL_SPEED = 4.0f;
+    private static final float INITIAL_SPEED = 3.2f;
 
     /** The drawing scale of the Paintball*/
     private Vector2 scale;
