@@ -17,6 +17,7 @@
 package edu.cornell.gdiac.game.modes;
 
 import java.util.Iterator;
+import java.util.Set;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -35,10 +36,12 @@ import edu.cornell.gdiac.game.entity.models.HUDModel;
 import edu.cornell.gdiac.game.entity.models.PlayerModel;
 import edu.cornell.gdiac.game.input.PlayerInputController;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
+import edu.cornell.gdiac.game.interfaces.Settable;
 import edu.cornell.gdiac.game.interfaces.Shooter;
 import edu.cornell.gdiac.game.levelLoading.LevelLoader;
 import edu.cornell.gdiac.util.*;
 import edu.cornell.gdiac.util.obstacles.*;
+import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 /**
  * Base class for a world-specific controller.
@@ -54,7 +57,7 @@ import edu.cornell.gdiac.util.obstacles.*;
  * This is the purpose of our AssetState variable; it ensures that multiple instances
  * place nicely with the static assets.
  */
-public class GameMode extends Mode {
+public class GameMode extends Mode implements Settable {
 	/**
 	 * Retro font for displaying messages
 	 */
@@ -266,8 +269,11 @@ public class GameMode extends Mode {
 		for (EntityController e : entityControllers)
 			e.update(dt);
 
+		applySettings();
 		// projectile creation
 		for(Obstacle obj: objects){
+			if(obj instanceof Settable)
+				((Settable) obj).applySettings();
 			if(obj instanceof Shooter)
 				updateShooter(obj);
 			if(obj instanceof AmmoDepotModel && ((AmmoDepotModel) obj).isUsed()) {
@@ -427,7 +433,8 @@ public class GameMode extends Mode {
 		return horiz && vert;
 	}
 
-	public float getGravity() {
-		return gravity;
+	@Override
+	public void applySettings() {
+		world.setGravity(new Vector2(0, Sidebar.getValue("Gravity")));
 	}
 }

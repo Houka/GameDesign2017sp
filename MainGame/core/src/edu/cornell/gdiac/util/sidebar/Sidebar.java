@@ -41,9 +41,9 @@ public class Sidebar {
 
         Sidebar.bootUp();
         //Below fields are just samples
-        Sidebar.addSlider("Gravity",-2.5f,2.5f,0);
-        Sidebar.addSlider("Jump Height",0f,5f,1);
-        Sidebar.addSlider("Player Speed",5f,7.5f,6);
+        Sidebar.addSlider("Gravity",-30f,0f,-20.0f);
+        Sidebar.addSlider("Jump Height",1f,10f, 5.5f);
+        Sidebar.addSlider("Player Speed",1f,10f,5.0f);
         Sidebar.addSlider("Bullet Width",1f,6.5f,5.5f);
 
     }
