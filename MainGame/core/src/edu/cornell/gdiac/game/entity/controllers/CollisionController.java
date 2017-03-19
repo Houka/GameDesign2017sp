@@ -41,7 +41,7 @@ public class CollisionController implements ContactListener {
     }
 
     private void handelCollision(PlayerModel obj1, PaintballModel obj2){
-
+        obj1.setGrounded(true);
     }
 
     private void handelCollision(EnemyModel obj1, PaintballModel obj2){
@@ -75,7 +75,7 @@ public class CollisionController implements ContactListener {
     }
 
     private void handelEndCollision(PlayerModel obj1,PaintballModel obj2){
-
+        obj1.setGrounded(false);
     }
     // END: Collision handlers
 

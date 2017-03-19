@@ -9,12 +9,17 @@ import edu.cornell.gdiac.game.input.PlayerInputController;
  * TODO: write class desc
  */
 public class PlayerController extends EntityController {
+
     private PlayerInputController input;
+
+
 
     public PlayerController(PlayerModel player){
         super(player);
         input = PlayerInputController.getInstance();
+
     }
+
 
     @Override
     public void update(float dt) {

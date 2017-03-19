@@ -131,5 +131,6 @@ public class PlayerInputController {
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             vertical -= 1.0f;
         }
+
     }
 }

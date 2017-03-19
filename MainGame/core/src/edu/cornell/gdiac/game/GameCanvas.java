@@ -369,6 +369,19 @@ public class GameCanvas {
     	active = DrawPass.STANDARD;
     }
 
+    public OrthographicCamera getCamera() {
+		return camera;
+    }
+
+    public void setCamera(float x, float y) {
+    	camera.translate(x-this.camera.position.x, y - this.camera.position.y);
+	}
+
+	public void setCameraY(float y) {
+		camera.translate(0, y);
+
+	}
+
 	/**
 	 * Ends a drawing sequence, flushing textures to the graphics card.
 	 */
@@ -820,9 +833,11 @@ public class GameCanvas {
 		
 		TextureRegion bounds = region.getRegion();
 		spriteBatch.setColor(tint);
-		spriteBatch.draw(region, x, y, ox, oy, 
+		spriteBatch.draw(region, x, y, ox, oy,
 						 bounds.getRegionWidth(), bounds.getRegionHeight(), 
 						 sx, sy, 180.0f*angle/(float)Math.PI);
+
+
 	}
 
 	/**

@@ -28,15 +28,15 @@ public class PlayerModel extends CapsuleObstacle implements Shooter {
     /** The density of the character */
     private static final float PLAYER_DENSITY = 1.0f;
     /** The factor to multiply by the input */
-    private static final float PLAYER_FORCE = 20.0f;
+    private static final float PLAYER_FORCE = 50.0f;
     /** The dude is a slippery one */
     private static final float PLAYER_FRICTION = 0.0f;
     /** The maximum character speed */
     private static final float PLAYER_MAXSPEED = 5.0f;
     /** The impulse for the character jump */
-    private static final float PLAYER_JUMP = 3.5f;
+    private static final float PLAYER_JUMP = 5.5f;
     /** Cooldown (in animation frames) for jumping */
-    private static final int JUMP_COOLDOWN = 30;
+    private static final int JUMP_COOLDOWN = 10;
     /** Cooldown (in animation frames) for shooting */
     private static final int SHOOT_COOLDOWN = 50;
     /** Height of the sensor attached to the player's feet */
@@ -52,12 +52,16 @@ public class PlayerModel extends CapsuleObstacle implements Shooter {
     /** The amount to shrink the sensor fixture (horizontally) relative to the image */
     private static final float PLAYER_SSHRINK = 0.6f;
 
+    /** The current max speed of the player */
+    private float maxSpeed;
     /** The current horizontal movement of the character */
     private float   movement;
     /** Which direction is the character facing */
     private boolean isFacingRight;
     /** How long until we can jump again */
     private int jumpCooldown;
+    /** The current impulse of the jump */
+    private float jumpForce;
     /** Whether we are actively jumping */
     private boolean isJumping;
     /** How long until we can shoot again */
@@ -82,8 +86,8 @@ public class PlayerModel extends CapsuleObstacle implements Shooter {
     /**
      * Creates a new dude at the origin.
      *
-     * The size is expressed in physics units NOT pixels.  In order for 
-     * drawing to work properly, you MUST set the drawScale. The drawScale 
+     * The size is expressed in physics units NOT pixels.  In order for
+     * drawing to work properly, you MUST set the drawScale. The drawScale
      * converts the physics units to pixels.
      *
      * @param width		The object width in physics units
@@ -96,8 +100,8 @@ public class PlayerModel extends CapsuleObstacle implements Shooter {
     /**
      * Creates a new dude avatar at the given position.
      *
-     * The size is expressed in physics units NOT pixels.  In order for 
-     * drawing to work properly, you MUST set the drawScale. The drawScale 
+     * The size is expressed in physics units NOT pixels.  In order for
+     * drawing to work properly, you MUST set the drawScale. The drawScale
      * converts the physics units to pixels.
      *
      * @param x  		Initial x position of the avatar center
@@ -180,6 +184,18 @@ public class PlayerModel extends CapsuleObstacle implements Shooter {
         isJumping = value;
     }
 
+    /** Set jump force to change the height of the jump. */
+    public void setJumpForce(float value) {
+        jumpForce = value;
+    }
+
+    /**
+     * Sets the jump cooldown time.
+     */
+    public void setJumpCooldown(int value) {
+        jumpCooldown = value;
+    }
+
     /**
      * Sets whether the dude can double jump.
      *
@@ -218,6 +234,11 @@ public class PlayerModel extends CapsuleObstacle implements Shooter {
         return PLAYER_MAXSPEED;
     }
 
+    /** */
+    public void setMaxSpeed(float value) {
+        maxSpeed = value;
+    }
+
     /**
      * Returns the name of the ground sensor
      *
@@ -253,11 +274,11 @@ public class PlayerModel extends CapsuleObstacle implements Shooter {
 
         // Ground Sensor
         // -------------
-        // We only allow the dude to jump when he's on the ground. 
+        // We only allow the dude to jump when he's on the ground.
         // Double jumping is not allowed.
         //
-        // To determine whether or not the dude is on the ground, 
-        // we create a thin sensor under his feet, which reports 
+        // To determine whether or not the dude is on the ground,
+        // we create a thin sensor under his feet, which reports
         // collisions with the world but has no collision response.
         Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
         FixtureDef sensorDef = new FixtureDef();
@@ -288,6 +309,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter {
         if (isJumping()) {
             forceCache.set(0, PLAYER_JUMP);
             body.applyLinearImpulse(forceCache,getPosition(),true);
+            setCanDoubleJump(true);
         }
 
         if (isDoubleJumping()) {
@@ -311,6 +333,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter {
         // Apply cooldowns
         if (isJumping()) {
             jumpCooldown = JUMP_COOLDOWN;
+            jumpForce = PLAYER_JUMP;
         } else {
             jumpCooldown = Math.max(0, jumpCooldown - 1);
         }
