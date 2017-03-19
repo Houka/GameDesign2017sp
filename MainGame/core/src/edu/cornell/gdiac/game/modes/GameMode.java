@@ -28,6 +28,7 @@ import edu.cornell.gdiac.game.entity.controllers.EnemyController;
 import edu.cornell.gdiac.game.entity.controllers.EntityController;
 import edu.cornell.gdiac.game.entity.controllers.PlayerController;
 import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
+import edu.cornell.gdiac.game.entity.models.AmmoDepotModel;
 import edu.cornell.gdiac.game.entity.models.EnemyModel;
 import edu.cornell.gdiac.game.entity.models.HUDModel;
 import edu.cornell.gdiac.game.entity.models.PlayerModel;
@@ -225,6 +226,12 @@ public class GameMode extends Mode {
 					// enemies shooting
 					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
 			}
+			if(obj instanceof AmmoDepotModel && ((AmmoDepotModel) obj).isUsed()) {
+				int newAmmo = Math.min(hud.getAmmoLeft()+((AmmoDepotModel) obj).getAmmoAmount(), hud.getStartingAmmo());
+				hud.setAmmoLeft(newAmmo);
+				//Remove the ammo depot from the world
+				//removeObject(obj);
+			}
 		}
 
 		postUpdate(dt);
@@ -333,6 +340,16 @@ public class GameMode extends Mode {
 
 		addEntityController(obj);
 	}
+
+//	/**
+//	 * Immediately removes the object from the physics world
+//	 *
+//	 * param obj The object to remove
+//	 */
+//	private void removeObject(Obstacle obj) {
+//		objects.remove(obj);
+//		obj.deactivatePhysics(world);
+//	}
 
 	/**
 	 * TODO: write desc

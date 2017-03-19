@@ -27,6 +27,7 @@ public class LevelLoader implements AssetUser, Disposable{
     private static String BG_FILE = "character/facade.png";
     private static String ENEMY_FILE = "character/dude.png";
     private static String CHARACTER_FILE = "character/charStatic.png";
+    private static String AMMO_DEPOT_FILE = "character/refillCan.png";
 
     private static Vector2 GOAL_POS = new Vector2(29.5f,15.0f); // x = 4.0f, y = 14.0f
     private static Vector2 DUDE_POS = new Vector2(2.5f, 5.0f);
@@ -36,6 +37,7 @@ public class LevelLoader implements AssetUser, Disposable{
     private TextureRegion bgTile;
     private TextureRegion enemyTexture;
     private TextureRegion playerTexture;
+    private TextureRegion depotTexture;
 
     // Vars that we do need for this class in the end
     /**TODO:write desc*/
@@ -115,15 +117,23 @@ public class LevelLoader implements AssetUser, Disposable{
         // Create 2 enemies
         dwidth  = enemyTexture.getRegionWidth()/scale.x;
         dheight = enemyTexture.getRegionHeight()/scale.y;
-        EnemyModel enemy = new EnemyModel(DUDE_POS.x+1, DUDE_POS.y + 3, dwidth, dheight, true);
+        EnemyModel enemy = new EnemyModel(DUDE_POS.x+1, DUDE_POS.y + 3, dwidth, dheight, true, false, 200);
         enemy.setDrawScale(scale);
         enemy.setTexture(enemyTexture);
         addQueuedObject(enemy);
 
-        enemy = new EnemyModel(DUDE_POS.x+4, DUDE_POS.y + 5, dwidth, dheight, true);
+        enemy = new EnemyModel(DUDE_POS.x+25, DUDE_POS.y + 5, dwidth, dheight, true, true, 0);
         enemy.setDrawScale(scale);
         enemy.setTexture(enemyTexture);
         addQueuedObject(enemy);
+
+        // Create one ammo depot
+        dheight = depotTexture.getRegionHeight()/scale.y;
+        dwidth = depotTexture.getRegionWidth()/scale.x;
+        AmmoDepotModel ammoDepot = new AmmoDepotModel(DUDE_POS.x+3, DUDE_POS.y -1, dwidth, dheight, 3);
+        ammoDepot.setDrawScale(scale);
+        ammoDepot.setTexture(depotTexture);
+        addQueuedObject(ammoDepot);
     }
 
     /**
@@ -148,6 +158,7 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(BG_FILE,Texture.class);
         manager.load(ENEMY_FILE,Texture.class);
         manager.load(CHARACTER_FILE, Texture.class);
+        manager.load(AMMO_DEPOT_FILE, Texture.class);
     }
 
     @Override
@@ -157,6 +168,7 @@ public class LevelLoader implements AssetUser, Disposable{
         goalTile  = AssetRetriever.createTexture(manager,GOAL_FILE,false);
         enemyTexture  = AssetRetriever.createTexture(manager,ENEMY_FILE,false);
         playerTexture = AssetRetriever.createTexture(manager, CHARACTER_FILE, false);
+        depotTexture = AssetRetriever.createTexture(manager, AMMO_DEPOT_FILE, false);
     }
 
     @Override

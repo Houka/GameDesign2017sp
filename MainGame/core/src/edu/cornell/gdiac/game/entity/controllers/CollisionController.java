@@ -64,6 +64,11 @@ public class CollisionController implements ContactListener {
         obj2.markRemoved(true);
     }
 
+    private void handelCollision(PlayerModel obj1, AmmoDepotModel obj2) {
+        obj2.setUsed(true);
+        obj2.markRemoved(true);
+    }
+
     // Collision end handlers
 
     private void handelEndCollision(PlayerModel obj1,PlatformModel obj2){
@@ -95,6 +100,8 @@ public class CollisionController implements ContactListener {
                 handelCollision((PlayerModel)obj1,(WallModel) obj2);
             else if (obj2.getName().equals("paintball"))
                 handelCollision((PlayerModel)obj1,(PaintballModel) obj2);
+            else if (obj2.getName().equals("ammoDepot"))
+                handelCollision((PlayerModel)obj1, (AmmoDepotModel) obj2);
         }
         else if (obj1.getName().equals("paintball")) {
             if (obj2.getName().equals("enemy"))
