@@ -29,6 +29,7 @@ import edu.cornell.gdiac.game.entity.controllers.EnemyController;
 import edu.cornell.gdiac.game.entity.controllers.EntityController;
 import edu.cornell.gdiac.game.entity.controllers.PlayerController;
 import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
+import edu.cornell.gdiac.game.entity.models.AmmoDepotModel;
 import edu.cornell.gdiac.game.entity.models.EnemyModel;
 import edu.cornell.gdiac.game.entity.models.HUDModel;
 import edu.cornell.gdiac.game.entity.models.PlayerModel;
@@ -266,19 +267,16 @@ public class GameMode extends Mode {
 			e.update(dt);
 
 		// projectile creation
-		for (Obstacle obj : objects) {
-			if (obj instanceof Shooter && ((Shooter) obj).isShooting()) {
-				if (obj.getName().equals("player") && hud.useAmmo())
-					// player shooting
-					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
-				else if (!obj.getName().equals("player"))
-					// enemies shooting
-					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
+		for(Obstacle obj: objects){
+			if(obj instanceof Shooter)
+				updateShooter(obj);
+			if(obj instanceof AmmoDepotModel && ((AmmoDepotModel) obj).isUsed()) {
+				int newAmmo = Math.min(hud.getAmmoLeft()+((AmmoDepotModel) obj).getAmmoAmount(), hud.getStartingAmmo());
+				hud.setAmmoLeft(newAmmo);
 			}
 		}
 
 		postUpdate(dt);
-		//scrollUp();
 	}
 
 	@Override
@@ -341,6 +339,20 @@ public class GameMode extends Mode {
 
 		if (!trySetPlayer())
 			System.out.println("Error: level file (" + levelFile + ") does not have a player");
+	}
+
+	/**
+	 * TODO: write desc
+	 */
+	private void updateShooter(Obstacle obj) {
+		if (((Shooter)obj).isShooting()) {
+			if (obj.getName().equals("player") && hud.useAmmo())
+				// player shooting
+				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
+			else if (!obj.getName().equals("player"))
+				// enemies shooting
+				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
+		}
 	}
 
 	/**
@@ -418,14 +430,4 @@ public class GameMode extends Mode {
 	public float getGravity() {
 		return gravity;
 	}
-
-	/*public void scrollUp() {
-		input = PlayerInputController.getInstance();
-		if(input.didJump()) {
-			System.out.println("did jump");
-			for (Obstacle obj : objects) {
-				obj.setY(obj.getY() - player.getY());
-			}
-		}
-	}*/
 }
