@@ -33,6 +33,21 @@ public class Sidebar {
 
     }
 
+
+    /**
+     * Call this to boot up the SidebarTool with default parameters
+     */
+    public static void defaultBootup(){
+
+        Sidebar.bootUp();
+        //Below fields are just samples
+        Sidebar.addSlider("Gravity",-2.5f,2.5f,0);
+        Sidebar.addSlider("Jump Height",0f,5f,1);
+        Sidebar.addSlider("Player Speed",5f,7.5f,6);
+        Sidebar.addSlider("Bullet Width",1f,6.5f,5.5f);
+
+    }
+
     public static void bootUp() {
         theMap = new HashMap<String,Float>();
         currHeight = 50;
