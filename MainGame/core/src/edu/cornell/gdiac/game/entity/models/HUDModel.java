@@ -70,8 +70,8 @@ public class HUDModel extends BoxObstacle {
         canvas.drawText("Ammo:"+ammoLeft, font, 30, getY()-30);
 
         if (state == STATE_WIN)
-            canvas.drawTextCentered("VICTORY", font, 0);
+            canvas.drawTextCentered("VICTORY", font, getY()-canvas.getHeight());
         else if (state == STATE_LOSE)
-            canvas.drawTextCentered("FAILURE", font, 0);
+            canvas.drawTextCentered("FAILURE", font, getY()-canvas.getHeight());
     }
 }

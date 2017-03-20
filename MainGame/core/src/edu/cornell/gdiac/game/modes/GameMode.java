@@ -226,7 +226,10 @@ public class GameMode extends Mode implements Settable {
 		}
 
 
-		hud.setY((Math.max(player.getY(), 0)*scaleVector.y)+canvas.getHeight()/2);
+		hud.setY((Math.max(player.getY(), 9)*scaleVector.y)+canvas.getHeight()/2);
+
+		if (player.getY() < -player.getHeight())
+			hud.setLose(true);
 
 		postUpdate(dt);
 	}
@@ -234,7 +237,7 @@ public class GameMode extends Mode implements Settable {
 
 	@Override
 	public void draw() {
-		canvas.setCameraY(player.getY() * scaleVector.y, 0);
+		canvas.setCameraY(player.getY() * scaleVector.y, canvas.getHeight()/2);
 
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
