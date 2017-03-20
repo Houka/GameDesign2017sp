@@ -14,7 +14,7 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
  */
 public class PaintballFactory implements AssetUser {
     /** Texture file */
-    private static final String PAINTBALL_FILE = "character/paintball.png";
+    private static final String PAINTBALL_FILE = "sprites/paintball.png";
     /** Offset for Paintball when firing */
     private static float x_offset = 1.7f;
     private static float y_offset = 0.25f;

@@ -38,7 +38,7 @@ import edu.cornell.gdiac.game.interfaces.ScreenListener;
  */
 public class MenuMode extends Mode {
 	/** Background texture */
-	private static final String BACKGROUND_FILE = "menu/bg/menu.png";
+	private static final String BACKGROUND_FILE = "ui/bg/menu.png";
 	/** Selection menu items y offset from the center*/
 	private static final int MENU_ITEM_START_OFFSET_Y = 100;
 	/** Selection menu items y offset between each menu item*/

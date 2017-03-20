@@ -43,8 +43,8 @@ import edu.cornell.gdiac.game.interfaces.ScreenListener;
  */
 public class LoadingMode extends Mode {
 	// Textures necessary to support the loading screen 
-	private static final String BACKGROUND_FILE = "menu/bg/loading.png";
-	private static final String PROGRESS_FILE = "menu/progressbar.png";
+	private static final String BACKGROUND_FILE = "ui/bg/loading.png";
+	private static final String PROGRESS_FILE = "ui/progress_bar.png";
 
 	/** Texture atlas to support a progress bar */
 	private Texture statusBar;
