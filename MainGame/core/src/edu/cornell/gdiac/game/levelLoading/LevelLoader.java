@@ -20,14 +20,12 @@ import java.awt.*;
  */
 public class LevelLoader implements AssetUser, Disposable{
     // TODO: remove all this constant stuff once json works
-    private static String PLATFORM_FILE = "sprites/wall/wall_texture.png";
+    private static String PLATFORM_FILE = "sprites/fixtures/solid.png";
     private static String GOAL_FILE = "sprites/security_camera.png";
     private static String BACKGROUND_FILE = "sprites/wall/wall_texture.png";
     private static String ENEMY_FILE = "sprites/enemy/enemy_idle.png";
     private static String CHARACTER_FILE = "sprites/char/char_idle.png";
     private static String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
-
-    private static Vector2 DUDE_POS = new Vector2(2.5f, 5.0f);
 
     private TextureRegion platformTile;
     private TextureRegion goalTile;
@@ -138,7 +136,7 @@ public class LevelLoader implements AssetUser, Disposable{
         for (int ii = 0; ii < resources.length; ii++) {
             //type of resource is ammo depot
             if (resources[ii][0] == 0) {
-                AmmoDepotModel ammoDepot = new AmmoDepotModel(DUDE_POS.x + 3, DUDE_POS.y - 1, dwidth, dheight, 3);
+                AmmoDepotModel ammoDepot = new AmmoDepotModel(resources[ii][1], resources[ii][2], dwidth, dheight, 3);
                 ammoDepot.setDrawScale(scale);
                 ammoDepot.setTexture(depotTexture);
                 addQueuedObject(ammoDepot);
