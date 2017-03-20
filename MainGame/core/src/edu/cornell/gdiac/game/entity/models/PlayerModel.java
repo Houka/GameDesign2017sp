@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
 import edu.cornell.gdiac.game.interfaces.Settable;
 import edu.cornell.gdiac.game.interfaces.Shooter;
 import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
@@ -64,7 +65,16 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
     private int jumpCooldown;
     /** The current impulse of the jump */
     private float jumpForce;
-    /** Whether we are actively jumping */
+    /** Whether we are getting knocked back*/
+    private boolean isKnockedBack;
+    /** Direction of said knockback**/
+    private Vector2 knockbackDirection;
+    /** Force of said knockback**/
+    private float knockbackForce;
+    private float knockbackDuration = 60;
+    private float defaultKnockbackDuration = 60;
+
+    /** Whether we getting knockedBack jumping */
     private boolean isJumping;
     /** How long until we can shoot again */
     private int shootCooldown;
@@ -120,6 +130,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
         isGrounded = false;
         isShooting = false;
         isJumping = false;
+        isKnockedBack = false;
         canDoubleJump = false;
         isFacingRight = true;
 
@@ -127,6 +138,9 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
         jumpCooldown = 0;
         jumpForce = PLAYER_JUMP;
         maxSpeed = PLAYER_MAXSPEED;
+
+        knockbackForce = 0;
+        knockbackDirection = new Vector2(0,0);
     }
 
     // BEGIN: Setters and Getters
@@ -175,6 +189,26 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
      */
     public boolean isJumping() {return isJumping && isGrounded && jumpCooldown <= 0;}
 
+    public boolean isKnockedBack() {return isKnockedBack && knockbackDuration > 0;}
+
+    public void setKnockedBack(float dir){
+
+        if(isKnockedBack)
+            return;
+
+        if(dir==0) {
+            isKnockedBack=false;
+            return;
+        }
+
+        isKnockedBack=true;
+        knockbackDuration = defaultKnockbackDuration;
+        if(dir>0)
+            knockbackDirection.set(1,0);
+        else
+            knockbackDirection.set(-1,0);
+
+    }
 
     public boolean isDoubleJumping(){ return isJumping && !isGrounded && canDoubleJump; }
     /**
@@ -322,11 +356,19 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
             body.applyLinearImpulse(forceCache,getPosition(),true);
             setCanDoubleJump(false);
         }
+
+        if(isKnockedBack) {
+            forceCache.set(knockbackDirection.x*knockbackForce,knockbackDirection.y*knockbackForce); //TODO: use trig if we ever want y knockback
+            body.applyLinearImpulse(forceCache,getPosition(),true);
+
+        }
     }
 
     @Override
     public void applySettings() {
         jumpForce = Sidebar.getValue("Jump Height");
+        knockbackForce = Sidebar.getValue("Knockback Force");
+        defaultKnockbackDuration = Sidebar.getValue("Knockback Duration");
         maxSpeed = Sidebar.getValue("Player Speed");
     }
 
@@ -350,6 +392,13 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
         } else {
             shootCooldown = Math.max(0, shootCooldown - 1);
         }
+
+        if (isKnockedBack()) {
+            knockbackDuration = Math.max(0, knockbackDuration - 1);
+        } else {
+            isKnockedBack=false;
+        }
+
         super.update(dt);
     }
 

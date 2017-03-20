@@ -57,7 +57,16 @@ public class CollisionController implements ContactListener {
     }
     private void handleCollision(PlayerModel obj1, WallModel obj2){}
     private void handleCollision(PlayerModel obj1, PaintballModel obj2, Object userData1) {
-        touchedGround(obj1, obj2, userData1);
+        float sign = obj2.getVX() / Math.abs(obj2.getVX());
+        System.out.println("Player: " + obj1.getX());
+        System.out.println("Platform: " + (obj2.getX()+obj2.getWidth()/2f));
+        if(obj1.getY()-obj1.getHeight()/2f>=obj2.getY()){
+            touchedGround(obj1, obj2, userData1);
+        }
+        else if(obj1.getX()*sign>obj2.getX()*sign+obj2.getHeadSize()*-sign+(sign>0?obj2.getWidth()/2f:0)){
+            System.out.println("!!");
+            obj1.setKnockedBack(sign);
+        }
     }
     private void handleCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){
         obj2.markRemoved(true);

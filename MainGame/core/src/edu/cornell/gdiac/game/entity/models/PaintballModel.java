@@ -21,6 +21,7 @@ public class PaintballModel extends BoxObstacle {
     private float yScale;
     private float xtransform = 1f;
     private float ytransform = 1f;
+    private float headSize = .2f;
     private float paintballToPaintballDuration;
     private float paintballToWallDuration;
     private float paintballToPlatformDuration;
@@ -139,6 +140,14 @@ public class PaintballModel extends BoxObstacle {
 
     public void fixX(float val) {
         speed=val;
+    }
+
+    public float getHeadSize() {
+        return headSize;
+    }
+
+    public void setHeadSize(float headSize) {
+        this.headSize = headSize;
     }
 
     public void setYScale(float val) {

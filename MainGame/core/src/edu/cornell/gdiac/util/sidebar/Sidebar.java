@@ -48,6 +48,8 @@ public class Sidebar {
         Sidebar.addSlider("Gravity",-30f,0f,-20.0f);
         Sidebar.addSlider("Jump Height",10f,30f, 15f);
         Sidebar.addSlider("Player Speed",1f,10f,5.0f);
+        Sidebar.addSlider("Knockback Force",10f,30f, 15f);
+        Sidebar.addSlider("Knockback Duration",10f,80f, 45f);
         Sidebar.addSlider("Bullet Height",.1f,.5f,.25f);
         Sidebar.addSlider("Bullet Width",.5f,6.5f,3f);
         Sidebar.addSlider("Bullet Speed",1f,7.5f,3.2f);
