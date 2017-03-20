@@ -229,7 +229,6 @@ public class GameMode extends Mode implements Settable {
 		}
 
 		canvas.setCameraY(player.getY()*scaleVector.y);
-		canvas.getCamera().update();
 
 		postUpdate(dt);
 	}

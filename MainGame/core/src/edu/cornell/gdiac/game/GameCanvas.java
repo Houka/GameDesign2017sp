@@ -105,9 +105,6 @@ public class GameCanvas {
 		// Set the projection matrix (for proper scaling)
 		camera = new OrthographicCamera(getWidth(),getHeight());
 		camera.setToOrtho(false);
-		/*DELETE*/
-		//camera.position.set(getWidth() / 2, getHeight()/2, 0);
-		//camera.update();
 		spriteBatch.setProjectionMatrix(camera.combined);
 		debugRender.setProjectionMatrix(camera.combined);
 
@@ -373,16 +370,13 @@ public class GameCanvas {
     	active = DrawPass.STANDARD;
     }
 
-    public OrthographicCamera getCamera() {
-		return camera;
-    }
-
     public void setCamera(float x, float y) {
     	camera.translate(x-this.camera.position.x, y - this.camera.position.y);
 	}
 
 	public void setCameraY(float y) {
 		setCamera(this.camera.position.x,y);
+		camera.update();
 	}
 
 	/**
