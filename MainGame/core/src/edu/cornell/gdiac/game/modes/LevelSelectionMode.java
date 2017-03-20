@@ -26,7 +26,6 @@ import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
-import com.badlogic.gdx.math.Vector2;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
@@ -41,17 +40,17 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
 public class LevelSelectionMode extends Mode {
 	// TODO: remove this once we have working json file loading in assetmanager
 	private static final String[] NUM_LEVELS = {
-			"JSON/defaultNoCeiling.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
+			"JSON/level1.json","JSON/level3.json","JSON/default.json","JSON/default.json","JSON/default.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json"};
-	private static final int TOTAL_COLUMNS = 10;
+	private static final int TOTAL_COLUMNS = 4;
 	private static final int TOTAL_ROWS = (int)Math.ceil((float)NUM_LEVELS.length/TOTAL_COLUMNS);
-	private static final int BORDER_X = 20;
-	private static final int BORDER_Y = 20;
+	private static final int BORDER_X = 50;
+	private static final int BORDER_Y = 50;
 
 	// Textures necessary to support the loading screen
-	private static final String BACKGROUND_FILE = "menu/bg/levelSelection.png";
+	private static final String BACKGROUND_FILE = "ui/bg/level_selection.png";
 	/** Retro font for displaying messages */
 	private static String FONT_FILE = "fonts/RetroGame.ttf";
 	private static int FONT_SIZE = 64;
@@ -127,12 +126,12 @@ public class LevelSelectionMode extends Mode {
 		for (int i = 0; i < TOTAL_COLUMNS; i++){
 			for (int j = 0; j < TOTAL_ROWS; j++) {
 				if (selected == convertToIndex(i,j))
-					displayFont.setColor(Color.RED);
-				else
 					displayFont.setColor(Color.WHITE);
+				else
+					displayFont.setColor(Color.DARK_GRAY);
 
 				if (convertToIndex(i,j) < NUM_LEVELS.length) {
-					canvas.drawText("" + (convertToIndex(i, j) + 1), displayFont,
+					canvas.drawText("/" + (convertToIndex(i, j) + 1)+"\\", displayFont,
 							i * ((canvas.getWidth() - BORDER_X * 2) / TOTAL_COLUMNS) + BORDER_X,
 							canvas.getHeight() - j * displayFont.getLineHeight() - BORDER_Y);
 				}else{

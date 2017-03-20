@@ -48,9 +48,9 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
 
     // This is to fit the image to a tigher hitbox
     /** The amount to shrink the body fixture (vertically) relative to the image */
-    private static final float PLAYER_VSHRINK = 0.95f;
+    private static final float PLAYER_VSHRINK = 1f;
     /** The amount to shrink the body fixture (horizontally) relative to the image */
-    private static final float PLAYER_HSHRINK = 0.7f;
+    private static final float PLAYER_HSHRINK = 1f;
     /** The amount to shrink the sensor fixture (horizontally) relative to the image */
     private static final float PLAYER_SSHRINK = 0.6f;
 
@@ -296,15 +296,32 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
         return true;
     }
 
+    // TODO REMOVE THIS!!!
+    private PaintballModel ridingBullet = null;
+    public void setRidingVX(PaintballModel b){
+        ridingBullet = b;
+    }
+
     public void applyForce() {
         if (!isActive()) {
             return;
         }
 
-        if (getMovement() == 0f ) {
-            setVX(0);
+        // TODO: find better solution for riding a bullet
+        if (ridingBullet!=null) {
+            // Don't want to be moving. Damp out player motion
+            if (getMovement() == 0f ) {
+                setVX(ridingBullet.getVX());
+            }else{
+                setVX(Math.signum(getMovement())*getMaxSpeed()+ridingBullet.getVX());
+            }
         }else{
-            setVX(Math.signum(getMovement())*getMaxSpeed());
+            if (getMovement() == 0f ) {
+                setVX(0);
+            }else{
+                setVX(Math.signum(getMovement())*getMaxSpeed());
+            }
+
         }
 
         // Jump!

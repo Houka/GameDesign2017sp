@@ -1,5 +1,8 @@
 package edu.cornell.gdiac.util;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
+
 import java.util.Scanner;
 import java.io.*;
 
@@ -20,11 +23,12 @@ public class FileReaderWriter {
      */
     public String readJson(String JsonFile){
         try {
-            String content = new Scanner(new File(JsonFile)).useDelimiter("\\Z").next();
+            FileHandle handler = Gdx.files.local(JsonFile);
+            String content = handler.readString();
             return content;
         }
-        catch(FileNotFoundException e){
-            System.out.println("Json file not found.");
+        catch(Exception e){
+            System.out.println("Error: Json file not found.");
             return null;
         }
 

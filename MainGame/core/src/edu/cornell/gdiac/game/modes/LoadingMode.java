@@ -43,8 +43,8 @@ import edu.cornell.gdiac.game.interfaces.ScreenListener;
  */
 public class LoadingMode extends Mode {
 	// Textures necessary to support the loading screen 
-	private static final String BACKGROUND_FILE = "menu/bg/loading.png";
-	private static final String PROGRESS_FILE = "menu/progressbar.png";
+	private static final String BACKGROUND_FILE = "ui/bg/loading.png";
+	private static final String PROGRESS_FILE = "ui/progress_bar.png";
 
 	/** Texture atlas to support a progress bar */
 	private Texture statusBar;
@@ -219,7 +219,7 @@ public class LoadingMode extends Mode {
 
 		canvas.draw(statusFrgLeft, Color.WHITE, centerX - width / 2, centerY, scale * PROGRESS_CAP, scale * PROGRESS_HEIGHT);
 		if (progress > 0) {
-			float span = progress * (width - 2 * scale * PROGRESS_CAP) / 2.0f;
+			float span = progress * (width - 2 * scale * PROGRESS_CAP);
 			canvas.draw(statusFrgRight, Color.WHITE, centerX - width / 2 + scale * PROGRESS_CAP + span, centerY, scale * PROGRESS_CAP, scale * PROGRESS_HEIGHT);
 			canvas.draw(statusFrgMiddle, Color.WHITE, centerX - width / 2 + scale * PROGRESS_CAP, centerY, span, scale * PROGRESS_HEIGHT);
 		} else {

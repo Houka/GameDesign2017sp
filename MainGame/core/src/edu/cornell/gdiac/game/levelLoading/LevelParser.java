@@ -1,5 +1,6 @@
 package edu.cornell.gdiac.game.levelLoading;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import edu.cornell.gdiac.util.FileReaderWriter;
@@ -140,7 +141,7 @@ public class LevelParser {
             nextLevel = state.get("next level").asString();
         }
         catch (Exception e){
-            System.out.println("Improper Json");
+            Gdx.app.error("LevelParser", "Improper Json", new IllegalStateException());
         }
     }
 
