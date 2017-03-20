@@ -146,7 +146,7 @@ public class GameMain extends Game implements ScreenListener {
 
 				setScreen(menuMode);
 				// TODO: function to reset camera position?
-				canvas.setCameraY(canvas.getHeight()/2);
+				canvas.setCameraY(canvas.getHeight()/2, 0);
 			default:
 				break;
 		}
