@@ -36,11 +36,16 @@ public class HUDModel extends BoxObstacle {
 
     // BEGIN: Setters and Getters
     public void setWin(boolean value){ state = value? STATE_WIN: state; }
+    public boolean isWin(){ return state == STATE_WIN; }
     public void setLose(boolean value){ state = value? STATE_LOSE: state; }
+    public boolean isLose(){ return state == STATE_LOSE; }
     public void setFont(BitmapFont font){
         this.font = font;
     }
-    public void setStartingAmmo(int value){ startingAmmo = value; }
+    public void setStartingAmmo(int value){
+        startingAmmo = value;
+        ammoLeft = startingAmmo;
+    }
     public void setAmmoLeft(int value){ ammoLeft = Math.min(value, startingAmmo); }
     public int getAmmoLeft(){ return ammoLeft; }
     public boolean useAmmo(){
@@ -63,5 +68,10 @@ public class HUDModel extends BoxObstacle {
     public void draw(GameCanvas canvas){
         font.setColor(Color.DARK_GRAY);
         canvas.drawText("Ammo:"+ammoLeft, font, 0, getHeight());
+
+        if (state == STATE_WIN)
+            canvas.drawTextCentered("VICTORY", font, 0);
+        else if (state == STATE_LOSE)
+            canvas.drawTextCentered("FAILURE", font, 0);
     }
 }
