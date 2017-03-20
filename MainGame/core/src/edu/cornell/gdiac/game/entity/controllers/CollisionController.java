@@ -94,7 +94,6 @@ public class CollisionController implements ContactListener {
 
     private void handleCollision(PlayerModel obj1, AmmoDepotModel obj2) {
         obj2.setUsed(true);
-        obj2.markRemoved(true);
     }
 
     // Collision end handlers

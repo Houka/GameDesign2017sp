@@ -1,5 +1,15 @@
 package edu.cornell.gdiac.game.levelLoading;
 
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
+import edu.cornell.gdiac.util.FileReaderWriter;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Scanner;
+
 /**
  * Created by Lu on 2/27/2017.
  *
@@ -16,6 +26,16 @@ public class LevelParser {
     // Since these appear only once, we do not care about the magic numbers.
     // In an actual game, this information would go in a data file.
     // Wall vertices
+    private float[][] platforms;
+    private float[][] walls;
+    private float[] player;
+    private float[][] enemies;
+    private float[][] resources;
+    private float[] target;
+    private int startingAmmo;
+    private String nextLevel;
+
+
     private static final float[][] WALLS = {
             {16.0f, 18.0f, 16.0f, 17.0f,  1.0f, 17.0f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f, 18.0f},
             {32.0f, 18.0f, 32.0f,  0.0f, 31.0f,  0.0f, 31.0f, 17.0f, 16.0f, 17.0f, 16.0f, 18.0f}
@@ -36,13 +56,119 @@ public class LevelParser {
     /** Creates a level parser object*/
     public LevelParser(){}
 
+    //* Loads a json level file into class variables
+    public void loadLevel(String JsonFile){
+        try {
+            FileReaderWriter f = new FileReaderWriter();
+            String content = f.readJson(JsonFile);
+            JsonReader reader = new JsonReader();
+            JsonValue objects = reader.parse(content).get("objects");
+
+            //load player info
+            JsonValue playerJson = objects.get("player");
+            player = new float[]{playerJson.get("x").asFloat(), playerJson.get("y").asFloat()};
+
+            //load enemy info
+            JsonValue enemyJson = objects.get("enemies");
+            ArrayList<float[]> enemyList = new ArrayList<float[]>();
+            JsonValue.JsonIterator iter = enemyJson.iterator();
+            JsonValue tempJson;
+            float[] tempArray;
+            while (iter.hasNext()){
+                tempJson = iter.next();
+                tempArray = new float[] {tempJson.get("type").asFloat(), tempJson.get("x").asFloat(),
+                        tempJson.get("y").asFloat(), tempJson.get("isFacingRight").asFloat(),
+                        tempJson.get("interval").asFloat()};
+                enemyList.add(tempArray);
+            }
+            float[][] newEnemiesArray = new float[enemyList.size()][4];
+            for (int i = 0; i < enemyList.size(); i++)
+                newEnemiesArray[i] = enemyList.get(i);
+
+            enemies = newEnemiesArray;
+
+
+            //load target info
+            JsonValue targetJson = objects.get("target");
+            target = new float[]{targetJson.get("x").asFloat(), targetJson.get("y").asFloat()};
+
+            //load resource info
+            JsonValue resourceJson = objects.get("resources");
+            ArrayList<float[]> resourceList = new ArrayList<float[]>();
+            iter = resourceJson.iterator();
+            while (iter.hasNext()){
+                tempJson = iter.next();
+                tempArray = new float[] {tempJson.get("type").asFloat(), tempJson.get("x").asFloat(),
+                        tempJson.get("y").asFloat()};
+                resourceList.add(tempArray);
+            }
+            float[][] newResourceArray = new float[resourceList.size()][3];
+            for (int i = 0; i < resourceList.size(); i++)
+                newResourceArray[i] = resourceList.get(i);
+
+            resources = newResourceArray;
+
+            //load platform info
+            JsonValue platformJson = objects.get("platforms");
+            ArrayList<float[]> platformList = new ArrayList<float[]>();
+            iter = platformJson.iterator();
+            while (iter.hasNext()){
+                platformJson = iter.next();
+                platformList.add(platformJson.get("vertices").asFloatArray());
+            }
+            float[][] newPlatformArray = new float[platformList.size()][];
+            for (int i = 0; i < platformList.size(); i++)
+                newPlatformArray[i] = platformList.get(i);
+            platforms = newPlatformArray;
+
+            //load wall info
+            JsonValue wallJson = objects.get("walls");
+            ArrayList<float[]> wallList = new ArrayList<float[]>();
+            iter = wallJson.iterator();
+            while (iter.hasNext()){
+                wallJson = iter.next();
+                wallList.add(wallJson.get("vertices").asFloatArray());
+            }
+            float[][] newWallArray = new float[wallList.size()][];
+            for (int i = 0; i < wallList.size(); i++)
+                newWallArray[i] = wallList.get(i);
+
+            walls = newWallArray;
+
+            JsonValue state = reader.parse(content).get("state");
+            startingAmmo = state.get("starting ammo").asInt();
+            nextLevel = state.get("next level").asString();
+        }
+        catch (Exception e){
+            System.out.println("Improper Json");
+        }
+    }
+
     /** Returns the walls of a level. Currently we just have one level*/
     public float[][] getWalls(){
-        return WALLS;
+        return walls;
     }
 
     /** Returns the platforms of a level. Currently we just have one level*/
     public float[][] getPlatforms(){
-        return PLATFORMS;
+        return platforms;
     }
+
+    /** Returns the data for the enemies*/
+    public float[][] getEnemies() { return enemies; }
+
+    /** Returns the resources */
+    public float[][] getResources() { return resources; }
+
+    /** Returns the  target loation*/
+    public float[] getTarget() { return target; }
+
+    /** Returns the player location*/
+    public float[] getPlayer() { return player; }
+
+    /** Returns the starting ammo*/
+    public int getStartingAmmo() { return startingAmmo; }
+
+    /** Returns the next level*/
+    public String getNextLevel() { return nextLevel; }
 }
