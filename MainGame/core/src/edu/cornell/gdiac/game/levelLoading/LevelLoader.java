@@ -62,7 +62,7 @@ public class LevelLoader implements AssetUser, Disposable{
         addQueue.clear();
 
         //sets the new world bounds TODO: do this with json values
-        bounds = new Rectangle(0,0,32,18);
+        bounds = new Rectangle(0,0,32,18*3);
         levelParser.loadLevel(JSONFile);
         populateLevel();
 
@@ -84,7 +84,7 @@ public class LevelLoader implements AssetUser, Disposable{
         // add background
         float dwidth  = bgTile.getRegionWidth()/scale.x;
         float dheight = bgTile.getRegionHeight()/scale.y;
-        BoxObstacle bg = new BackgroundModel(dwidth/2,dheight/2,dwidth,dheight);
+        BoxObstacle bg = new BackgroundModel(dwidth/2,dheight/2,dwidth*2,dheight*3);
         bg.setDrawScale(scale);
         bg.setTexture(bgTile);
         addQueuedObject(bg);
