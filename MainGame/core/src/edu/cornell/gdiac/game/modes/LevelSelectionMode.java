@@ -40,7 +40,7 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
 public class LevelSelectionMode extends Mode {
 	// TODO: remove this once we have working json file loading in assetmanager
 	private static final String[] NUM_LEVELS = {
-			"JSON/level1.json","JSON/level3.json","JSON/default.json","JSON/default.json","JSON/default.json",
+			"JSON/level1.json","JSON/level3.json","JSON/default.json","JSON/default.json","JSON/level5.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json"};
