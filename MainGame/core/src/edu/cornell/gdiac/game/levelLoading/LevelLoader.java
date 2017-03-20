@@ -20,22 +20,16 @@ import java.awt.*;
  */
 public class LevelLoader implements AssetUser, Disposable{
     // TODO: remove all this constant stuff once json works
-    private static String EARTH_FILE = "character/earthtile.png";
-    private static String GOAL_FILE = "character/securityCamera.png";
-    private static String BG_FILE = "character/facade.png";
-    private static String ENEMY_FILE = "character/charIdle.png";
-    private static String CHARACTER_FILE = "character/charStatic.png";
-    private static String AMMO_DEPOT_FILE = "character/refillCan.png";
+    private static String PLATFORM_FILE = "sprites/wall/wall_texture.png";
+    private static String GOAL_FILE = "sprites/security_camera.png";
+    private static String BACKGROUND_FILE = "sprites/wall/wall_texture.png";
+    private static String ENEMY_FILE = "sprites/enemy/enemy_idle.png";
+    private static String CHARACTER_FILE = "sprites/char/char_idle.png";
+    private static String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
 
-
-    private static final float  BASIC_DENSITY = 0.0f;
-    private static final float  BASIC_FRICTION = 0.4f;
-    private static final float  BASIC_RESTITUTION = 0.1f;
-
-    private static Vector2 GOAL_POS = new Vector2(29.5f,15.0f); // x = 4.0f, y = 14.0f
     private static Vector2 DUDE_POS = new Vector2(2.5f, 5.0f);
 
-    private TextureRegion earthTile;
+    private TextureRegion platformTile;
     private TextureRegion goalTile;
     private TextureRegion bgTile;
     private TextureRegion enemyTexture;
@@ -111,7 +105,7 @@ public class LevelLoader implements AssetUser, Disposable{
         for (int ii = 0; ii < walls.length; ii++) {
             PolygonObstacle obj = new WallModel(walls[ii]);
             obj.setDrawScale(scale);
-            obj.setTexture(earthTile);
+            obj.setTexture(platformTile);
             addQueuedObject(obj);
         }
 
@@ -119,7 +113,7 @@ public class LevelLoader implements AssetUser, Disposable{
         for (int ii = 0; ii < platforms.length; ii++) {
             PolygonObstacle obj = new PlatformModel(platforms[ii]);
             obj.setDrawScale(scale);
-            obj.setTexture(earthTile);
+            obj.setTexture(platformTile);
             addQueuedObject(obj);
         }
 
@@ -170,9 +164,9 @@ public class LevelLoader implements AssetUser, Disposable{
     @Override
     public void preLoadContent(AssetManager manager) {
         // Load the shared tiles.
-        manager.load(EARTH_FILE,Texture.class);
+        manager.load(PLATFORM_FILE,Texture.class);
         manager.load(GOAL_FILE,Texture.class);
-        manager.load(BG_FILE,Texture.class);
+        manager.load(BACKGROUND_FILE,Texture.class);
         manager.load(ENEMY_FILE,Texture.class);
         manager.load(CHARACTER_FILE, Texture.class);
         manager.load(AMMO_DEPOT_FILE, Texture.class);
@@ -180,8 +174,8 @@ public class LevelLoader implements AssetUser, Disposable{
 
     @Override
     public void loadContent(AssetManager manager) {
-        bgTile  = AssetRetriever.createTexture(manager,BG_FILE,true);
-        earthTile = AssetRetriever.createTexture(manager,EARTH_FILE,true);
+        bgTile  = AssetRetriever.createTexture(manager, BACKGROUND_FILE,true);
+        platformTile = AssetRetriever.createTexture(manager,PLATFORM_FILE,true);
         goalTile  = AssetRetriever.createTexture(manager,GOAL_FILE,false);
         enemyTexture  = AssetRetriever.createTexture(manager,ENEMY_FILE,false);
         playerTexture = AssetRetriever.createTexture(manager, CHARACTER_FILE, false);
@@ -190,8 +184,8 @@ public class LevelLoader implements AssetUser, Disposable{
 
     @Override
     public void unloadContent(AssetManager manager) {
-        manager.unload(BG_FILE);
-        manager.unload(EARTH_FILE);
+        manager.unload(BACKGROUND_FILE);
+        manager.unload(PLATFORM_FILE);
         manager.unload(GOAL_FILE);
         manager.unload(ENEMY_FILE);
         manager.unload(CHARACTER_FILE);

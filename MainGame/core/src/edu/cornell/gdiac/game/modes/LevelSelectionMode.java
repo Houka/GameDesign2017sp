@@ -51,7 +51,7 @@ public class LevelSelectionMode extends Mode {
 	private static final int BORDER_Y = 50;
 
 	// Textures necessary to support the loading screen
-	private static final String BACKGROUND_FILE = "menu/bg/levelSelection.png";
+	private static final String BACKGROUND_FILE = "ui/bg/levelSelection.png";
 	/** Retro font for displaying messages */
 	private static String FONT_FILE = "fonts/RetroGame.ttf";
 	private static int FONT_SIZE = 64;
