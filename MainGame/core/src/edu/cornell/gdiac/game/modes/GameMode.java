@@ -227,8 +227,7 @@ public class GameMode extends Mode implements Settable {
 				hud.addAmmo(((AmmoDepotModel) obj).getAmmoAmount());
 			}
 		}
-
-		canvas.setCameraY(player.getY()*scaleVector.y);
+		canvas.setCameraY(player.getY() * scaleVector.y);
 
 		postUpdate(dt);
 	}

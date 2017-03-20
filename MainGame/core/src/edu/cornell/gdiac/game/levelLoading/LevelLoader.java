@@ -93,6 +93,7 @@ public class LevelLoader implements AssetUser, Disposable{
         float dheight = bgTile.getRegionHeight()/scale.y;
         BoxObstacle bg = new BackgroundModel(dwidth/2,dheight/2,dwidth,dheight);
         bg.setDrawScale(scale);
+        bgTile.getTexture().setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
         bg.setTexture(bgTile);
         addQueuedObject(bg);
 
