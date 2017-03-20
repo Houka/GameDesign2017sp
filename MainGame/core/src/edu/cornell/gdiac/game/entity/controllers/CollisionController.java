@@ -22,10 +22,13 @@ import edu.cornell.gdiac.util.obstacles.Obstacle;
  *  PlayerGroundSensor
  */
 public class CollisionController implements ContactListener {
+    /** the hud*/
+    private HUDModel hud;
     /** Mark set to handle more sophisticated collision callbacks */
     private ObjectSet<Object> sensorObjects;
 
-    public CollisionController(){
+    public CollisionController(HUDModel hud){
+        this.hud = hud;
         sensorObjects = new ObjectSet<Object>();
     }
 
@@ -55,10 +58,17 @@ public class CollisionController implements ContactListener {
     private void handleCollision(PlayerModel obj1, WallModel obj2){}
     private void handleCollision(PlayerModel obj1, PaintballModel obj2, Object userData1) {
         touchedGround(obj1, obj2, userData1);
+        obj1.setRidingVX(obj2);
     }
-    private void handleCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){}
+    private void handleCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){
+        obj2.markRemoved(true);
+        obj1.setStunned(true);
+    }
     private void handleCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}
-    private void handleCollision(GoalModel obj1, PaintballModel obj2){}
+    private void handleCollision(GoalModel obj1, PaintballModel obj2){
+        hud.setWin(true);
+        obj2.markRemoved(true);
+    }
     private void handleCollision(PaintballModel obj1, PaintballModel obj2){
         if(obj1.isDead() || obj2.isDead())
             return;
@@ -96,6 +106,7 @@ public class CollisionController implements ContactListener {
     }
     private void handleCollision(PlayerModel obj1, AmmoDepotModel obj2) {
         obj2.setUsed(true);
+        hud.addAmmo(obj2.getAmmoAmount());
     }
 
     // Collision end handlers
@@ -105,6 +116,7 @@ public class CollisionController implements ContactListener {
     }
     private void handleEndCollision(PlayerModel obj1,PaintballModel obj2, Object userData1){
         leftGround(obj1,obj2,userData1);
+        obj1.setRidingVX(null);
     }
     private void handleEndCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){}
     private void handleEndCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}

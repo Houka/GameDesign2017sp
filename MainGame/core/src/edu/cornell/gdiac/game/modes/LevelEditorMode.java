@@ -35,7 +35,7 @@ import edu.cornell.gdiac.game.interfaces.ScreenListener;
  */
 public class LevelEditorMode extends Mode {
 	// Textures necessary to support the loading screen
-	private static final String BACKGROUND_FILE = "menu/bg/levelEditor.png";
+	private static final String BACKGROUND_FILE = "ui/bg/level_editor.png";
 
 	/**
 	 * Creates a Level Editor Mode with the default size and position.
