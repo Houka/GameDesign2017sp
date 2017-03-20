@@ -244,8 +244,6 @@ public class GameMode extends Mode implements Settable {
 			obj.draw(canvas);
 		}
 
-		//canvas.setCameraY(0, 0);
-
 		hud.draw(canvas);
 	}
 
