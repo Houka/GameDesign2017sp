@@ -62,6 +62,7 @@ public class LevelLoader implements AssetUser, Disposable{
     // BEGIN: Setters and Getters
     public Rectangle getBounds(){ return bounds; }
     public PooledList<Obstacle> getAddQueue(){ return addQueue; }
+    public int getStartingAmmo(){ return levelParser.getStartingAmmo(); }
     // END: Setters and Getters
 
     /**

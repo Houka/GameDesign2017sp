@@ -287,6 +287,7 @@ public class GameMode extends Mode implements Settable {
 		this.levelFile = levelFile;
 		levelLoader.loadLevel(levelFile);
 		resize(levelLoader.getBounds().width, levelLoader.getBounds().height);
+		hud.setStartingAmmo(levelLoader.getStartingAmmo());
 		if (!trySetPlayer())
 			System.out.println("Error: level file (" + levelFile + ") does not have a player");
 	}
