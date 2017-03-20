@@ -64,9 +64,6 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
     private boolean isFacingRight;
     /** If the enemy is OnSight or not */
     private boolean onSight;
-    /** Whether we  are stunned */
-    private boolean isStunned;
-
 
     /**
      * Returns the name of the ground sensor
@@ -101,7 +98,6 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
 
         // Gameplay attributes
         isShooting = false;
-        isStunned = false;
         shootCooldownCounter = 0;
         stunCooldownCounter = 0;
         this.isFacingRight = isFacingRight;
@@ -149,9 +145,9 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
         this.onSight = onSight;
     }
 
-    public boolean isStunned() { return isStunned && stunCooldownCounter <= 0; }
+    public boolean isStunned() { return stunCooldownCounter > 0; }
 
-    public void setStunned(boolean value) { isStunned = value; }
+    public void setStunned(boolean value) { stunCooldownCounter = value? stunCooldown : 0; }
 
     @Override
     public boolean isFacingRight() {
@@ -159,7 +155,7 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
     }
 
     @Override
-    public boolean isShooting() {return isShooting && shootCooldownCounter <= 0;}
+    public boolean isShooting() {return isShooting && shootCooldownCounter <= 0 && !isStunned();}
 
     @Override
     public void setShooting(boolean value) { isShooting = value; }
@@ -180,10 +176,8 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
         else
             shootCooldownCounter = Math.max(0, shootCooldownCounter - 1);
 
-        if (isStunned())
-            stunCooldownCounter = stunCooldown;
-        else
-            stunCooldownCounter = Math.max(0, stunCooldownCounter - 1);
+        if (stunCooldownCounter > 0)
+            stunCooldownCounter --;
     }
 
     /**
