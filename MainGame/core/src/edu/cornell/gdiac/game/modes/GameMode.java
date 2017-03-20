@@ -150,11 +150,11 @@ public class GameMode extends Mode implements Settable {
 		scaleVector = new Vector2(canvas.getWidth() / bounds.getWidth(), canvas.getHeight() / bounds.getHeight());
 
 		world = new World(gravity, false);
-		world.setContactListener(new CollisionController());
+		hud = new HUDModel(canvas.getWidth(), canvas.getHeight());
+		world.setContactListener(new CollisionController(hud));
 		paintballFactory = new PaintballFactory(scaleVector);
 		levelLoader = new LevelLoader(scaleVector);
 		this.bounds = new Rectangle(bounds);
-		hud = new HUDModel(canvas.getWidth(), canvas.getHeight());
 		hud.setDrawScale(scaleVector);
 
 		succeeded = false;
@@ -222,10 +222,6 @@ public class GameMode extends Mode implements Settable {
 				((Settable) obj).applySettings();
 			if(obj instanceof Shooter)
 				updateShooter(obj);
-			if(obj instanceof AmmoDepotModel && ((AmmoDepotModel) obj).isUsed()) {
-				// TODO: find better solution for hud communication with other objs
-				hud.addAmmo(((AmmoDepotModel) obj).getAmmoAmount());
-			}
 		}
 
 		postUpdate(dt);

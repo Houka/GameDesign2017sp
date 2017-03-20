@@ -11,10 +11,15 @@ import edu.cornell.gdiac.util.obstacles.BoxObstacle;
  */
 public class HUDModel extends BoxObstacle {
     private static final int DEFAULT_STARTING_AMMO = 10;
+    private static final int STATE_PLAYING = 0;
+    private static final int STATE_WIN = 1;
+    private static final int STATE_LOSE = 2;
 
     private BitmapFont font;
     private int ammoLeft;
     private int startingAmmo;
+
+    private int state = STATE_PLAYING;
 
     public HUDModel(float width, float height) {
         super(width/2,height/2, width, height);
@@ -30,6 +35,8 @@ public class HUDModel extends BoxObstacle {
     }
 
     // BEGIN: Setters and Getters
+    public void setWin(boolean value){ state = value? STATE_WIN: state; }
+    public void setLose(boolean value){ state = value? STATE_LOSE: state; }
     public void setFont(BitmapFont font){
         this.font = font;
     }
