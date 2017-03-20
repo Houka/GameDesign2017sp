@@ -217,27 +217,13 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
 
     // END: Setters and Getters
 
-    public void applyForce() {
-        if (!isActive()) {
-            return;
-        }
-
-        if (getMovement() == 0f ) {
-            setVX(0);
-        }else{
-            setVX(Math.signum(getMovement()));
-        }
-    }
-
     /**
      * Updates the object's physics state (NOT GAME LOGIC).
      *
      * We use this method to reset cooldowns.
      *
      */
-    public void update(float dt) {
-        super.update(dt);
-    }
+    public void update(float dt) { super.update(dt); }
 
     /**
      * Draws the physics object.

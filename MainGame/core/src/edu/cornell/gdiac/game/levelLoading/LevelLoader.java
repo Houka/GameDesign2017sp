@@ -5,17 +5,14 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.Disposable;
 import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.game.interfaces.AssetUser;
 import edu.cornell.gdiac.util.AssetRetriever;
-import edu.cornell.gdiac.util.FileReaderWriter;
 import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
-import java.util.Arrays;
 import java.awt.*;
 
 /**
@@ -26,7 +23,7 @@ public class LevelLoader implements AssetUser, Disposable{
     private static String EARTH_FILE = "character/earthtile.png";
     private static String GOAL_FILE = "character/securityCamera.png";
     private static String BG_FILE = "character/facade.png";
-    private static String ENEMY_FILE = "character/dude.png";
+    private static String ENEMY_FILE = "character/charIdle.png";
     private static String CHARACTER_FILE = "character/charStatic.png";
     private static String AMMO_DEPOT_FILE = "character/refillCan.png";
 
