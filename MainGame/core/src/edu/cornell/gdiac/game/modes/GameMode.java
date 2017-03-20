@@ -227,18 +227,24 @@ public class GameMode extends Mode implements Settable {
 				hud.addAmmo(((AmmoDepotModel) obj).getAmmoAmount());
 			}
 		}
-		canvas.setCameraY(player.getY() * scaleVector.y, 0);
+
+
+		hud.setY((Math.max(player.getY(), 0)*scaleVector.y)+canvas.getHeight()/2);
+		System.out.println(hud.getY());
 
 		postUpdate(dt);
 	}
 
+
 	@Override
 	public void draw() {
-		canvas.setCameraY(player.getY(), 0);
+		canvas.setCameraY(player.getY() * scaleVector.y, 0);
 
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
+
+		//canvas.setCameraY(0, 0);
 
 		hud.draw(canvas);
 	}
