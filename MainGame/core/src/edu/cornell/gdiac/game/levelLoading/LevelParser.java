@@ -140,7 +140,7 @@ public class LevelParser {
             nextLevel = state.get("next level").asString();
         }
         catch (Exception e){
-            System.out.println("Improper Json");
+            System.out.println("Error: Improper Json");
         }
     }
 
