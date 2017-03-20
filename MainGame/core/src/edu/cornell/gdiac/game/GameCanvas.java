@@ -375,9 +375,6 @@ public class GameCanvas {
 	}
 
     public void setCamera(float x, float y, float levelBottom) {
-    	//camera.position.set(x, Math.max(y,levelBottom), 0);
-		//System.out.println("cam position: " + this.camera.position.y);
-		//System.out.println(Math.max(levelBottom-this.camera.position.y, y-this.camera.position.y));
 		camera.translate(x-this.camera.position.x, Math.max(levelBottom-this.camera.position.y, y-this.camera.position.y));
 
 	}
