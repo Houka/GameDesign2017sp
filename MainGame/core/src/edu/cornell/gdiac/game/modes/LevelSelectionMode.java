@@ -45,10 +45,10 @@ public class LevelSelectionMode extends Mode {
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json"};
-	private static final int TOTAL_COLUMNS = 10;
+	private static final int TOTAL_COLUMNS = 4;
 	private static final int TOTAL_ROWS = (int)Math.ceil((float)NUM_LEVELS.length/TOTAL_COLUMNS);
-	private static final int BORDER_X = 20;
-	private static final int BORDER_Y = 20;
+	private static final int BORDER_X = 50;
+	private static final int BORDER_Y = 50;
 
 	// Textures necessary to support the loading screen
 	private static final String BACKGROUND_FILE = "menu/bg/levelSelection.png";
@@ -127,12 +127,12 @@ public class LevelSelectionMode extends Mode {
 		for (int i = 0; i < TOTAL_COLUMNS; i++){
 			for (int j = 0; j < TOTAL_ROWS; j++) {
 				if (selected == convertToIndex(i,j))
-					displayFont.setColor(Color.RED);
-				else
 					displayFont.setColor(Color.WHITE);
+				else
+					displayFont.setColor(Color.DARK_GRAY);
 
 				if (convertToIndex(i,j) < NUM_LEVELS.length) {
-					canvas.drawText("" + (convertToIndex(i, j) + 1), displayFont,
+					canvas.drawText("/" + (convertToIndex(i, j) + 1)+"\\", displayFont,
 							i * ((canvas.getWidth() - BORDER_X * 2) / TOTAL_COLUMNS) + BORDER_X,
 							canvas.getHeight() - j * displayFont.getLineHeight() - BORDER_Y);
 				}else{

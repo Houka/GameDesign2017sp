@@ -40,7 +40,7 @@ public class MenuMode extends Mode {
 	/** Background texture */
 	private static final String BACKGROUND_FILE = "menu/bg/menu.png";
 	/** Selection menu items y offset from the center*/
-	private static final int MENU_ITEM_START_OFFSET_Y = 50;
+	private static final int MENU_ITEM_START_OFFSET_Y = 100;
 	/** Selection menu items y offset between each menu item*/
 	private static final int MENU_ITEM_GAP_OFFSET_Y = 20;
 	/** Retro font for displaying messages */
@@ -125,9 +125,9 @@ public class MenuMode extends Mode {
 		// draw menu items
 		for (int i = 0; i<modeNames.length; i++) {
 			if (selected == i)
-				displayFont.setColor(Color.RED);
-			else
 				displayFont.setColor(Color.WHITE);
+			else
+				displayFont.setColor(Color.DARK_GRAY);
 			canvas.drawTextCentered(modeNames[i], displayFont,
 					(displayFont.getLineHeight()+ MENU_ITEM_GAP_OFFSET_Y)*-i+MENU_ITEM_START_OFFSET_Y);
 		}

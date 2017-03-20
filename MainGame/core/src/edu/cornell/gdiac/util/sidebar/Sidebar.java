@@ -15,6 +15,7 @@ public class Sidebar {
     private static int currHeight;
     public static int value =0;
     private static HashMap<String,Float> theMap;
+    private static boolean created = false;
 
     private static void createAndShowGUI() {
         frame = new JFrame("Sidebar Tool");
@@ -38,8 +39,11 @@ public class Sidebar {
      * Call this to boot up the SidebarTool with default parameters
      */
     public static void defaultBootup(){
+        if (created)
+            return;
 
         Sidebar.bootUp();
+        created = true;
         //Below fields are just samples
         Sidebar.addSlider("Gravity",-30f,0f,-20.0f);
         Sidebar.addSlider("Jump Height",10f,30f, 15f);
@@ -49,8 +53,6 @@ public class Sidebar {
         Sidebar.addSlider("Bullet Speed",1f,7.5f,3.2f);
         Sidebar.addSlider("Bullet-Bullet Stick Time",0f,10f,5f);
         Sidebar.addSlider("Bullet-Wall Stick Time",0f,10f,5f);
-
-
     }
 
     public static void bootUp() {

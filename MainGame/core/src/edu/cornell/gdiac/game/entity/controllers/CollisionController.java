@@ -59,11 +59,14 @@ public class CollisionController implements ContactListener {
     private void handleCollision(PlayerModel obj1, PaintballModel obj2, Object userData1) {
         touchedGround(obj1, obj2, userData1);
     }
-    private void handleCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){}
+    private void handleCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){
+        obj2.markRemoved(true);
+        obj1.setStunned(true);
+    }
     private void handleCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}
     private void handleCollision(GoalModel obj1, PaintballModel obj2){
         hud.setWin(true);
-        obj1.markRemoved(true);
+        obj2.markRemoved(true);
     }
     private void handleCollision(PaintballModel obj1, PaintballModel obj2){
         if(obj1.isDead() || obj2.isDead())
