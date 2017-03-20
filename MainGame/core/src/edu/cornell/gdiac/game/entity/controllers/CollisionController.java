@@ -58,6 +58,7 @@ public class CollisionController implements ContactListener {
     private void handleCollision(PlayerModel obj1, WallModel obj2){}
     private void handleCollision(PlayerModel obj1, PaintballModel obj2, Object userData1) {
         touchedGround(obj1, obj2, userData1);
+        obj1.setRidingVX(obj2);
     }
     private void handleCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){
         obj2.markRemoved(true);
@@ -115,6 +116,7 @@ public class CollisionController implements ContactListener {
     }
     private void handleEndCollision(PlayerModel obj1,PaintballModel obj2, Object userData1){
         leftGround(obj1,obj2,userData1);
+        obj1.setRidingVX(null);
     }
     private void handleEndCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){}
     private void handleEndCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}
