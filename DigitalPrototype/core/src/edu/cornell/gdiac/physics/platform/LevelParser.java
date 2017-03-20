@@ -8,8 +8,6 @@ package edu.cornell.gdiac.physics.platform;
  *  - parses data to a standard format for our game controllers
  *  - returns the information
  *
- * TODO: figure out what the values in WALLS and PLATFORMS represent
- * TODO: figure out how to make the medium level with this level format from WALLS and PLATFORMS
  * TODO: (extra) abstract the data out into a data file that can be loaded with this class with a string of the file name
  */
 public class LevelParser {
