@@ -192,6 +192,7 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 
 			canvas.clear();
 			canvas.begin();
+			canvas.getCamera().update();
 			draw();
 			canvas.end();
 

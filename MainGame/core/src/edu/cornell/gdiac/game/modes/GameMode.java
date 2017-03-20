@@ -278,7 +278,12 @@ public class GameMode extends Mode {
 		}
 
 		postUpdate(dt);
-		//scrollUp();
+		/* DELETE */
+		//canvas.getCamera().unproject(new Vector3(player.getX(), player.getY(), 0));
+		canvas.setCameraY(player.getY());
+		canvas.getCamera().update();
+		System.out.println(canvas.getCamera().position);
+
 	}
 
 	@Override
