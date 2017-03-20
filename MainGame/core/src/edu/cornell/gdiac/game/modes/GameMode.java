@@ -55,89 +55,50 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
  * place nicely with the static assets.
  */
 public class GameMode extends Mode implements Settable {
-	/**
-	 * Retro font for displaying messages
-	 */
+	/** Retro font for displaying messages */
 	private static String FONT_FILE = "fonts/RetroGame.ttf";
 
-	/**
-	 * The amount of time for a physics engine step.
-	 */
+	/** The amount of time for a physics engine step.	 */
 	public static final float WORLD_STEP = 1 / 60.0f;
-	/**
-	 * Number of velocity iterations for the constrain solvers
-	 */
+	/** Number of velocity iterations for the constrain solvers	 */
 	public static final int WORLD_VELOC = 6;
-	/**
-	 * Number of position iterations for the constrain solvers
-	 */
+	/** Number of position iterations for the constrain solvers	 */
 	public static final int WORLD_POSIT = 2;
 
-	/**
-	 * Width of the game world in Box2d units
-	 */
+	/** Width of the game world in Box2d units	 */
 	private static final float DEFAULT_WIDTH = 32.0f;
-	/**
-	 * Height of the game world in Box2d units
-	 */
+	/** Height of the game world in Box2d units	 */
 	private static final float DEFAULT_HEIGHT = 18.0f;
-	/**
-	 * The default value of gravity (going down)
-	 */
+	/** The default value of gravity (going down)	 */
 	private static final float DEFAULT_GRAVITY = -20.0f;
 
-	/**
-	 * All the objects in the world.
-	 */
+	/** All the objects in the world.	 */
 	private PooledList<Obstacle> objects = new PooledList<Obstacle>();
-	/**
-	 * All the Entity Controllers in the world
-	 */
+	/** All the Entity Controllers in the world	 */
 	private PooledList<EntityController> entityControllers = new PooledList<EntityController>();
 
-	/**
-	 * The Box2D world
-	 */
+	/** The Box2D world	 */
 	private World world;
-	/**
-	 * The boundary of the world
-	 */
+	/** The boundary of the world	 */
 	private Rectangle bounds;
-	/**
-	 * The player
-	 */
+	/** The player	 */
 	private PlayerModel player;
-	/**
-	 * The factory that creates projectiles
-	 */
+	/** The factory that creates projectiles	 */
 	private PaintballFactory paintballFactory;
-	/**
-	 * The hud of this world
-	 */
+	/** The hud of this world	 */
 	private HUDModel hud;
 
-	/**
-	 * The level loader
-	 */
+	/** The level loader	 */
 	private LevelLoader levelLoader;
-	/**
-	 * The level this game mode loads in
-	 */
+	/** The level this game mode loads in	 */
 	private String levelFile;
 
-	/**
-	 * The world scale Vector
-	 */
+	/** The world scale Vector	 */
 	private Vector2 scaleVector;
-	/**
-	 * Whether we have completed this level
-	 */
+	/** Whether we have completed this level	 */
 	private boolean succeeded;
-	/**
-	 * Whether we have failed at this world (and need a reset)
-	 */
+	/** Whether we have failed at this world (and need a reset)	 */
 	private boolean failed;
-
 
 	/**
 	 * Creates a new game world with the default values.
@@ -317,6 +278,11 @@ public class GameMode extends Mode implements Settable {
 		levelLoader.unloadContent(manager);
 	}
 
+	@Override
+	public void applySettings() {
+		world.setGravity(new Vector2(0, Sidebar.getValue("Gravity")));
+	}
+
 	/**
 	 * TODO: write desc for level setting.. should populate the level
 	 */
@@ -334,10 +300,8 @@ public class GameMode extends Mode implements Settable {
 	private void updateShooter(Obstacle obj) {
 		if (((Shooter)obj).isShooting()) {
 			if (obj.getName().equals("player") && hud.useAmmo())
-				// player shooting
 				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
-			else if (!obj.getName().equals("player"))
-				// enemies shooting
+			else if (obj.getName().equals("enemy"))
 				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
 		}
 	}
@@ -353,9 +317,8 @@ public class GameMode extends Mode implements Settable {
 	 */
 	private void postUpdate(float dt) {
 		// Add any objects created by actions
-		while (!levelLoader.getAddQueue().isEmpty()) {
+		while (!levelLoader.getAddQueue().isEmpty())
 			addObject(levelLoader.getAddQueue().poll());
-		}
 
 		// Turn the physics engine crank.
 		world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
@@ -411,10 +374,5 @@ public class GameMode extends Mode implements Settable {
 		boolean horiz = (bounds.x <= obj.getX() && obj.getX() <= bounds.x + bounds.width);
 		boolean vert = (bounds.y <= obj.getY() && obj.getY() <= bounds.y + bounds.height);
 		return horiz && vert;
-	}
-
-	@Override
-	public void applySettings() {
-		world.setGravity(new Vector2(0, Sidebar.getValue("Gravity")));
 	}
 }
