@@ -31,7 +31,8 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
     /** The player is a slippery one */
     private static final float ENEMY_FRICTION = 0.0f;
 
-    public static final int SHOT_COOLDOWN = 75;
+    private static final int DEFAULT_SHOOT_COOLDOWN = 75;
+    private static final int DEFAULT_STUN_COOLDOWN = 500;
 
     // This is to fit the image to a tigher hitbox
     /** The amount to shrink the body fixture (vertically) relative to the image */
@@ -52,17 +53,19 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
     /** The current horizontal movement of the character */
     private float movement;
     /** How long until we can shoot again */
+    private int shootCooldownCounter;
+    private int stunCooldownCounter;
+    /** How long we need to wait until we can shoot again */
     private int shootCooldown;
+    private int stunCooldown;
     /** Whether we are actively shooting */
     private boolean isShooting;
     /** Which direction is the character facing */
     private boolean isFacingRight;
     /** If the enemy is OnSight or not */
     private boolean onSight;
-    /** Interval that enemy shoots at (if interval) */
-    private int interval = 0;
-    /** Whether the enemy is stunned */
-    private boolean stunned;
+    /** Whether we  are stunned */
+    private boolean isStunned;
 
 
     /**
@@ -98,10 +101,13 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
 
         // Gameplay attributes
         isShooting = false;
-        shootCooldown = 0;
+        isStunned = false;
+        shootCooldownCounter = 0;
+        stunCooldownCounter = 0;
         this.isFacingRight = isFacingRight;
         this.onSight = onSight;
-        this.interval = interval;
+        shootCooldown = onSight? DEFAULT_SHOOT_COOLDOWN : interval;
+        stunCooldown = DEFAULT_STUN_COOLDOWN;
     }
 
     /**
@@ -143,77 +149,20 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
         this.onSight = onSight;
     }
 
-    public int getInterval() {
-        return interval;
-    }
+    public boolean isStunned() { return isStunned && stunCooldownCounter <= 0; }
 
-    public void setInterval(int interval) {
-        this.interval = interval;
-    }
-
-    public boolean isStunned() {
-        return stunned;
-    }
-
-    public void setStunned(boolean stunned) {
-        this.stunned = stunned;
-    }
-
-    /**
-     * Returns left/right movement of this character.
-     *
-     * This is the result of input times dude force.
-     *
-     * @return left/right movement of this character.
-     */
-    public float getMovement() {
-        return movement;
-    }
-
-    /**
-     * Sets left/right movement of this character.
-     *
-     * This is the result of input times dude force.
-     *
-     * @param value left/right movement of this character.
-     */
-    public void setMovement(float value) {
-        movement = value;
-        // Change facing if appropriate
-        if (movement < 0) {
-            isFacingRight = false;
-        } else if (movement > 0) {
-            isFacingRight = true;
-        }
-    }
+    public void setStunned(boolean value) { isStunned = value; }
 
     @Override
     public boolean isFacingRight() {
         return isFacingRight;
     }
 
-    /**
-     * Sets facing direction of this character.
-     *
-     * @param value whether this character is facing right
-     */
-    public void setFacingRight(boolean value) {
-        isFacingRight = value;
-    }
+    @Override
+    public boolean isShooting() {return isShooting && shootCooldownCounter <= 0;}
 
     @Override
-    public boolean isShooting() {return isShooting && shootCooldown <= 0;}
-
-    @Override
-    public void setShooting(boolean value) {isShooting = value;}
-
-    public int getShootCooldown() {
-        return shootCooldown;
-    }
-
-    public void setShootCooldown(int shootCooldown) {
-        this.shootCooldown = shootCooldown;
-    }
+    public void setShooting(boolean value) { isShooting = value; }
 
     // END: Setters and Getters
 
@@ -223,7 +172,19 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
      * We use this method to reset cooldowns.
      *
      */
-    public void update(float dt) { super.update(dt); }
+    public void update(float dt) {
+        super.update(dt);
+
+        if (isShooting())
+            shootCooldownCounter = shootCooldown;
+        else
+            shootCooldownCounter = Math.max(0, shootCooldownCounter - 1);
+
+        if (isStunned())
+            stunCooldownCounter = stunCooldown;
+        else
+            stunCooldownCounter = Math.max(0, stunCooldownCounter - 1);
+    }
 
     /**
      * Draws the physics object.
