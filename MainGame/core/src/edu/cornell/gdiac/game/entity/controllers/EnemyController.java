@@ -36,7 +36,6 @@ public class EnemyController extends EntityController {
 
     @Override
     public void update(float dt) {
-        // TODO for testing, please remove
         if (enemy.isShooting()) {
             shotTicks = 0;
             enemy.setShootCooldown(enemy.SHOT_COOLDOWN);
@@ -53,7 +52,6 @@ public class EnemyController extends EntityController {
         }
 
         enemy.setShootCooldown(enemy.getShootCooldown() - 1);
-        enemy.setFacingRight(player.getPosition().x > enemy.getPosition().x);
         enemy.setShooting(canShoot(enemy, player) && !enemy.isStunned());
     }
 }

@@ -46,7 +46,7 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
     private static final String SENSOR_NAME = "EnemyGroundSensor";
 
     /** Ground sensor to represent our feet */
-    private Fixture sensorFixture;
+    private Fixture sensorFixture;  // TODO: use sensors as ways to detect the ends of platforms (sensors in front/behind entity)
     private PolygonShape sensorShape;
 
     /** The current horizontal movement of the character */

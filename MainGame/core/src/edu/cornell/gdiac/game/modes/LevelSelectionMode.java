@@ -41,11 +41,10 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
 public class LevelSelectionMode extends Mode {
 	// TODO: remove this once we have working json file loading in assetmanager
 	private static final String[] NUM_LEVELS = {
-			"1","1","1","1","1",
-			"1","1","1","1","1",
-			"1","1","1","1","1",
-			"1","1","1","1","1",
-			"1","1","1","1","1"};
+			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
+			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
+			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
+			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json"};
 	private static final int TOTAL_COLUMNS = 10;
 	private static final int TOTAL_ROWS = (int)Math.ceil((float)NUM_LEVELS.length/TOTAL_COLUMNS);
 	private static final int BORDER_X = 20;
