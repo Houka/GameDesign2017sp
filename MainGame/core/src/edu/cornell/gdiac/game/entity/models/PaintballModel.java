@@ -3,6 +3,7 @@ package edu.cornell.gdiac.game.entity.models;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 
@@ -16,12 +17,16 @@ import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 public class PaintballModel extends BoxObstacle {
 
 
-    private float xScale = .5f;
-    private float yScale = .25f;
+    private float xScale;
+    private float yScale;
     private float xtransform = 1f;
     private float ytransform = 1f;
-
-    private float maxXScale = 3f;
+    private float paintballToPaintballDuration;
+    private float paintballToWallDuration;
+    private float paintballToPlatformDuration;
+    private float deathDuration = 1f;
+    private float maxLifeTime;
+    private float maxXScale;
     private float myVY;
     private float opacity;
     private float initWidth;
@@ -38,9 +43,21 @@ public class PaintballModel extends BoxObstacle {
     /**
      *  TODO: write constructor desc
      */
-    public PaintballModel(float x, float y, float w, float h, float s, Vector2 scl){
+    public PaintballModel(float x, float y, float w, float h, float s, float xScl, float yScl, Vector2 scl){
         super(x,y,w,h);
         setName("paintball");
+        if(yScl == 0 || xScl == 0) {
+            markRemoved(true);
+            xScale = 1;
+            yScale = 1;
+            opacity = 0;
+        } else {
+            xScale = xScl;
+            yScale = yScl;
+            opacity = 1;
+        }
+
+        maxXScale = 6*xScale;
         initWidth = w*xScale;
         initHeight = h*yScale;
         setWidth(initWidth);
@@ -52,8 +69,8 @@ public class PaintballModel extends BoxObstacle {
         dying = false;
         scale = scl;
         myVY = 0;
-        opacity = 1;
         gravity = false;
+        maxLifeTime = 20f;
     }
 
     public void update(float delta) {
@@ -66,10 +83,14 @@ public class PaintballModel extends BoxObstacle {
             //setVX(speed);
             growing = false;
         }
+        if(maxLifeTime<deathDuration) {
+            dying = true;
+        }
         if(dying) {
             growing= false;
             timeToDie-=delta;
-            if(timeToDie<1) {
+            if(timeToDie<deathDuration) {
+                this.setMass(0);
                 enableGravity();
                 opacity *= .99;
             }
@@ -78,6 +99,8 @@ public class PaintballModel extends BoxObstacle {
         }
         if(!gravity)
             this.setVY(0.0f);
+        this.setVX(speed);
+        maxLifeTime-=delta;
     }
 
     private float getScaledX() {
@@ -101,7 +124,7 @@ public class PaintballModel extends BoxObstacle {
 
     public void setTimeToDie(float xd) {
         if(!dying) {
-            timeToDie = xd;
+            timeToDie = xd + deathDuration;
             dying = true;
             growing = false;
         }
@@ -111,5 +134,74 @@ public class PaintballModel extends BoxObstacle {
         gravity = true;
         this.setGravityScale(1/3f);
         //this.setVY(-2); //Uncomment and comment above line for constant falling
+    }
+
+
+    public void fixX(float val) {
+        speed=val;
+    }
+
+    public void setYScale(float val) {
+        yScale=val;
+    }
+    public void setXScale(float val) {
+        xScale=val;
+    }
+    public void setMaxXScale(float val) {
+        maxXScale=val;
+    }
+
+    public void setPaintballToWallDuration(float paintballToWallDuration) {
+        this.paintballToWallDuration = paintballToWallDuration;
+    }
+
+    public void setPaintballToPlatformDuration(float paintballToPlatformDuration) {
+        this.paintballToPlatformDuration = paintballToPlatformDuration;
+    }
+
+    public void setPaintballToPaintballDuration(float paintballToPaintballDuration) {
+        this.paintballToPaintballDuration = paintballToPaintballDuration;
+    }
+
+    public void setMaxLifeTime(float val) {
+        maxLifeTime = val;
+    }
+
+    public float getTimeToDie() {
+        return timeToDie-deathDuration;
+    }
+    public boolean isDying() {
+        return dying;
+    }
+    public boolean isDead() {
+        return dying && timeToDie<deathDuration;
+    }
+    public float getMaxLifeTime() {
+        return maxLifeTime;
+    }
+
+    public float getYScale() {
+        return yScale;
+    }
+    public float getXScale() {
+        return yScale;
+    }
+    public float getMaxXScale() {
+        return maxXScale;
+    }
+    public float getSpeed() {
+        return speed;
+    }
+
+    public float getPaintballToPaintballDuration() {
+        return paintballToPaintballDuration;
+    }
+
+    public float getPaintballToWallDuration() {
+        return paintballToWallDuration;
+    }
+
+    public float getPaintballToPlatformDuration() {
+        return paintballToPlatformDuration;
     }
 }

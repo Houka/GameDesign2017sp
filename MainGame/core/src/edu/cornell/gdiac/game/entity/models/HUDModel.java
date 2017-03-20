@@ -33,9 +33,8 @@ public class HUDModel extends BoxObstacle {
     public void setFont(BitmapFont font){
         this.font = font;
     }
-
     public void setStartingAmmo(int value){ startingAmmo = value; }
-    public void setAmmoLeft(int value){ ammoLeft = value; }
+    public void setAmmoLeft(int value){ ammoLeft = Math.min(value, startingAmmo); }
     public int getAmmoLeft(){ return ammoLeft; }
     public boolean useAmmo(){
         if (ammoLeft > 0) {
@@ -45,6 +44,7 @@ public class HUDModel extends BoxObstacle {
 
         return false;
     }
+    public void addAmmo(int value){ setAmmoLeft(value+ammoLeft); }
     // END: Setters and Getters
 
 

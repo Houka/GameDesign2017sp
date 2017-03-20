@@ -31,6 +31,7 @@ import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
+import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 /**
  * Class that provides a Level Selection screen for the state of the game.
@@ -40,11 +41,10 @@ import edu.cornell.gdiac.game.interfaces.ScreenListener;
 public class LevelSelectionMode extends Mode {
 	// TODO: remove this once we have working json file loading in assetmanager
 	private static final String[] NUM_LEVELS = {
-			"1","1","1","1","1",
-			"1","1","1","1","1",
-			"1","1","1","1","1",
-			"1","1","1","1","1",
-			"1","1","1","1","1"};
+			"JSON/defaultNoCeiling.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
+			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
+			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
+			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json"};
 	private static final int TOTAL_COLUMNS = 10;
 	private static final int TOTAL_ROWS = (int)Math.ceil((float)NUM_LEVELS.length/TOTAL_COLUMNS);
 	private static final int BORDER_X = 20;
@@ -115,6 +115,8 @@ public class LevelSelectionMode extends Mode {
 	protected void onComplete(){
 		gameMode.loadContent(manager);
 		gameMode.loadLevel(NUM_LEVELS[selected]);
+		// TODO: remove, for tech demo and testing values
+		Sidebar.defaultBootup();
 		listener.switchScreens(this, gameMode);
 	}
 

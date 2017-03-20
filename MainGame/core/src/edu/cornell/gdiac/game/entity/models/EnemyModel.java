@@ -27,9 +27,11 @@ import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
 public class EnemyModel extends CapsuleObstacle implements Shooter {
     // Physics constants
     /** The density of the character */
-    private static final float ENEMY_DENSITY = 1.0f;
+    private static final float ENEMY_DENSITY = 500.0f;
     /** The player is a slippery one */
     private static final float ENEMY_FRICTION = 0.0f;
+
+    public static final int SHOT_COOLDOWN = 75;
 
     // This is to fit the image to a tigher hitbox
     /** The amount to shrink the body fixture (vertically) relative to the image */
@@ -44,7 +46,7 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
     private static final String SENSOR_NAME = "EnemyGroundSensor";
 
     /** Ground sensor to represent our feet */
-    private Fixture sensorFixture;
+    private Fixture sensorFixture;  // TODO: use sensors as ways to detect the ends of platforms (sensors in front/behind entity)
     private PolygonShape sensorShape;
 
     /** The current horizontal movement of the character */
@@ -55,6 +57,13 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
     private boolean isShooting;
     /** Which direction is the character facing */
     private boolean isFacingRight;
+    /** If the enemy is OnSight or not */
+    private boolean onSight;
+    /** Interval that enemy shoots at (if interval) */
+    private int interval = 0;
+    /** Whether the enemy is stunned */
+    private boolean stunned;
+
 
     /**
      * Returns the name of the ground sensor
@@ -80,7 +89,7 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
      * @param height	The object width in physics units
      * @param isFacingRight Whether or not the enemy is facing right
      */
-    public EnemyModel(float x, float y, float width, float height, boolean isFacingRight) {
+    public EnemyModel(float x, float y, float width, float height, boolean isFacingRight, boolean onSight, int interval) {
         super(x,y,width* ENEMY_HSHRINK,height* ENEMY_VSHRINK);
         setDensity(ENEMY_DENSITY);
         setFriction(ENEMY_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
@@ -91,6 +100,8 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
         isShooting = false;
         shootCooldown = 0;
         this.isFacingRight = isFacingRight;
+        this.onSight = onSight;
+        this.interval = interval;
     }
 
     /**
@@ -124,6 +135,30 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
     }
 
     // BEGIN: Setters and Getters
+    public boolean isOnSight() {
+        return onSight;
+    }
+
+    public void setOnSight(boolean onSight) {
+        this.onSight = onSight;
+    }
+
+    public int getInterval() {
+        return interval;
+    }
+
+    public void setInterval(int interval) {
+        this.interval = interval;
+    }
+
+    public boolean isStunned() {
+        return stunned;
+    }
+
+    public void setStunned(boolean stunned) {
+        this.stunned = stunned;
+    }
+
     /**
      * Returns left/right movement of this character.
      *
@@ -171,6 +206,15 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
 
     @Override
     public void setShooting(boolean value) {isShooting = value;}
+
+    public int getShootCooldown() {
+        return shootCooldown;
+    }
+
+    public void setShootCooldown(int shootCooldown) {
+        this.shootCooldown = shootCooldown;
+    }
+
     // END: Setters and Getters
 
     public void applyForce() {

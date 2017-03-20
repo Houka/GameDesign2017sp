@@ -14,8 +14,10 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.interfaces.Settable;
 import edu.cornell.gdiac.game.interfaces.Shooter;
 import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
+import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 /**
  * Player avatar for the plaform game.
@@ -23,7 +25,7 @@ import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
  * Note that this class returns to static loading.  That is because there are
  * no other subclasses that we might loop through.
  */
-public class PlayerModel extends CapsuleObstacle implements Shooter {
+public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
     // Physics constants
     /** The density of the character */
     private static final float PLAYER_DENSITY = 1.0f;
@@ -76,8 +78,6 @@ public class PlayerModel extends CapsuleObstacle implements Shooter {
     private Fixture sensorFixture;
     private PolygonShape sensorShape;
 
-    private int ammoLeft = 4;
-
     /** Cache for internal force calculations */
     private Vector2 forceCache = new Vector2();
 
@@ -125,6 +125,8 @@ public class PlayerModel extends CapsuleObstacle implements Shooter {
 
         shootCooldown = 0;
         jumpCooldown = 0;
+        jumpForce = PLAYER_JUMP;
+        maxSpeed = PLAYER_MAXSPEED;
     }
 
     // BEGIN: Setters and Getters
@@ -231,7 +233,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter {
      * @return the upper limit on dude left-right movement.
      */
     public float getMaxSpeed() {
-        return PLAYER_MAXSPEED;
+        return maxSpeed;
     }
 
     /** */
@@ -307,19 +309,25 @@ public class PlayerModel extends CapsuleObstacle implements Shooter {
 
         // Jump!
         if (isJumping()) {
-            forceCache.set(0, PLAYER_JUMP);
+            forceCache.set(0, jumpForce);
             body.applyLinearImpulse(forceCache,getPosition(),true);
             setCanDoubleJump(true);
         }
 
         if (isDoubleJumping()) {
             //dividing by sqrt 2 makes it such that from 0 velocity it goes half the height of a regular jump
-            forceCache.set(0, PLAYER_JUMP/((float)Math.sqrt(2)));
+            forceCache.set(0, jumpForce/((float)Math.sqrt(2)));
             //set velocity to 0 so that the jump height is independent of how the model is moving
             setLinearVelocity(zeroVector);
             body.applyLinearImpulse(forceCache,getPosition(),true);
             setCanDoubleJump(false);
         }
+    }
+
+    @Override
+    public void applySettings() {
+        jumpForce = Sidebar.getValue("Jump Height");
+        maxSpeed = Sidebar.getValue("Player Speed");
     }
 
     /**
@@ -333,7 +341,6 @@ public class PlayerModel extends CapsuleObstacle implements Shooter {
         // Apply cooldowns
         if (isJumping()) {
             jumpCooldown = JUMP_COOLDOWN;
-            jumpForce = PLAYER_JUMP;
         } else {
             jumpCooldown = Math.max(0, jumpCooldown - 1);
         }

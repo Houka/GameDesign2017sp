@@ -1,6 +1,7 @@
 package edu.cornell.gdiac.game.entity.controllers;
 
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.ObjectSet;
 import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 
@@ -21,106 +22,147 @@ import edu.cornell.gdiac.util.obstacles.Obstacle;
  *  PlayerGroundSensor
  */
 public class CollisionController implements ContactListener {
-    public CollisionController(){}
+    /** Mark set to handle more sophisticated collision callbacks */
+    private ObjectSet<Object> sensorObjects;
 
-    // BEGIN: Collision handlers
-    private void handelCollision(PlayerModel obj1, EnemyModel obj2){
-
+    public CollisionController(){
+        sensorObjects = new ObjectSet<Object>();
     }
 
-    private void handelCollision(PlayerModel obj1, GoalModel obj2){
-
+    // BEGIN: helper functions
+    private void touchedGround(PlayerModel obj1, Obstacle obj2, Object userData1){
+        if (obj1.getSensorName().equals(userData1)) {
+            obj1.setGrounded(true);
+            sensorObjects.add(obj2); // Could have more than one ground
+        }
     }
-
-    private void handelCollision(PlayerModel obj1, PlatformModel obj2){
-        obj1.setGrounded(true);
+    private void leftGround(PlayerModel obj1, Obstacle obj2, Object userData1){
+        if (obj1.getSensorName().equals(userData1)) {
+            sensorObjects.remove(obj2);
+            if (sensorObjects.size == 0) {
+                obj1.setGrounded(false);
+            }
+        }
     }
+    // END: helper functions
 
-    private void handelCollision(PlayerModel obj1, WallModel obj2){
-
+    // BEGIN: Simple Collision handlers
+    private void handleCollision(PlayerModel obj1, EnemyModel obj2){}
+    private void handleCollision(PlayerModel obj1, GoalModel obj2){}
+    private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1){
+        touchedGround(obj1,obj2,userData1);
     }
-
-    private void handelCollision(PlayerModel obj1, PaintballModel obj2){
-        obj1.setGrounded(true);
+    private void handleCollision(PlayerModel obj1, WallModel obj2){}
+    private void handleCollision(PlayerModel obj1, PaintballModel obj2, Object userData1) {
+        touchedGround(obj1, obj2, userData1);
     }
+    private void handleCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){}
+    private void handleCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}
+    private void handleCollision(GoalModel obj1, PaintballModel obj2){}
+    private void handleCollision(PaintballModel obj1, PaintballModel obj2){
+        if(obj1.isDead() || obj2.isDead())
+            return;
 
-    private void handelCollision(EnemyModel obj1, PaintballModel obj2){
+        float oneSign = obj1.getVX() / Math.abs(obj1.getVX());
+        float twoSign = obj2.getVX() / Math.abs(obj2.getVX());
+        if(oneSign == twoSign) {
+            if(obj1.getPosition().x*oneSign<obj2.getPosition().x*oneSign) {
+                obj2.setTimeToDie(0);
+            } else {
+                obj1.setTimeToDie(0);
+            }
+            return;
+        }
 
+        if(obj2.isDying())
+            obj1.setTimeToDie(obj2.getTimeToDie());
+        else
+            obj1.setTimeToDie(obj1.getPaintballToPaintballDuration());
+
+        if(obj1.isDying())
+            obj2.setTimeToDie(obj1.getTimeToDie());
+        else
+            obj2.setTimeToDie(obj2.getPaintballToPaintballDuration());
+        obj1.fixX(0f);
+        obj2.fixX(0f);
     }
-
-    private void handelCollision(GoalModel obj1, PaintballModel obj2){
-
+    private void handleCollision(PlatformModel obj1, PaintballModel obj2){
+        obj2.setTimeToDie(obj2.getPaintballToWallDuration());
+        obj2.fixX(0f);
     }
-
-    private void handelCollision(PaintballModel obj1, PaintballModel obj2){
-
+    private void handleCollision(WallModel obj1, PaintballModel obj2){
+        obj2.setTimeToDie(obj2.getPaintballToPlatformDuration());
+        obj2.fixX(0f);
     }
-
-    private void handelCollision(PlatformModel obj1, PaintballModel obj2){
-
-    }
-
-    private void handelCollision(WallModel obj1, PaintballModel obj2){
-        obj2.markRemoved(true);
+    private void handleCollision(PlayerModel obj1, AmmoDepotModel obj2) {
+        obj2.setUsed(true);
     }
 
     // Collision end handlers
-
-    private void handelEndCollision(PlayerModel obj1,PlatformModel obj2){
-        obj1.setGrounded(false);
+    private void handleEndCollision(PlayerModel obj1,WallModel obj2){ }
+    private void handleEndCollision(PlayerModel obj1,PlatformModel obj2, Object userData1){
+        leftGround(obj1,obj2,userData1);
     }
-
-    private void handelEndCollision(PlayerModel obj1,WallModel obj2){
-
+    private void handleEndCollision(PlayerModel obj1,PaintballModel obj2, Object userData1){
+        leftGround(obj1,obj2,userData1);
     }
-
-    private void handelEndCollision(PlayerModel obj1,PaintballModel obj2){
-        obj1.setGrounded(false);
-    }
-    // END: Collision handlers
-
+    private void handleEndCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){}
+    private void handleEndCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}
+    // END: Simple Collision handlers
 
     /**
      * TODO: write desc
      */
-    private void processObstacleCollision(Obstacle obj1, Obstacle obj2){
+    private void processCollision(Obstacle obj1, Obstacle obj2, Object userData1, Object userData2){
         if (obj1.getName().equals("player")) {
             if (obj2.getName().equals("enemy"))
-                handelCollision((PlayerModel)obj1, (EnemyModel) obj2);
+                handleCollision((PlayerModel)obj1, (EnemyModel) obj2);
             else if (obj2.getName().equals("goal"))
-                handelCollision((PlayerModel)obj1,(GoalModel) obj2);
+                handleCollision((PlayerModel)obj1,(GoalModel) obj2);
             else if (obj2.getName().equals("platform"))
-                handelCollision((PlayerModel)obj1,(PlatformModel) obj2);
+                handleCollision((PlayerModel)obj1,(PlatformModel) obj2, userData1);
             else if (obj2.getName().equals("wall"))
-                handelCollision((PlayerModel)obj1,(WallModel) obj2);
+                handleCollision((PlayerModel)obj1,(WallModel) obj2);
             else if (obj2.getName().equals("paintball"))
-                handelCollision((PlayerModel)obj1,(PaintballModel) obj2);
+                handleCollision((PlayerModel)obj1,(PaintballModel) obj2, userData1);
+            else if (obj2.getName().equals("ammoDepot"))
+                handleCollision((PlayerModel)obj1, (AmmoDepotModel) obj2);
         }
         else if (obj1.getName().equals("paintball")) {
             if (obj2.getName().equals("enemy"))
-                handelCollision((EnemyModel)obj2, (PaintballModel) obj1);
+                handleCollision((EnemyModel)obj2, (PaintballModel) obj1, userData2);
             else if (obj2.getName().equals("goal"))
-                handelCollision((GoalModel)obj2,(PaintballModel) obj1);
+                handleCollision((GoalModel)obj2,(PaintballModel) obj1);
             else if (obj2.getName().equals("platform"))
-                handelCollision((PlatformModel)obj2,(PaintballModel) obj1);
+                handleCollision((PlatformModel)obj2,(PaintballModel) obj1);
             else if (obj2.getName().equals("wall"))
-                handelCollision((WallModel)obj2,(PaintballModel) obj1);
+                handleCollision((WallModel)obj2,(PaintballModel) obj1);
             else if (obj2.getName().equals("paintball"))
-                handelCollision((PaintballModel)obj2,(PaintballModel) obj1);
+                handleCollision((PaintballModel)obj2,(PaintballModel) obj1);
+        }else if (obj1.getName().equals("enemy")) {
+            if (obj2.getName().equals("paintball"))
+                handleCollision((EnemyModel)obj1, (PaintballModel) obj2, userData1);
+            else if (obj2.getName().equals("platform"))
+                handleCollision((EnemyModel)obj1, (PlatformModel) obj2, userData1);
         }
     }
 
     /**
      * TODO: write desc
      */
-    private void processObstacleEndCollision(Obstacle obj1, Obstacle obj2){
+    private void processEndCollision(Obstacle obj1, Obstacle obj2, Object userData1, Object userData2){
         if (obj1.getName().equals("player")) {
             if (obj2.getName().equals("platform"))
-                handelEndCollision((PlayerModel)obj1,(PlatformModel) obj2);
+                handleEndCollision((PlayerModel)obj1,(PlatformModel) obj2, userData1);
             else if (obj2.getName().equals("wall"))
-                handelEndCollision((PlayerModel)obj1,(WallModel) obj2);
+                handleEndCollision((PlayerModel)obj1,(WallModel) obj2);
             else if (obj2.getName().equals("paintball"))
-                handelEndCollision((PlayerModel)obj1,(PaintballModel) obj2);
+                handleEndCollision((PlayerModel)obj1,(PaintballModel) obj2, userData1);
+        }else if (obj1.getName().equals("enemy")) {
+            if (obj2.getName().equals("paintball"))
+                handleEndCollision((EnemyModel)obj1, (PaintballModel) obj2, userData1);
+            else if (obj2.getName().equals("platform"))
+                handleEndCollision((EnemyModel)obj1, (PlatformModel) obj2, userData1);
         }
     }
 
@@ -139,8 +181,8 @@ public class CollisionController implements ContactListener {
             Obstacle bd1 = (Obstacle) body1.getUserData();
             Obstacle bd2 = (Obstacle) body2.getUserData();
 
-            processObstacleCollision(bd1, bd2);
-            processObstacleCollision(bd2, bd1);
+            processCollision(bd1, bd2, fd1, fd2);
+            processCollision(bd2, bd1, fd2, fd1);
         }catch (Exception e) {
             e.printStackTrace();
         }
@@ -161,21 +203,15 @@ public class CollisionController implements ContactListener {
             Obstacle bd1 = (Obstacle) body1.getUserData();
             Obstacle bd2 = (Obstacle) body2.getUserData();
 
-            processObstacleEndCollision(bd1, bd2);
-            processObstacleEndCollision(bd2, bd1);
+            processEndCollision(bd1, bd2, fd1, fd2);
+            processEndCollision(bd2, bd1, fd2, fd1);
         }catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
-    public void preSolve(Contact contact, Manifold oldManifold) {
-
-    }
-
+    public void preSolve(Contact contact, Manifold oldManifold) {}
     @Override
-    public void postSolve(Contact contact, ContactImpulse impulse) {
-
-    }
+    public void postSolve(Contact contact, ContactImpulse impulse) {}
 }

@@ -382,8 +382,7 @@ public class GameCanvas {
 	}
 
 	public void setCameraY(float y) {
-		camera.translate(0, y);
-
+		setCamera(this.camera.position.x,y);
 	}
 
 	/**
