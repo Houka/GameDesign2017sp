@@ -224,18 +224,23 @@ public class GameMode extends Mode implements Settable {
 			if(obj instanceof Shooter)
 				updateShooter(obj);
 		}
-		canvas.setCameraY(player.getY() * scaleVector.y, 0);
+
+
+		hud.setY((Math.max(player.getY(), 0)*scaleVector.y)+canvas.getHeight()/2);
 
 		postUpdate(dt);
 	}
 
+
 	@Override
 	public void draw() {
-		canvas.setCameraY(player.getY(), 0);
+		canvas.setCameraY(player.getY() * scaleVector.y, 0);
 
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
+
+		//canvas.setCameraY(0, 0);
 
 		hud.draw(canvas);
 	}
