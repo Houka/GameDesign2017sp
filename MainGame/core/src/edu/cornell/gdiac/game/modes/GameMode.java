@@ -18,6 +18,7 @@ package edu.cornell.gdiac.game.modes;
 
 import java.util.Iterator;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.assets.*;
@@ -224,12 +225,19 @@ public class GameMode extends Mode implements Settable {
 				updateShooter(obj);
 		}
 
+
+		hud.setY((Math.max(player.getY(), 9)*scaleVector.y)+canvas.getHeight()/2);
+
+		if (player.getY() < -player.getHeight())
+			hud.setLose(true);
+
 		postUpdate(dt);
 	}
 
+
 	@Override
 	public void draw() {
-		canvas.setCameraY(player.getY());
+		canvas.setCameraY(player.getY() * scaleVector.y, canvas.getHeight()/2);
 
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
@@ -242,15 +250,6 @@ public class GameMode extends Mode implements Settable {
 	protected void drawDebug() {
 		for (Obstacle obj : objects) {
 			obj.drawDebug(canvas);
-		}
-	}
-
-	@Override
-	public void resize(int width, int height) {
-		// TODO: implement
-		if (bounds != null) {
-			bounds.width = width;
-			bounds.height = height;
 		}
 	}
 
@@ -286,7 +285,7 @@ public class GameMode extends Mode implements Settable {
 	public void loadLevel(String levelFile) {
 		this.levelFile = levelFile;
 		levelLoader.loadLevel(levelFile);
-		resize(levelLoader.getBounds().width, levelLoader.getBounds().height);
+		bounds = levelLoader.getBounds();
 		hud.setStartingAmmo(levelLoader.getStartingAmmo());
 		if (!trySetPlayer())
 			System.out.println("Error: level file (" + levelFile + ") does not have a player");
