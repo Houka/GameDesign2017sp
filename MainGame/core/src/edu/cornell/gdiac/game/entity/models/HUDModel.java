@@ -62,6 +62,7 @@ public class HUDModel extends BoxObstacle {
 
     public void reset(){
         ammoLeft = startingAmmo;
+        state = STATE_PLAYING;
     }
 
     @Override
