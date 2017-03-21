@@ -26,7 +26,6 @@ import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
-import com.badlogic.gdx.math.Vector2;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
@@ -41,7 +40,7 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
 public class LevelSelectionMode extends Mode {
 	// TODO: remove this once we have working json file loading in assetmanager
 	private static final String[] NUM_LEVELS = {
-			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
+			"JSON/level1.json","JSON/level3.json","JSON/default.json","JSON/default.json","JSON/default.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json"};

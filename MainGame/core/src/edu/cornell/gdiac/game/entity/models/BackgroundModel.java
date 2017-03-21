@@ -30,5 +30,6 @@ public class BackgroundModel extends BoxObstacle {
         setRestitution(0.0f);
         setSensor(true);
         setName("background");
+
     }
 }

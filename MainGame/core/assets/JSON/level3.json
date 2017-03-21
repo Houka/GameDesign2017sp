@@ -1,0 +1,70 @@
+{
+  "objects": {
+    "platforms": [{
+      "vertices": [
+        1,
+        1,
+        31,
+        1,
+        31,
+        0,
+        1,
+        0
+      ]
+    }
+
+
+    ],
+    "walls": [{
+      "vertices": [
+        16,
+        54,
+        16,
+        53,
+        1,
+        53,
+        1,
+        0,
+        0,
+        0,
+        0,
+        54
+      ]
+    }, {
+      "vertices": [
+        32,
+        54,
+        32,
+        0,
+        31,
+        0,
+        31,
+        53,
+        16,
+        53,
+        16,
+        54
+      ]
+    }],
+    "player": {
+      "x": 2.5,
+      "y": 5
+    },
+    "enemies": [{
+      "type": 0,
+      "x": -100,
+      "y": 0,
+      "isFacingRight": 0,
+      "interval": 200
+    }],
+    "resources": [],
+    "target": {
+      "x": 29.5,
+      "y": 50
+    }
+  },
+  "state": {
+    "starting ammo": 200,
+    "next level": "NONE"
+  }
+}

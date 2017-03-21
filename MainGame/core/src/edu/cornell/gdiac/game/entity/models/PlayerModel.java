@@ -296,15 +296,32 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
         return true;
     }
 
+    // TODO REMOVE THIS!!!
+    private PaintballModel ridingBullet = null;
+    public void setRidingVX(PaintballModel b){
+        ridingBullet = b;
+    }
+
     public void applyForce() {
         if (!isActive()) {
             return;
         }
 
-        if (getMovement() == 0f ) {
-            setVX(0);
+        // TODO: find better solution for riding a bullet
+        if (ridingBullet!=null) {
+            // Don't want to be moving. Damp out player motion
+            if (getMovement() == 0f ) {
+                setVX(ridingBullet.getVX());
+            }else{
+                setVX(Math.signum(getMovement())*getMaxSpeed()+ridingBullet.getVX());
+            }
         }else{
-            setVX(Math.signum(getMovement())*getMaxSpeed());
+            if (getMovement() == 0f ) {
+                setVX(0);
+            }else{
+                setVX(Math.signum(getMovement())*getMaxSpeed());
+            }
+
         }
 
         // Jump!

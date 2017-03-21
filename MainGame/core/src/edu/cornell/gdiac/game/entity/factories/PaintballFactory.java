@@ -19,7 +19,7 @@ public class PaintballFactory implements AssetUser {
     private static float x_offset = 1.7f;
     private static float y_offset = 0.25f;
     /** The density for a Paintball */
-    private static float heavy_density = 10.0f;
+    private static float heavy_density = 100.0f;
     /** The speed of the Paintball after firing */
     private static float initial_speed = 4.0f;
     /** Duration for paintball to paintball sticking**/

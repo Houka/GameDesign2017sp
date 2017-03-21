@@ -364,22 +364,24 @@ public class GameCanvas {
 	 * Nothing is flushed to the graphics card until the method end() is called.
 	 */
     public void begin() {
+    	camera.position.set(getWidth()/2, 0, 0);
 		spriteBatch.setProjectionMatrix(camera.combined);
     	spriteBatch.begin();
     	active = DrawPass.STANDARD;
     }
 
     public OrthographicCamera getCamera() {
-		return camera;
-    }
-
-    public void setCamera(float x, float y) {
-    	camera.translate(x-this.camera.position.x, y - this.camera.position.y);
+    	return this.camera;
 	}
 
-	public void setCameraY(float y) {
-		camera.translate(0, y);
+    public void setCamera(float x, float y, float levelBottom) {
+		camera.translate(x-this.camera.position.x, Math.max(levelBottom-this.camera.position.y, y-this.camera.position.y));
 
+	}
+
+	public void setCameraY(float y, float levelBottom) {
+		setCamera(this.camera.position.x,y,levelBottom);
+		camera.update();
 	}
 
 	/**

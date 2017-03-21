@@ -71,9 +71,9 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	/** Whether or not this mode is completed*/
 	private boolean completed;
 	/** Whether or not this mode is still active */
-	private boolean active;
+	protected boolean active;
 	/** Whether or not debug mode is active */
-	private boolean debug;
+	protected boolean debug;
 	/** The main input controller */
 	private MainInputController input;
 
@@ -137,7 +137,7 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	 *
 	 * @return whether to process the update loop
 	 */
-	private boolean preUpdate(float dt) {
+	protected boolean preUpdate(float dt) {
 		input.readInput();
 		if (input.didDebug())
 			debug = !debug;
@@ -226,7 +226,7 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	protected void onComplete(){
 		onExit();
 	}
-	private void onExit(){ listener.exitScreen(this, onExit); }
+	protected void onExit(){ listener.exitScreen(this, onExit); }
 
 	// Unused functions for a mode
 	public void pause() {}
