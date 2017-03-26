@@ -24,9 +24,13 @@ package edu.cornell.gdiac.game.modes;
 
 import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.PolygonRegion;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
+
+import javax.xml.soap.Text;
 
 /**
  * Class that provides a Level Editor screen for the state of the game.
@@ -36,6 +40,8 @@ import edu.cornell.gdiac.game.interfaces.ScreenListener;
 public class LevelEditorMode extends Mode {
 	// Textures necessary to support the loading screen
 	private static final String BACKGROUND_FILE = "ui/bg/level_editor.png";
+	private static final String PLAYER_FILE = "sprites/char/char_idle.png";
+	private static final String ENEMY_FILE = "sprites/char/enemy_idle.png";
 
 	/**
 	 * Creates a Level Editor Mode with the default size and position.
@@ -66,6 +72,11 @@ public class LevelEditorMode extends Mode {
 	@Override
 	protected void draw() {
 		super.draw();
+
+		TextureRegion editor = new TextureRegion();
+		editor.setRegion(24.0f, 50.0f,  31.0f, 0.0f);
+
+		canvas.draw(editor, Color.DARK_GRAY, 24.0f, 50.0f, 7.0f, 50.0f);
 	}
 
 	@Override
