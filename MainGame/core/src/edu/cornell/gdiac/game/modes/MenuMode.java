@@ -69,7 +69,7 @@ public class MenuMode extends Mode {
 		onExit = ScreenListener.EXIT_QUIT;
 		modes = new Mode[]{
 			new LevelSelectionMode(canvas, manager),
-			new LevelEditorMode(canvas, manager)
+			new LevelEditorSelectionMode(canvas, manager)
 		};
 
 		input = SelectionInputController.getInstance();
