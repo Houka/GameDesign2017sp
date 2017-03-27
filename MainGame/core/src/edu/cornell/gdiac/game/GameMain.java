@@ -1,17 +1,14 @@
 /*
- * GDXRoot.java
+ * GameMain.java
  *
  * This is the primary class file for running the game.  It is the "static main" of
- * LibGDX.  In the first lab, we extended ApplicationAdapter.  In previous lab
- * we extended Game.  This is because of a weird graphical artifact that we do not
- * understand.  Transparencies (in 3D only) is failing when we use ApplicationAdapter. 
- * There must be some undocumented OpenGL code in setScreen.
+ * LibGDX. 
  *
- * Author: Walker M. White
+ * Author: Changxu Lu
  * Based on original PhysicsDemo Lab by Don Holden, 2007
  * LibGDX version, 2/6/2015
  */
- package edu.cornell.gdiac.game;
+package edu.cornell.gdiac.game;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.assets.*;
