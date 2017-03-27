@@ -24,6 +24,8 @@ package edu.cornell.gdiac.game.modes;
 
 import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.PolygonRegion;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.physics.box2d.*;
@@ -37,6 +39,8 @@ import edu.cornell.gdiac.game.interfaces.ScreenListener;
 import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 
+import javax.xml.soap.Text;
+
 /**
  * Class that provides a Level Editor screen for the state of the game.
  *
@@ -45,6 +49,11 @@ import edu.cornell.gdiac.util.obstacles.Obstacle;
 public class LevelEditorMode extends Mode {
 	// Textures necessary to support the loading screen
 	private static final String BACKGROUND_FILE = "ui/bg/level_editor.png";
+	private static final String PLAYER_FILE = "sprites/char/char_idle.png";
+	private static final String ENEMY_FILE = "sprites/enemy/enemy_idle.png";
+	private static final String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
+	private static final String PLATFORM_FILE = "sprites/fixtures/solid.png";
+	private static final String CAMERA_FILE = "sprites/security_camera.png";
 
 	/** Input controller */
 	private SelectionInputController input;
@@ -60,6 +69,19 @@ public class LevelEditorMode extends Mode {
 	private Rectangle bounds;
 	/** Scale for world */
 	private Vector2 scaleVector;
+	/** Texture for side-bar*/
+	protected Texture editor;
+	/** Texture for side-bar*/
+	protected Texture player;
+	/** Texture for side-bar*/
+	protected Texture enemy;
+	/** Texture for side-bar*/
+	protected Texture platform;
+	/** Texture for side-bar*/
+	protected Texture ammoDepot;
+	/** Texture for side-bar*/
+	protected Texture camera;
+
 
 	/** Width of the game world in Box2d units	 */
 	private static final float DEFAULT_WIDTH = 32.0f;
@@ -154,26 +176,71 @@ public class LevelEditorMode extends Mode {
 	@Override
 	protected void draw() {
 		super.draw();
+
+		TextureRegion editorRegion = new TextureRegion(editor);
+		editorRegion.setRegion(0, 0,  canvas.getWidth(), canvas.getHeight());
+		canvas.draw(editorRegion, Color.WHITE, canvas.getWidth()-200, 0, 200, canvas.getHeight());
+
+		TextureRegion[] regions = new TextureRegion[5];
+		regions[0] = new TextureRegion(player);
+		regions[0].setRegion(0, 0,  player.getWidth(), player.getHeight());
+		regions[1] = new TextureRegion(enemy);
+		regions[1].setRegion(0, 0,  enemy.getWidth(), enemy.getHeight());
+		regions[2] = new TextureRegion(platform);
+		regions[2].setRegion(0, 0,  platform.getWidth(), platform.getHeight());
+		regions[3] = new TextureRegion(ammoDepot);
+		regions[3].setRegion(0, 0,  ammoDepot.getWidth(), ammoDepot.getHeight());
+		regions[4] = new TextureRegion(camera);
+		regions[4].setRegion(0, 0,  camera.getWidth(), camera.getHeight());
+
+		int startHeight= 10;
+		for (TextureRegion region:
+			 regions) {
+			canvas.draw(region, canvas.getWidth()-125, startHeight);
+			startHeight += region.getRegionHeight() + 20;
+		}
 	}
 
 	@Override
 	public void preLoadContent(AssetManager manager) {
-		//manager.load(BACKGROUND_FILE,Texture.class);
+		manager.load(BACKGROUND_FILE,Texture.class);
+		manager.load(ENEMY_FILE,Texture.class);
+		manager.load(PLAYER_FILE,Texture.class);
+		manager.load(AMMO_DEPOT_FILE,Texture.class);
 		levelLoader.preLoadContent(manager);
 	}
 
 	@Override
 	public void loadContent(AssetManager manager) {
 		levelLoader.loadContent(manager);
-		// background = AssetRetriever.createTexture(manager, BACKGROUND_FILE, true).getTexture();
+		editor = AssetRetriever.createTexture(manager, BACKGROUND_FILE, true).getTexture();
+		player = AssetRetriever.createTexture(manager, PLAYER_FILE, true).getTexture();
+		enemy = AssetRetriever.createTexture(manager, ENEMY_FILE, true).getTexture();
+		platform = AssetRetriever.createTexture(manager, PLATFORM_FILE, true).getTexture();
+		ammoDepot = AssetRetriever.createTexture(manager, AMMO_DEPOT_FILE, true).getTexture();
+		camera = AssetRetriever.createTexture(manager, CAMERA_FILE, true).getTexture();
 	}
 
 	@Override
 	public void unloadContent(AssetManager manager) {
-		/*if (manager.isLoaded(BACKGROUND_FILE)) {
+		if (manager.isLoaded(BACKGROUND_FILE)) {
 			manager.unload(BACKGROUND_FILE);
-		}*/
-		levelLoader.unloadContent(manager);
+		}
+		if (manager.isLoaded(ENEMY_FILE)) {
+			manager.unload(ENEMY_FILE);
+		}
+		if (manager.isLoaded(PLAYER_FILE)) {
+			manager.unload(PLAYER_FILE);
+		}
+		if (manager.isLoaded(AMMO_DEPOT_FILE)) {
+			manager.unload(AMMO_DEPOT_FILE);
+		}
+		if (manager.isLoaded(PLATFORM_FILE)) {
+			manager.unload(PLATFORM_FILE);
+		}
+		if (manager.isLoaded(CAMERA_FILE)) {
+			manager.unload(CAMERA_FILE);
+		}
 	}
 
 	public void loadLevel(String levelFile) {
