@@ -1,24 +1,12 @@
 /*
- * LoadingMode.java
+ * Mode.java
  *
- * Asset loading is a really tricky problem.  If you have a lot of sound or images,
- * it can take a long time to decompress them and load them into memory.  If you just
- * have code at the start to load all your assets, your game will look like it is hung
- * at the start.
+ * The Abstract class that all modes adhere to.
+ * This class implements all the under the hood stuff for each mode/screen.
+ * It takes care of updating/drawing calls, resizing, pausing, and 
+ * what to do when exiting/switching the screen over to another screen
  *
- * The alternative is asynchronous asset loading.  In asynchronous loading, you load a
- * little bit of the assets at a time, but still animate the game while you are loading.
- * This way the player knows the game is not hung, even though he or she cannot do 
- * anything until loading is complete. You know those loading screens with the inane tips 
- * that want to be helpful?  That is asynchronous loading.  
- *
- * This player mode provides a basic loading screen.  While you could adapt it for
- * between level loading, it is currently designed for loading all assets at the 
- * start of the game.
- *
- * Author: Walker M. White
- * Based on original PhysicsDemo Lab by Don Holden, 2007
- * LibGDX version, 2/6/2015
+ * Author: Changxu Lu
  */
 package edu.cornell.gdiac.game.modes;
 
@@ -35,17 +23,7 @@ import edu.cornell.gdiac.game.interfaces.Exitable;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
 
 /**
- * Class that provides a loading screen for the state of the game.
- *
- * You still DO NOT need to understand this class for this lab.  We will talk about this
- * class much later in the course.  This class provides a basic template for a loading
- * screen to be used at the start of the game or between levels.  Feel free to adopt
- * this to your needs.
- *
- * You will note that this mode has some textures that are not loaded by the AssetManager.
- * You are never required to load through the AssetManager.  But doing this will block
- * the application.  That is why we try to have as few resources as possible for this
- * loading screen.
+ * Class that provides the fundamental mode functionalities
  */
 public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	/** Standard window size (for scaling) */
@@ -174,6 +152,9 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 			canvas.draw(background, Color.WHITE, 0, 0, 0,0, 0f, scale.x, scale.y);
 	}
 
+    /**
+     * Draw the outlines and bounding boxes of each object for debuging purposes
+     */
 	protected void drawDebug(){};
 
 	/**
@@ -215,23 +196,45 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 		scale.set(Math.max(1,(float) width/STANDARD_WIDTH), Math.max(1,(float) height/STANDARD_HEIGHT));
 	}
 
+    /**
+     * Resets all variables in the mode so when the screen switches back, the screen
+     * won't hold previous data.
+     */
 	public void reset(){
 		setExit(false);
 		setComplete(false);
 	}
 
-	/***
-	 * TODO: write spec
+	/**
+	 * Default behavior for modes that have completed their task
 	 */
 	protected void onComplete(){
 		onExit();
 	}
+    
+    /**
+     * Behavior for when the mode wishes to exit
+     */
 	protected void onExit(){ listener.exitScreen(this, onExit); }
 
-	// Unused functions for a mode
+    /**
+     * Behavor for when the mode is paused
+     */
 	public void pause() {}
-	public void resume() {}
+	
+    /**
+     * Behavor for when the mode resumes from a pause state
+     */
+    public void resume() {}
+    
+    /**
+     * Behavor for when the mode is shown/active
+     */
 	public void show() { active = true;}
+    
+    /**
+     * Behavor for when the mode is set to stop showing/ is inactive
+     */
 	public void hide() {
 		reset();
 		active = false;

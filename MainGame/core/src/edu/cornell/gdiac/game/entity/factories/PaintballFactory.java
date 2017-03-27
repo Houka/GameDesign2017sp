@@ -11,6 +11,8 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 /**
  * Created by Lu on 3/17/2017.
+ *
+ * Factory class for paintballs. Handles creation and removal of paintballs.
  */
 public class PaintballFactory implements AssetUser {
     /** Texture file */
@@ -28,16 +30,14 @@ public class PaintballFactory implements AssetUser {
     private static float paintballToWallDuration = 3f;
     /** Duration for paintball to platform sticking**/
     private static float paintballToPlatformDuration = 3f;
-
+    /** How long a paintball can exist before forced death*/
     private final float MAX_LIFE_TIME = 20f;
-
-    /**The starting width scale of the bullet**/
+    /**The starting width scale of the paintball**/
     private static float xScale =.5f;
-    /**The maximum width scale of the bullet**/
+    /**The maximum width scale of the paintball**/
     private static float maxXScale = 3f;
-    /**The height scale of the bullet**/
+    /**The height scale of the paintball**/
     private static float yScale =.25f;
-
     /** The drawing scale of the Paintball*/
     private Vector2 scale;
     /** Texture of the paintball */
@@ -48,8 +48,10 @@ public class PaintballFactory implements AssetUser {
     }
 
     /**
-     *  TODO: write desc
-     *  @param direction the traveling direction of the bullet (true for right, left otherwise)
+     *  Creates a paintball at the given location moving in the given direction
+     *  @param x            Initial x position of the paintball
+     *  @param y            Initial y position of the paintball
+     *  @param direction    Initial traveling direction of the paintball (true for right, left otherwise)
      */
     public PaintballModel createPaintball(float x, float y, boolean direction){
         float xOffset = (direction ? x_offset : -x_offset);
@@ -72,6 +74,7 @@ public class PaintballFactory implements AssetUser {
         return paintball;
     }
 
+    // BEGIN: Setters and Getters
     public static float getHeavy_density() {
         return heavy_density;
     }
@@ -152,13 +155,16 @@ public class PaintballFactory implements AssetUser {
         PaintballFactory.yScale = yScale;
     }
 
+    // END: Setters and Getters
+
+    @Override
     public static void applySettings() {
-        maxXScale = Sidebar.getValue("Bullet Width");
-        initial_speed = Sidebar.getValue("Bullet Speed");
-        yScale = Sidebar.getValue("Bullet Height");
-        paintballToPaintballDuration = Sidebar.getValue("Bullet-Bullet Stick Time");
-        paintballToWallDuration = Sidebar.getValue("Bullet-Wall Stick Time");
-        paintballToPlatformDuration = Sidebar.getValue("Bullet-Wall Stick Time");
+        maxXScale = Sidebar.getValue("Paintball Width");
+        initial_speed = Sidebar.getValue("Paintball Speed");
+        yScale = Sidebar.getValue("Paintball Height");
+        paintballToPaintballDuration = Sidebar.getValue("Paintball-paintball Stick Time");
+        paintballToWallDuration = Sidebar.getValue("Paintball-Wall Stick Time");
+        paintballToPlatformDuration = Sidebar.getValue("Paintball-Wall Stick Time");
     }
 
     @Override
