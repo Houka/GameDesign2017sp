@@ -34,7 +34,6 @@ import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.game.levelLoading.LevelLoader;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
-import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 /**
  * Class that provides a Level Editor screen for the state of the game.
