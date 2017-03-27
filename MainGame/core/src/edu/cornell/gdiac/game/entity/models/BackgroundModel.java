@@ -17,11 +17,22 @@ import java.awt.geom.RectangularShape;
 /**
  * Created by Lu on 3/10/2017.
  *
- * TODO: fill in class def
- * TODO: change simple implementation of Textures to better implementation of SpriteBatches
+ * Model class for the background. Is used to draw out the background.
  */
 public class BackgroundModel extends BoxObstacle {
 
+    /**
+     * Creates a new BackgroundModel at the given position.
+     *
+     * The size is expressed in physics units NOT pixels.  In order for
+     * drawing to work properly, you MUST set the drawScale. The drawScale
+     * converts the physics units to pixels.
+     *
+     * @param x         Initial x position of the center of the background 
+     * @param y         Initial y position of the center of the background
+     * @param width     The object width in physics units
+     * @param height    The object width in physics units
+     */
     public BackgroundModel(float x, float y, float width, float height) {
         super(x, y, width, height);
         setBodyType(BodyDef.BodyType.StaticBody);

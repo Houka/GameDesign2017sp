@@ -5,7 +5,7 @@ package edu.cornell.gdiac.game.interfaces;
  */
 public interface Settable {
     /**
-     * TODO: write desc
+     * For classes that have parameters than can be changed with settings
      */
     void applySettings();
 }
