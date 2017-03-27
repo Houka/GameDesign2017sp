@@ -34,6 +34,8 @@ import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.game.levelLoading.LevelLoader;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
+import edu.cornell.gdiac.util.PooledList;
+import edu.cornell.gdiac.util.obstacles.Obstacle;
 
 /**
  * Class that provides a Level Editor screen for the state of the game.
@@ -65,6 +67,9 @@ public class LevelEditorMode extends Mode {
 	private static final float DEFAULT_HEIGHT = 18.0f;
 	/** The default value of gravity (going down)	 */
 	private static final float DEFAULT_GRAVITY = -20.0f;
+
+	/** All the objects in the world.	 */
+	private PooledList<Obstacle> objects = new PooledList<Obstacle>();
 
 	/**
 	 * Creates a new game world with the default values.
@@ -126,7 +131,18 @@ public class LevelEditorMode extends Mode {
 
 	@Override
 	public void dispose() {
-		super.dispose();
+		for (Obstacle obj : objects) {
+			obj.deactivatePhysics(world);
+		}
+		objects.clear();
+		world.dispose();
+		levelLoader.dispose();
+		levelLoader = null;
+		objects = null;
+		bounds = null;
+		scaleVector = null;
+		world = null;
+		canvas = null;
 
 	}
 
@@ -164,5 +180,31 @@ public class LevelEditorMode extends Mode {
 		this.levelFile = levelFile;
 		levelLoader.loadLevel(levelFile);
 		bounds = levelLoader.getBounds();
+	}
+
+	/**
+	 * Immediately adds the object to the physics world
+	 *
+	 * @param obj The object to add
+	 */
+	private void addObject(Obstacle obj) {
+		assert inBounds(obj) : "Object is not in bounds";
+		objects.add(obj);
+		obj.activatePhysics(world);
+
+		//addEntityController(obj);
+	}
+
+	/**
+	 * Returns true if the object is in bounds.
+	 * This assertion is useful for debugging the physics.
+	 *
+	 * @param obj The object to check.
+	 * @return true if the object is in bounds.
+	 */
+	private boolean inBounds(Obstacle obj) {
+		boolean horiz = (bounds.x <= obj.getX() && obj.getX() <= bounds.x + bounds.width);
+		boolean vert = (bounds.y <= obj.getY() && obj.getY() <= bounds.y + bounds.height);
+		return horiz && vert;
 	}
 }
