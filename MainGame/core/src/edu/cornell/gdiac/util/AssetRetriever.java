@@ -7,9 +7,10 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 /**
  * Created by Lu on 3/13/2017.
  *
- * TODO: write class desc
+ * Static class that helps with retrieving assests from the AssetManager
  */
 public class AssetRetriever {
+    
     /**
      * Returns a newly loaded texture region for the given file.
      *
