@@ -5,7 +5,7 @@ import com.badlogic.gdx.assets.AssetManager;
 /**
  * Created by Lu on 3/13/2017.
  *
- * TODO: write class desc
+ * Contains functions for loading and removing assets
  */
 public interface AssetUser {
 

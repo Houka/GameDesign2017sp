@@ -13,8 +13,6 @@ import java.io.*;
  *  - reads the json files and converts them to game objects
  *  - writes to json files given game objects
  */
-
-//
 public class FileReaderWriter {
 
     /**
