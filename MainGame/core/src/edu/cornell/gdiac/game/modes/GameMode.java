@@ -213,6 +213,7 @@ public class GameMode extends Mode implements Settable {
 			e.update(dt);
 
 		applySettings();
+		paintballFactory.applySettings();
 		for(Obstacle obj: objects){
 			if(obj instanceof Settable)
 				((Settable) obj).applySettings();
@@ -271,7 +272,6 @@ public class GameMode extends Mode implements Settable {
 	@Override
 	public void applySettings() {
 		world.setGravity(new Vector2(0, Sidebar.getValue("Gravity")));
-		PaintballFactory.applySettings();
 	}
 
 	/**

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import edu.cornell.gdiac.game.entity.models.PaintballModel;
 import edu.cornell.gdiac.game.interfaces.AssetUser;
+import edu.cornell.gdiac.game.interfaces.Settable;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.util.sidebar.Sidebar;
 
@@ -14,7 +15,7 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
  *
  * Factory class for paintballs. Handles creation and removal of paintballs.
  */
-public class PaintballFactory implements AssetUser {
+public class PaintballFactory implements AssetUser, Settable {
     /** Texture file */
     private static final String PAINTBALL_FILE = "sprites/paintball.png";
     /** Offset for Paintball when firing */
@@ -158,7 +159,7 @@ public class PaintballFactory implements AssetUser {
     // END: Setters and Getters
 
     @Override
-    public static void applySettings() {
+    public void applySettings() {
         maxXScale = Sidebar.getValue("Paintball Width");
         initial_speed = Sidebar.getValue("Paintball Speed");
         yScale = Sidebar.getValue("Paintball Height");
