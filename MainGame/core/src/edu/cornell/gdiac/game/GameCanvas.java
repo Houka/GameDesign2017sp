@@ -74,7 +74,7 @@ public class GameCanvas {
 	private BlendState blend;
 	
 	/** Camera for the underlying SpriteBatch */
-	private OrthographicCamera camera;
+	private Camera2 camera;
 	
 	/** Value to cache window width (if we are currently full screen) */
 	int width;
@@ -103,7 +103,7 @@ public class GameCanvas {
 		debugRender = new ShapeRenderer();
 		
 		// Set the projection matrix (for proper scaling)
-		camera = new OrthographicCamera(getWidth(),getHeight());
+		camera = new Camera2(getWidth(),getHeight());
 		camera.setToOrtho(false);
 		spriteBatch.setProjectionMatrix(camera.combined);
 		debugRender.setProjectionMatrix(camera.combined);
@@ -364,24 +364,40 @@ public class GameCanvas {
 	 * Nothing is flushed to the graphics card until the method end() is called.
 	 */
     public void begin() {
-    	camera.position.set(getWidth()/2, 0, 0);
+    	//camera.position.set(getWidth()/2, 0, 0);
+		//camera.setTargetLocation(getWidth()/2, getHeight()/2);
+		//camera.snap();
 		spriteBatch.setProjectionMatrix(camera.combined);
     	spriteBatch.begin();
     	active = DrawPass.STANDARD;
     }
 
-    public OrthographicCamera getCamera() {
+    public void begin(Camera2 cam) {
+    	camera = cam;
+    	spriteBatch.setProjectionMatrix(camera.combined);
+    	spriteBatch.begin();
+    	active = DrawPass.STANDARD;
+	}
+
+	public void setDefaultCamera() {
+		camera.position.set(getWidth()/2, 0, 0);
+		camera.setTargetLocation(getWidth()/2, getHeight()/2);
+		camera.snap();
+
+	}
+
+    public Camera2 getCamera() {
     	return this.camera;
 	}
 
     public void setCamera(float x, float y, float levelBottom) {
-		camera.translate(x-this.camera.position.x, Math.max(levelBottom-this.camera.position.y, y-this.camera.position.y));
+		camera.setTargetLocation(x, Math.max(levelBottom, y));
+		camera.update();
 
 	}
 
 	public void setCameraY(float y, float levelBottom) {
-		setCamera(this.camera.position.x,y,levelBottom);
-		camera.update();
+		setCamera(camera.getTargetLocation().x,y,levelBottom);
 	}
 
 	/**
@@ -880,7 +896,14 @@ public class GameCanvas {
 		local.inv();
 		computeVertices(local,region.getVertices());
 	}
-	
+
+	public void snapCamera(){
+		camera.snap();
+	}
+
+	public void updateCamera() {
+		camera.update();
+	}
 	/**
 	 * Transform the given vertices by the affine transform
 	 */
@@ -978,6 +1001,10 @@ public class GameCanvas {
     	debugRender.begin(ShapeRenderer.ShapeType.Line);
     	active = DrawPass.DEBUG;
     }
+	public void beginDebug(Camera2 cam) {
+    	camera = cam;
+    	beginDebug();
+	}
 
 	/**
 	 * Ends the debug drawing sequence, flushing textures to the graphics card.

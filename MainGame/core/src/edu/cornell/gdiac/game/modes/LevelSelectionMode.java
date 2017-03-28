@@ -100,6 +100,7 @@ public class LevelSelectionMode extends Mode {
 		gameMode.loadLevel(NUM_LEVELS[selected]);
 		// TODO: remove, for tech demo and testing values
 		Sidebar.defaultBootup();
+		canvas.getCamera().setAutosnap(true);
 		listener.switchScreens(this, gameMode);
 	}
 

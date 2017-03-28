@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.physics.box2d.*;
+import edu.cornell.gdiac.game.Camera2;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.entity.controllers.CollisionController;
 import edu.cornell.gdiac.game.entity.controllers.EnemyController;
@@ -27,6 +28,7 @@ import edu.cornell.gdiac.game.entity.models.AmmoDepotModel;
 import edu.cornell.gdiac.game.entity.models.EnemyModel;
 import edu.cornell.gdiac.game.entity.models.HUDModel;
 import edu.cornell.gdiac.game.entity.models.PlayerModel;
+import edu.cornell.gdiac.game.input.MainInputController;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
 import edu.cornell.gdiac.game.interfaces.Settable;
 import edu.cornell.gdiac.game.interfaces.Shooter;
@@ -88,6 +90,10 @@ public class GameMode extends Mode implements Settable {
 	/** The level this game mode loads in	 */
 	private String levelFile;
 
+	/** Camera's used in-game**/
+	private Camera2 gameCamera;
+	private Camera2 hudCamera;
+
 	/** The world scale Vector	 */
 	private Vector2 scaleVector;
 	/** Whether we have completed this level	 */
@@ -146,11 +152,16 @@ public class GameMode extends Mode implements Settable {
 
 		world = new World(gravity, false);
 		hud = new HUDModel(canvas.getWidth(), canvas.getHeight());
+		hud.setY(hud.getHeight());
 		world.setContactListener(new CollisionController(hud));
 		paintballFactory = new PaintballFactory(scaleVector);
 		levelLoader = new LevelLoader(scaleVector);
 		this.bounds = new Rectangle(bounds);
 		hud.setDrawScale(scaleVector);
+		gameCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
+		gameCamera.setAutosnap(false);
+		hudCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
+		hudCamera.setAutosnap(true);
 
 		succeeded = false;
 		failed = false;
@@ -183,6 +194,7 @@ public class GameMode extends Mode implements Settable {
 		entityControllers.clear();
 		world.dispose();
 		levelLoader.dispose();
+		gameCamera.setAutosnap(true);
 		hud = null;
 		levelLoader = null;
 		objects = null;
@@ -204,6 +216,8 @@ public class GameMode extends Mode implements Settable {
 		if (!levelFile.isEmpty())
 			loadLevel(levelFile);
 
+		canvas.getCamera().setRumble(50,10,2);
+		canvas.setDefaultCamera();
 		hud.reset();
 	}
 
@@ -221,8 +235,8 @@ public class GameMode extends Mode implements Settable {
 				updateShooter(obj);
 		}
 
+		if(MainInputController.getInstance().didDebug())
 
-		hud.setY((Math.max(player.getY(), 9)*scaleVector.y)+canvas.getHeight()/2);
 
 		if (player.getY() < -player.getHeight())
 			hud.setLose(true);
@@ -233,17 +247,23 @@ public class GameMode extends Mode implements Settable {
 
 	@Override
 	public void draw() {
-		canvas.setCameraY(player.getY() * scaleVector.y, canvas.getHeight()/2);
-
+		canvas.end();
+		canvas.begin(gameCamera);
+		canvas.setCamera(canvas.getWidth()/2,player.getY() * scaleVector.y, canvas.getHeight()/2);
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
 
+		canvas.end();
+		canvas.begin(hudCamera);
+		canvas.setDefaultCamera();
 		hud.draw(canvas);
 	}
 
 	@Override
 	protected void drawDebug() {
+		canvas.endDebug();
+		canvas.beginDebug(gameCamera);
 		for (Obstacle obj : objects) {
 			obj.drawDebug(canvas);
 		}
@@ -272,6 +292,14 @@ public class GameMode extends Mode implements Settable {
 	@Override
 	public void applySettings() {
 		world.setGravity(new Vector2(0, Sidebar.getValue("Gravity")));
+		gameCamera.setSpeed(Sidebar.getValue("Camera Speed"));
+		gameCamera.setRumble((int)Sidebar.getValue("Rumble Intensity"),(int)Sidebar.getValue("Rumble Intensity"),(int)Sidebar.getValue("Rumble Frequency"));
+
+		if(Sidebar.getValue("Rumble Interval")==0)
+			gameCamera.disableRumble();
+		else
+			gameCamera.enableRumble();
+
 	}
 
 	/**

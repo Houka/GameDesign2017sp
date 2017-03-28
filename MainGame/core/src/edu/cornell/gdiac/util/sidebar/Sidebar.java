@@ -63,6 +63,9 @@ public class Sidebar {
         Sidebar.addSlider("Paintball Speed",1f,7.5f,3.2f);
         Sidebar.addSlider("Paintball-paintball Stick Time",0f,10f,5f);
         Sidebar.addSlider("Paintball-Wall Stick Time",0f,10f,5f);
+        Sidebar.addSlider("Camera Speed",0f,.3f,.1f);
+        Sidebar.addSlider("Rumble Intensity",0f,100f,0f);
+        Sidebar.addSlider("Rumble Interval",0f,10f,3f);
     }
 
     /**Initialize sidebar*/

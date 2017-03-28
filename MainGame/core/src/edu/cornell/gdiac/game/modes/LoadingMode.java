@@ -178,6 +178,7 @@ public class LoadingMode extends Mode {
 
 	@Override
 	protected void draw() {
+		canvas.setDefaultCamera();
 		super.draw();
 
 		// other elements specific to this mode
