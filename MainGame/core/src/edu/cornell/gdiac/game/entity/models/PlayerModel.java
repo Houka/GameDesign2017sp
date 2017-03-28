@@ -71,7 +71,9 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
     private Vector2 knockbackDirection;
     /** Force of said knockback**/
     private float knockbackForce;
+    private float knockbackFriction = .9f;
     private float knockbackDuration = 60;
+    private float knockbackStunDuration = 5;
     private float defaultKnockbackDuration = 60;
 
     /** Whether we getting knockedBack jumping */
@@ -189,19 +191,22 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
      */
     public boolean isJumping() {return isJumping && isGrounded && jumpCooldown <= 0;}
 
-    public boolean isKnockedBack() {return isKnockedBack && knockbackDuration > 0;}
+    public boolean isKnockedBack() {
+        return isKnockedBack && knockbackDuration > defaultKnockbackDuration-Math.max(defaultKnockbackDuration,knockbackStunDuration);
+    }
 
     public void setKnockedBack(float dir){
 
-        if(isKnockedBack)
-            return;
 
         if(dir==0) {
             isKnockedBack=false;
             return;
         }
 
-        isKnockedBack=true;
+        if(isKnockedBack)
+            return;
+
+       isKnockedBack=true;
         knockbackDuration = defaultKnockbackDuration;
         if(dir>0)
             knockbackDirection.set(1,0);
@@ -335,32 +340,47 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
             return;
         }
 
-        if (getMovement() == 0f ) {
-            setVX(0);
-        }else{
-            setVX(Math.signum(getMovement())*getMaxSpeed());
+        boolean stunned = false;
+
+
+        if(isKnockedBack()) {
+            stunned = true;
+
+            if(knockbackDuration>0) {
+                forceCache.set(knockbackDirection.x * knockbackForce, knockbackDirection.y * knockbackForce); //TODO: use trig if we ever want y knockback
+                body.applyLinearImpulse(forceCache, getPosition(), true);
+            }
+
+            if (knockbackDuration < 0) {
+                setVX(getVX() * knockbackFriction);
+              //  if (Math.abs(getVX()) < .01)
+                    //stunned = false;
+
+            }
+        }
+
+
+        if(!stunned) {
+            if (getMovement() == 0f) {
+                setVX(0f);
+            } else {
+                setVX(Math.signum(getMovement()) * getMaxSpeed());
+            }
         }
 
         // Jump!
-        if (isJumping()) {
+        if (isJumping() && !stunned) {
             forceCache.set(0, jumpForce);
             body.applyLinearImpulse(forceCache,getPosition(),true);
             setCanDoubleJump(true);
         }
-
-        if (isDoubleJumping()) {
+        if (isDoubleJumping() && !stunned) {
             //dividing by sqrt 2 makes it such that from 0 velocity it goes half the height of a regular jump
             forceCache.set(0, jumpForce/((float)Math.sqrt(2)));
             //set velocity to 0 so that the jump height is independent of how the model is moving
             setLinearVelocity(zeroVector);
             body.applyLinearImpulse(forceCache,getPosition(),true);
             setCanDoubleJump(false);
-        }
-
-        if(isKnockedBack) {
-            forceCache.set(knockbackDirection.x*knockbackForce,knockbackDirection.y*knockbackForce); //TODO: use trig if we ever want y knockback
-            body.applyLinearImpulse(forceCache,getPosition(),true);
-
         }
     }
 
@@ -369,6 +389,8 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
         jumpForce = Sidebar.getValue("Jump Height");
         knockbackForce = Sidebar.getValue("Knockback Force");
         defaultKnockbackDuration = Sidebar.getValue("Knockback Duration");
+        knockbackStunDuration = Sidebar.getValue("Knockback Stun Duration");
+        knockbackFriction = 1-Sidebar.getValue("Knockback Friction");
         maxSpeed = Sidebar.getValue("Player Speed");
     }
 
@@ -394,7 +416,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
         }
 
         if (isKnockedBack()) {
-            knockbackDuration = Math.max(0, knockbackDuration - 1);
+            knockbackDuration = knockbackDuration - 1;
         } else {
             isKnockedBack=false;
         }

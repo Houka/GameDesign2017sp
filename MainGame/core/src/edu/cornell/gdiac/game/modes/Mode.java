@@ -72,6 +72,8 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	private boolean completed;
 	/** Whether or not this mode is still active */
 	private boolean active;
+	/** Whether or not this mode is paused */
+	private boolean paused;
 	/** Whether or not debug mode is active */
 	private boolean debug;
 	/** The main input controller */
@@ -87,6 +89,7 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 		this.manager = manager;
 		this.canvas  = canvas;
 		scale = new Vector2(1,1);
+		paused = false;
 		active = false;
 		exit = false;
 		completed = false;
@@ -143,12 +146,13 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 			debug = !debug;
 		else if (input.didReset())
 			reset();
+		else if (input.didPause())
+			processPause();
 		else if(input.didExit()) {
 			setExit(true);
 			return false;
 		}
-
-		return true;
+		return !paused;
 	}
 
 	/**
@@ -221,16 +225,23 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	}
 
 	/***
-	 * TODO: write spec
+	 * Handles a pause button press
 	 */
+	public void processPause() {
+		if(!paused)
+			pauseGame();
+		else
+			resume();
+	}
 	protected void onComplete(){
 		onExit();
 	}
 	private void onExit(){ listener.exitScreen(this, onExit); }
 
-	// Unused functions for a mode
+	public void pauseGame() {paused = true;}
 	public void pause() {}
-	public void resume() {}
+	public void resume() {paused = false;}
+	// Unused functions for a mode
 	public void show() { active = true;}
 	public void hide() {
 		reset();
