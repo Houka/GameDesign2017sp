@@ -58,11 +58,11 @@ public class Sidebar {
         Sidebar.addSlider("Gravity",-30f,0f,-20.0f);
         Sidebar.addSlider("Jump Height",20f,50f, 30f);
         Sidebar.addSlider("Player Speed",1f,10f,5.0f);
-        Sidebar.addSlider("Bullet Height",.1f,.5f,.25f);
-        Sidebar.addSlider("Bullet Width",.5f,6.5f,3f);
-        Sidebar.addSlider("Bullet Speed",1f,7.5f,3.2f);
-        Sidebar.addSlider("Bullet-Bullet Stick Time",0f,10f,5f);
-        Sidebar.addSlider("Bullet-Wall Stick Time",0f,10f,5f);
+        Sidebar.addSlider("Paintball Height",.1f,.5f,.25f);
+        Sidebar.addSlider("Paintball Width",.5f,6.5f,3f);
+        Sidebar.addSlider("Paintball Speed",1f,7.5f,3.2f);
+        Sidebar.addSlider("Paintball-paintball Stick Time",0f,10f,5f);
+        Sidebar.addSlider("Paintball-Wall Stick Time",0f,10f,5f);
     }
 
     /**Initialize sidebar*/
