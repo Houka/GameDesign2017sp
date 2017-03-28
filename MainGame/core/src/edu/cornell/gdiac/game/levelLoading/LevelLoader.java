@@ -1,6 +1,6 @@
 package edu.cornell.gdiac.game.levelLoading;
 
-
+import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -14,6 +14,7 @@ import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
+
 
 /**
  * Created by Lu on 3/16/2017.
@@ -63,16 +64,12 @@ public class LevelLoader implements AssetUser, Disposable{
 
         //sets the new world bounds TODO: do this with json values
         bounds = new Rectangle(0,0,32,18*3);
+        LevelCreator c = new LevelCreator();
+        c.writeDemoJson();
         levelParser.loadLevel(JSONFile);
         populateLevel();
 
-        // set player
-        float[] playerData = levelParser.getPlayer();
-        PlayerModel player = new PlayerModel(playerData[0], playerData[1],
-                playerTexture.getRegionWidth() / scale.x, playerTexture.getRegionHeight() / scale.y);
-        player.setDrawScale(scale);
-        player.setTexture(playerTexture);
-        addQueuedObject(player);
+
     }
 
     /**
@@ -81,69 +78,14 @@ public class LevelLoader implements AssetUser, Disposable{
      * TODO: base this function off json data
      */
     private void populateLevel() {
-        // add background
-        float dwidth  = bgTile.getRegionWidth()/scale.x;
-        float dheight = bgTile.getRegionHeight()/scale.y;
-        BoxObstacle bg = new BackgroundModel(dwidth/2,dheight/2,dwidth*2,dheight*3);
-        bg.setDrawScale(scale);
-        bgTile.getTexture().setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
-        bg.setTexture(bgTile);
-        addQueuedObject(bg);
+        addBackground();
+        addPlatforms();
+        addWalls();
+        addPlayer();
+        addEnemies();
+        addResources();
+        addTarget();
 
-        // Add level goal
-        dwidth  = goalTile.getRegionWidth()/scale.x;
-        dheight = goalTile.getRegionHeight()/scale.y;
-        float[] target = levelParser.getTarget();
-        BoxObstacle goalDoor = new GoalModel(target[0],target[1],dwidth,dheight);
-        goalDoor.setDrawScale(scale);
-        goalDoor.setTexture(goalTile);
-        addQueuedObject(goalDoor);
-
-        //add walls
-        float[][] walls = levelParser.getWalls();
-        for (int ii = 0; ii < walls.length; ii++) {
-            PolygonObstacle obj = new WallModel(walls[ii]);
-            obj.setDrawScale(scale);
-            obj.setTexture(platformTile);
-            addQueuedObject(obj);
-        }
-
-        float[][] platforms = levelParser.getPlatforms();
-        for (int ii = 0; ii < platforms.length; ii++) {
-            PolygonObstacle obj = new PlatformModel(platforms[ii]);
-            obj.setDrawScale(scale);
-            obj.setTexture(platformTile);
-            addQueuedObject(obj);
-        }
-
-        // Create enemies
-        float[][] enemies = levelParser.getEnemies();
-        dwidth  = enemyTexture.getRegionWidth()/scale.x;
-        dheight = enemyTexture.getRegionHeight()/scale.y;
-        EnemyModel enemy;
-        for (int ii = 0; ii < enemies.length; ii++) {
-            enemy = new EnemyModel(enemies[ii][1], enemies[ii][2], dwidth, dheight, enemies[ii][3] == 1.0f,
-                    enemies[ii][0] == 1.0f, (int)enemies[ii][4]);
-            enemy.setDrawScale(scale);
-            enemy.setTexture(enemyTexture);
-            addQueuedObject(enemy);
-        }
-
-
-        // Create one ammo depot
-        float[][] resources = levelParser.getResources();
-        dheight = depotTexture.getRegionHeight()/scale.y;
-        dwidth = depotTexture.getRegionWidth()/scale.x;
-        for (int ii = 0; ii < resources.length; ii++) {
-            //type of resource is ammo depot
-            if (resources[ii][0] == 0) {
-                AmmoDepotModel ammoDepot = new AmmoDepotModel(resources[ii][1], resources[ii][2], dwidth, dheight, 3);
-                ammoDepot.setDrawScale(scale);
-                ammoDepot.setTexture(depotTexture);
-                addQueuedObject(ammoDepot);
-            }
-
-        }
     }
 
     /**
@@ -158,6 +100,111 @@ public class LevelLoader implements AssetUser, Disposable{
     public void addQueuedObject(Obstacle obj) {
         assert inBounds(obj) : "Object is not in bounds";
         addQueue.add(obj);
+    }
+
+    public void addBackground() {
+        float dwidth = bgTile.getRegionWidth() / scale.x;
+        float dheight = bgTile.getRegionHeight() / scale.y;
+        BoxObstacle bg = new BackgroundModel(dwidth / 2, dheight / 2, dwidth * 2, dheight * 3);
+        bg.setDrawScale(scale);
+        bgTile.getTexture().setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+        bg.setTexture(bgTile);
+        addQueuedObject(bg);
+    }
+    /**
+     * Adds the platforms to the insertion queue
+     */
+    public void addPlatforms(){
+        JsonValue platforms = levelParser.getPlatforms();
+        JsonValue dflt = platforms.get("default");
+        JsonValue.JsonIterator iter = dflt.iterator();
+        JsonValue vertices;
+        while (iter.hasNext()){
+            vertices = iter.next();
+            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray());
+            obj.setDrawScale(scale);
+            obj.setTexture(platformTile);
+            addQueuedObject(obj);
+        }
+    }
+
+    public void addWalls(){
+        JsonValue walls = levelParser.getWalls();
+        JsonValue dflt = walls.get("default");
+        JsonValue.JsonIterator iter = dflt.iterator();
+        JsonValue vertices;
+        while (iter.hasNext()){
+            vertices = iter.next();
+            PolygonObstacle obj = new WallModel(vertices.asFloatArray());
+            obj.setDrawScale(scale);
+            obj.setTexture(platformTile);
+            addQueuedObject(obj);
+        }
+    }
+
+
+    public void addPlayer(){
+        JsonValue playerData = levelParser.getPlayer();
+        PlayerModel player = new PlayerModel(playerData.get("x").asFloat(), playerData.get("y").asFloat(),
+                playerTexture.getRegionWidth() / scale.x, playerTexture.getRegionHeight() / scale.y);
+        player.setDrawScale(scale);
+        player.setTexture(playerTexture);
+        addQueuedObject(player);
+    }
+
+    public void addEnemies(){
+        float dwidth  = enemyTexture.getRegionWidth()/scale.x;
+        float dheight = enemyTexture.getRegionHeight()/scale.y;
+        JsonValue enemies = levelParser.getEnemies();
+        JsonValue interval = enemies.get("interval");
+        JsonValue.JsonIterator iter = interval.iterator();
+        JsonValue enemy;
+        while (iter.hasNext()){
+            enemy = iter.next();
+            EnemyModel obj = new EnemyModel(enemy.get("x").asInt(), enemy.get("y").asFloat(), dwidth, dheight,
+                            enemy.get("isFacingRight").asBoolean(), false, enemy.get("interval").asInt());
+            obj.setDrawScale(scale);
+            obj.setTexture(enemyTexture);
+            addQueuedObject(obj);
+        }
+
+        JsonValue onSight = enemies.get("on_sight");
+        iter = onSight.iterator();
+        while (iter.hasNext()){
+            enemy = iter.next();
+            EnemyModel obj = new EnemyModel(enemy.get("x").asInt(), enemy.get("y").asFloat(), dwidth, dheight,
+                    enemy.get("isFacingRight").asBoolean(), true, 0);
+            obj.setDrawScale(scale);
+            obj.setTexture(enemyTexture);
+            addQueuedObject(obj);
+        }
+    }
+
+    public void addResources(){
+        JsonValue resources = levelParser.getResources();
+        float dheight = depotTexture.getRegionHeight()/scale.y;
+        float dwidth = depotTexture.getRegionWidth()/scale.x;
+        JsonValue ammoDepots = resources.get("ammo_depots");
+        JsonValue.JsonIterator iter = ammoDepots.iterator();
+        JsonValue depot;
+        while (iter.hasNext()){
+            depot = iter.next();
+            AmmoDepotModel ammoDepot = new AmmoDepotModel(depot.get("x").asFloat(), depot.get("y").asFloat(), dwidth,
+                    dheight, depot.get("amount").asInt());
+            ammoDepot.setDrawScale(scale);
+            ammoDepot.setTexture(depotTexture);
+            addQueuedObject(ammoDepot);
+        }
+    }
+
+    public void addTarget(){
+        float dwidth  = goalTile.getRegionWidth()/scale.x;
+        float dheight = goalTile.getRegionHeight()/scale.y;
+        JsonValue target = levelParser.getTarget();
+        BoxObstacle goalDoor = new GoalModel(target.get("x").asFloat(),target.get("y").asFloat(),dwidth, dheight);
+        goalDoor.setDrawScale(scale);
+        goalDoor.setTexture(goalTile);
+        addQueuedObject(goalDoor);
     }
 
     @Override
@@ -211,6 +258,9 @@ public class LevelLoader implements AssetUser, Disposable{
         return horiz && vert;
     }
 
+    /**
+    * Debugging method
+     */
     private void printMatrix(float[][] matrix) {
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[i].length; j++) {

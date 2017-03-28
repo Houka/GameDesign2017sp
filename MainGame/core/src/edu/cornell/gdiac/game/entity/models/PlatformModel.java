@@ -10,13 +10,19 @@ public class PlatformModel extends PolygonObstacle {
     private static final float  BASIC_DENSITY = 0.0f;
     private static final float  BASIC_FRICTION = 0.4f;
     private static final float  BASIC_RESTITUTION = 0.1f;
+    private float[] pointArray;
 
     public PlatformModel(float[] points) {
         super(points);
+        pointArray = points;
         setBodyType(BodyDef.BodyType.StaticBody);
         setDensity(BASIC_DENSITY);
         setFriction(BASIC_FRICTION);
         setRestitution(BASIC_RESTITUTION);
         setName("platform");
+    }
+
+    public float[] getPoints(){
+        return pointArray;
     }
 }

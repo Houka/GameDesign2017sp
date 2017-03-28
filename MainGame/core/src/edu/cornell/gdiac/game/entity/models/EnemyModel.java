@@ -141,6 +141,8 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
         return onSight;
     }
 
+    public int getInterval() { return shootCooldown; }
+
     public void setOnSight(boolean onSight) {
         this.onSight = onSight;
     }
