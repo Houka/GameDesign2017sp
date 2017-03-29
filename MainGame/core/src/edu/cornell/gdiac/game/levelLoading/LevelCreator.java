@@ -14,8 +14,8 @@ import java.io.*;
  */
 public class LevelCreator {
 
+    /** Fields and constants for the default level. For testing purposes. */
     private static final String DEFAULT_FILE = "JSON/default.json";
-
     private static final float[][] DEFAULT_PLATFORMS = {
             // (x top left, y top left, x top right, y top right, x bottom right, y bottom left, x bottom left, y bottom right)
 
@@ -26,29 +26,10 @@ public class LevelCreator {
             {0.0f, 9.0f,7.0f, 9.0f,7.0f, 8.5f,0.0f, 8.5f}, // 5th platform on the right
             { 1.0f,12.5f, 10.0f,12.5f, 10.0f,12.0f, 1.0f,12.0f} // finish platform
     };
-
     private static final float[][] DEFAULT_WALLS = {
             {16.0f, 18.0f, 16.0f, 17.0f,  1.0f, 17.0f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f, 18.0f},
             {32.0f, 18.0f, 32.0f,  0.0f, 31.0f,  0.0f, 31.0f, 17.0f, 16.0f, 17.0f, 16.0f, 18.0f}
     };
-
-    private static final float[] DEFAULT_PLAYER = {2.5f, 5.0f};
-
-    private static final float[][] DEFAULT_ENEMIES = {
-            {0f, 3.5f, 8.0f, 1.0f, 200f},
-            {1f, 5.5f, 10f, 1.0f, 0f}
-    };
-
-    private static final float[][] DEFAULT_RESOURCES = {
-            {0f, 5.5f, 4.0f}
-    };
-
-    private static final float[] DEFAULT_TARGET = {29.5f, 15.0f};
-
-    private static final int DEFAULT_AMMO = 4;
-
-
-    /** defaults stored into classes */
     private ArrayList<PlatformModel> defaultPlatforms;
     private ArrayList<WallModel> defaultWalls;
     private PlayerModel defaultPlayer;
@@ -58,9 +39,9 @@ public class LevelCreator {
     private GoalModel defaultTarget;
     private int defaultAmmo;
 
-
-
-
+    /**
+     * Fills in defaults (for testing purposes)
+     */
     private void setDefaults(){
         defaultPlatforms = new ArrayList<PlatformModel>();
         defaultWalls = new ArrayList<WallModel>();
@@ -83,6 +64,9 @@ public class LevelCreator {
         defaultAmmo = 4;
     }
 
+    /**
+     * Writes the level given model objects
+     */
     public void writeLevel(String JsonFile, ArrayList<PlatformModel> platforms, ArrayList<WallModel> walls,
                            PlayerModel player, ArrayList<EnemyModel> intervalEnemies, ArrayList<EnemyModel> onSightEnemies,
                            ArrayList<AmmoDepotModel> ammoDepots, GoalModel target, int ammo) {

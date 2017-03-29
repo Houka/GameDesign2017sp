@@ -18,9 +18,11 @@ import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
 
 /**
  * Created by Lu on 3/16/2017.
+ *
+ * The level loader class puts objects from a json file into the world.
  */
 public class LevelLoader implements AssetUser, Disposable{
-    // TODO: remove all this constant stuff once json works
+    //filenames for sprites of objects
     private static String PLATFORM_FILE = "sprites/fixtures/solid.png";
     private static String GOAL_FILE = "sprites/security_camera.png";
     private static String BACKGROUND_FILE = "sprites/wall/wall_texture.png";
@@ -28,6 +30,7 @@ public class LevelLoader implements AssetUser, Disposable{
     private static String CHARACTER_FILE = "sprites/char/char_idle.png";
     private static String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
 
+    //textures
     private TextureRegion platformTile;
     private TextureRegion goalTile;
     private TextureRegion bgTile;
@@ -35,15 +38,17 @@ public class LevelLoader implements AssetUser, Disposable{
     private TextureRegion playerTexture;
     private TextureRegion depotTexture;
 
-    // Vars that we do need for this class in the end
-    /**TODO:write desc*/
+    /** Bounds of the window*/
     private Rectangle bounds;
     /** Queue for adding objects */
     private PooledList<Obstacle> addQueue = new PooledList<Obstacle>();
-    /**TODO:write desc*/
+    /** LevelParser object we get object data from*/
     private LevelParser levelParser;
+    /** LevelParser scale at which everything is drawn*/
     private Vector2 scale;
 
+    /** Constructor that specifies scale.
+     * @param scale Scale at which the level is drawn*/
     public LevelLoader(Vector2 scale){
         this.scale = scale;
         levelParser = new LevelParser();
@@ -56,26 +61,19 @@ public class LevelLoader implements AssetUser, Disposable{
     // END: Setters and Getters
 
     /**
-     * TODO: write desc... loads the level based on the json file. adds the (Obstacle) object into addQueue
+     * loads the level based on the json file.
      */
     public void loadLevel(String JSONFile){
         // reset queue of objects
         addQueue.clear();
-
-        //sets the new world bounds TODO: do this with json values
+        //sets the new world bounds
         bounds = new Rectangle(0,0,32,18*3);
-        LevelCreator c = new LevelCreator();
-        c.writeDemoJson();
         levelParser.loadLevel(JSONFile);
         populateLevel();
-
-
     }
 
     /**
      * Lays out the game geography.
-     *
-     * TODO: base this function off json data
      */
     private void populateLevel() {
         addBackground();
@@ -85,7 +83,6 @@ public class LevelLoader implements AssetUser, Disposable{
         addEnemies();
         addResources();
         addTarget();
-
     }
 
     /**
@@ -102,6 +99,9 @@ public class LevelLoader implements AssetUser, Disposable{
         addQueue.add(obj);
     }
 
+    /**
+     * Adds the background to the insertion queue
+     */
     public void addBackground() {
         float dwidth = bgTile.getRegionWidth() / scale.x;
         float dheight = bgTile.getRegionHeight() / scale.y;
@@ -111,6 +111,7 @@ public class LevelLoader implements AssetUser, Disposable{
         bg.setTexture(bgTile);
         addQueuedObject(bg);
     }
+
     /**
      * Adds the platforms to the insertion queue
      */
@@ -128,6 +129,9 @@ public class LevelLoader implements AssetUser, Disposable{
         }
     }
 
+    /**
+     * Adds the walls to the insertion queue
+     */
     public void addWalls(){
         JsonValue walls = levelParser.getWalls();
         JsonValue dflt = walls.get("default");
@@ -142,7 +146,9 @@ public class LevelLoader implements AssetUser, Disposable{
         }
     }
 
-
+    /**
+     * Adds the player to the insertion queue
+     */
     public void addPlayer(){
         JsonValue playerData = levelParser.getPlayer();
         PlayerModel player = new PlayerModel(playerData.get("x").asFloat(), playerData.get("y").asFloat(),
@@ -152,10 +158,15 @@ public class LevelLoader implements AssetUser, Disposable{
         addQueuedObject(player);
     }
 
+    /**
+     * Adds the enemies to the insertion queue. Currently handles on sight and interval shooters.
+     */
     public void addEnemies(){
         float dwidth  = enemyTexture.getRegionWidth()/scale.x;
         float dheight = enemyTexture.getRegionHeight()/scale.y;
         JsonValue enemies = levelParser.getEnemies();
+
+        //add interval shooters
         JsonValue interval = enemies.get("interval");
         JsonValue.JsonIterator iter = interval.iterator();
         JsonValue enemy;
@@ -168,6 +179,7 @@ public class LevelLoader implements AssetUser, Disposable{
             addQueuedObject(obj);
         }
 
+        //add on sight shooters
         JsonValue onSight = enemies.get("on_sight");
         iter = onSight.iterator();
         while (iter.hasNext()){
@@ -180,10 +192,14 @@ public class LevelLoader implements AssetUser, Disposable{
         }
     }
 
+    /**
+     * Adds the resources to the insertion queue. Currently only handles ammo depots.
+     */
     public void addResources(){
         JsonValue resources = levelParser.getResources();
         float dheight = depotTexture.getRegionHeight()/scale.y;
         float dwidth = depotTexture.getRegionWidth()/scale.x;
+
         JsonValue ammoDepots = resources.get("ammo_depots");
         JsonValue.JsonIterator iter = ammoDepots.iterator();
         JsonValue depot;
@@ -197,6 +213,9 @@ public class LevelLoader implements AssetUser, Disposable{
         }
     }
 
+    /**
+     * Adds the target to the insertion queue
+     */
     public void addTarget(){
         float dwidth  = goalTile.getRegionWidth()/scale.x;
         float dheight = goalTile.getRegionHeight()/scale.y;
