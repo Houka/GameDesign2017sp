@@ -22,24 +22,46 @@
  */
 package edu.cornell.gdiac.game.modes;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.entity.controllers.CollisionController;
+import edu.cornell.gdiac.game.entity.models.PlayerModel;
+import edu.cornell.gdiac.game.input.EditorInputController;
 import edu.cornell.gdiac.game.input.SelectionInputController;
+import edu.cornell.gdiac.game.interfaces.Settable;
 import edu.cornell.gdiac.game.levelLoading.LevelLoader;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
 import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
+import edu.cornell.gdiac.util.sidebar.Sidebar;
+import javafx.scene.image.*;
+import javafx.scene.image.Image;
 
 import javax.xml.soap.Text;
+import java.awt.*;
+import java.util.ArrayList;
+
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload;
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Source;
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Target;
+
+import static edu.cornell.gdiac.game.entity.factories.PaintballFactory.applySettings;
 
 /**
  * Class that provides a Level Editor screen for the state of the game.
@@ -56,7 +78,7 @@ public class LevelEditorMode extends Mode {
 	private static final String CAMERA_FILE = "sprites/security_camera.png";
 
 	/** Input controller */
-	private SelectionInputController input;
+	private EditorInputController input;
 	/** The position of the level that the player is selecting */
 	private int selected;
 	/** Level loader */
@@ -82,6 +104,12 @@ public class LevelEditorMode extends Mode {
 	/** Texture for side-bar*/
 	protected Texture camera;
 
+	private TextureRegion underMouse;
+	private boolean textureClicked;
+	private boolean justTouched;
+
+	private PlayerModel player;
+
 
 	/** Width of the game world in Box2d units	 */
 	private static final float DEFAULT_WIDTH = 32.0f;
@@ -92,6 +120,13 @@ public class LevelEditorMode extends Mode {
 
 	/** All the objects in the world.	 */
 	private PooledList<Obstacle> objects = new PooledList<Obstacle>();
+
+	/** array of textures */
+	private TextureRegion[] regions;
+	private int[] startHeights;
+
+	/** The stage for drag and drop */
+	Stage stage;
 
 	/**
 	 * Creates a new game world with the default values.
@@ -139,6 +174,9 @@ public class LevelEditorMode extends Mode {
 	 */
 	public LevelEditorMode(GameCanvas canvas, AssetManager manager, Rectangle bounds, Vector2 gravity) {
 		super(canvas, manager);
+		input = EditorInputController.getInstance();
+		Gdx.input.setInputProcessor(input);
+		textureClicked = false;
 		onExit = ScreenListener.EXIT_MENU;
 		scaleVector = new Vector2(canvas.getWidth() / bounds.getWidth(), canvas.getHeight() / bounds.getHeight());
 
@@ -165,11 +203,44 @@ public class LevelEditorMode extends Mode {
 		scaleVector = null;
 		world = null;
 		canvas = null;
+		stage.dispose();
 
+	}
+
+	public void applySettings() {
+		world.setGravity(new Vector2(0, -20.0f));
 	}
 
 	@Override
 	protected void update(float delta) {
+		input.readInput();
+		int mouseX = Gdx.input.getX();
+		int mouseY = Gdx.input.getY();
+
+		if(input.didTouch() && mouseX >= canvas.getWidth()-125) {
+			for(int i=0; i<regions.length; i++) {
+				Rectangle textureBounds=new Rectangle
+						(canvas.getWidth()-125, canvas.getHeight() - startHeights[i] - (regions[i].getRegionHeight()),
+								regions[i].getRegionWidth(),regions[i].getRegionHeight());
+
+				if(textureBounds.contains(mouseX, mouseY)) {
+					System.out.println("region y: "+ (canvas.getHeight()-startHeights[i]));
+					System.out.println("mouse y: "+ mouseY);
+					//System.out.println("clicked region " + i);
+					underMouse = regions[i];
+					textureClicked = true;
+				}
+			}
+		}
+		if(!input.didTouch()) {
+			textureClicked = false;
+		}
+
+		applySettings();
+		for(Obstacle obj: objects){
+			if(obj instanceof Settable)
+				((Settable) obj).applySettings();
+		}
 
 	}
 
@@ -181,7 +252,7 @@ public class LevelEditorMode extends Mode {
 		editorRegion.setRegion(0, 0,  canvas.getWidth(), canvas.getHeight());
 		canvas.draw(editorRegion, Color.WHITE, canvas.getWidth()-200, 0, 200, canvas.getHeight());
 
-		TextureRegion[] regions = new TextureRegion[5];
+		regions = new TextureRegion[5];
 		regions[0] = new TextureRegion(player);
 		regions[0].setRegion(0, 0,  player.getWidth(), player.getHeight());
 		regions[1] = new TextureRegion(enemy);
@@ -194,10 +265,17 @@ public class LevelEditorMode extends Mode {
 		regions[4].setRegion(0, 0,  camera.getWidth(), camera.getHeight());
 
 		int startHeight= 10;
-		for (TextureRegion region:
-			 regions) {
-			canvas.draw(region, canvas.getWidth()-125, startHeight);
-			startHeight += region.getRegionHeight() + 20;
+		startHeights = new int[5];
+		for (int i=0; i<regions.length; i++) {
+			canvas.draw(regions[i], canvas.getWidth()-125, startHeight);
+			startHeights[i] = startHeight;
+			startHeight += regions[i].getRegionHeight() + 20;
+		}
+		if(textureClicked) {
+			canvas.draw(underMouse, Gdx.input.getX(), canvas.getHeight()-Gdx.input.getY());
+		}
+		for(Obstacle o: objects) {
+			o.draw(canvas);
 		}
 	}
 

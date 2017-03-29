@@ -1,6 +1,8 @@
 package edu.cornell.gdiac.game.input;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Source;
@@ -9,9 +11,13 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Target;
 /**
  * Created by cece on 3/26/2017.
  */
-public class EditorInputController {
+public class EditorInputController implements InputProcessor {
     /** The singleton instance of the input controller */
     private static EditorInputController theController = null;
+    /** */
+    private boolean didTouch;
+    private boolean didDrag;
+    private boolean justTouched;
 
     /**
      * Return the singleton instance of the input controller
@@ -25,8 +31,12 @@ public class EditorInputController {
         return theController;
     }
 
-    // Fields to manage buttons
-    private boolean mouseClicked;
+    public boolean didTouch() { return didTouch; }
+
+    public boolean didDrag() { return didDrag; }
+
+    public boolean justTouched() { return justTouched; }
+
 
     /**
      * Creates a new input controller
@@ -38,7 +48,48 @@ public class EditorInputController {
      *
      */
     public void readInput() {
-        // Copy state from last animation frame
-        // Helps us ignore buttons that are held down
+        // Copy state from last animation frame\
+    }
+
+    // INPUTPROCESSOR METHODS
+
+    public boolean keyDown (int keycode) {
+        return false;
+    }
+
+    public boolean keyUp (int keycode) {
+        return false;
+    }
+
+    public boolean keyTyped (char character) {
+        return false;
+    }
+
+    public boolean touchDown (int x, int y, int pointer, int button) {
+        if(button == Input.Buttons.LEFT) {
+            didTouch = true;
+        }
+        return false;
+    }
+
+    public boolean touchUp (int x, int y, int pointer, int button) {
+        if(button == Input.Buttons.LEFT) {
+            didTouch = false;
+            didDrag = false;
+        }
+        return false;
+    }
+
+    public boolean touchDragged (int x, int y, int pointer) {
+        didDrag = true;
+        return false;
+    }
+
+    public boolean mouseMoved (int x, int y) {
+        return false;
+    }
+
+    public boolean scrolled (int amount) {
+        return false;
     }
 }
