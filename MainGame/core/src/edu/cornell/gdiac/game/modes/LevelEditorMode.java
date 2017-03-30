@@ -54,7 +54,7 @@ import javafx.scene.image.Image;
 
 import javax.xml.soap.Text;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.*;
 
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload;
@@ -105,10 +105,11 @@ public class LevelEditorMode extends Mode {
 	protected Texture camera;
 
 	private TextureRegion underMouse;
+	private Vector2 underMousecoords;
 	private boolean textureClicked;
 	private boolean justTouched;
 
-	private PlayerModel player;
+	private PlayerModel playermodel;
 
 
 	/** Width of the game world in Box2d units	 */
@@ -119,7 +120,7 @@ public class LevelEditorMode extends Mode {
 	private static final float DEFAULT_GRAVITY = -20.0f;
 
 	/** All the objects in the world.	 */
-	private PooledList<Obstacle> objects = new PooledList<Obstacle>();
+	private HashSet<Obstacle> objects = new HashSet<Obstacle>();
 
 	/** array of textures */
 	private TextureRegion[] regions;
@@ -191,9 +192,9 @@ public class LevelEditorMode extends Mode {
 
 	@Override
 	public void dispose() {
-		for (Obstacle obj : objects) {
+		/*for (Obstacle obj : objects) {
 			obj.deactivatePhysics(world);
-		}
+		}*/
 		objects.clear();
 		world.dispose();
 		levelLoader.dispose();
@@ -224,9 +225,6 @@ public class LevelEditorMode extends Mode {
 								regions[i].getRegionWidth(),regions[i].getRegionHeight());
 
 				if(textureBounds.contains(mouseX, mouseY)) {
-					System.out.println("region y: "+ (canvas.getHeight()-startHeights[i]));
-					System.out.println("mouse y: "+ mouseY);
-					//System.out.println("clicked region " + i);
 					underMouse = regions[i];
 					textureClicked = true;
 				}
@@ -235,11 +233,17 @@ public class LevelEditorMode extends Mode {
 		if(!input.didTouch()) {
 			textureClicked = false;
 		}
-
-		applySettings();
-		for(Obstacle obj: objects){
-			if(obj instanceof Settable)
-				((Settable) obj).applySettings();
+		// if mouse just released
+		if(!input.didTouch() &&  mouseX <= canvas.getWidth()-200 && underMouse != null) {
+			if(underMouse.getTexture().equals(player)) {
+				PlayerModel newP = new PlayerModel(input.getLastPos().x,canvas.getHeight()-input.getLastPos().y,
+						underMouse.getRegionWidth(), underMouse.getRegionHeight());
+				newP.setDrawScale(1,1);
+				newP.setTexture(underMouse);
+				if(!objects.contains(newP)) {
+					objects.add(newP);
+				}
+			}
 		}
 
 	}
@@ -272,10 +276,12 @@ public class LevelEditorMode extends Mode {
 			startHeight += regions[i].getRegionHeight() + 20;
 		}
 		if(textureClicked) {
-			canvas.draw(underMouse, Gdx.input.getX(), canvas.getHeight()-Gdx.input.getY());
+			canvas.draw(underMouse, Gdx.input.getX()-(underMouse.getRegionWidth()/2),
+					canvas.getHeight()-Gdx.input.getY()-(underMouse.getRegionHeight()/2));
 		}
-		for(Obstacle o: objects) {
-			o.draw(canvas);
+		for(Obstacle t: objects) {
+			t.draw(canvas);
+			//canvas.draw(t, underMousecoords.x, canvas.getHeight() - underMousecoords.y);
 		}
 	}
 
@@ -334,8 +340,8 @@ public class LevelEditorMode extends Mode {
 	 */
 	private void addObject(Obstacle obj) {
 		assert inBounds(obj) : "Object is not in bounds";
-		objects.add(obj);
-		obj.activatePhysics(world);
+//		objects.add(obj);
+//		obj.activatePhysics(world);
 
 		//addEntityController(obj);
 	}

@@ -3,6 +3,7 @@ package edu.cornell.gdiac.game.input;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Source;
@@ -18,6 +19,7 @@ public class EditorInputController implements InputProcessor {
     private boolean didTouch;
     private boolean didDrag;
     private boolean justTouched;
+    private Vector2 lastPos;
 
     /**
      * Return the singleton instance of the input controller
@@ -35,7 +37,11 @@ public class EditorInputController implements InputProcessor {
 
     public boolean didDrag() { return didDrag; }
 
-    public boolean justTouched() { return justTouched; }
+    // public boolean justTouched() { return justTouched; }
+
+    public Vector2 getLastPos() {
+        return lastPos;
+    }
 
 
     /**
@@ -76,6 +82,7 @@ public class EditorInputController implements InputProcessor {
         if(button == Input.Buttons.LEFT) {
             didTouch = false;
             didDrag = false;
+            lastPos = new Vector2(x,y);
         }
         return false;
     }
