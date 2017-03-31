@@ -1,24 +1,11 @@
 /*
- * LoadingMode.java
+ * LevelSelectionMode.java
  *
- * Asset loading is a really tricky problem.  If you have a lot of sound or images,
- * it can take a long time to decompress them and load them into memory.  If you just
- * have code at the start to load all your assets, your game will look like it is hung
- * at the start.
+ * Mode for level selecting. This class manages all the json levels that exists in the game
+ * and gives the players control over which level to load and play. It limits what level
+ * the player can choose to play and controls what level GameMode needs to load.
  *
- * The alternative is asynchronous asset loading.  In asynchronous loading, you load a
- * little bit of the assets at a time, but still animate the game while you are loading.
- * This way the player knows the game is not hung, even though he or she cannot do 
- * anything until loading is complete. You know those loading screens with the inane tips 
- * that want to be helpful?  That is asynchronous loading.  
- *
- * This player mode provides a basic loading screen.  While you could adapt it for
- * between level loading, it is currently designed for loading all assets at the 
- * start of the game.
- *
- * Author: Walker M. White
- * Based on original PhysicsDemo Lab by Don Holden, 2007
- * LibGDX version, 2/6/2015
+ * Author: Changxu Lu
  */
 package edu.cornell.gdiac.game.modes;
 
@@ -34,13 +21,11 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 /**
  * Class that provides a Level Selection screen for the state of the game.
- *
- * TODO: write class desc
  */
 public class LevelSelectionMode extends Mode {
 	// TODO: remove this once we have working json file loading in assetmanager
 	private static final String[] NUM_LEVELS = {
-			"JSON/level1.json","JSON/level3.json","JSON/default.json","JSON/default.json","JSON/default.json",
+			"JSON/level1.json","JSON/level3.json","JSON/default.json","JSON/default.json","JSON/level5.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json"};
@@ -49,7 +34,7 @@ public class LevelSelectionMode extends Mode {
 	private static final int BORDER_X = 50;
 	private static final int BORDER_Y = 50;
 
-	// Textures necessary to support the loading screen
+	/** Textures necessary to support the loading screen */
 	private static final String BACKGROUND_FILE = "ui/bg/level_selection.png";
 	/** Retro font for displaying messages */
 	private static String FONT_FILE = "fonts/RetroGame.ttf";
@@ -64,7 +49,6 @@ public class LevelSelectionMode extends Mode {
 	private int selected;
 	/** The Game mode where players can play*/
 	private GameMode gameMode;
-
 
 	/**
 	 * Creates a LevelSelectionMode with the default size and position.
@@ -81,8 +65,8 @@ public class LevelSelectionMode extends Mode {
 	}
 
 	// BEGIN: Setters and Getters
-
 	// END: Setters and Getters
+    
 	@Override
 	public void setScreenListener(ScreenListener listener) {
 		super.setScreenListener(listener);
@@ -163,8 +147,6 @@ public class LevelSelectionMode extends Mode {
 			displayFont = manager.get(FONT_FILE, BitmapFont.class);
 		else
 			displayFont = null;
-
-		// TODO: loads all the level json files
 	}
 
 	@Override
@@ -176,6 +158,12 @@ public class LevelSelectionMode extends Mode {
 		gameMode.unloadContent(manager);
 	}
 
+    /**
+     *  Converts a 2 dimensional array index mapping into the index of 
+     *  a 1 dimensional array.
+     *
+     * @return the index in a 1d array that corresponds to the 2d array index
+     */
 	private int convertToIndex(int x, int y){
 		return x + (y*TOTAL_COLUMNS);
 	}

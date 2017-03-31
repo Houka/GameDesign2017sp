@@ -1,22 +1,20 @@
 {
-  "objects": {
-    "platforms": [{
-      "vertices": [
-        1,
-        1,
-        31,
-        1,
-        31,
-        0,
-        1,
-        0
+    "platforms": {
+      "default": [
+        [
+          1,
+          1,
+          31,
+          1,
+          31,
+          0,
+          1,
+          0
+        ]
       ]
-    }
-
-
-    ],
-    "walls": [{
-      "vertices": [
+    },
+    "walls": {
+      "default": [[
         16,
         18,
         16,
@@ -30,8 +28,7 @@
         0,
         18
       ]
-    }, {
-      "vertices": [
+    , [
         32,
         18,
         32,
@@ -45,32 +42,27 @@
         16,
         18
       ]
-    }],
-    "player": {
+      ]},
+  "player": {
       "x": 2.5,
       "y": 5
     },
-    "enemies": [{
-      "type": 0,
-      "x": -100,
-      "y": 0,
-      "isFacingRight": 0,
-      "interval": 200
-    }],
-    "resources": [
-      {
-        "type": 0,
-        "x": 5.5,
-        "y": -10
-      }
+    "enemies": {
+      "interval":[
+
     ],
+      "on_sight":[]
+    },
+
+    "resources": {
+      "ammo_depots":[
+
+    ]
+},
     "target": {
       "x": 29.5,
       "y": 15
-    }
-  },
-  "state": {
-    "starting ammo": 100,
-    "next level": "NONE"
-  }
+    },
+  "starting ammo": 100
+
 }

@@ -1,24 +1,15 @@
 /*
- * LoadingMode.java
+ * LevelEditorMode.java
  *
- * Asset loading is a really tricky problem.  If you have a lot of sound or images,
- * it can take a long time to decompress them and load them into memory.  If you just
- * have code at the start to load all your assets, your game will look like it is hung
- * at the start.
+ * Mode for level editing. This class sets up an interactive level editing
+ * screen so players can take any element that is avalible in game and
+ * add it to a layout. This layout should look very much like a typical level
+ * in game and once, completed it will pass the information off to LevelCreator
+ * to have a json made of the created level. 
  *
- * The alternative is asynchronous asset loading.  In asynchronous loading, you load a
- * little bit of the assets at a time, but still animate the game while you are loading.
- * This way the player knows the game is not hung, even though he or she cannot do 
- * anything until loading is complete. You know those loading screens with the inane tips 
- * that want to be helpful?  That is asynchronous loading.  
+ * Other functionalities include being able to load json levels in and editing them. 
  *
- * This player mode provides a basic loading screen.  While you could adapt it for
- * between level loading, it is currently designed for loading all assets at the 
- * start of the game.
- *
- * Author: Walker M. White
- * Based on original PhysicsDemo Lab by Don Holden, 2007
- * LibGDX version, 2/6/2015
+ * Author: Changxu Lu
  */
 package edu.cornell.gdiac.game.modes;
 
@@ -30,8 +21,8 @@ import edu.cornell.gdiac.game.interfaces.ScreenListener;
 
 /**
  * Class that provides a Level Editor screen for the state of the game.
- *
- * TODO: write class desc
+ * 
+ * The level editor screen allows players to create/edit their own levels
  */
 public class LevelEditorMode extends Mode {
 	// Textures necessary to support the loading screen
@@ -49,7 +40,6 @@ public class LevelEditorMode extends Mode {
 	}
 
 	// BEGIN: Setters and Getters
-
 	// END: Setters and Getters
 
 	@Override

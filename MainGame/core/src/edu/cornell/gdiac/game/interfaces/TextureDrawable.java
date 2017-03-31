@@ -7,7 +7,7 @@ import edu.cornell.gdiac.game.GameCanvas;
 /**
  * Created by Lu on 3/10/2017.
  *
- * TODO: class desc
+ * Contains functions for drawing textures
  */
 public interface TextureDrawable {
     /**
@@ -43,7 +43,6 @@ public interface TextureDrawable {
      * This method does NOT return a reference to the drawing scale. Changes to this
      * vector will not affect the body.  However, it returns the same vector each time
      * its is called, and so cannot be used as an allocator.
-
      * We allow for the scaling factor to be non-uniform.
      *
      * @return the drawing scale for this physics object
