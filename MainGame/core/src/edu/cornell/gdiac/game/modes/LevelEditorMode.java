@@ -29,6 +29,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
@@ -37,9 +39,10 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.utils.Array;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.entity.controllers.CollisionController;
-import edu.cornell.gdiac.game.entity.models.PlayerModel;
+import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.game.input.EditorInputController;
 import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.game.interfaces.Settable;
@@ -110,6 +113,8 @@ public class LevelEditorMode extends Mode {
 	private boolean justTouched;
 
 	private PlayerModel playermodel;
+	ShapeRenderer shapeRenderer;
+	HashSet<Vector2> grid;
 
 
 	/** Width of the game world in Box2d units	 */
@@ -125,6 +130,7 @@ public class LevelEditorMode extends Mode {
 	/** array of textures */
 	private TextureRegion[] regions;
 	private int[] startHeights;
+	private int gridCell = 50;
 
 	/** The stage for drag and drop */
 	Stage stage;
@@ -179,6 +185,13 @@ public class LevelEditorMode extends Mode {
 		Gdx.input.setInputProcessor(input);
 		textureClicked = false;
 		onExit = ScreenListener.EXIT_MENU;
+		shapeRenderer = new ShapeRenderer();
+		grid = new HashSet<Vector2>();
+		for(int i=0; i<canvas.getWidth()-200; i+=gridCell) {
+			for(int j=0; j<canvas.getHeight(); j+=gridCell) {
+				grid.add(new Vector2(i,j));
+			}
+		}
 		scaleVector = new Vector2(canvas.getWidth() / bounds.getWidth(), canvas.getHeight() / bounds.getHeight());
 
 		world = new World(gravity, false);
@@ -189,6 +202,28 @@ public class LevelEditorMode extends Mode {
 	// BEGIN: Setters and Getters
 
 	// END: Setters and Getters
+
+	protected void drawGrid() {
+		shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+		for(Vector2 cell: grid) {
+			shapeRenderer.rect(cell.x, cell.y, gridCell, gridCell);
+		}
+		shapeRenderer.end();
+	}
+
+	public Vector2 getCell(Vector2 pos) {
+		int cellsX = canvas.getWidth()-200/gridCell;
+		int cellsY = canvas.getHeight()-200/gridCell;
+		float dist = Float.MAX_VALUE;
+		Vector2 newPos = pos;
+		for(Vector2 cell: grid) {
+			if(pos.dst(cell) < dist) {
+				dist = pos.dst(cell);
+				newPos = cell;
+			}
+		}
+		return newPos;
+	}
 
 	@Override
 	public void dispose() {
@@ -227,6 +262,7 @@ public class LevelEditorMode extends Mode {
 				if(textureBounds.contains(mouseX, mouseY)) {
 					underMouse = regions[i];
 					textureClicked = true;
+
 				}
 			}
 		}
@@ -235,15 +271,47 @@ public class LevelEditorMode extends Mode {
 		}
 		// if mouse just released
 		if(!input.didTouch() &&  mouseX <= canvas.getWidth()-200 && underMouse != null) {
+			Vector2 newPos = getCell(input.getLastPos());
 			if(underMouse.getTexture().equals(player)) {
-				PlayerModel newP = new PlayerModel(input.getLastPos().x,canvas.getHeight()-input.getLastPos().y,
+				PlayerModel newP = new PlayerModel(newPos.x,canvas.getHeight()-newPos.y,
 						underMouse.getRegionWidth(), underMouse.getRegionHeight());
 				newP.setDrawScale(1,1);
 				newP.setTexture(underMouse);
-				if(!objects.contains(newP)) {
-					objects.add(newP);
-				}
+				objects.add(newP);
 			}
+			else if(underMouse.getTexture().equals(enemy)) {
+				int interval = 3;
+				EnemyModel newE = new EnemyModel(newPos.x, canvas.getHeight()-newPos.y,
+						underMouse.getRegionWidth(), underMouse.getRegionHeight(), true, true, interval);
+				newE.setDrawScale(1,1);
+				newE.setTexture(underMouse);
+				objects.add(newE);
+			}
+			else if(underMouse.getTexture().equals(ammoDepot)) {
+				int ammoAmount = 3;
+				AmmoDepotModel newA = new AmmoDepotModel(newPos.x, canvas.getHeight()-newPos.y,
+						underMouse.getRegionWidth(), underMouse.getRegionHeight(), ammoAmount);
+				newA.setDrawScale(1,1);
+				newA.setTexture(underMouse);
+				objects.add(newA);
+			}
+			else if(underMouse.getTexture().equals(camera)) {
+				GoalModel newG = new GoalModel(newPos.x, canvas.getHeight()-newPos.y,
+						underMouse.getRegionWidth(), underMouse.getRegionHeight());
+				newG.setDrawScale(1,1);
+				newG.setTexture(underMouse);
+				objects.add(newG);
+			}
+			else if(underMouse.getTexture().equals(platform)) {
+				float[] arr = {newPos.x, newPos.y, newPos.x+gridCell, newPos.y, newPos.x+gridCell,
+						newPos.y-0.5f, newPos.x, newPos.y-0.5f};
+				PlatformModel newP = new PlatformModel(arr);
+				newP.setDrawScale(1,1);
+				newP.setTexture(underMouse);
+				objects.add(newP);
+			}
+			underMouse = null;
+
 		}
 
 	}
@@ -281,8 +349,9 @@ public class LevelEditorMode extends Mode {
 		}
 		for(Obstacle t: objects) {
 			t.draw(canvas);
-			//canvas.draw(t, underMousecoords.x, canvas.getHeight() - underMousecoords.y);
 		}
+
+		drawGrid();
 	}
 
 	@Override
