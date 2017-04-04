@@ -10,37 +10,68 @@ import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 /**
  * Created by Lu on 2/27/2017.
  *
- * The model class for bullet objects.
- *
+ * The model class for paintball objects
  */
 public class PaintballModel extends BoxObstacle {
-
-    /** horizontal scale*/
+    /** Scale of paintball**/
     private float xScale;
     private float yScale;
+
+    /** Transformation of original scale **/
     private float xtransform = 1f;
     private float ytransform = 1f;
+
+    /** Size of knockback portion of paintball**/
+    private float headSize = .2f;
+
+    /** Duration before death variables**/
     private float paintballToPaintballDuration;
     private float paintballToWallDuration;
     private float paintballToPlatformDuration;
     private float deathDuration = 1f;
+
+    /** Time before bullet dies**/
     private float maxLifeTime;
+
+    /** Maximum scale**/
     private float maxXScale;
-    private float myVY;
+
+    /** Opacity of paintball**/
     private float opacity;
+
+    /** Starting width and height**/
     private float initWidth;
     private float initHeight;
+
+    /** Starting speed**/
     private float speed;
+
+    /** Is paintball growing?**/
     private boolean growing;
+    /** Is paintball dying?**/
     private boolean dying;
-    private float timeToDie;
-    private Vector2 scale;
+    /** Is gravity enabled?**/
     boolean gravity;
 
+    /** Counter from death until removal**/
+    private float timeToDie;
+
+    /** Screen scale**/
+    private Vector2 scale;
+
+    /** Paintball color**/
     private Color paintcolor = Color.WHITE;
 
     /**
-     *  TODO: write constructor desc
+     * PaintballModel constructor
+     * @param x         Starting x position
+     * @param y         Starting y position
+     * @param w         Starting width
+     * @param h         Starting height
+     * @param s         Starting speed
+     * @param xScl      Starting x-scale
+     * @param yScl      Starting y-scale
+     * @param scl       Screen scale
      */
     public PaintballModel(float x, float y, float w, float h, float s, float xScl, float yScl, Vector2 scl){
         super(x,y,w,h);
@@ -67,11 +98,122 @@ public class PaintballModel extends BoxObstacle {
         growing = true;
         dying = false;
         scale = scl;
-        myVY = 0;
         gravity = false;
         maxLifeTime = 20f;
     }
 
+    //BEGIN: GETTERS AND SETTERS
+    public void setTimeToDie(float xd) {
+        if(!dying) {
+            timeToDie = xd + deathDuration;
+            dying = true;
+            growing = false;
+        }
+    }
+
+    private float getScaledX() {
+        return xScale*xtransform;
+    }
+
+    private float getScaledY() {
+        return yScale*ytransform;
+    }
+
+
+    public float getHeadSize() {
+        return headSize;
+    }
+
+    public void setHeadSize(float headSize) {
+        this.headSize = headSize;
+    }
+
+    public void setYScale(float val) {
+        yScale=val;
+    }
+    public void setXScale(float val) {
+        xScale=val;
+    }
+    public void setMaxXScale(float val) {
+        maxXScale=val;
+    }
+
+    public void setPaintballToWallDuration(float paintballToWallDuration) {
+        this.paintballToWallDuration = paintballToWallDuration;
+    }
+
+    public void setPaintballToPlatformDuration(float paintballToPlatformDuration) {
+        this.paintballToPlatformDuration = paintballToPlatformDuration;
+    }
+
+    public void setPaintballToPaintballDuration(float paintballToPaintballDuration) {
+        this.paintballToPaintballDuration = paintballToPaintballDuration;
+    }
+
+    public float getMaxLifeTime() {
+        return maxLifeTime;
+    }
+
+    public float getYScale() {
+        return yScale;
+    }
+    public float getXScale() {
+        return xScale;
+    }
+    public float getMaxXScale() {
+        return maxXScale;
+    }
+    public float getSpeed() {
+        return speed;
+    }
+
+    public float getPaintballToPaintballDuration() {
+        return paintballToPaintballDuration;
+    }
+
+    public float getPaintballToWallDuration() {
+        return paintballToWallDuration;
+    }
+
+    public float getPaintballToPlatformDuration() {
+        return paintballToPlatformDuration;
+    }
+
+    public float getTimeToDie() {
+        return timeToDie-deathDuration;
+    }
+    public boolean isDying() {
+        return dying;
+    }
+    public boolean isDead() {
+        return dying && timeToDie<deathDuration;
+    }
+    //END: GETTERS AND SETTERS
+
+    /** Enable gravity**/
+    public void enableGravity() {
+        gravity = true;
+        this.setGravityScale(1/3f);
+        //this.setVY(-2); //Uncomment and comment above line for constant falling
+    }
+
+    /**
+     * Fix X velocity
+     * @param val       x velocity
+     */
+    public void fixX(float val) {
+        speed=val;
+    }
+
+    /**
+     * Set the time until paintball expires
+     * @param val       Time until death
+     */
+    public void setMaxLifeTime(float val) {
+        maxLifeTime = val;
+    }
+
+    @Override
     public void update(float delta) {
         if(xtransform<maxXScale && growing) {
             xtransform += delta*Math.abs(speed)*1.5f;
@@ -102,14 +244,7 @@ public class PaintballModel extends BoxObstacle {
         maxLifeTime-=delta;
     }
 
-    private float getScaledX() {
-        return xScale*xtransform;
-    }
-
-    private float getScaledY() {
-        return yScale*ytransform;
-    }
-
+    @Override
     public void draw(GameCanvas canvas) {
         paintcolor.a = opacity;
         if (texture != null) {
@@ -119,88 +254,5 @@ public class PaintballModel extends BoxObstacle {
         //TODO Find better solution later
         paintcolor.a = 1;
         canvas.draw(texture, paintcolor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),0,0);
-    }
-
-    public void setTimeToDie(float xd) {
-        if(!dying) {
-            timeToDie = xd + deathDuration;
-            dying = true;
-            growing = false;
-        }
-    }
-
-    public void enableGravity() {
-        gravity = true;
-        this.setGravityScale(1/3f);
-        //this.setVY(-2); //Uncomment and comment above line for constant falling
-    }
-
-
-    public void fixX(float val) {
-        speed=val;
-    }
-
-    public void setYScale(float val) {
-        yScale=val;
-    }
-    public void setXScale(float val) {
-        xScale=val;
-    }
-    public void setMaxXScale(float val) {
-        maxXScale=val;
-    }
-
-    public void setPaintballToWallDuration(float paintballToWallDuration) {
-        this.paintballToWallDuration = paintballToWallDuration;
-    }
-
-    public void setPaintballToPlatformDuration(float paintballToPlatformDuration) {
-        this.paintballToPlatformDuration = paintballToPlatformDuration;
-    }
-
-    public void setPaintballToPaintballDuration(float paintballToPaintballDuration) {
-        this.paintballToPaintballDuration = paintballToPaintballDuration;
-    }
-
-    public void setMaxLifeTime(float val) {
-        maxLifeTime = val;
-    }
-
-    public float getTimeToDie() {
-        return timeToDie-deathDuration;
-    }
-    public boolean isDying() {
-        return dying;
-    }
-    public boolean isDead() {
-        return dying && timeToDie<deathDuration;
-    }
-    public float getMaxLifeTime() {
-        return maxLifeTime;
-    }
-
-    public float getYScale() {
-        return yScale;
-    }
-    public float getXScale() {
-        return yScale;
-    }
-    public float getMaxXScale() {
-        return maxXScale;
-    }
-    public float getSpeed() {
-        return speed;
-    }
-
-    public float getPaintballToPaintballDuration() {
-        return paintballToPaintballDuration;
-    }
-
-    public float getPaintballToWallDuration() {
-        return paintballToWallDuration;
-    }
-
-    public float getPaintballToPlatformDuration() {
-        return paintballToPlatformDuration;
     }
 }

@@ -49,7 +49,9 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	/** Whether or not this mode is completed*/
 	private boolean completed;
 	/** Whether or not this mode is still active */
-	protected boolean active;
+	private boolean active;
+	/** Whether or not this mode is paused */
+	private boolean paused;
 	/** Whether or not debug mode is active */
 	protected boolean debug;
 	/** The main input controller */
@@ -65,6 +67,7 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 		this.manager = manager;
 		this.canvas  = canvas;
 		scale = new Vector2(1,1);
+		paused = false;
 		active = false;
 		exit = false;
 		completed = false;
@@ -121,12 +124,13 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 			debug = !debug;
 		else if (input.didReset())
 			reset();
+		else if (input.didPause())
+			processPause();
 		else if(input.didExit()) {
 			setExit(true);
 			return false;
 		}
-
-		return true;
+		return !paused;
 	}
 
 	/**
@@ -205,18 +209,29 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 		setComplete(false);
 	}
 
-	/**
-	 * Default behavior for modes that have completed their task
+	/***
+	 * Handles a pause button press
 	 */
+	public void processPause() {
+		if(!paused)
+			pauseGame();
+		else
+			resume();
+	}
 	protected void onComplete(){
 		onExit();
 	}
-    
+  
     /**
      * Behavior for when the mode wishes to exit
      */
-	protected void onExit(){ listener.exitScreen(this, onExit); }
+	private void onExit(){ listener.exitScreen(this, onExit); }
 
+    /**
+     * Behavor for when the mode is paused
+     */
+	public void pauseGame() {paused = true;}
+  
     /**
      * Behavor for when the mode is paused
      */
@@ -225,8 +240,8 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
     /**
      * Behavor for when the mode resumes from a pause state
      */
-    public void resume() {}
-    
+	public void resume() {paused = false;}
+	  
     /**
      * Behavor for when the mode is shown/active
      */

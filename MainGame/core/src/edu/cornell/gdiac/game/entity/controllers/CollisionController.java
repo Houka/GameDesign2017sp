@@ -8,6 +8,8 @@ import edu.cornell.gdiac.util.obstacles.Obstacle;
 /**
  * Created by Lu on 3/17/2017.
  *
+ * This class handles collisions between game objects
+ *
  * object names so far
  *  background
  *  hud
@@ -27,23 +29,48 @@ public class CollisionController implements ContactListener {
     /** Mark set to handle more sophisticated collision callbacks */
     private ObjectSet<Object> sensorObjects;
 
+    /**
+     *  The contructor
+     * @param hud   The HUD to update
+     */
     public CollisionController(HUDModel hud){
         this.hud = hud;
         sensorObjects = new ObjectSet<Object>();
     }
 
     // BEGIN: helper functions
-    private void touchedGround(PlayerModel obj1, Obstacle obj2, Object userData1){
+
+    /**
+     *  This function updates the state as if the player touched the ground
+     * @param obj1          The player
+     * @param obj2          The obstacle being collided with
+     * @param userData1     Information about the part of the player colliding
+     * @param userData2     Information about the obstacle being collided with
+     */
+    private void touchedGround(PlayerModel obj1, Obstacle obj2, Object userData1, Object userData2){
         if (obj1.getSensorName().equals(userData1)) {
             obj1.setGrounded(true);
-            sensorObjects.add(obj2); // Could have more than one ground
+            if(userData2==null)
+                userData2 = obj2;
+            sensorObjects.add(userData2); // Could have more than one ground
         }
     }
-    private void leftGround(PlayerModel obj1, Obstacle obj2, Object userData1){
+
+    /**
+     *  This function updates the state as if the player left the ground
+     * @param obj1          The player
+     * @param obj2          The obstacle being collided with
+     * @param userData1     Information about the part of the player that was colliding
+     * @param userData2     Information about the obstacle that had been collided with
+     */
+    private void leftGround(PlayerModel obj1, Obstacle obj2, Object userData1, Object userData2){
         if (obj1.getSensorName().equals(userData1)) {
-            sensorObjects.remove(obj2);
+            if(userData2==null)
+                userData2 = obj2;
+            sensorObjects.remove(userData2);
             if (sensorObjects.size == 0) {
                 obj1.setGrounded(false);
+                obj1.setCanDoubleJump(true);
             }
         }
     }
@@ -52,13 +79,22 @@ public class CollisionController implements ContactListener {
     // BEGIN: Simple Collision handlers
     private void handleCollision(PlayerModel obj1, EnemyModel obj2){}
     private void handleCollision(PlayerModel obj1, GoalModel obj2){}
-    private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1){
-        touchedGround(obj1,obj2,userData1);
+    private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
+        touchedGround(obj1,obj2,userData1,userData2);
     }
-    private void handleCollision(PlayerModel obj1, WallModel obj2){}
-    private void handleCollision(PlayerModel obj1, PaintballModel obj2, Object userData1) {
-        touchedGround(obj1, obj2, userData1);
-        obj1.setRidingVX(obj2);
+    private void handleCollision(PlayerModel obj1, WallModel obj2){
+        obj1.setKnockedBack(0);
+    }
+    private void handleCollision(PlayerModel obj1, PaintballModel obj2, Object userData1, Object userData2) {
+        float sign = obj2.getVX() / Math.abs(obj2.getVX());
+        if(obj1.getY()-obj1.getHeight()/2f>=obj2.getY()){
+            touchedGround(obj1, obj2, userData1, userData2);
+        }
+        else{
+            obj1.setKnockedBack(0);
+            if(!obj2.isDying() && obj1.getX()*sign>obj2.getX()*sign+obj2.getHeadSize()*-sign+(sign>0?obj2.getWidth()/2f:0))
+                obj1.setKnockedBack(sign);
+        }
     }
     private void handleCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){
         obj2.markRemoved(true);
@@ -111,11 +147,11 @@ public class CollisionController implements ContactListener {
 
     // Collision end handlers
     private void handleEndCollision(PlayerModel obj1,WallModel obj2){ }
-    private void handleEndCollision(PlayerModel obj1,PlatformModel obj2, Object userData1){
-        leftGround(obj1,obj2,userData1);
+    private void handleEndCollision(PlayerModel obj1,PlatformModel obj2, Object userData1, Object userData2){
+        leftGround(obj1,obj2,userData1,userData2);
     }
-    private void handleEndCollision(PlayerModel obj1,PaintballModel obj2, Object userData1){
-        leftGround(obj1,obj2,userData1);
+    private void handleEndCollision(PlayerModel obj1,PaintballModel obj2, Object userData1, Object userData2){
+        leftGround(obj1,obj2,userData1,userData2);
         obj1.setRidingVX(null);
     }
     private void handleEndCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){}
@@ -123,20 +159,26 @@ public class CollisionController implements ContactListener {
     // END: Simple Collision handlers
 
     /**
-     * TODO: write desc
+     * Processes a collision between two objects
+     * @param obj1          The first obstacle colliding
+     * @param obj2          The second obstacle colliding
+     * @param userData1     The user data of the first obstacle's fixture
+     * @param userData2     The user data for the second obstacle's fixture
+     * @param fix1          The first fixture colliding
+     * @param fix2          The second fixture colliding
      */
-    private void processCollision(Obstacle obj1, Obstacle obj2, Object userData1, Object userData2){
+    private void processCollision(Obstacle obj1, Obstacle obj2, Object userData1, Object userData2,Fixture fix1, Fixture fix2){
         if (obj1.getName().equals("player")) {
             if (obj2.getName().equals("enemy"))
                 handleCollision((PlayerModel)obj1, (EnemyModel) obj2);
             else if (obj2.getName().equals("goal"))
                 handleCollision((PlayerModel)obj1,(GoalModel) obj2);
             else if (obj2.getName().equals("platform"))
-                handleCollision((PlayerModel)obj1,(PlatformModel) obj2, userData1);
+                handleCollision((PlayerModel)obj1,(PlatformModel) obj2, userData1, fix2);
             else if (obj2.getName().equals("wall"))
                 handleCollision((PlayerModel)obj1,(WallModel) obj2);
             else if (obj2.getName().equals("paintball"))
-                handleCollision((PlayerModel)obj1,(PaintballModel) obj2, userData1);
+                handleCollision((PlayerModel)obj1,(PaintballModel) obj2, userData1,fix2);
             else if (obj2.getName().equals("ammoDepot"))
                 handleCollision((PlayerModel)obj1, (AmmoDepotModel) obj2);
         }
@@ -160,16 +202,22 @@ public class CollisionController implements ContactListener {
     }
 
     /**
-     * TODO: write desc
+     * Processes the end of a collision between two objects
+     * @param obj1          The first obstacle colliding
+     * @param obj2          The second obstacle colliding
+     * @param userData1     The user data of the first obstacle's fixture
+     * @param userData2     The user data for the second obstacle's fixture
+     * @param fix1          The first fixture colliding
+     * @param fix2          The second fixture colliding
      */
-    private void processEndCollision(Obstacle obj1, Obstacle obj2, Object userData1, Object userData2){
+    private void processEndCollision(Obstacle obj1, Obstacle obj2, Object userData1, Object userData2,Fixture fix1, Fixture fix2){
         if (obj1.getName().equals("player")) {
             if (obj2.getName().equals("platform"))
-                handleEndCollision((PlayerModel)obj1,(PlatformModel) obj2, userData1);
+                handleEndCollision((PlayerModel)obj1,(PlatformModel) obj2, userData1, fix2);
             else if (obj2.getName().equals("wall"))
                 handleEndCollision((PlayerModel)obj1,(WallModel) obj2);
             else if (obj2.getName().equals("paintball"))
-                handleEndCollision((PlayerModel)obj1,(PaintballModel) obj2, userData1);
+                handleEndCollision((PlayerModel)obj1,(PaintballModel) obj2, userData1,fix2);
         }else if (obj1.getName().equals("enemy")) {
             if (obj2.getName().equals("paintball"))
                 handleEndCollision((EnemyModel)obj1, (PaintballModel) obj2, userData1);
@@ -193,8 +241,8 @@ public class CollisionController implements ContactListener {
             Obstacle bd1 = (Obstacle) body1.getUserData();
             Obstacle bd2 = (Obstacle) body2.getUserData();
 
-            processCollision(bd1, bd2, fd1, fd2);
-            processCollision(bd2, bd1, fd2, fd1);
+            processCollision(bd1, bd2, fd1, fd2,fix1,fix2);
+            processCollision(bd2, bd1, fd2, fd1,fix2,fix1);
         }catch (Exception e) {
             e.printStackTrace();
         }
@@ -215,8 +263,8 @@ public class CollisionController implements ContactListener {
             Obstacle bd1 = (Obstacle) body1.getUserData();
             Obstacle bd2 = (Obstacle) body2.getUserData();
 
-            processEndCollision(bd1, bd2, fd1, fd2);
-            processEndCollision(bd2, bd1, fd2, fd1);
+            processEndCollision(bd1, bd2, fd1, fd2,fix1,fix2);
+            processEndCollision(bd2, bd1, fd2, fd1,fix2,fix1);
         }catch (Exception e) {
             e.printStackTrace();
         }
