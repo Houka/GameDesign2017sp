@@ -32,12 +32,10 @@ import com.badlogic.gdx.Screen;
  */
 public interface ScreenListener {
 	// Exit Codes
-	/** Default exit code for a NOP */
-	int EXIT_NOP = -1;
 	/** Exit code for quitting the game */
 	int EXIT_QUIT = 0;
 	/** Exit code for jumping back to previous screen */
-	int EXIT_MENU = 1;
+	int EXIT_ESC = 1;
 	
 	/**
 	 * The given screen has made a request to exit its player mode.
@@ -53,7 +51,7 @@ public interface ScreenListener {
 	 * The given screen has made a request to change its screen.
 	 *
 	 * @param from  The screen requesting to exit
-	 * @param to 	The screen to change to
+	 * @param to 	The name of screen to change to
 	 */
-	void switchScreens(Screen from, Screen to);
+	void switchToScreen(Screen from, String to);
 }

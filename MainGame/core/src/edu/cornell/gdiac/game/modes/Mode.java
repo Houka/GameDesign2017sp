@@ -17,15 +17,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.input.MainInputController;
-import edu.cornell.gdiac.game.interfaces.AssetUser;
-import edu.cornell.gdiac.game.interfaces.Completable;
-import edu.cornell.gdiac.game.interfaces.Exitable;
-import edu.cornell.gdiac.game.interfaces.ScreenListener;
+import edu.cornell.gdiac.game.interfaces.*;
 
 /**
  * Class that provides the fundamental mode functionalities
  */
-public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
+public abstract class Mode implements Screen, Completable, AssetUser, Exitable, Nameable {
 	/** Standard window size (for scaling) */
 	private static int STANDARD_WIDTH  = 1024;
 	/** Standard window height (for scaling) */
@@ -41,9 +38,11 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	protected GameCanvas canvas;
 	/** Listener that will update the player mode when we are done */
 	protected ScreenListener listener;
+	/** The name of this mode */
+	protected String name;
 
 	/** The exit code for when this screen completes */
-	protected int onExit = ScreenListener.EXIT_NOP; // default it to non existant exit code
+	protected int onExit = ScreenListener.EXIT_ESC;
 	/** Whether or not this mode is completed*/
 	private boolean exit;
 	/** Whether or not this mode is completed*/
@@ -63,7 +62,8 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	 * @param canvas The GameCanvas to draw the textures to
 	 * @param manager The AssetManager to load in the background
 	 */
-	protected Mode(GameCanvas canvas, AssetManager manager) {
+	protected Mode(String name, GameCanvas canvas, AssetManager manager) {
+		this.name = name;
 		this.manager = manager;
 		this.canvas  = canvas;
 		scale = new Vector2(1,1);
@@ -76,6 +76,8 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	}
 
 	// BEGIN: Getters and Setters
+	public void setName(String value){name = value;}
+	public String getName(){ return name;}
 	public void setScreenListener(ScreenListener listener) {
 		this.listener = listener;
 	}

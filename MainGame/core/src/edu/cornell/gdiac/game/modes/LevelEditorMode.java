@@ -34,9 +34,8 @@ public class LevelEditorMode extends Mode {
 	 * @param canvas The GameCanvas to draw to
 	 * @param manager The AssetManager to load in the background
 	 */
-	public LevelEditorMode(GameCanvas canvas, AssetManager manager) {
-		super(canvas, manager);
-		onExit = ScreenListener.EXIT_MENU;
+	public LevelEditorMode(String name, GameCanvas canvas, AssetManager manager) {
+		super(name, canvas, manager);
 	}
 
 	// BEGIN: Setters and Getters
