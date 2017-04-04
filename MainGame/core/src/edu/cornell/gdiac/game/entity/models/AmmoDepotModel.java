@@ -15,13 +15,12 @@ import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 
 
 /**
- * AmmoDepot for the plaform game.
+ * Model class for ammo depots.
  *
  * Note that this class returns to static loading.  That is because there are
  * no other subclasses that we might loop through.
  */
 public class AmmoDepotModel extends BoxObstacle {
-    // This is to fit the image to a tighter hitbox
     /** The amount to shrink the body fixture (vertically) relative to the image */
     private static final float AMMO_DEPOT_VSHRINK = 0.95f;
     /** The amount to shrink the body fixture (horizontally) relative to the image */
@@ -39,8 +38,8 @@ public class AmmoDepotModel extends BoxObstacle {
      * drawing to work properly, you MUST set the drawScale. The drawScale
      * converts the physics units to pixels.
      *
-     * @param x  		Initial x position of the avatar center
-     * @param y  		Initial y position of the avatar center
+     * @param x  		Initial x position of the center
+     * @param y  		Initial y position of the center
      * @param width		The object width in physics units
      * @param height	The object width in physics units
      * @param ammoAmount How much ammo the player will receive from this
@@ -58,7 +57,7 @@ public class AmmoDepotModel extends BoxObstacle {
         this.used = false;
     }
 
-    // BEGIN: Getters and Setters
+    // BEGIN: Setters and Getters
     /**
      * Returns the max amount of ammo that the depot provides
      *
@@ -84,7 +83,7 @@ public class AmmoDepotModel extends BoxObstacle {
         this.used = used;
     }
 
-    // END: Getters and Setters
+    // END: Setters and Getters
 
     @Override
     public void update(float dt) {

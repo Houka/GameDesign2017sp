@@ -1,13 +1,3 @@
-/*
- * DudeModel.java
- *
- * You SHOULD NOT need to modify this file.  However, you may learn valuable lessons
- * for the rest of the lab by looking at it.
- *
- * Author: Walker M. White
- * Based on original PhysicsDemo Lab by Don Holden, 2007
- * LibGDX version, 2/6/2015
- */
 package edu.cornell.gdiac.game.entity.models;
 
 import com.badlogic.gdx.math.*;
@@ -19,7 +9,7 @@ import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
 
 
 /**
- * Player avatar for the plaform game.
+ * Enemy avatar for the plaform game.
  *
  * Note that this class returns to static loading.  That is because there are
  * no other subclasses that we might loop through.
@@ -28,9 +18,10 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
     // Physics constants
     /** The density of the character */
     private static final float ENEMY_DENSITY = 500.0f;
-    /** The player is a slippery one */
+    /** How slippery the enemy is */
     private static final float ENEMY_FRICTION = 0.0f;
 
+    /** Cooldown constants */
     private static final int DEFAULT_SHOOT_COOLDOWN = 75;
     private static final int DEFAULT_STUN_COOLDOWN = 500;
 
@@ -52,7 +43,7 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
 
     /** The current horizontal movement of the character */
     private float movement;
-    /** How long until we can shoot again */
+    /** Keeps track of how long until we can shoot again */
     private int shootCooldownCounter;
     private int stunCooldownCounter;
     /** How long we need to wait until we can shoot again */
@@ -140,6 +131,8 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
     public boolean isOnSight() {
         return onSight;
     }
+
+    public int getInterval() { return shootCooldown; }
 
     public void setOnSight(boolean onSight) {
         this.onSight = onSight;

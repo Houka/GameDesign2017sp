@@ -6,20 +6,23 @@ import edu.cornell.gdiac.game.input.PlayerInputController;
 /**
  * Created by Lu on 3/16/2017.
  *
- * TODO: write class desc
+ * This class handles the PlayerModel's logic
+ * 
  */
 public class PlayerController extends EntityController {
 
+    /** The input controller associated with the PlayerModel **/
     private PlayerInputController input;
 
-
-
+    /**
+    * PlayerController's contructor
+    * @player The PlayerModel that this PlayerController controls
+    **/
     public PlayerController(PlayerModel player){
         super(player);
         input = PlayerInputController.getInstance();
 
     }
-
 
     @Override
     public void update(float dt) {
@@ -30,4 +33,5 @@ public class PlayerController extends EntityController {
         player.setShooting(input.didShoot());
         player.applyForce();
     }
+    
 }

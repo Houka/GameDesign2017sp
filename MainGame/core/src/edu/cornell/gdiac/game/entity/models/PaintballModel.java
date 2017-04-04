@@ -11,10 +11,8 @@ import edu.cornell.gdiac.util.obstacles.BoxObstacle;
  * Created by Lu on 2/27/2017.
  *
  * The model class for paintball objects
- *
  */
 public class PaintballModel extends BoxObstacle {
-
     /** Scale of paintball**/
     private float xScale;
     private float yScale;

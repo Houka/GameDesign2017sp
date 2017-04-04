@@ -1,16 +1,10 @@
 /*
- * WorldController.java
+ * GameMode.java
  *
- * This is the most important new class in this lab.  This class serves as a combination 
- * of the CollisionController and GameplayController from the previous lab.  There is not 
- * much to do for collisions; Box2d takes care of all of that for us.  This controller 
- * invokes Box2d and then performs any after the fact modifications to the data 
- * (e.g. gameplay).
+ *  This class deals with the main gameplay logic and encompasses
+ *  the main game engine. 
  *
- * If you study this class, and the contents of the edu.cornell.cs3152.physics.obstacles
- * package, you should be able to understand how the Physics engine works.
- *
- * Author: Walker M. White
+ * Author: Changxu Lu
  * Based on original PhysicsDemo Lab by Don Holden, 2007
  * LibGDX version, 2/6/2015
  */
@@ -18,6 +12,7 @@ package edu.cornell.gdiac.game.modes;
 
 import java.util.Iterator;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.assets.*;
@@ -162,9 +157,10 @@ public class GameMode extends Mode implements Settable {
 	}
 
 	// BEGIN: Setters and Getters
-
 	/**
-	 * TODO: write desc
+	 * Trys to set the player in the world if it exists
+     *
+     * @return true if the world has a player, false otherwise
 	 */
 	private boolean trySetPlayer() {
 		for (Obstacle obj : levelLoader.getAddQueue()) {
@@ -217,6 +213,7 @@ public class GameMode extends Mode implements Settable {
 			e.update(dt);
 
 		applySettings();
+		paintballFactory.applySettings();
 		for(Obstacle obj: objects){
 			if(obj instanceof Settable)
 				((Settable) obj).applySettings();
@@ -224,12 +221,19 @@ public class GameMode extends Mode implements Settable {
 				updateShooter(obj);
 		}
 
+
+		hud.setY((Math.max(player.getY(), 9)*scaleVector.y)+canvas.getHeight()/2);
+
+		if (player.getY() < -player.getHeight())
+			hud.setLose(true);
+
 		postUpdate(dt);
 	}
 
+
 	@Override
 	public void draw() {
-		canvas.setCameraY(player.getY());
+		canvas.setCameraY(player.getY() * scaleVector.y, canvas.getHeight()/2);
 
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
@@ -242,15 +246,6 @@ public class GameMode extends Mode implements Settable {
 	protected void drawDebug() {
 		for (Obstacle obj : objects) {
 			obj.drawDebug(canvas);
-		}
-	}
-
-	@Override
-	public void resize(int width, int height) {
-		// TODO: implement
-		if (bounds != null) {
-			bounds.width = width;
-			bounds.height = height;
 		}
 	}
 
@@ -277,23 +272,29 @@ public class GameMode extends Mode implements Settable {
 	@Override
 	public void applySettings() {
 		world.setGravity(new Vector2(0, Sidebar.getValue("Gravity")));
-		PaintballFactory.applySettings();
 	}
 
 	/**
-	 * TODO: write desc for level setting.. should populate the level
+	 * Loads the level based on a json file. Will queue up a list of objects to
+     * add to the game world and sets all starting attributes to their initial starting
+     * number.
+     *
+     * @param levelFile the relative string path to the json file containing level info
 	 */
 	public void loadLevel(String levelFile) {
 		this.levelFile = levelFile;
 		levelLoader.loadLevel(levelFile);
-		resize(levelLoader.getBounds().width, levelLoader.getBounds().height);
+		bounds = levelLoader.getBounds();
 		hud.setStartingAmmo(levelLoader.getStartingAmmo());
 		if (!trySetPlayer())
 			System.out.println("Error: level file (" + levelFile + ") does not have a player");
 	}
 
 	/**
-	 * TODO: write desc
+	 * Updates any objects that are shooters so that this class can create/add bullets 
+     * to the shooting entity. Special case applies for the player involving the HUD
+     *
+     * @param obj the obstacle that we are checking is a shooter
 	 */
 	private void updateShooter(Obstacle obj) {
 		if (((Shooter)obj).isShooting()) {
@@ -351,8 +352,9 @@ public class GameMode extends Mode implements Settable {
 	}
 
 	/**
-	 * TODO: write desc
-	 * if its an enemy or player, add a new entity controller to it
+	 * Helper function that adds its corresponding controller class to 
+     * every entity obstacle.
+	 * If its an enemy or player, add a new entity controller to it.
 	 */
 	private void addEntityController(Obstacle obj) {
 		if (obj.getName().equals("player"))
