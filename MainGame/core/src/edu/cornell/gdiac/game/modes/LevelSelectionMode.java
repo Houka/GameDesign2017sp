@@ -56,11 +56,10 @@ public class LevelSelectionMode extends Mode {
 	 * @param canvas The GameCanvas to draw to
 	 * @param manager The AssetManager to load in the background
 	 */
-	public LevelSelectionMode(GameCanvas canvas, AssetManager manager) {
-		super(canvas, manager);
-		onExit = ScreenListener.EXIT_MENU;
+	public LevelSelectionMode(String name, GameCanvas canvas, AssetManager manager, GameMode gameMode) {
+		super(name, canvas, manager);
+		this.gameMode = gameMode;
 		input = SelectionInputController.getInstance();
-		gameMode = new GameMode(canvas,manager);
 		selected = 0;
 	}
 
@@ -96,11 +95,8 @@ public class LevelSelectionMode extends Mode {
 
 	@Override
 	protected void onComplete(){
-		gameMode.loadContent(manager);
-		gameMode.loadLevel(NUM_LEVELS[selected]);
-		// TODO: remove, for tech demo and testing values
-		Sidebar.defaultBootup();
-		listener.switchScreens(this, gameMode);
+		gameMode.setLevel(NUM_LEVELS[selected]);
+		listener.switchToScreen(this, gameMode.getName());
 	}
 
 	@Override
@@ -134,8 +130,6 @@ public class LevelSelectionMode extends Mode {
 		size2Params.fontFileName = FONT_FILE;
 		size2Params.fontParameters.size = FONT_SIZE;
 		manager.load(FONT_FILE, BitmapFont.class, size2Params);
-
-		gameMode.preLoadContent(manager);
 	}
 
 	@Override
@@ -154,8 +148,6 @@ public class LevelSelectionMode extends Mode {
 		if (manager.isLoaded(BACKGROUND_FILE)) {
 			manager.unload(BACKGROUND_FILE);
 		}
-
-		gameMode.unloadContent(manager);
 	}
 
     /**

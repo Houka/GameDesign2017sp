@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.GameModeManager;
 import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
@@ -32,7 +33,7 @@ public class MenuMode extends Mode {
 	protected BitmapFont displayFont;
 
 	/** Player modes that are selectable from menu mode */
-	private Mode[] modes;
+	private String[] modes = {GameModeManager.LEVEL_SELECTION, GameModeManager.LEVEL_EDITOR};
 	private String[] modeNames = {"Select Level","Level Editor", "Quit"};
 	private int selected = 0;
 
@@ -45,14 +46,9 @@ public class MenuMode extends Mode {
 	 * @param canvas The GameCanvas to draw to
 	 * @param manager The AssetManager to load in the background
 	 */
-	public MenuMode(GameCanvas canvas, AssetManager manager) {
-		super(canvas, manager);
+	public MenuMode(String name, GameCanvas canvas, AssetManager manager) {
+		super(name, canvas, manager);
 		onExit = ScreenListener.EXIT_QUIT;
-		modes = new Mode[]{
-			new LevelSelectionMode(canvas, manager),
-			new LevelEditorMode(canvas, manager)
-		};
-
 		input = SelectionInputController.getInstance();
 	}
 
@@ -62,28 +58,18 @@ public class MenuMode extends Mode {
 	@Override
 	public void setScreenListener(ScreenListener listener) {
 		super.setScreenListener(listener);
-		for(Mode m : modes)
-			m.setScreenListener(listener);
 	}
 
 	@Override
 	protected void onComplete(){
-		if (selected == modeNames.length-1)
-			super.onComplete();
-		else {
-			modes[selected].loadContent(manager);
-			listener.switchScreens(this, modes[selected]);
-		}
+		if (selected < modes.length)
+			listener.switchToScreen(this, modes[selected]);
 	}
 
 	@Override
 	public void dispose() {
 		super.dispose();
-
-		for(int i = 0; i < modes.length; i++)	{
-			modes[i].dispose();
-			modes[i] = null;
-		}
+		input = null;
 	}
 
 	@Override
@@ -94,8 +80,11 @@ public class MenuMode extends Mode {
 			selected=(selected+1) % modeNames.length;
 		else if (input.didUp())
 			selected=(selected-1 < 0)? modeNames.length-1 : selected-1;
-		else if (input.didSelect())
+		else if (input.didSelect()) {
+			if (selected == modeNames.length-1)
+				setExit(true);
 			setComplete(true);
+		}
 	}
 
 	@Override
@@ -122,10 +111,6 @@ public class MenuMode extends Mode {
 		size2Params.fontFileName = FONT_FILE;
 		size2Params.fontParameters.size = FONT_SIZE;
 		manager.load(FONT_FILE, BitmapFont.class, size2Params);
-
-		// preload content for children
-		for(Mode m : modes)
-			m.preLoadContent(manager);
 	}
 
 	@Override
@@ -145,7 +130,5 @@ public class MenuMode extends Mode {
 			manager.unload(BACKGROUND_FILE);
 		if (manager.isLoaded(FONT_FILE))
 			manager.unload(FONT_FILE);
-		for(Mode m: modes)
-			m.unloadContent(manager);
 	}
 }
