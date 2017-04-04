@@ -25,7 +25,7 @@ public class LevelLoader implements AssetUser, Disposable{
     //filenames for sprites of objects
     private static String PLATFORM_FILE = "sprites/fixtures/solid.png";
     private static String GOAL_FILE = "sprites/security_camera.png";
-    private static String BACKGROUND_FILE = "sprites/wall/wall_texture.png";
+    private static String BACKGROUND_FILE = "sprites/wall/plain_wall_tile.png";
     private static String ENEMY_FILE = "sprites/enemy/enemy_idle.png";
     private static String CHARACTER_FILE = "sprites/char/char_idle.png";
     private static String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
