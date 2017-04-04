@@ -39,7 +39,6 @@ public class LevelParser {
         try {
             FileReaderWriter f = new FileReaderWriter();
             String content = f.readJson(JsonFile);
-            System.out.println(content);
             JsonReader reader = new JsonReader();
             JsonValue objects = reader.parse(content);
 

@@ -154,7 +154,7 @@ public class LevelCreator {
             writer.close();
         }
         catch (Exception e){
-                System.out.println("Failed to close writer");
+                System.out.println("Error: Failed to close writer");
         }
     }
 
