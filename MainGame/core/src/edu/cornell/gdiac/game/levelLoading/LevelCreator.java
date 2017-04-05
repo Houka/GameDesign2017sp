@@ -1,5 +1,6 @@
 package edu.cornell.gdiac.game.levelLoading;
 import com.badlogic.gdx.files.FileHandle;
+import edu.cornell.gdiac.game.entity.models.*;
 import com.badlogic.gdx.utils.*;
 import java.util.ArrayList;
 import java.io.*;
@@ -13,9 +14,8 @@ import java.io.*;
  */
 public class LevelCreator {
 
+    /** Fields and constants for the default level. For testing purposes. */
     private static final String DEFAULT_FILE = "JSON/default.json";
-
-    /** The outlines of all of the platforms */
     private static final float[][] DEFAULT_PLATFORMS = {
             // (x top left, y top left, x top right, y top right, x bottom right, y bottom left, x bottom left, y bottom right)
 
@@ -26,111 +26,127 @@ public class LevelCreator {
             {0.0f, 9.0f,7.0f, 9.0f,7.0f, 8.5f,0.0f, 8.5f}, // 5th platform on the right
             { 1.0f,12.5f, 10.0f,12.5f, 10.0f,12.0f, 1.0f,12.0f} // finish platform
     };
-
     private static final float[][] DEFAULT_WALLS = {
             {16.0f, 18.0f, 16.0f, 17.0f,  1.0f, 17.0f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f, 18.0f},
             {32.0f, 18.0f, 32.0f,  0.0f, 31.0f,  0.0f, 31.0f, 17.0f, 16.0f, 17.0f, 16.0f, 18.0f}
     };
+    private ArrayList<PlatformModel> defaultPlatforms;
+    private ArrayList<WallModel> defaultWalls;
+    private PlayerModel defaultPlayer;
+    private ArrayList<EnemyModel> defaultOnSightEnemies;
+    private ArrayList<EnemyModel> defaultIntervalEnemies;
+    private ArrayList<AmmoDepotModel> defaultAmmoDepots;
+    private GoalModel defaultTarget;
+    private int defaultAmmo;
 
-    private static final float[] DEFAULT_PLAYER = {2.5f, 5.0f};
-
-    private static final float[][] DEFAULT_ENEMIES = {
-            {0f, 3.5f, 8.0f, 1.0f, 200f},
-            {1f, 5.5f, 10f, 1.0f, 0f}
-    };
-
-    private static final float[][] DEFAULT_RESOURCES = {
-            {0f, 5.5f, 4.0f}
-    };
-
-    private static final float[] DEFAULT_TARGET = {29.5f, 15.0f};
-
-    private static final int DEFAULT_AMMO = 4;
-
-    private static final String DEFAULT_NEXT = "NONE";
+    /**
+     * Fills in defaults (for testing purposes)
+     */
+    private void setDefaults(){
+        defaultPlatforms = new ArrayList<PlatformModel>();
+        defaultWalls = new ArrayList<WallModel>();
+        defaultOnSightEnemies = new ArrayList<EnemyModel>();
+        defaultIntervalEnemies = new ArrayList<EnemyModel>();
+        defaultAmmoDepots = new ArrayList<AmmoDepotModel>();
 
 
+        for (int i = 0; i < DEFAULT_PLATFORMS.length; i++)
+            defaultPlatforms.add(new PlatformModel(DEFAULT_PLATFORMS[i]));
 
-    public void writeLevel(String JsonFile, float[][] platforms, float[][] walls, float[] player,
-                            float[][] enemies, float[][] resources, float[] target, int ammo, String nextLevel) {
+        for (int i = 0; i < DEFAULT_WALLS.length; i++)
+            defaultWalls.add(new WallModel(DEFAULT_WALLS[i]));
+
+        defaultPlayer = new PlayerModel(2.5f, 5.0f,38 ,95 );
+        defaultOnSightEnemies.add(new EnemyModel(5.5f, 10f, 1, 1, true, true, 0));
+        defaultIntervalEnemies.add(new EnemyModel(3.5f, 8f, 1, 1, true, false, 200));
+        defaultAmmoDepots.add(new AmmoDepotModel(5.5f, 4f, 1, 1, 3));
+        defaultTarget = new GoalModel(29.5f, 15.0f, 1, 1);
+        defaultAmmo = 4;
+    }
+
+    /**
+     * Writes the level given model objects
+     */
+    public void writeLevel(String JsonFile, ArrayList<PlatformModel> platforms, ArrayList<WallModel> walls,
+                           PlayerModel player, ArrayList<EnemyModel> intervalEnemies, ArrayList<EnemyModel> onSightEnemies,
+                           ArrayList<AmmoDepotModel> ammoDepots, GoalModel target, int ammo) {
         FileHandle f = new FileHandle(new File(JsonFile));
         JsonWriter writer = new JsonWriter(f.writer(false));
         Json json = new Json();
-
         json.setOutputType(JsonWriter.OutputType.json);
         json.setWriter(writer);
 
         json.writeObjectStart();
-        json.writeObjectStart("objects");
 
         //platforms
-        json.writeArrayStart("platforms");
-        for (int i = 0; i < platforms.length; i ++) {
-            json.writeObjectStart();
-            json.writeValue("vertices", platforms[i], FloatArray.class, Float.class);
-            json.writeObjectEnd();
+        json.writeObjectStart("platforms");
+        json.writeArrayStart("default");
+        for (int i = 0; i < platforms.size(); i ++) {
+            json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
         }
         json.writeArrayEnd();
-
+        json.writeObjectEnd();
         //walls
-        json.writeArrayStart("walls");
-        for (int i = 0; i < walls.length; i++) {
-            json.writeObjectStart();
-            json.writeValue("vertices", walls[i], FloatArray.class, Float.class);
-            json.writeObjectEnd();
+        json.writeObjectStart("walls");
+        json.writeArrayStart("default");
+        for (int i = 0; i < walls.size(); i++) {
+            json.writeValue( walls.get(i).getPoints(), FloatArray.class, Float.class);
         }
         json.writeArrayEnd();
+        json.writeObjectEnd();
 
         //player
         json.writeObjectStart("player");
-        if (player.length > 0) {
-            json.writeValue("x", player[0]);
-            json.writeValue("y", player[1]);
-        }
+        json.writeValue("x", player.getX());
+        json.writeValue("y", player.getY());
         json.writeObjectEnd();;
 
         //enemies
-        json.writeArrayStart("enemies");
-        for (int i = 0; i < enemies.length; i ++) {
+        json.writeObjectStart("enemies");
+        json.writeArrayStart("interval");
+        for (int i = 0; i < intervalEnemies.size(); i++){
             json.writeObjectStart();
-            float[] enemy = enemies[i];
-            json.writeValue("type", enemy[0]);
-            json.writeValue("x", enemy[1]);
-            json.writeValue("y", enemy[2]);
-            json.writeValue("isFacingRight", enemy[3]);
-            json.writeValue("interval", enemy[4]);
+            json.writeValue("x", intervalEnemies.get(i).getX());
+            json.writeValue("y", intervalEnemies.get(i).getY());
+            json.writeValue("isFacingRight", intervalEnemies.get(i).isFacingRight());
+            json.writeValue("interval", intervalEnemies.get(i).getInterval());
             json.writeObjectEnd();
         }
         json.writeArrayEnd();
 
-        //resources
-        json.writeArrayStart("resources");
-        for (int i = 0; i < resources.length; i ++) {
+        json.writeArrayStart("on_sight");
+        for (int i = 0; i < onSightEnemies.size(); i++){
             json.writeObjectStart();
-            float[] resource = resources[i];
-            json.writeValue("type", resource[0]);
-            json.writeValue("x", resource[1]);
-            json.writeValue("y", resource[2]);
+            json.writeValue("x", onSightEnemies.get(i).getX());
+            json.writeValue("y", onSightEnemies.get(i).getY());
+            json.writeValue("isFacingRight", onSightEnemies.get(i).isFacingRight());
+            json.writeValue("interval", onSightEnemies.get(i).getInterval());
             json.writeObjectEnd();
         }
         json.writeArrayEnd();
+        json.writeObjectEnd();
+
+        //resources
+        json.writeObjectStart("resources");
+        json.writeArrayStart("ammo_depots");
+        for (int i = 0; i < ammoDepots.size(); i ++) {
+            json.writeObjectStart();
+            json.writeValue("x", ammoDepots.get(i).getX());
+            json.writeValue("y", ammoDepots.get(i).getY());
+            json.writeValue("amount", ammoDepots.get(i).getAmmoAmount());
+            json.writeObjectEnd();
+        }
+        json.writeArrayEnd();
+        json.writeObjectEnd();
 
         //target
         json.writeObjectStart("target");
-        if (target.length > 0) {
-            json.writeValue("x", target[0]);
-            json.writeValue("y", target[1]);
-        }
+        json.writeValue("x", target.getX());
+        json.writeValue("y", target.getY());
         json.writeObjectEnd();;
 
-        //end of objects
-        json.writeObjectEnd();
-
-        //state variables
-        json.writeObjectStart("state");
+        //ammo
         json.writeValue("starting ammo", ammo);
-        json.writeValue("next level", nextLevel);
-        json.writeObjectEnd();
 
         json.writeObjectEnd();
 
@@ -138,13 +154,14 @@ public class LevelCreator {
             writer.close();
         }
         catch (Exception e){
-                System.out.println("Failed to close writer");
+                System.out.println("Error: Failed to close writer");
         }
     }
 
     /* this function is for demo purposes (technical prototype)**/
     public void writeDemoJson(){
-        writeLevel(DEFAULT_FILE, DEFAULT_PLATFORMS, DEFAULT_WALLS, DEFAULT_PLAYER, DEFAULT_ENEMIES,
-                    DEFAULT_RESOURCES, DEFAULT_TARGET, DEFAULT_AMMO, DEFAULT_NEXT);
+        setDefaults();
+        writeLevel(DEFAULT_FILE, defaultPlatforms, defaultWalls, defaultPlayer, defaultIntervalEnemies,
+                defaultOnSightEnemies, defaultAmmoDepots, defaultTarget, defaultAmmo);
     }
 }

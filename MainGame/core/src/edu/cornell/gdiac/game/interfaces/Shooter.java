@@ -2,6 +2,8 @@ package edu.cornell.gdiac.game.interfaces;
 
 /**
  * Created by Lu on 3/17/2017.
+ *
+ * Contains functions for classes that shoot.
  */
 public interface Shooter {
     /**

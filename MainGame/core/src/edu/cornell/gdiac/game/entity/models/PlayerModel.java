@@ -1,19 +1,10 @@
-/*
- * DudeModel.java
- *
- * You SHOULD NOT need to modify this file.  However, you may learn valuable lessons
- * for the rest of the lab by looking at it.
- *
- * Author: Walker M. White
- * Based on original PhysicsDemo Lab by Don Holden, 2007
- * LibGDX version, 2/6/2015
- */
 package edu.cornell.gdiac.game.entity.models;
 
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
 import edu.cornell.gdiac.game.interfaces.Settable;
 import edu.cornell.gdiac.game.interfaces.Shooter;
 import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
@@ -31,7 +22,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
     private static final float PLAYER_DENSITY = 1.0f;
     /** The factor to multiply by the input */
     private static final float PLAYER_FORCE = 50.0f;
-    /** The dude is a slippery one */
+    /** The player is a slippery one */
     private static final float PLAYER_FRICTION = 0.0f;
     /** The maximum character speed */
     private static final float PLAYER_MAXSPEED = 5.0f;
@@ -64,7 +55,18 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
     private int jumpCooldown;
     /** The current impulse of the jump */
     private float jumpForce;
-    /** Whether we are actively jumping */
+    /** Whether we are getting knocked back*/
+    private boolean isKnockedBack;
+    /** Direction of said knockback**/
+    private Vector2 knockbackDirection;
+    /** Force of said knockback**/
+    private float knockbackForce;
+    private float knockbackFriction = .9f;
+    private float knockbackDuration = 60;
+    private float knockbackStunDuration = 5;
+    private float defaultKnockbackDuration = 60;
+
+    /** Whether we getting knockedBack jumping */
     private boolean isJumping;
     /** How long until we can shoot again */
     private int shootCooldown;
@@ -84,7 +86,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
     private Vector2 zeroVector = new Vector2(0,0);
 
     /**
-     * Creates a new dude at the origin.
+     * Creates a new player avatar at the origin.
      *
      * The size is expressed in physics units NOT pixels.  In order for
      * drawing to work properly, you MUST set the drawScale. The drawScale
@@ -98,7 +100,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
     }
 
     /**
-     * Creates a new dude avatar at the given position.
+     * Creates a new player avatar at the given position.
      *
      * The size is expressed in physics units NOT pixels.  In order for
      * drawing to work properly, you MUST set the drawScale. The drawScale
@@ -110,6 +112,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
      * @param height	The object width in physics units
      */
     public PlayerModel(float x, float y, float width, float height) {
+
         super(x,y,width*PLAYER_HSHRINK,height*PLAYER_VSHRINK);
         setDensity(PLAYER_DENSITY);
         setFriction(PLAYER_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
@@ -120,6 +123,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
         isGrounded = false;
         isShooting = false;
         isJumping = false;
+        isKnockedBack = false;
         canDoubleJump = false;
         isFacingRight = true;
 
@@ -127,13 +131,16 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
         jumpCooldown = 0;
         jumpForce = PLAYER_JUMP;
         maxSpeed = PLAYER_MAXSPEED;
+
+        knockbackForce = 0;
+        knockbackDirection = new Vector2(0,0);
     }
 
     // BEGIN: Setters and Getters
     /**
      * Returns left/right movement of this character.
      *
-     * This is the result of input times dude force.
+     * This is the result of input times player force.
      *
      * @return left/right movement of this character.
      */
@@ -144,7 +151,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
     /**
      * Sets left/right movement of this character.
      *
-     * This is the result of input times dude force.
+     * This is the result of input times player force.
      *
      * @param value left/right movement of this character.
      */
@@ -169,18 +176,50 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
     }
 
     /**
-     * Returns true if the dude is actively jumping.
+     * Returns true if the player is actively jumping.
      *
-     * @return true if the dude is actively jumping.
+     * @return true if the player is actively jumping.
      */
-    public boolean isJumping() {return isJumping && isGrounded && jumpCooldown <= 0;}
-
-
-    public boolean isDoubleJumping(){ return isJumping && !isGrounded && canDoubleJump; }
+    public boolean isJumping() {
+        return isJumping && isGrounded && jumpCooldown <= 0;
+    }
+  
     /**
-     * Sets whether the dude is actively jumping.
+     * Returns true if the player is actively double jumping.
      *
-     * @param value whether the dude is actively jumping.
+     * @return true if the player is actively jumping.
+     */
+    public boolean isDoubleJumping(){ 
+        return isJumping && !isGrounded && canDoubleJump; 
+    }
+
+    public boolean isKnockedBack() {
+        return isKnockedBack && knockbackDuration > defaultKnockbackDuration-Math.max(defaultKnockbackDuration,knockbackStunDuration);
+    }
+
+    public void setKnockedBack(float dir){
+
+
+        if(dir==0) {
+            isKnockedBack=false;
+            return;
+        }
+
+        if(isKnockedBack)
+            return;
+
+       isKnockedBack=true;
+        knockbackDuration = defaultKnockbackDuration;
+        if(dir>0)
+            knockbackDirection.set(1,0);
+        else
+            knockbackDirection.set(-1,0);
+    }
+
+    /**
+     * Sets whether the player is actively jumping.
+     *
+     * @param value whether the player is actively jumping.
      */
     public void setJumping(boolean value) {
         isJumping = value;
@@ -199,44 +238,48 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
     }
 
     /**
-     * Sets whether the dude can double jump.
+     * Sets whether the player can double jump.
      *
-     * @param value whether the dude can double jump.
+     * @param value whether the player can double jump.
      */
     public void setCanDoubleJump(boolean value) {
         canDoubleJump = value;
     }
 
     /**
-     * Returns true if the dude is on the ground.
+     * Returns true if the player is on the ground.
      *
-     * @return true if the dude is on the ground.
+     * @return true if the player is on the ground.
      */
     public boolean isGrounded() {
         return isGrounded;
     }
 
     /**
-     * Sets whether the dude is on the ground.
+     * Sets whether the player is on the ground.
      *
-     * @param value whether the dude is on the ground.
+     * @param value whether the player is on the ground.
      */
     public void setGrounded(boolean value) {
         isGrounded = value;
     }
 
     /**
-     * Returns the upper limit on dude left-right movement.
+     * Returns the upper limit on player left-right movement.
      *
      * This does NOT apply to vertical movement.
      *
-     * @return the upper limit on dude left-right movement.
+     * @return the upper limit on player left-right movement.
      */
     public float getMaxSpeed() {
         return maxSpeed;
     }
 
-    /** */
+    /**
+     * Sets the player's max speed.
+     *
+     * @param value how fast the player can move.
+     */
     public void setMaxSpeed(float value) {
         maxSpeed = value;
     }
@@ -276,10 +319,10 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
 
         // Ground Sensor
         // -------------
-        // We only allow the dude to jump when he's on the ground.
+        // We only allow the player to jump when he's on the ground.
         // Double jumping is not allowed.
         //
-        // To determine whether or not the dude is on the ground,
+        // To determine whether or not the player is on the ground,
         // we create a thin sensor under his feet, which reports
         // collisions with the world but has no collision response.
         Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
@@ -296,42 +339,63 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
         return true;
     }
 
-    // TODO REMOVE THIS!!!
+    //TODO: find better solution for riding a bullet
     private PaintballModel ridingBullet = null;
     public void setRidingVX(PaintballModel b){
         ridingBullet = b;
     }
 
+    /** Applies forces to the player*/
     public void applyForce() {
         if (!isActive()) {
             return;
         }
+      
+        boolean stunned = false;
 
+        if(isKnockedBack()) {
+            stunned = true;
+
+            if(knockbackDuration>0) {
+                forceCache.set(knockbackDirection.x * knockbackForce, knockbackDirection.y * knockbackForce); //TODO: use trig if we ever want y knockback
+                body.applyLinearImpulse(forceCache, getPosition(), true);
+            }
+
+            if (knockbackDuration < 0) {
+                setVX(getVX() * knockbackFriction);
+              //  if (Math.abs(getVX()) < .01)
+                    //stunned = false;
+
+            }
+        }
+      
         // TODO: find better solution for riding a bullet
         if (ridingBullet!=null) {
-            // Don't want to be moving. Damp out player motion
-            if (getMovement() == 0f ) {
-                setVX(ridingBullet.getVX());
-            }else{
-                setVX(Math.signum(getMovement())*getMaxSpeed()+ridingBullet.getVX());
+            if(!stunned){
+              // Don't want to be moving. Damp out player motion
+              if (getMovement() == 0f ) {
+                  setVX(ridingBullet.getVX());
+              }else{
+                  setVX(Math.signum(getMovement())*getMaxSpeed()+ridingBullet.getVX());
+              }
             }
         }else{
+          if(!stunned){
             if (getMovement() == 0f ) {
                 setVX(0);
             }else{
                 setVX(Math.signum(getMovement())*getMaxSpeed());
             }
-
+          }
         }
 
         // Jump!
-        if (isJumping()) {
+        if (isJumping() && !stunned) {
             forceCache.set(0, jumpForce);
             body.applyLinearImpulse(forceCache,getPosition(),true);
             setCanDoubleJump(true);
         }
-
-        if (isDoubleJumping()) {
+        if (isDoubleJumping() && !stunned) {
             //dividing by sqrt 2 makes it such that from 0 velocity it goes half the height of a regular jump
             forceCache.set(0, jumpForce/((float)Math.sqrt(2)));
             //set velocity to 0 so that the jump height is independent of how the model is moving
@@ -344,6 +408,10 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
     @Override
     public void applySettings() {
         jumpForce = Sidebar.getValue("Jump Height");
+        knockbackForce = Sidebar.getValue("Knockback Force");
+        defaultKnockbackDuration = Sidebar.getValue("Knockback Duration");
+        knockbackStunDuration = Sidebar.getValue("Knockback Stun Duration");
+        knockbackFriction = 1-Sidebar.getValue("Knockback Friction");
         maxSpeed = Sidebar.getValue("Player Speed");
     }
 
@@ -367,6 +435,13 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
         } else {
             shootCooldown = Math.max(0, shootCooldown - 1);
         }
+
+        if (isKnockedBack()) {
+            knockbackDuration = knockbackDuration - 1;
+        } else {
+            isKnockedBack=false;
+        }
+
         super.update(dt);
     }
 

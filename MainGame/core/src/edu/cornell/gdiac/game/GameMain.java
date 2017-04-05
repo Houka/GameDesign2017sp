@@ -1,17 +1,14 @@
 /*
- * GDXRoot.java
+ * GameMain.java
  *
  * This is the primary class file for running the game.  It is the "static main" of
- * LibGDX.  In the first lab, we extended ApplicationAdapter.  In previous lab
- * we extended Game.  This is because of a weird graphical artifact that we do not
- * understand.  Transparencies (in 3D only) is failing when we use ApplicationAdapter. 
- * There must be some undocumented OpenGL code in setScreen.
+ * LibGDX. 
  *
- * Author: Walker M. White
+ * Author: Changxu Lu
  * Based on original PhysicsDemo Lab by Don Holden, 2007
  * LibGDX version, 2/6/2015
  */
- package edu.cornell.gdiac.game;
+package edu.cornell.gdiac.game;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.assets.*;
@@ -20,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.*;
 import com.badlogic.gdx.assets.loaders.*;
 import com.badlogic.gdx.assets.loaders.resolvers.*;
 
+import edu.cornell.gdiac.game.interfaces.Nameable;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
 import edu.cornell.gdiac.game.modes.LoadingMode;
 import edu.cornell.gdiac.game.modes.MenuMode;
@@ -43,8 +41,9 @@ public class GameMain extends Game implements ScreenListener {
 	private GameCanvas canvas;
 	/** Player mode for the asset loadingMode screen (CONTROLLER CLASS) */
 	private LoadingMode loadingMode;
-	/** Mode Controller that loads and unloads different player modes (CONTROLLER CLASS) */
-	private MenuMode menuMode;
+
+	/** Mode Controller that keeps track of different player modes and how to switch between them (CONTROLLER CLASS) */
+	private GameModeManager gameModeManager;
 	
 	/**
 	 * Creates a new game from the configuration settings.
@@ -57,7 +56,7 @@ public class GameMain extends Game implements ScreenListener {
 		manager = new AssetManager();
 		
 		// Add font support to the asset manager
-		FileHandleResolver resolver = new InternalFileHandleResolver();
+		FileHandleResolver resolver = new LocalFileHandleResolver();
 		manager.setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
 		manager.setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
 	}
@@ -70,15 +69,15 @@ public class GameMain extends Game implements ScreenListener {
 	 */
 	public void create() {
 		canvas  = new GameCanvas();
-		loadingMode = new LoadingMode(canvas,manager,1);
-		menuMode = new MenuMode(canvas, manager);
-		loadingMode.setScreenListener(this);
-		menuMode.setScreenListener(this);
+		loadingMode = new LoadingMode("loading", canvas,manager,1);
+		gameModeManager = new GameModeManager(canvas, manager);
 
-		menuMode.preLoadContent(manager);
+		loadingMode.setScreenListener(this);
+		gameModeManager.setScreenListener(this);
+
+		gameModeManager.preLoadContent(manager);
 
 		setScreen(loadingMode);
-
 	}
 
 	/** 
@@ -92,9 +91,8 @@ public class GameMain extends Game implements ScreenListener {
 			loadingMode.dispose();
 		loadingMode = null;
 
-		menuMode.unloadContent(manager);
-		menuMode.dispose();
-		menuMode = null;
+		gameModeManager.dispose();
+		gameModeManager = null;
 
 		setScreen(null);
 
@@ -121,44 +119,38 @@ public class GameMain extends Game implements ScreenListener {
 		super.resize(width,height);
 	}
 	
-	/**
-	 * The given screen has made a request to exit its player mode.
-	 *
-	 * The value onExit can be used to implement menu options.
-	 *
-	 * @param screen   The screen requesting to exit
-	 * @param exitCode The state of the screen upon exit
-	 */
+	@Override
 	public void exitScreen(Screen screen, int exitCode) {
 		switch (exitCode){
-			case EXIT_NOP:
-				break;
 			case EXIT_QUIT:
-				// We quit the main application
-				Gdx.app.exit();
+				exit();
 				break;
-			case EXIT_MENU:
+			case EXIT_ESC:
 				if (loadingMode != null) {
 					loadingMode.dispose();
 					loadingMode = null;
-					menuMode.loadContent(manager);
 				}
 
-				setScreen(menuMode);
+				Screen to = gameModeManager.getExitToMode(((Nameable) screen).getName());
+				if (to == null)
+					exit();
+				else
+					setScreen(to);
+
 				// TODO: function to reset camera position?
 				canvas.setCameraY(canvas.getHeight()/2, 0);
+				break;
 			default:
 				break;
 		}
 	}
 
-	/**
-	 * The given screen has made a request to change its screen.
-	 *
-	 * @param from  The screen requesting to exit
-	 * @param to 	The screen to change to
-	 */
-	public void switchScreens(Screen from, Screen to){
-		setScreen(to);
+	@Override
+	public void switchToScreen(Screen from, String to){
+		setScreen(gameModeManager.getMode(to));
+	}
+
+	private void exit(){
+		Gdx.app.exit();
 	}
 }

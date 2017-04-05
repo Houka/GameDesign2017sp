@@ -475,7 +475,6 @@ public class GameCanvas {
 		draw(holder, tint, x-ox, y-oy, width, height);
 	}
 
-
 	/**
 	 * Draws the tinted texture with the given transformations
 	 *

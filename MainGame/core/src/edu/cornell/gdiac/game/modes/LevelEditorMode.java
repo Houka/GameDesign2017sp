@@ -1,24 +1,15 @@
 /*
- * LoadingMode.java
+ * LevelEditorMode.java
  *
- * Asset loading is a really tricky problem.  If you have a lot of sound or images,
- * it can take a long time to decompress them and load them into memory.  If you just
- * have code at the start to load all your assets, your game will look like it is hung
- * at the start.
+ * Mode for level editing. This class sets up an interactive level editing
+ * screen so players can take any element that is avalible in game and
+ * add it to a layout. This layout should look very much like a typical level
+ * in game and once, completed it will pass the information off to LevelCreator
+ * to have a json made of the created level. 
  *
- * The alternative is asynchronous asset loading.  In asynchronous loading, you load a
- * little bit of the assets at a time, but still animate the game while you are loading.
- * This way the player knows the game is not hung, even though he or she cannot do 
- * anything until loading is complete. You know those loading screens with the inane tips 
- * that want to be helpful?  That is asynchronous loading.  
+ * Other functionalities include being able to load json levels in and editing them. 
  *
- * This player mode provides a basic loading screen.  While you could adapt it for
- * between level loading, it is currently designed for loading all assets at the 
- * start of the game.
- *
- * Author: Walker M. White
- * Based on original PhysicsDemo Lab by Don Holden, 2007
- * LibGDX version, 2/6/2015
+ * Author: Changxu Lu
  */
 package edu.cornell.gdiac.game.modes;
 
@@ -49,8 +40,8 @@ import javax.xml.soap.Text;
 
 /**
  * Class that provides a Level Editor screen for the state of the game.
- *
- * TODO: write class desc
+ * 
+ * The level editor screen allows players to create/edit their own levels
  */
 public class LevelEditorMode extends Mode {
 	// Textures necessary to support the loading screen
@@ -158,7 +149,7 @@ public class LevelEditorMode extends Mode {
 	 * @param gravity The gravitational force on this Box2d world
 	 */
 	public LevelEditorMode(GameCanvas canvas, AssetManager manager, Rectangle bounds, Vector2 gravity) {
-		super(canvas, manager);
+		super(name ,canvas, manager);
 		onExit = ScreenListener.EXIT_MENU;
 		scaleVector = new Vector2(canvas.getWidth() / bounds.getWidth(), canvas.getHeight() / bounds.getHeight());
 
@@ -168,8 +159,11 @@ public class LevelEditorMode extends Mode {
 		this.bounds = new Rectangle(bounds);
 	}
 
-	// BEGIN: Setters and Getters
+	public LevelEditorMode(String name, GameCanvas canvas, AssetManager manager) {
+		super(name, canvas, manager);
+	}
 
+	// BEGIN: Setters and Getters
 	// END: Setters and Getters
 
 	@Override
@@ -200,15 +194,18 @@ public class LevelEditorMode extends Mode {
 	protected void draw() {
 		super.draw();
 
+		// Draw the objects from the loaded level
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
 
+		// Draw the top and right sidebars for the editor
 		TextureRegion editorRegion = new TextureRegion(editor);
 		editorRegion.setRegion(0, 0,  canvas.getWidth(), canvas.getHeight());
 		canvas.draw(editorRegion, Color.WHITE, canvas.getWidth()-180, 0, 200, canvas.getHeight());
 		canvas.draw(editorRegion, Color.WHITE, 0, canvas.getHeight()-100, canvas.getWidth()-180, canvas.getHeight());
 
+		// Create the sidebar textures (MISSING WALL TEXTURE)
 		TextureRegion[] regions = new TextureRegion[5];
 		regions[0] = new TextureRegion(player);
 		regions[0].setRegion(0, 0,  player.getWidth(), player.getHeight());
@@ -221,6 +218,7 @@ public class LevelEditorMode extends Mode {
 		regions[4] = new TextureRegion(camera);
 		regions[4].setRegion(0, 0,  camera.getWidth(), camera.getHeight());
 
+		// Draw the sidebar textures into the right sidebar
 		int startHeight= 10;
 		for (TextureRegion region:
 			 regions) {
@@ -228,6 +226,7 @@ public class LevelEditorMode extends Mode {
 			startHeight += region.getRegionHeight() + 50;
 		}
 
+		// Draw the save/load/cancel buttons into the top sidebar
 		canvas.drawText("SAVE", displayFont, 10,
 				canvas.getHeight() - 20);
 		canvas.drawText("LOAD", displayFont, 250,
@@ -304,6 +303,8 @@ public class LevelEditorMode extends Mode {
 	private void addObject(Obstacle obj) {
 		assert inBounds(obj) : "Object is not in bounds";
 		objects.add(obj);
+
+		//This gives the objects in the game screen physics (possibly remove)
 		obj.activatePhysics(world);
 
 		//addEntityController(obj);
@@ -323,5 +324,6 @@ public class LevelEditorMode extends Mode {
 	}
 
 	private void saveLevel() {
+
 	}
 }

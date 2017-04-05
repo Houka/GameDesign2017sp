@@ -1,24 +1,12 @@
 /*
- * LoadingMode.java
+ * Mode.java
  *
- * Asset loading is a really tricky problem.  If you have a lot of sound or images,
- * it can take a long time to decompress them and load them into memory.  If you just
- * have code at the start to load all your assets, your game will look like it is hung
- * at the start.
+ * The Abstract class that all modes adhere to.
+ * This class implements all the under the hood stuff for each mode/screen.
+ * It takes care of updating/drawing calls, resizing, pausing, and 
+ * what to do when exiting/switching the screen over to another screen
  *
- * The alternative is asynchronous asset loading.  In asynchronous loading, you load a
- * little bit of the assets at a time, but still animate the game while you are loading.
- * This way the player knows the game is not hung, even though he or she cannot do 
- * anything until loading is complete. You know those loading screens with the inane tips 
- * that want to be helpful?  That is asynchronous loading.  
- *
- * This player mode provides a basic loading screen.  While you could adapt it for
- * between level loading, it is currently designed for loading all assets at the 
- * start of the game.
- *
- * Author: Walker M. White
- * Based on original PhysicsDemo Lab by Don Holden, 2007
- * LibGDX version, 2/6/2015
+ * Author: Changxu Lu
  */
 package edu.cornell.gdiac.game.modes;
 
@@ -29,25 +17,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.input.MainInputController;
-import edu.cornell.gdiac.game.interfaces.AssetUser;
-import edu.cornell.gdiac.game.interfaces.Completable;
-import edu.cornell.gdiac.game.interfaces.Exitable;
-import edu.cornell.gdiac.game.interfaces.ScreenListener;
+import edu.cornell.gdiac.game.interfaces.*;
 
 /**
- * Class that provides a loading screen for the state of the game.
- *
- * You still DO NOT need to understand this class for this lab.  We will talk about this
- * class much later in the course.  This class provides a basic template for a loading
- * screen to be used at the start of the game or between levels.  Feel free to adopt
- * this to your needs.
- *
- * You will note that this mode has some textures that are not loaded by the AssetManager.
- * You are never required to load through the AssetManager.  But doing this will block
- * the application.  That is why we try to have as few resources as possible for this
- * loading screen.
+ * Class that provides the fundamental mode functionalities
  */
-public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
+public abstract class Mode implements Screen, Completable, AssetUser, Exitable, Nameable {
 	/** Standard window size (for scaling) */
 	private static int STANDARD_WIDTH  = 1024;
 	/** Standard window height (for scaling) */
@@ -63,15 +38,19 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	protected GameCanvas canvas;
 	/** Listener that will update the player mode when we are done */
 	protected ScreenListener listener;
+	/** The name of this mode */
+	protected String name;
 
 	/** The exit code for when this screen completes */
-	protected int onExit = ScreenListener.EXIT_NOP; // default it to non existant exit code
+	protected int onExit = ScreenListener.EXIT_ESC;
 	/** Whether or not this mode is completed*/
 	private boolean exit;
 	/** Whether or not this mode is completed*/
 	private boolean completed;
 	/** Whether or not this mode is still active */
-	protected boolean active;
+	private boolean active;
+	/** Whether or not this mode is paused */
+	private boolean paused;
 	/** Whether or not debug mode is active */
 	protected boolean debug;
 	/** The main input controller */
@@ -83,10 +62,12 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	 * @param canvas The GameCanvas to draw the textures to
 	 * @param manager The AssetManager to load in the background
 	 */
-	protected Mode(GameCanvas canvas, AssetManager manager) {
+	protected Mode(String name, GameCanvas canvas, AssetManager manager) {
+		this.name = name;
 		this.manager = manager;
 		this.canvas  = canvas;
 		scale = new Vector2(1,1);
+		paused = false;
 		active = false;
 		exit = false;
 		completed = false;
@@ -95,6 +76,8 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	}
 
 	// BEGIN: Getters and Setters
+	public void setName(String value){name = value;}
+	public String getName(){ return name;}
 	public void setScreenListener(ScreenListener listener) {
 		this.listener = listener;
 	}
@@ -143,12 +126,13 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 			debug = !debug;
 		else if (input.didReset())
 			reset();
+		else if (input.didPause())
+			processPause();
 		else if(input.didExit()) {
 			setExit(true);
 			return false;
 		}
-
-		return true;
+		return !paused;
 	}
 
 	/**
@@ -174,6 +158,9 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 			canvas.draw(background, Color.WHITE, 0, 0, 0,0, 0f, scale.x, scale.y);
 	}
 
+    /**
+     * Draw the outlines and bounding boxes of each object for debuging purposes
+     */
 	protected void drawDebug(){};
 
 	/**
@@ -215,25 +202,60 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 		scale.set(Math.max(1,(float) width/STANDARD_WIDTH), Math.max(1,(float) height/STANDARD_HEIGHT));
 	}
 
+    /**
+     * Resets all variables in the mode so when the screen switches back, the screen
+     * won't hold previous data.
+     */
 	public void reset(){
 		setExit(false);
 		setComplete(false);
 	}
 
 	/***
-	 * TODO: write spec
+	 * Handles a pause button press
 	 */
+	public void processPause() {
+		if(!paused)
+			pauseGame();
+		else
+			resume();
+	}
 	protected void onComplete(){
 		onExit();
 	}
-	protected void onExit(){ listener.exitScreen(this, onExit); }
+  
+    /**
+     * Behavior for when the mode wishes to exit
+     */
+	private void onExit(){ listener.exitScreen(this, onExit); }
 
-	// Unused functions for a mode
+    /**
+     * Behavor for when the mode is paused
+     */
+	public void pauseGame() {paused = true;}
+  
+    /**
+     * Behavor for when the mode is paused
+     */
 	public void pause() {}
-	public void resume() {}
-	public void show() { active = true;}
-	public void hide() {
+	
+    /**
+     * Behavor for when the mode resumes from a pause state
+     */
+	public void resume() {paused = false;}
+	  
+    /**
+     * Behavor for when the mode is shown/active
+     */
+	public void show() {
 		reset();
+		active = true;
+	}
+    
+    /**
+     * Behavor for when the mode is set to stop showing/ is inactive
+     */
+	public void hide() {
 		active = false;
 	}
 }

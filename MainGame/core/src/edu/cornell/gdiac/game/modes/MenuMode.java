@@ -1,24 +1,7 @@
 /*
- * LoadingMode.java
+ * MenuMode.java
  *
- * Asset loading is a really tricky problem.  If you have a lot of sound or images,
- * it can take a long time to decompress them and load them into memory.  If you just
- * have code at the start to load all your assets, your game will look like it is hung
- * at the start.
- *
- * The alternative is asynchronous asset loading.  In asynchronous loading, you load a
- * little bit of the assets at a time, but still animate the game while you are loading.
- * This way the player knows the game is not hung, even though he or she cannot do 
- * anything until loading is complete. You know those loading screens with the inane tips 
- * that want to be helpful?  That is asynchronous loading.  
- *
- * This player mode provides a basic loading screen.  While you could adapt it for
- * between level loading, it is currently designed for loading all assets at the 
- * start of the game.
- *
- * Author: Walker M. White
- * Based on original PhysicsDemo Lab by Don Holden, 2007
- * LibGDX version, 2/6/2015
+ * The main menu that players will use to navigate the different modes/screen of the game
  */
 package edu.cornell.gdiac.game.modes;
 
@@ -27,14 +10,13 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.GameModeManager;
 import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
 
 /**
  * Class that provides a menu screen for the state of the game.
- *
- * TODO: write class desc
  */
 public class MenuMode extends Mode {
 	/** Background texture */
@@ -51,7 +33,7 @@ public class MenuMode extends Mode {
 	protected BitmapFont displayFont;
 
 	/** Player modes that are selectable from menu mode */
-	private Mode[] modes;
+	private String[] modes = {GameModeManager.LEVEL_SELECTION, GameModeManager.LEVEL_EDITOR};
 	private String[] modeNames = {"Select Level","Level Editor", "Quit"};
 	private int selected = 0;
 
@@ -64,46 +46,34 @@ public class MenuMode extends Mode {
 	 * @param canvas The GameCanvas to draw to
 	 * @param manager The AssetManager to load in the background
 	 */
-	public MenuMode(GameCanvas canvas, AssetManager manager) {
-		super(canvas, manager);
+	public MenuMode(String name, GameCanvas canvas, AssetManager manager) {
+		super(name, canvas, manager);
 		onExit = ScreenListener.EXIT_QUIT;
 		modes = new Mode[]{
 			new LevelSelectionMode(canvas, manager),
-			new LevelEditorSelectionMode(canvas, manager)
+			new LevelEditorMode(canvas, manager)
 		};
-
 		input = SelectionInputController.getInstance();
 	}
 
 	// BEGIN: Setters and Getters
-
 	// END: Setters and Getters
 
 	@Override
 	public void setScreenListener(ScreenListener listener) {
 		super.setScreenListener(listener);
-		for(Mode m : modes)
-			m.setScreenListener(listener);
 	}
 
 	@Override
 	protected void onComplete(){
-		if (selected == modeNames.length-1)
-			super.onComplete();
-		else {
-			modes[selected].loadContent(manager);
-			listener.switchScreens(this, modes[selected]);
-		}
+		if (selected < modes.length)
+			listener.switchToScreen(this, modes[selected]);
 	}
 
 	@Override
 	public void dispose() {
 		super.dispose();
-
-		for(int i = 0; i < modes.length; i++)	{
-			modes[i].dispose();
-			modes[i] = null;
-		}
+		input = null;
 	}
 
 	@Override
@@ -114,8 +84,11 @@ public class MenuMode extends Mode {
 			selected=(selected+1) % modeNames.length;
 		else if (input.didUp())
 			selected=(selected-1 < 0)? modeNames.length-1 : selected-1;
-		else if (input.didSelect())
+		else if (input.didSelect()) {
+			if (selected == modeNames.length-1)
+				setExit(true);
 			setComplete(true);
+		}
 	}
 
 	@Override
@@ -142,10 +115,6 @@ public class MenuMode extends Mode {
 		size2Params.fontFileName = FONT_FILE;
 		size2Params.fontParameters.size = FONT_SIZE;
 		manager.load(FONT_FILE, BitmapFont.class, size2Params);
-
-		// preload content for children
-		for(Mode m : modes)
-			m.preLoadContent(manager);
 	}
 
 	@Override
@@ -165,7 +134,5 @@ public class MenuMode extends Mode {
 			manager.unload(BACKGROUND_FILE);
 		if (manager.isLoaded(FONT_FILE))
 			manager.unload(FONT_FILE);
-		for(Mode m: modes)
-			m.unloadContent(manager);
 	}
 }
