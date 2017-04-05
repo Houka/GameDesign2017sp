@@ -552,10 +552,9 @@ public class GameCanvas {
 	 * Unless otherwise transformed by the global transform (@see begin(Affine2)),
 	 * the texture will be unscaled.  The bottom left of the texture will be positioned
 	 * at the given coordinates.
-	 *
 	 * @param region The texture to draw
-	 * @param x 	The x-coordinate of the bottom left corner
-	 * @param y 	The y-coordinate of the bottom left corner
+	 * @param x    The x-coordinate of the bottom left corner
+	 * @param y    The y-coordinate of the bottom left corner
 	 */
 	public void draw(TextureRegion region, float x, float y) {
 		if (active != DrawPass.STANDARD) {

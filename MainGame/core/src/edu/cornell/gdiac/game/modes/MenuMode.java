@@ -49,6 +49,10 @@ public class MenuMode extends Mode {
 	public MenuMode(String name, GameCanvas canvas, AssetManager manager) {
 		super(name, canvas, manager);
 		onExit = ScreenListener.EXIT_QUIT;
+		modes = new Mode[]{
+			new LevelSelectionMode(canvas, manager),
+			new LevelEditorMode(canvas, manager)
+		};
 		input = SelectionInputController.getInstance();
 	}
 
