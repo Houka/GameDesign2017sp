@@ -23,16 +23,22 @@
 package edu.cornell.gdiac.game.modes;
 
 import com.badlogic.gdx.assets.*;
+import com.badlogic.gdx.assets.loaders.FileHandleResolver;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
+import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.math.Vector2;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.entity.controllers.CollisionController;
 import edu.cornell.gdiac.game.input.SelectionInputController;
+import edu.cornell.gdiac.game.levelLoading.LevelCreator;
 import edu.cornell.gdiac.game.levelLoading.LevelLoader;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
@@ -57,10 +63,10 @@ public class LevelEditorMode extends Mode {
 
 	/** Input controller */
 	private SelectionInputController input;
-	/** The position of the level that the player is selecting */
-	private int selected;
 	/** Level loader */
 	private LevelLoader levelLoader;
+	/** Level creator */
+	private LevelCreator levelCreator;
 	/** File of level */
 	private String levelFile;
 	/** World */
@@ -81,6 +87,13 @@ public class LevelEditorMode extends Mode {
 	protected Texture ammoDepot;
 	/** Texture for side-bar*/
 	protected Texture camera;
+	private GameCanvas canvas;
+	/** Retro font for displaying messages */
+	private static String FONT_FILE = "fonts/RetroGame.ttf";
+	private static int FONT_SIZE = 16;
+
+	/** The font for giving messages to the player */
+	protected BitmapFont displayFont;
 
 
 	/** Width of the game world in Box2d units	 */
@@ -89,6 +102,13 @@ public class LevelEditorMode extends Mode {
 	private static final float DEFAULT_HEIGHT = 18.0f;
 	/** The default value of gravity (going down)	 */
 	private static final float DEFAULT_GRAVITY = -20.0f;
+
+	/** The amount of time for a physics engine step.	 */
+	public static final float WORLD_STEP = 1 / 60.0f;
+	/** Number of velocity iterations for the constrain solvers	 */
+	public static final int WORLD_VELOC = 6;
+	/** Number of position iterations for the constrain solvers	 */
+	public static final int WORLD_POSIT = 2;
 
 	/** All the objects in the world.	 */
 	private PooledList<Obstacle> objects = new PooledList<Obstacle>();
@@ -144,6 +164,7 @@ public class LevelEditorMode extends Mode {
 
 		world = new World(gravity, false);
 		levelLoader = new LevelLoader(scaleVector);
+		levelCreator = new LevelCreator();
 		this.bounds = new Rectangle(bounds);
 	}
 
@@ -170,16 +191,23 @@ public class LevelEditorMode extends Mode {
 
 	@Override
 	protected void update(float delta) {
-
+		while (!levelLoader.getAddQueue().isEmpty())
+			addObject(levelLoader.getAddQueue().poll());
+		world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
 	}
 
 	@Override
 	protected void draw() {
 		super.draw();
 
+		for (Obstacle obj : objects) {
+			obj.draw(canvas);
+		}
+
 		TextureRegion editorRegion = new TextureRegion(editor);
 		editorRegion.setRegion(0, 0,  canvas.getWidth(), canvas.getHeight());
-		canvas.draw(editorRegion, Color.WHITE, canvas.getWidth()-200, 0, 200, canvas.getHeight());
+		canvas.draw(editorRegion, Color.WHITE, canvas.getWidth()-180, 0, 200, canvas.getHeight());
+		canvas.draw(editorRegion, Color.WHITE, 0, canvas.getHeight()-100, canvas.getWidth()-180, canvas.getHeight());
 
 		TextureRegion[] regions = new TextureRegion[5];
 		regions[0] = new TextureRegion(player);
@@ -196,17 +224,32 @@ public class LevelEditorMode extends Mode {
 		int startHeight= 10;
 		for (TextureRegion region:
 			 regions) {
-			canvas.draw(region, canvas.getWidth()-125, startHeight);
-			startHeight += region.getRegionHeight() + 20;
+			canvas.draw(region, canvas.getWidth()-115, startHeight);
+			startHeight += region.getRegionHeight() + 50;
 		}
+
+		canvas.drawText("SAVE", displayFont, 10,
+				canvas.getHeight() - 20);
+		canvas.drawText("LOAD", displayFont, 250,
+				canvas.getHeight() - 20);
+		canvas.drawText("CANCEL", displayFont, 500,
+				canvas.getHeight() - 20);
 	}
 
 	@Override
 	public void preLoadContent(AssetManager manager) {
+//		InternalFileHandleResolver resolver = new InternalFileHandleResolver();
+//		manager.setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
+//		manager.setLoader(BitmapFont.class, ".png", new FreetypeFontLoader(resolver));
+
 		manager.load(BACKGROUND_FILE,Texture.class);
 		manager.load(ENEMY_FILE,Texture.class);
 		manager.load(PLAYER_FILE,Texture.class);
 		manager.load(AMMO_DEPOT_FILE,Texture.class);
+		FreetypeFontLoader.FreeTypeFontLoaderParameter size2Params = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
+		size2Params.fontFileName = FONT_FILE;
+		size2Params.fontParameters.size = FONT_SIZE;
+		manager.load(FONT_FILE, BitmapFont.class, size2Params);
 		levelLoader.preLoadContent(manager);
 	}
 
@@ -219,6 +262,10 @@ public class LevelEditorMode extends Mode {
 		platform = AssetRetriever.createTexture(manager, PLATFORM_FILE, true).getTexture();
 		ammoDepot = AssetRetriever.createTexture(manager, AMMO_DEPOT_FILE, true).getTexture();
 		camera = AssetRetriever.createTexture(manager, CAMERA_FILE, true).getTexture();
+		if (manager.isLoaded(FONT_FILE))
+			displayFont = manager.get(FONT_FILE, BitmapFont.class);
+		else
+			displayFont = null;
 	}
 
 	@Override
@@ -273,5 +320,8 @@ public class LevelEditorMode extends Mode {
 		boolean horiz = (bounds.x <= obj.getX() && obj.getX() <= bounds.x + bounds.width);
 		boolean vert = (bounds.y <= obj.getY() && obj.getY() <= bounds.y + bounds.height);
 		return horiz && vert;
+	}
+
+	private void saveLevel() {
 	}
 }

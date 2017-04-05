@@ -64,8 +64,8 @@ public class LevelEditorSelectionMode extends Mode {
         super(canvas, manager);
         onExit = ScreenListener.EXIT_MENU;
         input = SelectionInputController.getInstance();
-        levelEditorMode = new LevelEditorMode(canvas, manager);
         selected = 0;
+        levelEditorMode = new LevelEditorMode(canvas, manager);
     }
 
     // BEGIN: Setters and Getters
