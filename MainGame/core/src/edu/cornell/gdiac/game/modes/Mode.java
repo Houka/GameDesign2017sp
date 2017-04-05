@@ -247,13 +247,15 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable, 
     /**
      * Behavor for when the mode is shown/active
      */
-	public void show() { active = true;}
+	public void show() {
+		reset();
+		active = true;
+	}
     
     /**
      * Behavor for when the mode is set to stop showing/ is inactive
      */
 	public void hide() {
-		reset();
 		active = false;
 	}
 }
