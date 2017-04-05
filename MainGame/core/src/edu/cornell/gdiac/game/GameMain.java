@@ -56,7 +56,7 @@ public class GameMain extends Game implements ScreenListener {
 		manager = new AssetManager();
 		
 		// Add font support to the asset manager
-		FileHandleResolver resolver = new InternalFileHandleResolver();
+		FileHandleResolver resolver = new LocalFileHandleResolver();
 		manager.setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
 		manager.setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
 	}
