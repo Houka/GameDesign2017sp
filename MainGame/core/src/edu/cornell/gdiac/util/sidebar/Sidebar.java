@@ -55,6 +55,19 @@ public class Sidebar {
         Sidebar.addSlider("Bullet-Wall Stick Time",0f,10f,5f);
     }
 
+    /**
+     * Call this to bootup the level editor sidebar to change grid size
+     */
+    public static void editorBootup(){
+        if (created)
+            return;
+
+        Sidebar.bootUp();
+        created = true;
+        //Below fields are just samples
+        Sidebar.addSlider("Grid Size",30,70,50);
+    }
+
     public static void bootUp() {
         theMap = new HashMap<String,Float>();
         currHeight = 50;

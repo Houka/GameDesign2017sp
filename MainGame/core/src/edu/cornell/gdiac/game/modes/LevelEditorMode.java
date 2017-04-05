@@ -108,13 +108,11 @@ public class LevelEditorMode extends Mode {
 	protected Texture camera;
 
 	private TextureRegion underMouse;
-	private Vector2 underMousecoords;
 	private boolean textureClicked;
-	private boolean justTouched;
-
-	private PlayerModel playermodel;
 	ShapeRenderer shapeRenderer;
 	HashSet<Vector2> grid;
+
+	private static final int DEFAULT_GRID = 50;
 
 
 	/** Width of the game world in Box2d units	 */
@@ -130,10 +128,8 @@ public class LevelEditorMode extends Mode {
 	/** array of textures */
 	private TextureRegion[] regions;
 	private int[] startHeights;
-	private int gridCell = 50;
+	private int gridCell = DEFAULT_GRID;
 
-	/** The stage for drag and drop */
-	Stage stage;
 
 	/**
 	 * Creates a new game world with the default values.
@@ -197,22 +193,42 @@ public class LevelEditorMode extends Mode {
 		world = new World(gravity, false);
 		levelLoader = new LevelLoader(scaleVector);
 		this.bounds = new Rectangle(bounds);
+
+		regions = new TextureRegion[5];
 	}
 
 	// BEGIN: Setters and Getters
 
+	public int getCellDim() {
+		return gridCell;
+	}
+
+	public void setCellDim(int dim) {
+		gridCell = dim;
+	}
+
 	// END: Setters and Getters
 
-	protected void drawGrid() {
-		shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-		for(Vector2 cell: grid) {
-			shapeRenderer.rect(cell.x, cell.y, gridCell, gridCell);
+	protected void drawGrid(int gridCell) {
+		for(int i=0; i<canvas.getWidth()-200; i+=gridCell) {
+			canvas.draw(platform,Color.WHITE,i,0,1, canvas.getHeight());
 		}
-		shapeRenderer.end();
+		for(int i=0; i<canvas.getHeight(); i+=gridCell) {
+			canvas.draw(platform, Color.WHITE, 0, i, canvas.getWidth() - 200, 1);
+		}
 	}
 
 	public Vector2 getCell(Vector2 pos) {
-		int cellsX = canvas.getWidth()-200/gridCell;
+		int tileX = (int) pos.x/gridCell;
+		int tileY = (int) pos.y/gridCell;
+		Vector2 newPos = pos;
+
+		// If we are less than half into the tile
+		newPos.x = tileX * gridCell + (gridCell/2);
+		newPos.y = tileY * gridCell ;
+
+		return newPos;
+		/*int cellsX = canvas.getWidth()-200/gridCell;
 		int cellsY = canvas.getHeight()-200/gridCell;
 		float dist = Float.MAX_VALUE;
 		Vector2 newPos = pos;
@@ -222,7 +238,7 @@ public class LevelEditorMode extends Mode {
 				newPos = cell;
 			}
 		}
-		return newPos;
+		return newPos;*/
 	}
 
 	@Override
@@ -239,12 +255,11 @@ public class LevelEditorMode extends Mode {
 		scaleVector = null;
 		world = null;
 		canvas = null;
-		stage.dispose();
 
 	}
 
 	public void applySettings() {
-		world.setGravity(new Vector2(0, -20.0f));
+		setCellDim((int)Sidebar.getValue("Grid Size"));
 	}
 
 	@Override
@@ -272,8 +287,9 @@ public class LevelEditorMode extends Mode {
 		// if mouse just released
 		if(!input.didTouch() &&  mouseX <= canvas.getWidth()-200 && underMouse != null) {
 			Vector2 newPos = getCell(input.getLastPos());
+			newPos.y = canvas.getHeight()-newPos.y;
 			if(underMouse.getTexture().equals(player)) {
-				PlayerModel newP = new PlayerModel(newPos.x,canvas.getHeight()-newPos.y,
+				PlayerModel newP = new PlayerModel(newPos.x,newPos.y-(gridCell/2),
 						underMouse.getRegionWidth(), underMouse.getRegionHeight());
 				newP.setDrawScale(1,1);
 				newP.setTexture(underMouse);
@@ -281,7 +297,7 @@ public class LevelEditorMode extends Mode {
 			}
 			else if(underMouse.getTexture().equals(enemy)) {
 				int interval = 3;
-				EnemyModel newE = new EnemyModel(newPos.x, canvas.getHeight()-newPos.y,
+				EnemyModel newE = new EnemyModel(newPos.x+(gridCell/2), newPos.y-(gridCell/2),
 						underMouse.getRegionWidth(), underMouse.getRegionHeight(), true, true, interval);
 				newE.setDrawScale(1,1);
 				newE.setTexture(underMouse);
@@ -289,22 +305,22 @@ public class LevelEditorMode extends Mode {
 			}
 			else if(underMouse.getTexture().equals(ammoDepot)) {
 				int ammoAmount = 3;
-				AmmoDepotModel newA = new AmmoDepotModel(newPos.x, canvas.getHeight()-newPos.y,
+				AmmoDepotModel newA = new AmmoDepotModel(newPos.x, newPos.y,
 						underMouse.getRegionWidth(), underMouse.getRegionHeight(), ammoAmount);
 				newA.setDrawScale(1,1);
 				newA.setTexture(underMouse);
 				objects.add(newA);
 			}
 			else if(underMouse.getTexture().equals(camera)) {
-				GoalModel newG = new GoalModel(newPos.x, canvas.getHeight()-newPos.y,
+				GoalModel newG = new GoalModel(newPos.x, newPos.y,
 						underMouse.getRegionWidth(), underMouse.getRegionHeight());
 				newG.setDrawScale(1,1);
 				newG.setTexture(underMouse);
 				objects.add(newG);
 			}
 			else if(underMouse.getTexture().equals(platform)) {
-				float[] arr = {newPos.x, newPos.y, newPos.x+gridCell, newPos.y, newPos.x+gridCell,
-						newPos.y-0.5f, newPos.x, newPos.y-0.5f};
+				float[] arr = {newPos.x-(gridCell/2), newPos.y+(gridCell/2), newPos.x+(gridCell/2), newPos.y+(gridCell/2),
+						newPos.x+(gridCell/2), newPos.y, newPos.x-(gridCell/2), newPos.y};
 				PlatformModel newP = new PlatformModel(arr);
 				newP.setDrawScale(1,1);
 				newP.setTexture(underMouse);
@@ -324,18 +340,6 @@ public class LevelEditorMode extends Mode {
 		editorRegion.setRegion(0, 0,  canvas.getWidth(), canvas.getHeight());
 		canvas.draw(editorRegion, Color.WHITE, canvas.getWidth()-200, 0, 200, canvas.getHeight());
 
-		regions = new TextureRegion[5];
-		regions[0] = new TextureRegion(player);
-		regions[0].setRegion(0, 0,  player.getWidth(), player.getHeight());
-		regions[1] = new TextureRegion(enemy);
-		regions[1].setRegion(0, 0,  enemy.getWidth(), enemy.getHeight());
-		regions[2] = new TextureRegion(platform);
-		regions[2].setRegion(0, 0,  platform.getWidth(), platform.getHeight());
-		regions[3] = new TextureRegion(ammoDepot);
-		regions[3].setRegion(0, 0,  ammoDepot.getWidth(), ammoDepot.getHeight());
-		regions[4] = new TextureRegion(camera);
-		regions[4].setRegion(0, 0,  camera.getWidth(), camera.getHeight());
-
 		int startHeight= 10;
 		startHeights = new int[5];
 		for (int i=0; i<regions.length; i++) {
@@ -351,7 +355,17 @@ public class LevelEditorMode extends Mode {
 			t.draw(canvas);
 		}
 
-		drawGrid();
+
+		drawGrid(gridCell);
+
+
+	}
+
+	@Override
+	protected void drawDebug() {
+		for (Obstacle obj : objects) {
+			obj.drawDebug(canvas);
+		}
 	}
 
 	@Override
@@ -372,6 +386,17 @@ public class LevelEditorMode extends Mode {
 		platform = AssetRetriever.createTexture(manager, PLATFORM_FILE, true).getTexture();
 		ammoDepot = AssetRetriever.createTexture(manager, AMMO_DEPOT_FILE, true).getTexture();
 		camera = AssetRetriever.createTexture(manager, CAMERA_FILE, true).getTexture();
+
+		regions[0] = new TextureRegion(player);
+		regions[0].setRegion(0, 0,  player.getWidth(), player.getHeight());
+		regions[1] = new TextureRegion(enemy);
+		regions[1].setRegion(0, 0,  enemy.getWidth(), enemy.getHeight());
+		regions[2] = new TextureRegion(platform);
+		regions[2].setRegion(0, 0,  platform.getWidth(), platform.getHeight()/3);
+		regions[3] = new TextureRegion(ammoDepot);
+		regions[3].setRegion(0, 0,  ammoDepot.getWidth(), ammoDepot.getHeight());
+		regions[4] = new TextureRegion(camera);
+		regions[4].setRegion(0, 0,  camera.getWidth(), camera.getHeight());
 	}
 
 	@Override

@@ -102,6 +102,7 @@ public class LevelEditorSelectionMode extends Mode {
     protected void onComplete() {
         levelEditorMode.loadContent(manager);
         levelEditorMode.loadLevel(NUM_LEVELS[selected]);
+        Sidebar.editorBootup();
         listener.switchScreens(this, levelEditorMode);
     }
 
