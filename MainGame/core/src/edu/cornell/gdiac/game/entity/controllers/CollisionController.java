@@ -89,6 +89,7 @@ public class CollisionController implements ContactListener {
         float sign = obj2.getVX() / Math.abs(obj2.getVX());
         if(obj1.getY()-obj1.getHeight()/2f>=obj2.getY()){
             touchedGround(obj1, obj2, userData1, userData2);
+            obj1.setRidingVX(obj2);
         }
         else{
             obj1.setKnockedBack(0);

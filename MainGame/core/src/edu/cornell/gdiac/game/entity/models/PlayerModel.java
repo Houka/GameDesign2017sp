@@ -5,8 +5,10 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
+import edu.cornell.gdiac.game.interfaces.Animatable;
 import edu.cornell.gdiac.game.interfaces.Settable;
 import edu.cornell.gdiac.game.interfaces.Shooter;
+import edu.cornell.gdiac.util.Animation;
 import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
 import edu.cornell.gdiac.util.sidebar.Sidebar;
 
@@ -16,7 +18,7 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
  * Note that this class returns to static loading.  That is because there are
  * no other subclasses that we might loop through.
  */
-public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
+public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, Animatable {
     // Physics constants
     /** The density of the character */
     private static final float PLAYER_DENSITY = 1.0f;
@@ -82,8 +84,10 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
 
     /** Cache for internal force calculations */
     private Vector2 forceCache = new Vector2();
-
     private Vector2 zeroVector = new Vector2(0,0);
+
+    /** The animation associated with this entity */
+    private Animation animation;
 
     /**
      * Creates a new player avatar at the origin.
@@ -137,6 +141,16 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
     }
 
     // BEGIN: Setters and Getters
+    @Override
+    public void setAnimation(Animation animation){
+        this.animation = animation;
+    }
+
+    @Override
+    public Animation getAnimation(){
+        return animation;
+    }
+
     /**
      * Returns left/right movement of this character.
      *
@@ -443,6 +457,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
         }
 
         super.update(dt);
+        animation.update(dt);
     }
 
     /**
@@ -452,7 +467,11 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
      */
     public void draw(GameCanvas canvas) {
         float effect = isFacingRight ? 1.0f : -1.0f;
-        canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+
+        if (animation == null)
+            canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+        else
+            canvas.draw(animation.getTextureRegion(),Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
     }
 
     /**

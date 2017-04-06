@@ -8,7 +8,6 @@ import edu.cornell.gdiac.game.entity.models.PlayerModel;
  * Abstract class for game entity controllers
  */
 public abstract class EntityController {
-    
     /** The model associated with this controller **/
     protected PlayerModel player;
 
