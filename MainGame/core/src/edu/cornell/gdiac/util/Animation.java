@@ -24,6 +24,7 @@ public class Animation implements Disposable{
     private String currentStrip = "";
     private boolean isPlaying = false;
     private boolean isLooping = false;
+    private boolean hasPlayedOnce = true;
 
     /**
      *  Constructor
@@ -70,15 +71,29 @@ public class Animation implements Disposable{
     }
 
     /**
-     * Plays the filmstrip
+     * Plays the filmstrip, but waits until the last animation can be interrupted
      *
      * @param stripName the filmstrip to be played
      * @param loop whether or not to loop this animation
      */
     public void play(String stripName, boolean loop){
-        setPlayingAnimation(stripName);
-        setPlaying(true);
-        isLooping = loop;
+        if (hasPlayedOnce) {
+            setPlayingAnimation(stripName);
+            setPlaying(true);
+            isLooping = loop;
+        }
+    }
+
+    /**
+     * Plays the filmstrip completely through once
+     *
+     * @param stripName the filmstrip to be played
+     */
+    public void playOnce(String stripName){
+        if (stripName != currentStrip) {
+            play(stripName, false);
+            hasPlayedOnce = false;
+        }
     }
 
     /**
@@ -100,8 +115,10 @@ public class Animation implements Disposable{
             FilmStrip filmStrip = filmStrips.get(currentStrip);
             filmStrip.setFrame(currentFrame);
             currentFrame = (currentFrame+1) % filmStrip.getSize();
-            if (currentFrame == 0 && !isLooping)
+            if (currentFrame == 0 && !isLooping) {
                 isPlaying = false;
+                hasPlayedOnce = true;
+            }
         }
     }
 

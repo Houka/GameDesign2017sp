@@ -86,7 +86,6 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
     private Vector2 forceCache = new Vector2();
     private Vector2 zeroVector = new Vector2(0,0);
 
-    /** The animation of the player */
     /** The animation associated with this entity */
     private Animation animation;
 
@@ -145,6 +144,11 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
     @Override
     public void setAnimation(Animation animation){
         this.animation = animation;
+    }
+
+    @Override
+    public Animation getAnimation(){
+        return animation;
     }
 
     /**
@@ -385,20 +389,16 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
               // Don't want to be moving. Damp out player motion
               if (getMovement() == 0f ) {
                   setVX(ridingBullet.getVX());
-                  animation.play("idle", true);
               }else{
                   setVX(Math.signum(getMovement())*getMaxSpeed()+ridingBullet.getVX());
-                  animation.play("run", true);
               }
             }
         }else{
           if(!stunned){
             if (getMovement() == 0f ) {
                 setVX(0);
-                animation.play("idle", true);
             }else{
                 setVX(Math.signum(getMovement())*getMaxSpeed());
-                animation.play("run", true);
             }
           }
         }

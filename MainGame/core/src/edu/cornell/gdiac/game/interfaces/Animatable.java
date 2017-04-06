@@ -7,7 +7,12 @@ import edu.cornell.gdiac.util.Animation;
  */
 public interface Animatable {
     /**
-     *  Sets the animation for this
+     *  Sets the animation for this entity
      */
     void setAnimation(Animation animation);
+
+    /**
+     * @return the animation for this entity
+     */
+    Animation getAnimation();
 }
