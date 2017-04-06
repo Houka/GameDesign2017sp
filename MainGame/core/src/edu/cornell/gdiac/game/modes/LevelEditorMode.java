@@ -107,10 +107,11 @@ public class LevelEditorMode extends Mode {
 	/** Texture for side-bar*/
 	protected Texture camera;
 
+	/** Texture under mouse when object clicked in right bar */
 	private TextureRegion underMouse;
+	/** If a texture on the right bar has been clicked */
 	private boolean textureClicked;
-	ShapeRenderer shapeRenderer;
-	HashSet<Vector2> grid;
+
 
 	private static final int DEFAULT_GRID = 50;
 
@@ -181,13 +182,6 @@ public class LevelEditorMode extends Mode {
 		Gdx.input.setInputProcessor(input);
 		textureClicked = false;
 		onExit = ScreenListener.EXIT_MENU;
-		shapeRenderer = new ShapeRenderer();
-		grid = new HashSet<Vector2>();
-		for(int i=0; i<canvas.getWidth()-200; i+=gridCell) {
-			for(int j=0; j<canvas.getHeight(); j+=gridCell) {
-				grid.add(new Vector2(i,j));
-			}
-		}
 		scaleVector = new Vector2(canvas.getWidth() / bounds.getWidth(), canvas.getHeight() / bounds.getHeight());
 
 		world = new World(gravity, false);
@@ -223,29 +217,14 @@ public class LevelEditorMode extends Mode {
 		int tileY = (int) pos.y/gridCell;
 		Vector2 newPos = pos;
 
-		// If we are less than half into the tile
 		newPos.x = tileX * gridCell + (gridCell/2);
-		newPos.y = tileY * gridCell ;
+		newPos.y = tileY * gridCell;
 
 		return newPos;
-		/*int cellsX = canvas.getWidth()-200/gridCell;
-		int cellsY = canvas.getHeight()-200/gridCell;
-		float dist = Float.MAX_VALUE;
-		Vector2 newPos = pos;
-		for(Vector2 cell: grid) {
-			if(pos.dst(cell) < dist) {
-				dist = pos.dst(cell);
-				newPos = cell;
-			}
-		}
-		return newPos;*/
 	}
 
 	@Override
 	public void dispose() {
-		/*for (Obstacle obj : objects) {
-			obj.deactivatePhysics(world);
-		}*/
 		objects.clear();
 		world.dispose();
 		levelLoader.dispose();
@@ -284,7 +263,6 @@ public class LevelEditorMode extends Mode {
 		if(!input.didTouch()) {
 			textureClicked = false;
 		}
-		// if mouse just released
 		if(!input.didTouch() &&  mouseX <= canvas.getWidth()-200 && underMouse != null) {
 			Vector2 newPos = getCell(input.getLastPos());
 			newPos.y = canvas.getHeight()-newPos.y;
@@ -427,29 +405,4 @@ public class LevelEditorMode extends Mode {
 		bounds = levelLoader.getBounds();
 	}
 
-	/**
-	 * Immediately adds the object to the physics world
-	 *
-	 * @param obj The object to add
-	 */
-	private void addObject(Obstacle obj) {
-		assert inBounds(obj) : "Object is not in bounds";
-//		objects.add(obj);
-//		obj.activatePhysics(world);
-
-		//addEntityController(obj);
-	}
-
-	/**
-	 * Returns true if the object is in bounds.
-	 * This assertion is useful for debugging the physics.
-	 *
-	 * @param obj The object to check.
-	 * @return true if the object is in bounds.
-	 */
-	private boolean inBounds(Obstacle obj) {
-		boolean horiz = (bounds.x <= obj.getX() && obj.getX() <= bounds.x + bounds.width);
-		boolean vert = (bounds.y <= obj.getY() && obj.getY() <= bounds.y + bounds.height);
-		return horiz && vert;
-	}
 }
