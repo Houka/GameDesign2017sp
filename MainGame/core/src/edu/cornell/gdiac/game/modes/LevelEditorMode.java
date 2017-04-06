@@ -17,7 +17,6 @@ import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.graphics.*;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.util.AssetRetriever;
-import edu.cornell.gdiac.game.interfaces.ScreenListener;
 
 /**
  * Class that provides a Level Editor screen for the state of the game.
@@ -64,7 +63,7 @@ public class LevelEditorMode extends Mode {
 
 	@Override
 	public void loadContent(AssetManager manager) {
-		background = AssetRetriever.createTexture(manager, BACKGROUND_FILE, true).getTexture();
+		background = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true).getTexture();
 	}
 
 	@Override

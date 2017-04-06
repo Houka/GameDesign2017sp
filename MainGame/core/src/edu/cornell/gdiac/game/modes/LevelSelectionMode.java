@@ -17,7 +17,6 @@ import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
-import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 /**
  * Class that provides a Level Selection screen for the state of the game.
@@ -134,7 +133,7 @@ public class LevelSelectionMode extends Mode {
 
 	@Override
 	public void loadContent(AssetManager manager) {
-		background = AssetRetriever.createTexture(manager, BACKGROUND_FILE, true).getTexture();
+		background = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true).getTexture();
 
 		// Allocate the font
 		if (manager.isLoaded(FONT_FILE))

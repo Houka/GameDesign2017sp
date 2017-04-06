@@ -115,7 +115,7 @@ public class MenuMode extends Mode {
 
 	@Override
 	public void loadContent(AssetManager manager) {
-		background = AssetRetriever.createTexture(manager, BACKGROUND_FILE, true).getTexture();
+		background = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true).getTexture();
 
 		// Allocate the font
 		if (manager.isLoaded(FONT_FILE))

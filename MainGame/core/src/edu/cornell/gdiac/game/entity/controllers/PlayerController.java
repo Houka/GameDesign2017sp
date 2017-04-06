@@ -33,5 +33,4 @@ public class PlayerController extends EntityController {
         player.setShooting(input.didShoot());
         player.applyForce();
     }
-    
 }

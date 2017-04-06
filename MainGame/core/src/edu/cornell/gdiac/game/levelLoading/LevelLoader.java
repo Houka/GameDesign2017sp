@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.game.interfaces.AssetUser;
+import edu.cornell.gdiac.util.Animation;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
@@ -22,21 +23,25 @@ import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
  * The level loader class puts objects from a json file into the world.
  */
 public class LevelLoader implements AssetUser, Disposable{
-    //filenames for sprites of objects
+    /** Filenames for sprites of objects */
     private static String PLATFORM_FILE = "sprites/fixtures/solid.png";
     private static String GOAL_FILE = "sprites/security_camera.png";
     private static String BACKGROUND_FILE = "sprites/wall/plain_wall_tile.png";
     private static String ENEMY_FILE = "sprites/enemy/enemy_idle.png";
     private static String CHARACTER_FILE = "sprites/char/char_idle.png";
+    private static String CHARACTER_RUN_FILE = "sprites/char/char_run.png";
     private static String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
 
-    //textures
+    /** Textures */
     private TextureRegion platformTile;
     private TextureRegion goalTile;
     private TextureRegion bgTile;
     private TextureRegion enemyTexture;
     private TextureRegion playerTexture;
     private TextureRegion depotTexture;
+
+    /** Animations */
+    private Animation playerAnimation;
 
     /** Bounds of the window*/
     private Rectangle bounds;
@@ -155,6 +160,7 @@ public class LevelLoader implements AssetUser, Disposable{
                 playerTexture.getRegionWidth() / scale.x, playerTexture.getRegionHeight() / scale.y);
         player.setDrawScale(scale);
         player.setTexture(playerTexture);
+        player.setAnimation(playerAnimation);
         addQueuedObject(player);
     }
 
@@ -234,17 +240,26 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(BACKGROUND_FILE,Texture.class);
         manager.load(ENEMY_FILE,Texture.class);
         manager.load(CHARACTER_FILE, Texture.class);
+        manager.load(CHARACTER_RUN_FILE, Texture.class);
         manager.load(AMMO_DEPOT_FILE, Texture.class);
     }
 
     @Override
     public void loadContent(AssetManager manager) {
-        bgTile  = AssetRetriever.createTexture(manager, BACKGROUND_FILE,true);
-        platformTile = AssetRetriever.createTexture(manager,PLATFORM_FILE,true);
-        goalTile  = AssetRetriever.createTexture(manager,GOAL_FILE,false);
-        enemyTexture  = AssetRetriever.createTexture(manager,ENEMY_FILE,false);
-        playerTexture = AssetRetriever.createTexture(manager, CHARACTER_FILE, false);
-        depotTexture = AssetRetriever.createTexture(manager, AMMO_DEPOT_FILE, false);
+        // static texture loading
+        bgTile  = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE,true);
+        platformTile = AssetRetriever.createTextureRegion(manager,PLATFORM_FILE,true);
+        goalTile  = AssetRetriever.createTextureRegion(manager,GOAL_FILE,false);
+        enemyTexture  = AssetRetriever.createTextureRegion(manager,ENEMY_FILE,false);
+        playerTexture = AssetRetriever.createTextureRegion(manager, CHARACTER_FILE, false);
+        depotTexture = AssetRetriever.createTextureRegion(manager, AMMO_DEPOT_FILE, false);
+
+        // animation spritesheet loading
+        playerAnimation = new Animation();
+        playerAnimation.addTexture("run", AssetRetriever.createTexture(manager, CHARACTER_RUN_FILE, false), 1,6);
+        playerAnimation.addTexture("idle", playerTexture.getTexture(), 1, 1);
+        playerAnimation.setPlaying(false);
+        playerAnimation.setPlayingAnimation("idle");
     }
 
     @Override
@@ -254,6 +269,7 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.unload(GOAL_FILE);
         manager.unload(ENEMY_FILE);
         manager.unload(CHARACTER_FILE);
+        manager.unload(CHARACTER_RUN_FILE);
     }
 
     @Override
