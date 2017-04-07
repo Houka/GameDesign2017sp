@@ -460,7 +460,7 @@ public class LevelEditorMode extends Mode {
 	private void loadLevel() {
         String filename = getLoadFileName();
         if (!filename.isEmpty()) {
-            levelLoader.loadLevel();
+            levelLoader.loadLevel(filename);
             while (!levelLoader.getAddQueue().isEmpty()) {
                 Obstacle obj = levelLoader.getAddQueue().poll();
                 obj.setDrawScale(scaleVector);
