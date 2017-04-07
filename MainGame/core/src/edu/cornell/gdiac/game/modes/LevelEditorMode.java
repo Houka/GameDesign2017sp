@@ -32,6 +32,7 @@ import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 
+import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -93,10 +94,8 @@ public class LevelEditorMode extends Mode {
 	/** Scale for world */
 	private Vector2 scaleVector;
 
-	/** List of string paths to all json files found */
-	private PooledList<String> jsonFiles;
-	/** name of the file we want to save to */
-	private String saveFileName = "";
+	/** Dummy JFrame in order to have input message box show in front */
+	private JFrame dummyFrame;
 
 	/** All the objects in the world.	 */
 	private PooledList<Obstacle> objects = new PooledList<Obstacle>();
@@ -130,9 +129,6 @@ public class LevelEditorMode extends Mode {
         grid.setAsBox(gridCell/2, gridCell/2);
 
         mousePos = new Vector2();
-
-		// get initial json files
-		jsonFiles = new PooledList<String>();
 	}
 
 	// BEGIN: Setters and Getters
@@ -143,12 +139,14 @@ public class LevelEditorMode extends Mode {
 
     /**
 	 * Gets a list of all files in the JSON directory in the assets folder.
-	 * @return list of all current files in the JSON directory
+	 * @return Pretty formated string of the list of all current files in the JSON directory
 	 */
-	private PooledList<String> getAllJsonFiles(){
-		jsonFiles.clear();
-		jsonFiles.addAll(getJsonFiles(new ArrayList<String>(), Gdx.files.local(JSON_DIRECTORY).file()));
-		return jsonFiles;
+	private String getAllJsonFiles(){
+		String result = "";
+		for(Object s:getJsonFiles(new ArrayList<String>(), Gdx.files.local(JSON_DIRECTORY).file()).toArray()){
+		    result+="        "+s+"\n";
+        }
+        return result+"\n";
 	}
 
 	private ArrayList<String> getJsonFiles(ArrayList<String> list, File directory)
@@ -180,19 +178,44 @@ public class LevelEditorMode extends Mode {
     private Vector2 getWorldCoordinates(Vector2 pos){
 	    return new Vector2(pos.x/scaleVector.x,pos.y/scaleVector.y);
     }
+
+    private String getLoadFileName(){
+        if (dummyFrame == null) {
+            dummyFrame = new JFrame();
+        }
+
+        dummyFrame.setVisible(true);
+        dummyFrame.setLocationRelativeTo(null);
+        dummyFrame.setAlwaysOnTop(true);
+        String response = JOptionPane.showInputDialog(dummyFrame,
+                "What's the relative file path of the file you want to load? \n\n List of all level files:\n"+getAllJsonFiles());
+        dummyFrame.dispose();
+        return response;
+    }
+
+    private String getSaveFileName(){
+        if (dummyFrame == null) {
+            dummyFrame = new JFrame();
+        }
+
+        dummyFrame.setVisible(true);
+        dummyFrame.setLocationRelativeTo(null);
+        dummyFrame.setAlwaysOnTop(true);
+        String response = JOptionPane.showInputDialog(dummyFrame,"What do you want to name the save file? (ex: test.json)");
+        dummyFrame.dispose();
+        return response;
+    }
 	// END: Setters and Getters
 
 	@Override
 	public void dispose() {
 		objects.clear();
-		jsonFiles.clear();
 		levelLoader.dispose();
         grid.dispose();
         grid = null;
         levelLoader = null;
         levelCreator = null;
         objects = null;
-        jsonFiles = null;
         scaleVector = null;
         mouseInput = null;
         mousePos = null;
@@ -218,7 +241,7 @@ public class LevelEditorMode extends Mode {
             System.out.println("TEST: key right");
 
         if(keyInput.didSelect())
-            saveLevel();
+            loadLevel();
     }
 
 	private void updateMouseInput(){
@@ -325,7 +348,7 @@ public class LevelEditorMode extends Mode {
 				canvas.getHeight() - 20);
 		canvas.drawText("LOAD", displayFont, 250,
 				canvas.getHeight() - 20);
-		canvas.drawText("CANCEL", displayFont, 500,
+		canvas.drawText("CLEAR", displayFont, 500,
 				canvas.getHeight() - 20);
 	}
 
@@ -400,9 +423,7 @@ public class LevelEditorMode extends Mode {
 	}
 
 	private void saveLevel() {
-        System.out.println("TEST: saving level");
-        // testing code
-        saveFileName = JSON_DIRECTORY+"/test.json";
+        String saveFileName = JSON_DIRECTORY+"/"+getSaveFileName();
         ArrayList<PlatformModel> platforms = new ArrayList<PlatformModel>();
         ArrayList<WallModel> walls = new ArrayList<WallModel>();
         PlayerModel player = null;
@@ -410,7 +431,7 @@ public class LevelEditorMode extends Mode {
         ArrayList<EnemyModel> onSightEnemies = new ArrayList<EnemyModel>();
         ArrayList<AmmoDepotModel> ammoDepots = new ArrayList<AmmoDepotModel>();
         GoalModel target = null;
-        int ammo = 4;
+        int ammo = 4; // testing code TODO: replace with variable
 
         for (Obstacle obj: objects){
             if (obj instanceof PlatformModel)
@@ -432,16 +453,25 @@ public class LevelEditorMode extends Mode {
         if (player != null || target != null)
             levelCreator.writeLevel(saveFileName, platforms, walls, player, intervalEnemies, onSightEnemies, ammoDepots, target, ammo);
 	    else{
-	        System.out.println("ERROR: cannot create JSON without a player or goal in the map");
+	        System.out.println("ERROR: cannot create JSON without a player or goal in the map or file name is invalid");
         }
     }
 
-	private void loadLevel(String levelFile) {
-        levelLoader.loadLevel(levelFile);
-        while (!levelLoader.getAddQueue().isEmpty()) {
-            Obstacle obj =levelLoader.getAddQueue().poll() ;
-            obj.setDrawScale(scaleVector);
-            objects.add(obj);
+	private void loadLevel() {
+        String filename = getLoadFileName();
+        if (!filename.isEmpty()) {
+            levelLoader.loadLevel();
+            while (!levelLoader.getAddQueue().isEmpty()) {
+                Obstacle obj = levelLoader.getAddQueue().poll();
+                obj.setDrawScale(scaleVector);
+                objects.add(obj);
+            }
+        }else{
+            System.out.println("ERROR: invalid file path");
         }
 	}
+
+	private void clearLevel(){
+        objects.clear();
+    }
 }
