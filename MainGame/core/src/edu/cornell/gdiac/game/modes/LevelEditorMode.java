@@ -21,15 +21,16 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.game.input.EditorInputController;
+import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.game.levelLoading.LevelCreator;
 import edu.cornell.gdiac.game.levelLoading.LevelLoader;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
-import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -47,11 +48,13 @@ public class LevelEditorMode extends Mode {
 	private static final String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
 	private static final String PLATFORM_FILE = "sprites/fixtures/solid.png";
 	private static final String CAMERA_FILE = "sprites/security_camera.png";
-    private static final int DEFAULT_GRID = 50;
 
-	/** Dimensions of the game world in Box2d units	 */
-	private static final float DEFAULT_WIDTH = 32.0f;
-	private static final float DEFAULT_HEIGHT = 18.0f;
+	/** size of the grid */
+    private static final int DEFAULT_GRID = 50;
+    /** Width of the game world in Box2d units	 */
+    private static final float DEFAULT_WIDTH = 32.0f;
+    /** Height of the game world in Box2d units	 */
+    private static final float DEFAULT_HEIGHT = 18.0f;
 
 	/** Retro font for displaying messages */
 	private static final String FONT_FILE = "fonts/RetroGame.ttf";
@@ -60,28 +63,28 @@ public class LevelEditorMode extends Mode {
 	private static final String JSON_DIRECTORY = "JSON";
 
 	/** The font for giving messages to the player */
-	protected BitmapFont displayFont;
-
+	private BitmapFont displayFont;
 	/** Texture for side-bar*/
-	protected Texture editor;
-	protected Texture player;
-	protected Texture enemy;
-	protected Texture platform;
-	protected Texture ammoDepot;
-	protected Texture camera;
+ 	private Texture editor;
 
 	/** Input controller */
-	private EditorInputController input;
+	private EditorInputController mouseInput;
+	private SelectionInputController keyInput;
 
     /** Texture under mouse when object clicked in right bar */
     private TextureRegion underMouse;
     /** If a texture on the right bar has been clicked */
     private boolean textureClicked;
+    /** The position of the mouse translated to the grid */
+    private Vector2 mousePos;
 
     /** array of textures */
     private TextureRegion[] regions;
     private int[] startHeights;
+
+    /** grid size and shape */
     private int gridCell = DEFAULT_GRID;
+    private PolygonShape grid;
 
 	/** Level loader */
 	private LevelLoader levelLoader;
@@ -92,23 +95,11 @@ public class LevelEditorMode extends Mode {
 
 	/** List of string paths to all json files found */
 	private PooledList<String> jsonFiles;
+	/** name of the file we want to save to */
+	private String saveFileName = "";
+
 	/** All the objects in the world.	 */
 	private PooledList<Obstacle> objects = new PooledList<Obstacle>();
-
-	/**
-	 * Creates a new game world with the default values.
-	 * <p>
-	 * The game world is scaled so that the screen coordinates do not agree
-	 * with the Box2d coordinates.  The bounds are in terms of the Box2d
-	 * world, not the screen.
-	 *
-	 * @param name 	  The name of this mode
-	 * @param canvas  The GameCanvas to draw the textures to
-	 * @param manager The AssetManager to load in the background
-	 */
-	public LevelEditorMode(String name, GameCanvas canvas, AssetManager manager) {
-		this(name, canvas, manager, new Rectangle(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT));
-	}
 
 	/**
 	 * Creates a new game world
@@ -120,31 +111,34 @@ public class LevelEditorMode extends Mode {
 	 * @param name 	  The name of this mode
 	 * @param canvas  The GameCanvas to draw the textures to
 	 * @param manager The AssetManager to load in the background
-	 * @param bounds  The game bounds in Box2d coordinates
 	 */
-	public LevelEditorMode(String name, GameCanvas canvas, AssetManager manager, Rectangle bounds) {
+	public LevelEditorMode(String name, GameCanvas canvas, AssetManager manager) {
 		super(name ,canvas, manager);
-		scaleVector = new Vector2(canvas.getWidth() / bounds.getWidth(), canvas.getHeight() / bounds.getHeight());
+        scaleVector = new Vector2(canvas.getWidth() / DEFAULT_WIDTH, canvas.getHeight() / DEFAULT_HEIGHT);
+		debug = true;
 
 		levelLoader = new LevelLoader(scaleVector);
 		levelCreator = new LevelCreator();
 
-		input = EditorInputController.getInstance();
-        Gdx.input.setInputProcessor(input);
+		mouseInput = EditorInputController.getInstance();
+		Gdx.input.setInputProcessor(mouseInput);
+		keyInput = SelectionInputController.getInstance();
         textureClicked = false;
         regions = new TextureRegion[5];
+
+        grid = new PolygonShape();
+        grid.setAsBox(gridCell/2, gridCell/2);
+
+        mousePos = new Vector2();
 
 		// get initial json files
 		jsonFiles = new PooledList<String>();
 	}
 
 	// BEGIN: Setters and Getters
-    private int getCellDim() {
-        return gridCell;
-    }
-
-    private void setCellDim(int dim) {
-        gridCell = dim;
+    private void setCellDimension(int dim) {
+	    gridCell = dim;
+	    grid.setAsBox(gridCell,gridCell);
     }
 
     /**
@@ -177,9 +171,14 @@ public class LevelEditorMode extends Mode {
         Vector2 newPos = pos;
 
         newPos.x = tileX * gridCell + (gridCell/2);
-        newPos.y = tileY * gridCell;
+        newPos.y = tileY * gridCell + (gridCell/2);
+        newPos.y = canvas.getHeight()-newPos.y;
 
         return newPos;
+    }
+
+    private Vector2 getWorldCoordinates(Vector2 pos){
+	    return new Vector2(pos.x/scaleVector.x,pos.y/scaleVector.y);
     }
 	// END: Setters and Getters
 
@@ -188,29 +187,46 @@ public class LevelEditorMode extends Mode {
 		objects.clear();
 		jsonFiles.clear();
 		levelLoader.dispose();
-		levelLoader = null;
-		levelCreator = null;
-		objects = null;
-		jsonFiles = null;
-		scaleVector = null;
-		input = null;
+        grid.dispose();
+        grid = null;
+        levelLoader = null;
+        levelCreator = null;
+        objects = null;
+        jsonFiles = null;
+        scaleVector = null;
+        mouseInput = null;
+        mousePos = null;
 	}
 
 	@Override
 	protected void update(float delta) {
-		input.readInput();
+		mouseInput.readInput();
+		keyInput.readInput();
 
-		updateMouseInput();
-
-		while (!levelLoader.getAddQueue().isEmpty())
-			objects.add(levelLoader.getAddQueue().poll());
+        updateKeyInput();
+        updateMouseInput();
 	}
+
+	private void updateKeyInput(){
+	    if(keyInput.didUp())
+	        System.out.println("TEST: key up");
+	    else if(keyInput.didDown())
+            System.out.println("TEST: key down");
+        else if(keyInput.didLeft())
+            System.out.println("TEST: key left");
+        else if(keyInput.didRight())
+            System.out.println("TEST: key right");
+
+        if(keyInput.didSelect())
+            saveLevel();
+    }
 
 	private void updateMouseInput(){
         int mouseX = Gdx.input.getX();
         int mouseY = Gdx.input.getY();
+        mousePos = getCell(new Vector2(mouseX, mouseY));
 
-        if(input.didTouch() && mouseX >= canvas.getWidth()-125) {
+        if(mouseInput.didTouch() && mouseX >= canvas.getWidth()-125) {
             for(int i=0; i<regions.length; i++) {
                 Rectangle textureBounds=new Rectangle
                         (canvas.getWidth()-125, canvas.getHeight() - startHeights[i] - (regions[i].getRegionHeight()),
@@ -223,47 +239,46 @@ public class LevelEditorMode extends Mode {
                 }
             }
         }
-        if(!input.didTouch()) {
+        if(!mouseInput.didTouch()) {
             textureClicked = false;
         }
-        if(!input.didTouch() &&  mouseX <= canvas.getWidth()-200 && underMouse != null) {
-            Vector2 newPos = getCell(input.getLastPos());
-            newPos.y = canvas.getHeight()-newPos.y;
-            if(underMouse.getTexture().equals(player)) {
-                PlayerModel newP = new PlayerModel(newPos.x,newPos.y-(gridCell/2),
+        if(!mouseInput.didTouch() &&  mouseX <= canvas.getWidth()-200 && underMouse != null) {
+            Vector2 newPos = getWorldCoordinates(getCell(mouseInput.getLastPos()));
+            if(underMouse.equals(regions[0])) {
+                PlayerModel newP = new PlayerModel(newPos.x,newPos.y,
                         underMouse.getRegionWidth(), underMouse.getRegionHeight());
-                newP.setDrawScale(1,1);
+                newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
                 objects.add(newP);
             }
-            else if(underMouse.getTexture().equals(enemy)) {
+            else if(underMouse.equals(regions[1])) {
                 int interval = 3;
-                EnemyModel newE = new EnemyModel(newPos.x+(gridCell/2), newPos.y-(gridCell/2),
+                EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
                         underMouse.getRegionWidth(), underMouse.getRegionHeight(), true, true, interval);
-                newE.setDrawScale(1,1);
+                newE.setDrawScale(scaleVector);
                 newE.setTexture(underMouse);
                 objects.add(newE);
             }
-            else if(underMouse.getTexture().equals(ammoDepot)) {
+            else if(underMouse.equals(regions[3])) {
                 int ammoAmount = 3;
                 AmmoDepotModel newA = new AmmoDepotModel(newPos.x, newPos.y,
                         underMouse.getRegionWidth(), underMouse.getRegionHeight(), ammoAmount);
-                newA.setDrawScale(1,1);
+                newA.setDrawScale(scaleVector);
                 newA.setTexture(underMouse);
                 objects.add(newA);
             }
-            else if(underMouse.getTexture().equals(camera)) {
+            else if(underMouse.equals(regions[4])) {
                 GoalModel newG = new GoalModel(newPos.x, newPos.y,
                         underMouse.getRegionWidth(), underMouse.getRegionHeight());
-                newG.setDrawScale(1,1);
+                newG.setDrawScale(scaleVector);
                 newG.setTexture(underMouse);
                 objects.add(newG);
             }
-            else if(underMouse.getTexture().equals(platform)) {
-                float[] arr = {newPos.x-(gridCell/2), newPos.y+(gridCell/2), newPos.x+(gridCell/2), newPos.y+(gridCell/2),
-                        newPos.x+(gridCell/2), newPos.y, newPos.x-(gridCell/2), newPos.y};
+            else if(underMouse.equals(regions[2])) {
+                float[] arr = {newPos.x-1f, newPos.y+1f, newPos.x+1f, newPos.y+1f,
+                        newPos.x+1f, newPos.y-1f, newPos.x-1f, newPos.y-1f};
                 PlatformModel newP = new PlatformModel(arr);
-                newP.setDrawScale(1,1);
+                newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
                 objects.add(newP);
             }
@@ -286,19 +301,6 @@ public class LevelEditorMode extends Mode {
 		canvas.draw(editorRegion, Color.WHITE, canvas.getWidth()-180, 0, 200, canvas.getHeight());
 		canvas.draw(editorRegion, Color.WHITE, 0, canvas.getHeight()-100, canvas.getWidth()-180, canvas.getHeight());
 
-		// Create the sidebar textures (MISSING WALL TEXTURE)
-		TextureRegion[] regions = new TextureRegion[5];
-		regions[0] = new TextureRegion(player);
-		regions[0].setRegion(0, 0,  player.getWidth(), player.getHeight());
-		regions[1] = new TextureRegion(enemy);
-		regions[1].setRegion(0, 0,  enemy.getWidth(), enemy.getHeight());
-		regions[2] = new TextureRegion(platform);
-		regions[2].setRegion(0, 0,  platform.getWidth(), platform.getHeight());
-		regions[3] = new TextureRegion(ammoDepot);
-		regions[3].setRegion(0, 0,  ammoDepot.getWidth(), ammoDepot.getHeight());
-		regions[4] = new TextureRegion(camera);
-		regions[4].setRegion(0, 0,  camera.getWidth(), camera.getHeight());
-
 		// Draw the sidebar textures into the right sidebar
         int startHeight= 10;
         startHeights = new int[5];
@@ -312,7 +314,6 @@ public class LevelEditorMode extends Mode {
                     canvas.getHeight()-Gdx.input.getY()-(underMouse.getRegionHeight()/2));
         }
 
-        drawGrid(gridCell);
 		drawMenuButtons(canvas);
 	}
 
@@ -328,24 +329,25 @@ public class LevelEditorMode extends Mode {
 				canvas.getHeight() - 20);
 	}
 
+    @Override
+    protected void drawDebug() {
+        drawGrid(gridCell);
+        for (Obstacle obj : objects) {
+            obj.drawDebug(canvas);
+        }
+    }
+
     /**
      * Draws the snapping grid
      * @param gridCell the length of a side of a grid
      */
     private void drawGrid(int gridCell) {
-        for(int i=0; i<canvas.getWidth()-200; i+=gridCell) {
-            canvas.draw(platform,Color.WHITE,i,0,1, canvas.getHeight());
+        for(int i=gridCell/2; i<canvas.getWidth()-200; i+=gridCell) {
+            for (int j =0; j < canvas.getHeight(); j += gridCell) {
+                canvas.drawPhysics(grid, Color.WHITE, i, j);
+            }
         }
-        for(int i=0; i<canvas.getHeight(); i+=gridCell) {
-            canvas.draw(platform, Color.WHITE, 0, i, canvas.getWidth() - 200, 1);
-        }
-    }
-
-    @Override
-    protected void drawDebug() {
-        for (Obstacle obj : objects) {
-            obj.drawDebug(canvas);
-        }
+        canvas.drawPhysics(grid, Color.RED, mousePos.x, mousePos.y);
     }
 
 	@Override
@@ -363,15 +365,8 @@ public class LevelEditorMode extends Mode {
 	public void loadContent(AssetManager manager) {
 		levelLoader.loadContent(manager);
 		editor = AssetRetriever.createTexture(manager, BACKGROUND_FILE, true);
-		player = AssetRetriever.createTexture(manager, PLAYER_FILE, true);
-		enemy = AssetRetriever.createTexture(manager, ENEMY_FILE, true);
-		platform = AssetRetriever.createTexture(manager, PLATFORM_FILE, true);
-		ammoDepot = AssetRetriever.createTexture(manager, AMMO_DEPOT_FILE, true);
-		camera = AssetRetriever.createTexture(manager, CAMERA_FILE, true);
-		if (manager.isLoaded(FONT_FILE)) {
+		if (manager.isLoaded(FONT_FILE))
 			displayFont = manager.get(FONT_FILE, BitmapFont.class);
-			displayFont.getData().setScale(0.5f, 0.5f);
-		}
 		else
 			displayFont = null;
 
@@ -405,14 +400,48 @@ public class LevelEditorMode extends Mode {
 	}
 
 	private void saveLevel() {
+        System.out.println("TEST: saving level");
+        // testing code
+        saveFileName = JSON_DIRECTORY+"/test.json";
+        ArrayList<PlatformModel> platforms = new ArrayList<PlatformModel>();
+        ArrayList<WallModel> walls = new ArrayList<WallModel>();
+        PlayerModel player = null;
+        ArrayList<EnemyModel> intervalEnemies = new ArrayList<EnemyModel>();
+        ArrayList<EnemyModel> onSightEnemies = new ArrayList<EnemyModel>();
+        ArrayList<AmmoDepotModel> ammoDepots = new ArrayList<AmmoDepotModel>();
+        GoalModel target = null;
+        int ammo = 4;
 
-	}
+        for (Obstacle obj: objects){
+            if (obj instanceof PlatformModel)
+                platforms.add((PlatformModel) obj);
+            else if (obj instanceof WallModel)
+                walls.add((WallModel) obj);
+            else if (obj instanceof EnemyModel && ((EnemyModel) obj).isOnSight())
+                onSightEnemies.add((EnemyModel) obj);
+            else if (obj instanceof EnemyModel && !((EnemyModel) obj).isOnSight())
+                intervalEnemies.add((EnemyModel) obj);
+            else if (obj instanceof AmmoDepotModel)
+                ammoDepots.add((AmmoDepotModel) obj);
+            else if (obj instanceof PlayerModel)
+                player = (PlayerModel) obj;
+            else if (obj instanceof GoalModel)
+                target = (GoalModel) obj;
+        }
+
+        if (player != null || target != null)
+            levelCreator.writeLevel(saveFileName, platforms, walls, player, intervalEnemies, onSightEnemies, ammoDepots, target, ammo);
+	    else{
+	        System.out.println("ERROR: cannot create JSON without a player or goal in the map");
+        }
+    }
 
 	private void loadLevel(String levelFile) {
-		levelLoader.loadLevel(levelFile);
+        levelLoader.loadLevel(levelFile);
+        while (!levelLoader.getAddQueue().isEmpty()) {
+            Obstacle obj =levelLoader.getAddQueue().poll() ;
+            obj.setDrawScale(scaleVector);
+            objects.add(obj);
+        }
 	}
-
-    private void applySettings() {
-        setCellDim((int) Sidebar.getValue("Grid Size"));
-    }
 }
