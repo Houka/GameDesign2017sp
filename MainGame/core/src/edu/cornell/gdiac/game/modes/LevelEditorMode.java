@@ -15,26 +15,24 @@ package edu.cornell.gdiac.game.modes;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import edu.cornell.gdiac.game.GameCanvas;
-import edu.cornell.gdiac.game.input.SelectionInputController;
+import edu.cornell.gdiac.game.entity.models.*;
+import edu.cornell.gdiac.game.input.EditorInputController;
 import edu.cornell.gdiac.game.levelLoading.LevelCreator;
 import edu.cornell.gdiac.game.levelLoading.LevelLoader;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
+import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.FileHandler;
 
 /**
  * Class that provides a Level Editor screen for the state of the game.
@@ -42,13 +40,14 @@ import java.util.logging.FileHandler;
  * The level editor screen allows players to create/edit their own levels
  */
 public class LevelEditorMode extends Mode {
-	// Textures necessary to support the loading screen
+	/** Textures necessary to support the loading screen */
 	private static final String BACKGROUND_FILE = "ui/bg/level_editor.png";
 	private static final String PLAYER_FILE = "sprites/char/char_still.png";
 	private static final String ENEMY_FILE = "sprites/enemy/enemy_still.png";
 	private static final String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
 	private static final String PLATFORM_FILE = "sprites/fixtures/solid.png";
 	private static final String CAMERA_FILE = "sprites/security_camera.png";
+    private static final int DEFAULT_GRID = 50;
 
 	/** Dimensions of the game world in Box2d units	 */
 	private static final float DEFAULT_WIDTH = 32.0f;
@@ -72,7 +71,17 @@ public class LevelEditorMode extends Mode {
 	protected Texture camera;
 
 	/** Input controller */
-	private SelectionInputController input;
+	private EditorInputController input;
+
+    /** Texture under mouse when object clicked in right bar */
+    private TextureRegion underMouse;
+    /** If a texture on the right bar has been clicked */
+    private boolean textureClicked;
+
+    /** array of textures */
+    private TextureRegion[] regions;
+    private int[] startHeights;
+    private int gridCell = DEFAULT_GRID;
 
 	/** Level loader */
 	private LevelLoader levelLoader;
@@ -120,16 +129,32 @@ public class LevelEditorMode extends Mode {
 		levelLoader = new LevelLoader(scaleVector);
 		levelCreator = new LevelCreator();
 
-		input = SelectionInputController.getInstance();
+		input = EditorInputController.getInstance();
+        Gdx.input.setInputProcessor(input);
+        textureClicked = false;
+        regions = new TextureRegion[5];
 
 		// get initial json files
 		jsonFiles = new PooledList<String>();
-		jsonFiles.addAll(getAllJsonFiles());
 	}
 
 	// BEGIN: Setters and Getters
-	private ArrayList<String> getAllJsonFiles(){
-		return getJsonFiles(new ArrayList<String>(), Gdx.files.local(JSON_DIRECTORY).file());
+    private int getCellDim() {
+        return gridCell;
+    }
+
+    private void setCellDim(int dim) {
+        gridCell = dim;
+    }
+
+    /**
+	 * Gets a list of all files in the JSON directory in the assets folder.
+	 * @return list of all current files in the JSON directory
+	 */
+	private PooledList<String> getAllJsonFiles(){
+		jsonFiles.clear();
+		jsonFiles.addAll(getJsonFiles(new ArrayList<String>(), Gdx.files.local(JSON_DIRECTORY).file()));
+		return jsonFiles;
 	}
 
 	private ArrayList<String> getJsonFiles(ArrayList<String> list, File directory)
@@ -145,6 +170,17 @@ public class LevelEditorMode extends Mode {
 
 		return list;
 	}
+
+    private Vector2 getCell(Vector2 pos) {
+        int tileX = (int) pos.x/gridCell;
+        int tileY = (int) pos.y/gridCell;
+        Vector2 newPos = pos;
+
+        newPos.x = tileX * gridCell + (gridCell/2);
+        newPos.y = tileY * gridCell;
+
+        return newPos;
+    }
 	// END: Setters and Getters
 
 	@Override
@@ -164,9 +200,76 @@ public class LevelEditorMode extends Mode {
 	protected void update(float delta) {
 		input.readInput();
 
+		updateMouseInput();
+
 		while (!levelLoader.getAddQueue().isEmpty())
 			objects.add(levelLoader.getAddQueue().poll());
 	}
+
+	private void updateMouseInput(){
+        int mouseX = Gdx.input.getX();
+        int mouseY = Gdx.input.getY();
+
+        if(input.didTouch() && mouseX >= canvas.getWidth()-125) {
+            for(int i=0; i<regions.length; i++) {
+                Rectangle textureBounds=new Rectangle
+                        (canvas.getWidth()-125, canvas.getHeight() - startHeights[i] - (regions[i].getRegionHeight()),
+                                regions[i].getRegionWidth(),regions[i].getRegionHeight());
+
+                if(textureBounds.contains(mouseX, mouseY)) {
+                    underMouse = regions[i];
+                    textureClicked = true;
+
+                }
+            }
+        }
+        if(!input.didTouch()) {
+            textureClicked = false;
+        }
+        if(!input.didTouch() &&  mouseX <= canvas.getWidth()-200 && underMouse != null) {
+            Vector2 newPos = getCell(input.getLastPos());
+            newPos.y = canvas.getHeight()-newPos.y;
+            if(underMouse.getTexture().equals(player)) {
+                PlayerModel newP = new PlayerModel(newPos.x,newPos.y-(gridCell/2),
+                        underMouse.getRegionWidth(), underMouse.getRegionHeight());
+                newP.setDrawScale(1,1);
+                newP.setTexture(underMouse);
+                objects.add(newP);
+            }
+            else if(underMouse.getTexture().equals(enemy)) {
+                int interval = 3;
+                EnemyModel newE = new EnemyModel(newPos.x+(gridCell/2), newPos.y-(gridCell/2),
+                        underMouse.getRegionWidth(), underMouse.getRegionHeight(), true, true, interval);
+                newE.setDrawScale(1,1);
+                newE.setTexture(underMouse);
+                objects.add(newE);
+            }
+            else if(underMouse.getTexture().equals(ammoDepot)) {
+                int ammoAmount = 3;
+                AmmoDepotModel newA = new AmmoDepotModel(newPos.x, newPos.y,
+                        underMouse.getRegionWidth(), underMouse.getRegionHeight(), ammoAmount);
+                newA.setDrawScale(1,1);
+                newA.setTexture(underMouse);
+                objects.add(newA);
+            }
+            else if(underMouse.getTexture().equals(camera)) {
+                GoalModel newG = new GoalModel(newPos.x, newPos.y,
+                        underMouse.getRegionWidth(), underMouse.getRegionHeight());
+                newG.setDrawScale(1,1);
+                newG.setTexture(underMouse);
+                objects.add(newG);
+            }
+            else if(underMouse.getTexture().equals(platform)) {
+                float[] arr = {newPos.x-(gridCell/2), newPos.y+(gridCell/2), newPos.x+(gridCell/2), newPos.y+(gridCell/2),
+                        newPos.x+(gridCell/2), newPos.y, newPos.x-(gridCell/2), newPos.y};
+                PlatformModel newP = new PlatformModel(arr);
+                newP.setDrawScale(1,1);
+                newP.setTexture(underMouse);
+                objects.add(newP);
+            }
+            underMouse = null;
+        }
+    }
 
 	@Override
 	protected void draw() {
@@ -197,13 +300,19 @@ public class LevelEditorMode extends Mode {
 		regions[4].setRegion(0, 0,  camera.getWidth(), camera.getHeight());
 
 		// Draw the sidebar textures into the right sidebar
-		int startHeight= 10;
-		for (TextureRegion region:
-				regions) {
-			canvas.draw(region, canvas.getWidth()-115, startHeight);
-			startHeight += region.getRegionHeight() + 50;
-		}
+        int startHeight= 10;
+        startHeights = new int[5];
+        for (int i=0; i<regions.length; i++) {
+            canvas.draw(regions[i], canvas.getWidth()-125, startHeight);
+            startHeights[i] = startHeight;
+            startHeight += regions[i].getRegionHeight() + 20;
+        }
+        if(textureClicked) {
+            canvas.draw(underMouse, Gdx.input.getX()-(underMouse.getRegionWidth()/2),
+                    canvas.getHeight()-Gdx.input.getY()-(underMouse.getRegionHeight()/2));
+        }
 
+        drawGrid(gridCell);
 		drawMenuButtons(canvas);
 	}
 
@@ -219,12 +328,34 @@ public class LevelEditorMode extends Mode {
 				canvas.getHeight() - 20);
 	}
 
+    /**
+     * Draws the snapping grid
+     * @param gridCell the length of a side of a grid
+     */
+    private void drawGrid(int gridCell) {
+        for(int i=0; i<canvas.getWidth()-200; i+=gridCell) {
+            canvas.draw(platform,Color.WHITE,i,0,1, canvas.getHeight());
+        }
+        for(int i=0; i<canvas.getHeight(); i+=gridCell) {
+            canvas.draw(platform, Color.WHITE, 0, i, canvas.getWidth() - 200, 1);
+        }
+    }
+
+    @Override
+    protected void drawDebug() {
+        for (Obstacle obj : objects) {
+            obj.drawDebug(canvas);
+        }
+    }
+
 	@Override
 	public void preLoadContent(AssetManager manager) {
 		manager.load(BACKGROUND_FILE,Texture.class);
 		manager.load(ENEMY_FILE,Texture.class);
 		manager.load(PLAYER_FILE,Texture.class);
+		manager.load(PLATFORM_FILE,Texture.class);
 		manager.load(AMMO_DEPOT_FILE,Texture.class);
+		manager.load(CAMERA_FILE,Texture.class);
 		levelLoader.preLoadContent(manager);
 	}
 
@@ -243,6 +374,12 @@ public class LevelEditorMode extends Mode {
 		}
 		else
 			displayFont = null;
+
+        regions[0] = AssetRetriever.createTextureRegion(manager, PLAYER_FILE, false);
+        regions[1] = AssetRetriever.createTextureRegion(manager, ENEMY_FILE, false);
+        regions[2] = AssetRetriever.createTextureRegion(manager, PLATFORM_FILE, false);
+        regions[3] = AssetRetriever.createTextureRegion(manager, AMMO_DEPOT_FILE, false);
+        regions[4] = AssetRetriever.createTextureRegion(manager, CAMERA_FILE, false);
 	}
 
 	@Override
@@ -274,4 +411,8 @@ public class LevelEditorMode extends Mode {
 	private void loadLevel(String levelFile) {
 		levelLoader.loadLevel(levelFile);
 	}
+
+    private void applySettings() {
+        setCellDim((int) Sidebar.getValue("Grid Size"));
+    }
 }
