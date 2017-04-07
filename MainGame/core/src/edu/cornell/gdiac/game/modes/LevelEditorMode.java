@@ -124,6 +124,7 @@ public class LevelEditorMode extends Mode {
 		keyInput = SelectionInputController.getInstance();
         textureClicked = false;
         regions = new TextureRegion[5];
+        startHeights = new int[5];
 
         grid = new PolygonShape();
         grid.setAsBox(gridCell/2, gridCell/2);
@@ -241,7 +242,7 @@ public class LevelEditorMode extends Mode {
             System.out.println("TEST: key right");
 
         if(keyInput.didSelect())
-            loadLevel();
+            clearLevel();
     }
 
 	private void updateMouseInput(){
@@ -318,15 +319,13 @@ public class LevelEditorMode extends Mode {
 			obj.draw(canvas);
 		}
 
-		// Draw the top and right sidebars for the editor
+		// Draw the right sidebars for the editor
 		TextureRegion editorRegion = new TextureRegion(editor);
 		editorRegion.setRegion(0, 0,  canvas.getWidth(), canvas.getHeight());
 		canvas.draw(editorRegion, Color.WHITE, canvas.getWidth()-180, 0, 200, canvas.getHeight());
-		canvas.draw(editorRegion, Color.WHITE, 0, canvas.getHeight()-100, canvas.getWidth()-180, canvas.getHeight());
 
 		// Draw the sidebar textures into the right sidebar
         int startHeight= 10;
-        startHeights = new int[5];
         for (int i=0; i<regions.length; i++) {
             canvas.draw(regions[i], canvas.getWidth()-125, startHeight);
             startHeights[i] = startHeight;
@@ -336,28 +335,11 @@ public class LevelEditorMode extends Mode {
             canvas.draw(underMouse, Gdx.input.getX()-(underMouse.getRegionWidth()/2),
                     canvas.getHeight()-Gdx.input.getY()-(underMouse.getRegionHeight()/2));
         }
-
-		drawMenuButtons(canvas);
-	}
-
-	/**
-	 *  Draws the save/load/cancel buttons into the top sidebar
-	 */
-	private void drawMenuButtons(GameCanvas canvas){
-		canvas.drawText("SAVE", displayFont, 10,
-				canvas.getHeight() - 20);
-		canvas.drawText("LOAD", displayFont, 250,
-				canvas.getHeight() - 20);
-		canvas.drawText("CLEAR", displayFont, 500,
-				canvas.getHeight() - 20);
 	}
 
     @Override
     protected void drawDebug() {
         drawGrid(gridCell);
-        for (Obstacle obj : objects) {
-            obj.drawDebug(canvas);
-        }
     }
 
     /**
@@ -370,7 +352,10 @@ public class LevelEditorMode extends Mode {
                 canvas.drawPhysics(grid, Color.WHITE, i, j);
             }
         }
-        canvas.drawPhysics(grid, Color.RED, mousePos.x, mousePos.y);
+
+        // draw hover over cell
+        if (mousePos.x < canvas.getWidth()-200)
+            canvas.drawPhysics(grid, Color.RED, mousePos.x, mousePos.y);
     }
 
 	@Override
