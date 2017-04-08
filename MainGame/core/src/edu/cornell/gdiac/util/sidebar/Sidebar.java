@@ -177,7 +177,7 @@ public class Sidebar {
      *@return           Returns key value if exists, else 0.0 
      **/
     public static float getValue(String key) {
-        if(!theMap.containsKey(key))
+        if(theMap == null || !theMap.containsKey(key))
             return 0.0f;
         return theMap.get(key);
     }

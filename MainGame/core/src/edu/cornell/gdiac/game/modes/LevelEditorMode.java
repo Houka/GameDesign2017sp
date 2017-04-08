@@ -100,6 +100,12 @@ public class LevelEditorMode extends Mode {
 	/** All the objects in the world.	 */
 	private PooledList<Obstacle> objects = new PooledList<Obstacle>();
 
+	/** The y starting offset of the sidebar elements */
+    private int startHeight= 5;
+
+    /** Level variables */
+    int ammo = 4;
+
 	/**
 	 * Creates a new game world
 	 * <p>
@@ -120,11 +126,10 @@ public class LevelEditorMode extends Mode {
 		levelCreator = new LevelCreator();
 
 		mouseInput = EditorInputController.getInstance();
-		Gdx.input.setInputProcessor(mouseInput);
 		keyInput = SelectionInputController.getInstance();
         textureClicked = false;
-        regions = new TextureRegion[5];
-        startHeights = new int[5];
+        regions = new TextureRegion[6];
+        startHeights = new int[6];
 
         grid = new PolygonShape();
         grid.setAsBox(gridCell/2, gridCell/2);
@@ -181,13 +186,7 @@ public class LevelEditorMode extends Mode {
     }
 
     private String getLoadFileName(){
-        if (dummyFrame == null) {
-            dummyFrame = new JFrame();
-        }
-
-        dummyFrame.setVisible(true);
-        dummyFrame.setLocationRelativeTo(null);
-        dummyFrame.setAlwaysOnTop(true);
+        setUpPopUpFrame();
         String response = JOptionPane.showInputDialog(dummyFrame,
                 "What's the relative file path of the file you want to load? \n\n List of all level files:\n"+getAllJsonFiles());
         dummyFrame.dispose();
@@ -195,6 +194,20 @@ public class LevelEditorMode extends Mode {
     }
 
     private String getSaveFileName(){
+        setUpPopUpFrame();
+        String response = JOptionPane.showInputDialog(dummyFrame,"What do you want to name the save file? (ex: test.json)");
+        dummyFrame.dispose();
+        return response;
+    }
+
+    private String getNewAmmo(){
+        setUpPopUpFrame();
+        String response = JOptionPane.showInputDialog(dummyFrame,"What do you want to change the starting ammo to?");
+        dummyFrame.dispose();
+        return response;
+    }
+
+    private void setUpPopUpFrame(){
         if (dummyFrame == null) {
             dummyFrame = new JFrame();
         }
@@ -202,9 +215,6 @@ public class LevelEditorMode extends Mode {
         dummyFrame.setVisible(true);
         dummyFrame.setLocationRelativeTo(null);
         dummyFrame.setAlwaysOnTop(true);
-        String response = JOptionPane.showInputDialog(dummyFrame,"What do you want to name the save file? (ex: test.json)");
-        dummyFrame.dispose();
-        return response;
     }
 	// END: Setters and Getters
 
@@ -229,6 +239,16 @@ public class LevelEditorMode extends Mode {
 
         updateKeyInput();
         updateMouseInput();
+
+        // save, clear, or load the level
+        if(mouseInput.didReset())
+            clearLevel();
+        else if (mouseInput.didLoad())
+            loadLevel();
+        else if (mouseInput.didSave())
+            saveLevel();
+        else if (mouseInput.didAmmoChange())
+            changeStartingAmmo(getNewAmmo());
 	}
 
 	private void updateKeyInput(){
@@ -283,6 +303,14 @@ public class LevelEditorMode extends Mode {
                 newE.setTexture(underMouse);
                 objects.add(newE);
             }
+            else if(underMouse.equals(regions[5])) {
+                int interval = 200;
+                EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
+                        underMouse.getRegionWidth(), underMouse.getRegionHeight(), true, false, interval);
+                newE.setDrawScale(scaleVector);
+                newE.setTexture(underMouse);
+                objects.add(newE);
+            }
             else if(underMouse.equals(regions[3])) {
                 int ammoAmount = 3;
                 AmmoDepotModel newA = new AmmoDepotModel(newPos.x, newPos.y,
@@ -299,14 +327,23 @@ public class LevelEditorMode extends Mode {
                 objects.add(newG);
             }
             else if(underMouse.equals(regions[2])) {
-                float[] arr = {newPos.x-1f, newPos.y+1f, newPos.x+1f, newPos.y+1f,
-                        newPos.x+1f, newPos.y-1f, newPos.x-1f, newPos.y-1f};
+                float offset = .75f;
+                float[] arr = {newPos.x-offset, newPos.y+offset, newPos.x+offset, newPos.y+offset,
+                        newPos.x+offset, newPos.y-offset, newPos.x-offset, newPos.y-offset};
                 PlatformModel newP = new PlatformModel(arr);
                 newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
                 objects.add(newP);
             }
             underMouse = null;
+        }
+
+        // scrolling the sidebar
+        if(mouseX >= canvas.getWidth() - 170){
+            if (mouseInput.didScrolledUp())
+                startHeight+=10;
+            else if(mouseInput.didScrolledDown())
+                startHeight-=10;
         }
     }
 
@@ -322,10 +359,10 @@ public class LevelEditorMode extends Mode {
 		// Draw the right sidebars for the editor
 		TextureRegion editorRegion = new TextureRegion(editor);
 		editorRegion.setRegion(0, 0,  canvas.getWidth(), canvas.getHeight());
-		canvas.draw(editorRegion, Color.WHITE, canvas.getWidth()-180, 0, 200, canvas.getHeight());
+		canvas.draw(editorRegion, Color.WHITE, canvas.getWidth()-170, 0, 170, canvas.getHeight());
 
 		// Draw the sidebar textures into the right sidebar
-        int startHeight= 10;
+        int startHeight = this.startHeight;
         for (int i=0; i<regions.length; i++) {
             canvas.draw(regions[i], canvas.getWidth()-125, startHeight);
             startHeights[i] = startHeight;
@@ -347,14 +384,15 @@ public class LevelEditorMode extends Mode {
      * @param gridCell the length of a side of a grid
      */
     private void drawGrid(int gridCell) {
-        for(int i=gridCell/2; i<canvas.getWidth()-200; i+=gridCell) {
+        int sidebarOffset = 150;
+        for(int i=gridCell/2; i<canvas.getWidth()-sidebarOffset; i+=gridCell) {
             for (int j =0; j < canvas.getHeight(); j += gridCell) {
                 canvas.drawPhysics(grid, Color.WHITE, i, j);
             }
         }
 
         // draw hover over cell
-        if (mousePos.x < canvas.getWidth()-200)
+        if (mousePos.x < canvas.getWidth()-sidebarOffset)
             canvas.drawPhysics(grid, Color.RED, mousePos.x, mousePos.y);
     }
 
@@ -383,6 +421,7 @@ public class LevelEditorMode extends Mode {
         regions[2] = AssetRetriever.createTextureRegion(manager, PLATFORM_FILE, false);
         regions[3] = AssetRetriever.createTextureRegion(manager, AMMO_DEPOT_FILE, false);
         regions[4] = AssetRetriever.createTextureRegion(manager, CAMERA_FILE, false);
+        regions[5] = AssetRetriever.createTextureRegion(manager, ENEMY_FILE, false);
 	}
 
 	@Override
@@ -416,7 +455,6 @@ public class LevelEditorMode extends Mode {
         ArrayList<EnemyModel> onSightEnemies = new ArrayList<EnemyModel>();
         ArrayList<AmmoDepotModel> ammoDepots = new ArrayList<AmmoDepotModel>();
         GoalModel target = null;
-        int ammo = 4; // testing code TODO: replace with variable
 
         for (Obstacle obj: objects){
             if (obj instanceof PlatformModel)
@@ -435,7 +473,7 @@ public class LevelEditorMode extends Mode {
                 target = (GoalModel) obj;
         }
 
-        if (player != null || target != null)
+        if (player != null && target != null)
             levelCreator.writeLevel(saveFileName, platforms, walls, player, intervalEnemies, onSightEnemies, ammoDepots, target, ammo);
 	    else{
 	        System.out.println("ERROR: cannot create JSON without a player or goal in the map or file name is invalid");
@@ -458,5 +496,17 @@ public class LevelEditorMode extends Mode {
 
 	private void clearLevel(){
         objects.clear();
+    }
+
+    private void changeGridSize(){
+        // TODO: unimplemented
+    }
+
+    private void changeStartingAmmo(String ammo){
+        try{
+            this.ammo = Integer.valueOf(ammo);
+        }catch (Exception e){
+            System.out.println("ERROR: invalid ammo amount: "+ammo);
+        }
     }
 }

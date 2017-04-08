@@ -38,8 +38,6 @@ public class GameModeManager implements Disposable, AssetUser{
         modeExitMapping = new HashMap<String, String>();
         initModes();
 
-        // TODO: remove, for tech demo and testing values
-        Sidebar.defaultBootup();
     }
 
     // BEGIN: setters and getters
