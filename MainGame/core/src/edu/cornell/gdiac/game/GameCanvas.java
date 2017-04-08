@@ -972,7 +972,7 @@ public class GameCanvas {
     	debugRender.setProjectionMatrix(camera.combined);
     	debugRender.begin(ShapeRenderer.ShapeType.Filled);
     	debugRender.setColor(Color.RED);
-    	debugRender.circle(0, 0, 10);
+    	debugRender.circle(0, 0, 2);
     	debugRender.end();
     	
     	debugRender.begin(ShapeRenderer.ShapeType.Line);
@@ -1032,10 +1032,10 @@ public class GameCanvas {
 			Gdx.app.error("GameCanvas", "Cannot draw without active beginDebug()", new IllegalStateException());
 			return;
 		}
-		
+
 		local.setToTranslation(x,y);
 		local.rotateRad(angle);
-		
+
     	float x0, y0, x1, y1;
     	debugRender.setColor(color);
     	for(int ii = 0; ii < shape.getVertexCount()-1; ii++) {

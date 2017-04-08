@@ -14,6 +14,7 @@ import edu.cornell.gdiac.game.GameModeManager;
 import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
+import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 /**
  * Class that provides a menu screen for the state of the game.
@@ -22,7 +23,7 @@ public class MenuMode extends Mode {
 	/** Background texture */
 	private static final String BACKGROUND_FILE = "ui/bg/menu.png";
 	/** Selection menu items y offset from the center*/
-	private static final int MENU_ITEM_START_OFFSET_Y = 100;
+	private static final int MENU_ITEM_START_OFFSET_Y = 150;
 	/** Selection menu items y offset between each menu item*/
 	private static final int MENU_ITEM_GAP_OFFSET_Y = 20;
 	/** Retro font for displaying messages */
@@ -34,7 +35,7 @@ public class MenuMode extends Mode {
 
 	/** Player modes that are selectable from menu mode */
 	private String[] modes = {GameModeManager.LEVEL_SELECTION, GameModeManager.LEVEL_EDITOR};
-	private String[] modeNames = {"Select Level","Level Editor", "Quit"};
+	private String[] modeNames = {"Select Level","Level Editor", "Settings", "Quit"};
 	private int selected = 0;
 
 	/** Input controller for menu selection */
@@ -83,7 +84,11 @@ public class MenuMode extends Mode {
 		else if (input.didSelect()) {
 			if (selected == modeNames.length-1)
 				setExit(true);
-			setComplete(true);
+			else if (selected == modeNames.length-2)
+				// TODO: remove, for tech demo and testing values
+				Sidebar.defaultBootup();
+			else
+				setComplete(true);
 		}
 	}
 
