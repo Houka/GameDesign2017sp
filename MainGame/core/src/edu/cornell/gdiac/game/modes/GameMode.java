@@ -111,8 +111,8 @@ public class GameMode extends Mode implements Settable {
 	 * @param canvas  The GameCanvas to draw the textures to
 	 * @param manager The AssetManager to load in the background
 	 */
-	public GameMode(GameCanvas canvas, AssetManager manager) {
-		this(canvas, manager, new Rectangle(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT),
+	public GameMode(String name, GameCanvas canvas, AssetManager manager) {
+		this(name, canvas, manager, new Rectangle(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT),
 				new Vector2(0, DEFAULT_GRAVITY));
 	}
 
@@ -129,8 +129,8 @@ public class GameMode extends Mode implements Settable {
 	 * @param height  The height in Box2d coordinates
 	 * @param gravity The downward gravity
 	 */
-	public GameMode(GameCanvas canvas, AssetManager manager, float width, float height, float gravity) {
-		this(canvas, manager, new Rectangle(0, 0, width, height), new Vector2(0, gravity));
+	public GameMode(String name, GameCanvas canvas, AssetManager manager, float width, float height, float gravity) {
+		this(name, canvas, manager, new Rectangle(0, 0, width, height), new Vector2(0, gravity));
 	}
 
 	/**
@@ -145,9 +145,8 @@ public class GameMode extends Mode implements Settable {
 	 * @param bounds  The game bounds in Box2d coordinates
 	 * @param gravity The gravitational force on this Box2d world
 	 */
-	public GameMode(GameCanvas canvas, AssetManager manager, Rectangle bounds, Vector2 gravity) {
-		super(canvas, manager);
-		onExit = ScreenListener.EXIT_MENU;
+	public GameMode(String name, GameCanvas canvas, AssetManager manager, Rectangle bounds, Vector2 gravity) {
+		super(name, canvas, manager);
 		scaleVector = new Vector2(canvas.getWidth() / bounds.getWidth(), canvas.getHeight() / bounds.getHeight());
 
 		world = new World(gravity, false);
@@ -168,6 +167,13 @@ public class GameMode extends Mode implements Settable {
 	}
 
 	// BEGIN: Setters and Getters
+	/**
+	 * Sets the level of this game mode
+	 */
+	public void setLevel(String levelFile) {
+		this.levelFile = levelFile;
+	}
+
 	/**
 	 * Trys to set the player in the world if it exists
      *
@@ -214,7 +220,7 @@ public class GameMode extends Mode implements Settable {
 		entityControllers.clear();
 
 		if (!levelFile.isEmpty())
-			loadLevel(levelFile);
+			loadLevel();
 
 		canvas.getCamera().setRumble(50,10,2);
 		canvas.setDefaultCamera();
@@ -281,6 +287,7 @@ public class GameMode extends Mode implements Settable {
 		levelLoader.loadContent(manager);
 		if (manager.isLoaded(FONT_FILE))
 			hud.setFont(manager.get(FONT_FILE, BitmapFont.class));
+		loadLevel();
 	}
 
 	@Override
@@ -307,10 +314,8 @@ public class GameMode extends Mode implements Settable {
      * add to the game world and sets all starting attributes to their initial starting
      * number.
      *
-     * @param levelFile the relative string path to the json file containing level info
 	 */
-	public void loadLevel(String levelFile) {
-		this.levelFile = levelFile;
+	private void loadLevel() {
 		levelLoader.loadLevel(levelFile);
 		bounds = levelLoader.getBounds();
 		hud.setStartingAmmo(levelLoader.getStartingAmmo());

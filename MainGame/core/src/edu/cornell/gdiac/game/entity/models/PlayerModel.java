@@ -4,8 +4,11 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
+import edu.cornell.gdiac.game.interfaces.Animatable;
 import edu.cornell.gdiac.game.interfaces.Settable;
 import edu.cornell.gdiac.game.interfaces.Shooter;
+import edu.cornell.gdiac.util.Animation;
 import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
 import edu.cornell.gdiac.util.sidebar.Sidebar;
 
@@ -15,7 +18,7 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
  * Note that this class returns to static loading.  That is because there are
  * no other subclasses that we might loop through.
  */
-public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
+public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, Animatable {
     // Physics constants
     /** The density of the character */
     private static final float PLAYER_DENSITY = 1.0f;
@@ -54,7 +57,18 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
     private int jumpCooldown;
     /** The current impulse of the jump */
     private float jumpForce;
-    /** Whether we are actively jumping */
+    /** Whether we are getting knocked back*/
+    private boolean isKnockedBack;
+    /** Direction of said knockback**/
+    private Vector2 knockbackDirection;
+    /** Force of said knockback**/
+    private float knockbackForce;
+    private float knockbackFriction = .9f;
+    private float knockbackDuration = 60;
+    private float knockbackStunDuration = 5;
+    private float defaultKnockbackDuration = 60;
+
+    /** Whether we getting knockedBack jumping */
     private boolean isJumping;
     /** How long until we can shoot again */
     private int shootCooldown;
@@ -70,8 +84,10 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
 
     /** Cache for internal force calculations */
     private Vector2 forceCache = new Vector2();
-
     private Vector2 zeroVector = new Vector2(0,0);
+
+    /** The animation associated with this entity */
+    private Animation animation;
 
     /**
      * Creates a new player avatar at the origin.
@@ -100,6 +116,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
      * @param height	The object width in physics units
      */
     public PlayerModel(float x, float y, float width, float height) {
+
         super(x,y,width*PLAYER_HSHRINK,height*PLAYER_VSHRINK);
         setDensity(PLAYER_DENSITY);
         setFriction(PLAYER_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
@@ -110,6 +127,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
         isGrounded = false;
         isShooting = false;
         isJumping = false;
+        isKnockedBack = false;
         canDoubleJump = false;
         isFacingRight = true;
 
@@ -117,9 +135,22 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
         jumpCooldown = 0;
         jumpForce = PLAYER_JUMP;
         maxSpeed = PLAYER_MAXSPEED;
+
+        knockbackForce = 0;
+        knockbackDirection = new Vector2(0,0);
     }
 
     // BEGIN: Setters and Getters
+    @Override
+    public void setAnimation(Animation animation){
+        this.animation = animation;
+    }
+
+    @Override
+    public Animation getAnimation(){
+        return animation;
+    }
+
     /**
      * Returns left/right movement of this character.
      *
@@ -166,7 +197,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
     public boolean isJumping() {
         return isJumping && isGrounded && jumpCooldown <= 0;
     }
-
+  
     /**
      * Returns true if the player is actively double jumping.
      *
@@ -174,6 +205,29 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
      */
     public boolean isDoubleJumping(){ 
         return isJumping && !isGrounded && canDoubleJump; 
+    }
+
+    public boolean isKnockedBack() {
+        return isKnockedBack && knockbackDuration > defaultKnockbackDuration-Math.max(defaultKnockbackDuration,knockbackStunDuration);
+    }
+
+    public void setKnockedBack(float dir){
+
+
+        if(dir==0) {
+            isKnockedBack=false;
+            return;
+        }
+
+        if(isKnockedBack)
+            return;
+
+       isKnockedBack=true;
+        knockbackDuration = defaultKnockbackDuration;
+        if(dir>0)
+            knockbackDirection.set(1,0);
+        else
+            knockbackDirection.set(-1,0);
     }
 
     /**
@@ -310,32 +364,52 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
         if (!isActive()) {
             return;
         }
+      
+        boolean stunned = false;
 
+        if(isKnockedBack()) {
+            stunned = true;
+
+            if(knockbackDuration>0) {
+                forceCache.set(knockbackDirection.x * knockbackForce, knockbackDirection.y * knockbackForce); //TODO: use trig if we ever want y knockback
+                body.applyLinearImpulse(forceCache, getPosition(), true);
+            }
+
+            if (knockbackDuration < 0) {
+                setVX(getVX() * knockbackFriction);
+              //  if (Math.abs(getVX()) < .01)
+                    //stunned = false;
+
+            }
+        }
+      
         // TODO: find better solution for riding a bullet
         if (ridingBullet!=null) {
-            // Don't want to be moving. Damp out player motion
-            if (getMovement() == 0f ) {
-                setVX(ridingBullet.getVX());
-            }else{
-                setVX(Math.signum(getMovement())*getMaxSpeed()+ridingBullet.getVX());
+            if(!stunned){
+              // Don't want to be moving. Damp out player motion
+              if (getMovement() == 0f ) {
+                  setVX(ridingBullet.getVX());
+              }else{
+                  setVX(Math.signum(getMovement())*getMaxSpeed()+ridingBullet.getVX());
+              }
             }
         }else{
+          if(!stunned){
             if (getMovement() == 0f ) {
                 setVX(0);
             }else{
                 setVX(Math.signum(getMovement())*getMaxSpeed());
             }
-
+          }
         }
 
         // Jump!
-        if (isJumping()) {
+        if (isJumping() && !stunned) {
             forceCache.set(0, jumpForce);
             body.applyLinearImpulse(forceCache,getPosition(),true);
             setCanDoubleJump(true);
         }
-
-        if (isDoubleJumping()) {
+        if (isDoubleJumping() && !stunned) {
             //dividing by sqrt 2 makes it such that from 0 velocity it goes half the height of a regular jump
             forceCache.set(0, jumpForce/((float)Math.sqrt(2)));
             //set velocity to 0 so that the jump height is independent of how the model is moving
@@ -348,6 +422,10 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
     @Override
     public void applySettings() {
         jumpForce = Sidebar.getValue("Jump Height");
+        knockbackForce = Sidebar.getValue("Knockback Force");
+        defaultKnockbackDuration = Sidebar.getValue("Knockback Duration");
+        knockbackStunDuration = Sidebar.getValue("Knockback Stun Duration");
+        knockbackFriction = 1-Sidebar.getValue("Knockback Friction");
         maxSpeed = Sidebar.getValue("Player Speed");
     }
 
@@ -371,7 +449,15 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
         } else {
             shootCooldown = Math.max(0, shootCooldown - 1);
         }
+
+        if (isKnockedBack()) {
+            knockbackDuration = knockbackDuration - 1;
+        } else {
+            isKnockedBack=false;
+        }
+
         super.update(dt);
+        animation.update(dt);
     }
 
     /**
@@ -381,7 +467,11 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
      */
     public void draw(GameCanvas canvas) {
         float effect = isFacingRight ? 1.0f : -1.0f;
-        canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+
+        if (animation == null)
+            canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+        else
+            canvas.draw(animation.getTextureRegion(),Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
     }
 
     /**
@@ -393,6 +483,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable {
      */
     public void drawDebug(GameCanvas canvas) {
         super.drawDebug(canvas);
-        canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+        if (sensorShape != null)
+            canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
     }
 }

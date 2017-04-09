@@ -16,6 +16,7 @@ public class WallModel extends PolygonObstacle {
     private static final float  BASIC_FRICTION = 0.4f;
     /** "Bounciness" of the walls*/
     private static final float  BASIC_RESTITUTION = 0.1f;
+    private float[] pointArray;
 
     /**
      * Creates a new wall.
@@ -28,10 +29,15 @@ public class WallModel extends PolygonObstacle {
      */
     public WallModel(float[] points) {
         super(points);
+        pointArray = points;
         setBodyType(BodyDef.BodyType.StaticBody);
         setDensity(BASIC_DENSITY);
         setFriction(BASIC_FRICTION);
         setRestitution(BASIC_RESTITUTION);
         setName("wall");
+    }
+
+    public float[] getPoints(){
+        return pointArray;
     }
 }

@@ -96,9 +96,8 @@ public class LoadingMode extends Mode {
 	 * @param manager The AssetManager to load in the background
 	 * @param millis The loading budget in milliseconds
 	 */
-	public LoadingMode(GameCanvas canvas, AssetManager manager, int millis) {
-		super(canvas, manager);
-		onExit = ScreenListener.EXIT_MENU;
+	public LoadingMode(String name, GameCanvas canvas, AssetManager manager, int millis) {
+		super(name, canvas, manager);
 		budget = millis;
 
 		// Load the next two images immediately.

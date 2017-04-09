@@ -90,10 +90,10 @@ public class SelectionInputController {
      */
     private void readKeyboard(boolean secondary) {
         // Give priority to gamepad results
-        upPressed  = (secondary && upPressed) || (Gdx.input.isKeyPressed(Input.Keys.UP));
-        downPressed  = (secondary && downPressed) || (Gdx.input.isKeyPressed(Input.Keys.DOWN));
-        leftPressed  = (secondary && leftPressed) || (Gdx.input.isKeyPressed(Input.Keys.LEFT));
-        rightPressed  = (secondary && rightPressed) || (Gdx.input.isKeyPressed(Input.Keys.RIGHT));
+        upPressed  = (secondary && upPressed) || (Gdx.input.isKeyPressed(Input.Keys.UP))|| (Gdx.input.isKeyPressed(Input.Keys.W));
+        downPressed  = (secondary && downPressed) || (Gdx.input.isKeyPressed(Input.Keys.DOWN))|| (Gdx.input.isKeyPressed(Input.Keys.S));
+        leftPressed  = (secondary && leftPressed) || (Gdx.input.isKeyPressed(Input.Keys.LEFT))|| (Gdx.input.isKeyPressed(Input.Keys.A));
+        rightPressed  = (secondary && rightPressed) || (Gdx.input.isKeyPressed(Input.Keys.RIGHT))|| (Gdx.input.isKeyPressed(Input.Keys.D));
         selectPressed  = (secondary && selectPressed) || (Gdx.input.isKeyPressed(Input.Keys.ENTER));
     }
 }

@@ -32,6 +32,23 @@ public class PlayerController extends EntityController {
         player.setJumping(input.didJump());
         player.setShooting(input.didShoot());
         player.applyForce();
+
+        updateAnimation();
     }
-    
+
+    private void updateAnimation(){
+        if (player.isShooting())
+            player.getAnimation().playOnce("shoot");
+        else if (!player.isGrounded() && player.getVY() > 0) {
+            if (player.isDoubleJumping())
+                player.getAnimation().setPlayingAnimation("still");
+            player.getAnimation().playOnce("rising");
+        }
+        else if (input.getHorizontal() != 0)
+            player.getAnimation().play("run", true);
+        else if (!player.isGrounded() && player.getVY() < 0)
+            player.getAnimation().play("falling", false);
+        else
+            player.getAnimation().play("idle", true);
+    }
 }

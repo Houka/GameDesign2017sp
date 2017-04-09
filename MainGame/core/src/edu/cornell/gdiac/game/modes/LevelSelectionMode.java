@@ -17,7 +17,6 @@ import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
-import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 /**
  * Class that provides a Level Selection screen for the state of the game.
@@ -25,8 +24,8 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
 public class LevelSelectionMode extends Mode {
 	// TODO: remove this once we have working json file loading in assetmanager
 	private static final String[] NUM_LEVELS = {
-			"JSON/level1.json","JSON/level3.json","JSON/default.json","JSON/default.json","JSON/level5.json",
-			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
+			"JSON/level1.json","JSON/level2.json","JSON/level3.json","JSON/level4.json","JSON/level5.json",
+			"JSON/test.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json"};
 	private static final int TOTAL_COLUMNS = 4;
@@ -56,11 +55,10 @@ public class LevelSelectionMode extends Mode {
 	 * @param canvas The GameCanvas to draw to
 	 * @param manager The AssetManager to load in the background
 	 */
-	public LevelSelectionMode(GameCanvas canvas, AssetManager manager) {
-		super(canvas, manager);
-		onExit = ScreenListener.EXIT_MENU;
+	public LevelSelectionMode(String name, GameCanvas canvas, AssetManager manager, GameMode gameMode) {
+		super(name, canvas, manager);
+		this.gameMode = gameMode;
 		input = SelectionInputController.getInstance();
-		gameMode = new GameMode(canvas,manager);
 		selected = 0;
 	}
 
@@ -96,12 +94,9 @@ public class LevelSelectionMode extends Mode {
 
 	@Override
 	protected void onComplete(){
-		gameMode.loadContent(manager);
-		gameMode.loadLevel(NUM_LEVELS[selected]);
-		// TODO: remove, for tech demo and testing values
-		Sidebar.defaultBootup();
 		canvas.getCamera().setAutosnap(true);
-		listener.switchScreens(this, gameMode);
+		gameMode.setLevel(NUM_LEVELS[selected]);
+		listener.switchToScreen(this, gameMode.getName());
 	}
 
 	@Override
@@ -135,13 +130,11 @@ public class LevelSelectionMode extends Mode {
 		size2Params.fontFileName = FONT_FILE;
 		size2Params.fontParameters.size = FONT_SIZE;
 		manager.load(FONT_FILE, BitmapFont.class, size2Params);
-
-		gameMode.preLoadContent(manager);
 	}
 
 	@Override
 	public void loadContent(AssetManager manager) {
-		background = AssetRetriever.createTexture(manager, BACKGROUND_FILE, true).getTexture();
+		background = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true).getTexture();
 
 		// Allocate the font
 		if (manager.isLoaded(FONT_FILE))
@@ -155,8 +148,6 @@ public class LevelSelectionMode extends Mode {
 		if (manager.isLoaded(BACKGROUND_FILE)) {
 			manager.unload(BACKGROUND_FILE);
 		}
-
-		gameMode.unloadContent(manager);
 	}
 
     /**

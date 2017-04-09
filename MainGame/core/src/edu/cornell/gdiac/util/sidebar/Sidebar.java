@@ -41,8 +41,6 @@ public class Sidebar {
 
         frame.pack();
         frame.setVisible(true);
-
-
     }
 
     /**
@@ -51,13 +49,17 @@ public class Sidebar {
     public static void defaultBootup(){
         if (created)
             return;
-
         Sidebar.bootUp();
         created = true;
+
         //Below fields are just samples
         Sidebar.addSlider("Gravity",-30f,0f,-20.0f);
         Sidebar.addSlider("Jump Height",20f,50f, 30f);
         Sidebar.addSlider("Player Speed",1f,10f,5.0f);
+        Sidebar.addSlider("Knockback Force",0f,30f, 8f);
+        Sidebar.addSlider("Knockback Friction",0f,.1f, .06f);
+        Sidebar.addSlider("Knockback Duration",0f,80f, 3f);
+        Sidebar.addSlider("Knockback Stun Duration",0f,60f, 30f);
         Sidebar.addSlider("Paintball Height",.1f,.5f,.25f);
         Sidebar.addSlider("Paintball Width",.5f,6.5f,3f);
         Sidebar.addSlider("Paintball Speed",1f,7.5f,3.2f);
@@ -66,6 +68,18 @@ public class Sidebar {
         Sidebar.addSlider("Camera Speed",0f,.3f,.1f);
         Sidebar.addSlider("Rumble Intensity",0f,100f,0f);
         Sidebar.addSlider("Rumble Interval",0f,10f,3f);
+    }
+    /**
+    * Call this to bootup the level editor sidebar to change grid size
+    */
+    public static void editorBootup(){
+        if (created)
+            return;
+        Sidebar.bootUp();
+        created = true;
+
+        //Below fields are just samples
+        Sidebar.addSlider("Grid Size",30,70,50);
     }
 
     /**Initialize sidebar*/
@@ -166,7 +180,7 @@ public class Sidebar {
      *@return           Returns key value if exists, else 0.0 
      **/
     public static float getValue(String key) {
-        if(!theMap.containsKey(key))
+        if(theMap == null || !theMap.containsKey(key))
             return 0.0f;
         return theMap.get(key);
     }

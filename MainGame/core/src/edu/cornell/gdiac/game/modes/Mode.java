@@ -17,15 +17,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.input.MainInputController;
-import edu.cornell.gdiac.game.interfaces.AssetUser;
-import edu.cornell.gdiac.game.interfaces.Completable;
-import edu.cornell.gdiac.game.interfaces.Exitable;
-import edu.cornell.gdiac.game.interfaces.ScreenListener;
+import edu.cornell.gdiac.game.interfaces.*;
 
 /**
  * Class that provides the fundamental mode functionalities
  */
-public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
+public abstract class Mode implements Screen, Completable, AssetUser, Exitable, Nameable {
 	/** Standard window size (for scaling) */
 	private static int STANDARD_WIDTH  = 1024;
 	/** Standard window height (for scaling) */
@@ -41,15 +38,19 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	protected GameCanvas canvas;
 	/** Listener that will update the player mode when we are done */
 	protected ScreenListener listener;
+	/** The name of this mode */
+	protected String name;
 
 	/** The exit code for when this screen completes */
-	protected int onExit = ScreenListener.EXIT_NOP; // default it to non existant exit code
+	protected int onExit = ScreenListener.EXIT_ESC;
 	/** Whether or not this mode is completed*/
 	private boolean exit;
 	/** Whether or not this mode is completed*/
 	private boolean completed;
 	/** Whether or not this mode is still active */
-	protected boolean active;
+	private boolean active;
+	/** Whether or not this mode is paused */
+	private boolean paused;
 	/** Whether or not debug mode is active */
 	protected boolean debug;
 	/** The main input controller */
@@ -61,10 +62,12 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	 * @param canvas The GameCanvas to draw the textures to
 	 * @param manager The AssetManager to load in the background
 	 */
-	protected Mode(GameCanvas canvas, AssetManager manager) {
+	protected Mode(String name, GameCanvas canvas, AssetManager manager) {
+		this.name = name;
 		this.manager = manager;
 		this.canvas  = canvas;
 		scale = new Vector2(1,1);
+		paused = false;
 		active = false;
 		exit = false;
 		completed = false;
@@ -73,6 +76,8 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 	}
 
 	// BEGIN: Getters and Setters
+	public void setName(String value){name = value;}
+	public String getName(){ return name;}
 	public void setScreenListener(ScreenListener listener) {
 		this.listener = listener;
 	}
@@ -121,12 +126,13 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 			debug = !debug;
 		else if (input.didReset())
 			reset();
+		else if (input.didPause())
+			processPause();
 		else if(input.didExit()) {
 			setExit(true);
 			return false;
 		}
-
-		return true;
+		return !paused;
 	}
 
 	/**
@@ -205,18 +211,29 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
 		setComplete(false);
 	}
 
-	/**
-	 * Default behavior for modes that have completed their task
+	/***
+	 * Handles a pause button press
 	 */
+	public void processPause() {
+		if(!paused)
+			pauseGame();
+		else
+			resume();
+	}
 	protected void onComplete(){
 		onExit();
 	}
-    
+  
     /**
      * Behavior for when the mode wishes to exit
      */
-	protected void onExit(){ listener.exitScreen(this, onExit); }
+	private void onExit(){ listener.exitScreen(this, onExit); }
 
+    /**
+     * Behavor for when the mode is paused
+     */
+	public void pauseGame() {paused = true;}
+  
     /**
      * Behavor for when the mode is paused
      */
@@ -225,18 +242,20 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable {
     /**
      * Behavor for when the mode resumes from a pause state
      */
-    public void resume() {}
-    
+	public void resume() {paused = false;}
+	  
     /**
      * Behavor for when the mode is shown/active
      */
-	public void show() { active = true;}
+	public void show() {
+		reset();
+		active = true;
+	}
     
     /**
      * Behavor for when the mode is set to stop showing/ is inactive
      */
 	public void hide() {
-		reset();
 		active = false;
 	}
 }

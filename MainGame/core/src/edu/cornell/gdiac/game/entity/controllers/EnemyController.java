@@ -25,13 +25,31 @@ public class EnemyController extends EntityController {
     
     @Override
     public void update(float dt) {
-        if (enemy.isStunned())
-            return;
+        if (!enemy.isStunned()) {
+            if (enemy.isOnSight())
+                enemy.setShooting(getInLineOfSight());
+            else
+                enemy.setShooting(true);
+        }
 
-        if (enemy.isOnSight())
-            enemy.setShooting(enemy.getPosition().y < (player.getPosition().y + 1)
-                    && enemy.getPosition().y > (player.getPosition().y - 1));
+        updateAnimation();
+    }
+
+    private void updateAnimation(){
+        if(enemy.isStunned())
+            enemy.getAnimation().playOnce("stunned");
+        else if(enemy.isShooting()) {
+            if (enemy.isOnSight() && getInLineOfSight())
+                enemy.getAnimation().playOnce("shoot");
+            else if (!enemy.isOnSight())
+                enemy.getAnimation().playOnce("shoot");
+        }
         else
-            enemy.setShooting(true);
+            enemy.getAnimation().play("still", true);
+    }
+
+    private boolean getInLineOfSight(){
+        return enemy.getPosition().y < (player.getPosition().y + 1)
+                && enemy.getPosition().y > (player.getPosition().y - 1);
     }
 }

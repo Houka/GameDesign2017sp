@@ -34,10 +34,12 @@ public class MainInputController {
     // Fields to manage buttons
     private boolean resetPressed;
     private boolean debugPressed;
+    private boolean pausePressed;
     private boolean exitPressed;
 
     private boolean resetPrevious;
     private boolean debugPrevious;
+    private boolean pausePrevious;
     private boolean exitPrevious;
 
     /**
@@ -51,6 +53,9 @@ public class MainInputController {
     }
     public boolean didDebug() {
         return debugPressed && !debugPrevious;
+    }
+    public boolean didPause() {
+        return pausePressed && !pausePrevious;
     }
     public boolean didExit() {
         return exitPressed && !exitPrevious;
@@ -66,6 +71,7 @@ public class MainInputController {
         // Helps us ignore buttons that are held down
         resetPrevious  = resetPressed;
         debugPrevious  = debugPressed;
+        pausePrevious  = pausePressed;
         exitPrevious = exitPressed;
 
         readKeyboard(false);
@@ -81,5 +87,6 @@ public class MainInputController {
         exitPressed  = (secondary && exitPressed) || (Gdx.input.isKeyPressed(Input.Keys.ESCAPE));
         resetPressed = (secondary && resetPressed) || (Gdx.input.isKeyPressed(Input.Keys.R));
         debugPressed = (secondary && debugPressed) || (Gdx.input.isKeyPressed(Input.Keys.D));
+        pausePressed = (secondary && debugPressed) || (Gdx.input.isKeyPressed(Input.Keys.P));
     }
 }

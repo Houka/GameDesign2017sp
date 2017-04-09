@@ -4,7 +4,9 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.interfaces.Animatable;
 import edu.cornell.gdiac.game.interfaces.Shooter;
+import edu.cornell.gdiac.util.Animation;
 import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
 
 
@@ -14,7 +16,7 @@ import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
  * Note that this class returns to static loading.  That is because there are
  * no other subclasses that we might loop through.
  */
-public class EnemyModel extends CapsuleObstacle implements Shooter {
+public class EnemyModel extends CapsuleObstacle implements Shooter, Animatable {
     // Physics constants
     /** The density of the character */
     private static final float ENEMY_DENSITY = 500.0f;
@@ -55,6 +57,9 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
     private boolean isFacingRight;
     /** If the enemy is OnSight or not */
     private boolean onSight;
+
+    /** The animation associated with this entity */
+    private Animation animation;
 
     /**
      * Returns the name of the ground sensor
@@ -128,9 +133,21 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
     }
 
     // BEGIN: Setters and Getters
+    @Override
+    public void setAnimation(Animation animation){
+        this.animation = animation;
+    }
+
+    @Override
+    public Animation getAnimation(){
+        return animation;
+    }
+
     public boolean isOnSight() {
         return onSight;
     }
+
+    public int getInterval() { return shootCooldown; }
 
     public void setOnSight(boolean onSight) {
         this.onSight = onSight;
@@ -169,6 +186,8 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
 
         if (stunCooldownCounter > 0)
             stunCooldownCounter --;
+
+        animation.update(dt);
     }
 
     /**
@@ -178,7 +197,11 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
      */
     public void draw(GameCanvas canvas) {
         float xScale = isFacingRight ? 1.0f : -1.0f;
-        canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),xScale,1.0f);
+
+        if (animation == null)
+            canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),xScale,1.0f);
+        else
+            canvas.draw(animation.getTextureRegion(),Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),xScale,1.0f);
     }
 
     /**
@@ -190,6 +213,7 @@ public class EnemyModel extends CapsuleObstacle implements Shooter {
      */
     public void drawDebug(GameCanvas canvas) {
         super.drawDebug(canvas);
-        canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+        if (sensorShape != null)
+            canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
     }
 }

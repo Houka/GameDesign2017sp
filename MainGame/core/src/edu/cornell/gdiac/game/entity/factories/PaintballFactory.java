@@ -175,7 +175,7 @@ public class PaintballFactory implements AssetUser, Settable {
 
     @Override
     public void loadContent(AssetManager manager) {
-        texture = AssetRetriever.createTexture(manager, PAINTBALL_FILE, false);
+        texture = AssetRetriever.createTextureRegion(manager, PAINTBALL_FILE, false);
     }
 
     @Override

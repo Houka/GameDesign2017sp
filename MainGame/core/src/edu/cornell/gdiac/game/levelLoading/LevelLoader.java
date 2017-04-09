@@ -1,6 +1,6 @@
 package edu.cornell.gdiac.game.levelLoading;
 
-
+import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -9,24 +9,38 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.game.interfaces.AssetUser;
+import edu.cornell.gdiac.util.Animation;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
 
+
 /**
  * Created by Lu on 3/16/2017.
+ *
+ * The level loader class puts objects from a json file into the world.
  */
 public class LevelLoader implements AssetUser, Disposable{
-    // TODO: remove all this constant stuff once json works
+    /** Filenames for sprites of objects */
     private static String PLATFORM_FILE = "sprites/fixtures/solid.png";
     private static String GOAL_FILE = "sprites/security_camera.png";
-    private static String BACKGROUND_FILE = "sprites/wall/wall_texture.png";
-    private static String ENEMY_FILE = "sprites/enemy/enemy_idle.png";
-    private static String CHARACTER_FILE = "sprites/char/char_idle.png";
+    private static String BACKGROUND_FILE = "sprites/wall/plain_wall_tile.png";
+    private static String ENEMY_STILL_FILE = "sprites/enemy/enemy_still.png";
+    private static String ENEMY_SHOOT_FILE = "sprites/enemy/enemy_shoot.png";
+    private static String ENEMY_SPOTTED_FILE = "sprites/enemy/enemy_spotted.png";
+    private static String ENEMY_STUNNED_FILE = "sprites/enemy/enemy_stunned.png";
+    private static String CHARACTER_STILL_FILE = "sprites/char/char_still.png";
+    private static String CHARACTER_RUN_FILE = "sprites/char/char_run.png";
+    private static String CHARACTER_FALLING_FILE = "sprites/char/char_falling.png";
+    private static String CHARACTER_IDLE_FILE = "sprites/char/char_idle.png";
+    private static String CHARACTER_MIDAIR_FILE = "sprites/char/char_midair_shoot.png";
+    private static String CHARACTER_RISING_FILE = "sprites/char/char_rising.png";
+    private static String CHARACTER_SHOOT_FILE = "sprites/char/char_shoot.png";
     private static String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
 
+    /** Textures */
     private TextureRegion platformTile;
     private TextureRegion goalTile;
     private TextureRegion bgTile;
@@ -34,15 +48,21 @@ public class LevelLoader implements AssetUser, Disposable{
     private TextureRegion playerTexture;
     private TextureRegion depotTexture;
 
-    // Vars that we do need for this class in the end
-    /**TODO:write desc*/
+    /** Animations */
+    private Animation playerAnimation;
+    private Animation enemyAnimation;
+
+    /** Bounds of the window*/
     private Rectangle bounds;
     /** Queue for adding objects */
     private PooledList<Obstacle> addQueue = new PooledList<Obstacle>();
-    /**TODO:write desc*/
+    /** LevelParser object we get object data from*/
     private LevelParser levelParser;
+    /** LevelParser scale at which everything is drawn*/
     private Vector2 scale;
 
+    /** Constructor that specifies scale.
+     * @param scale Scale at which the level is drawn*/
     public LevelLoader(Vector2 scale){
         this.scale = scale;
         levelParser = new LevelParser();
@@ -55,95 +75,28 @@ public class LevelLoader implements AssetUser, Disposable{
     // END: Setters and Getters
 
     /**
-     * TODO: write desc... loads the level based on the json file. adds the (Obstacle) object into addQueue
+     * loads the level based on the json file.
      */
     public void loadLevel(String JSONFile){
         // reset queue of objects
         addQueue.clear();
-
-        //sets the new world bounds TODO: do this with json values
+        //sets the new world bounds
         bounds = new Rectangle(0,0,32,18*3);
         levelParser.loadLevel(JSONFile);
         populateLevel();
-
-        // set player
-        float[] playerData = levelParser.getPlayer();
-        PlayerModel player = new PlayerModel(playerData[0], playerData[1],
-                playerTexture.getRegionWidth() / scale.x, playerTexture.getRegionHeight() / scale.y);
-        player.setDrawScale(scale);
-        player.setTexture(playerTexture);
-        addQueuedObject(player);
     }
 
     /**
      * Lays out the game geography.
-     *
-     * TODO: base this function off json data
      */
     private void populateLevel() {
-        // add background
-        float dwidth  = bgTile.getRegionWidth()/scale.x;
-        float dheight = bgTile.getRegionHeight()/scale.y;
-        BoxObstacle bg = new BackgroundModel(dwidth/2,dheight/2,dwidth*2,dheight*3);
-        bg.setDrawScale(scale);
-        bgTile.getTexture().setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
-        bg.setTexture(bgTile);
-        addQueuedObject(bg);
-
-        // Add level goal
-        dwidth  = goalTile.getRegionWidth()/scale.x;
-        dheight = goalTile.getRegionHeight()/scale.y;
-        float[] target = levelParser.getTarget();
-        BoxObstacle goalDoor = new GoalModel(target[0],target[1],dwidth,dheight);
-        goalDoor.setDrawScale(scale);
-        goalDoor.setTexture(goalTile);
-        addQueuedObject(goalDoor);
-
-        //add walls
-        float[][] walls = levelParser.getWalls();
-        for (int ii = 0; ii < walls.length; ii++) {
-            PolygonObstacle obj = new WallModel(walls[ii]);
-            obj.setDrawScale(scale);
-            obj.setTexture(platformTile);
-            addQueuedObject(obj);
-        }
-
-        float[][] platforms = levelParser.getPlatforms();
-        for (int ii = 0; ii < platforms.length; ii++) {
-            PolygonObstacle obj = new PlatformModel(platforms[ii]);
-            obj.setDrawScale(scale);
-            obj.setTexture(platformTile);
-            addQueuedObject(obj);
-        }
-
-        // Create enemies
-        float[][] enemies = levelParser.getEnemies();
-        dwidth  = enemyTexture.getRegionWidth()/scale.x;
-        dheight = enemyTexture.getRegionHeight()/scale.y;
-        EnemyModel enemy;
-        for (int ii = 0; ii < enemies.length; ii++) {
-            enemy = new EnemyModel(enemies[ii][1], enemies[ii][2], dwidth, dheight, enemies[ii][3] == 1.0f,
-                    enemies[ii][0] == 1.0f, (int)enemies[ii][4]);
-            enemy.setDrawScale(scale);
-            enemy.setTexture(enemyTexture);
-            addQueuedObject(enemy);
-        }
-
-
-        // Create one ammo depot
-        float[][] resources = levelParser.getResources();
-        dheight = depotTexture.getRegionHeight()/scale.y;
-        dwidth = depotTexture.getRegionWidth()/scale.x;
-        for (int ii = 0; ii < resources.length; ii++) {
-            //type of resource is ammo depot
-            if (resources[ii][0] == 0) {
-                AmmoDepotModel ammoDepot = new AmmoDepotModel(resources[ii][1], resources[ii][2], dwidth, dheight, 3);
-                ammoDepot.setDrawScale(scale);
-                ammoDepot.setTexture(depotTexture);
-                addQueuedObject(ammoDepot);
-            }
-
-        }
+        addBackground();
+        addPlatforms();
+        addWalls();
+        addPlayer();
+        addEnemies();
+        addResources();
+        addTarget();
     }
 
     /**
@@ -160,25 +113,185 @@ public class LevelLoader implements AssetUser, Disposable{
         addQueue.add(obj);
     }
 
+    /**
+     * Adds the background to the insertion queue
+     */
+    public void addBackground() {
+        float dwidth = bgTile.getRegionWidth() / scale.x;
+        float dheight = bgTile.getRegionHeight() / scale.y;
+        BoxObstacle bg = new BackgroundModel(dwidth / 2, dheight / 2, dwidth * 2, dheight * 3);
+        bg.setDrawScale(scale);
+        bgTile.getTexture().setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+        bg.setTexture(bgTile);
+        addQueuedObject(bg);
+    }
+
+    /**
+     * Adds the platforms to the insertion queue
+     */
+    public void addPlatforms(){
+        JsonValue platforms = levelParser.getPlatforms();
+        JsonValue dflt = platforms.get("default");
+        JsonValue.JsonIterator iter = dflt.iterator();
+        JsonValue vertices;
+        while (iter.hasNext()){
+            vertices = iter.next();
+            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray());
+            obj.setDrawScale(scale);
+            obj.setTexture(platformTile);
+            addQueuedObject(obj);
+        }
+    }
+
+    /**
+     * Adds the walls to the insertion queue
+     */
+    public void addWalls(){
+        JsonValue walls = levelParser.getWalls();
+        JsonValue dflt = walls.get("default");
+        JsonValue.JsonIterator iter = dflt.iterator();
+        JsonValue vertices;
+        while (iter.hasNext()){
+            vertices = iter.next();
+            PolygonObstacle obj = new WallModel(vertices.asFloatArray());
+            obj.setDrawScale(scale);
+            obj.setTexture(platformTile);
+            addQueuedObject(obj);
+        }
+    }
+
+    /**
+     * Adds the player to the insertion queue
+     */
+    public void addPlayer(){
+        JsonValue playerData = levelParser.getPlayer();
+        PlayerModel player = new PlayerModel(playerData.get("x").asFloat(), playerData.get("y").asFloat(),
+                playerTexture.getRegionWidth() / scale.x, playerTexture.getRegionHeight() / scale.y);
+        player.setDrawScale(scale);
+        player.setTexture(playerTexture);
+        player.setAnimation(playerAnimation);
+        addQueuedObject(player);
+    }
+
+    /**
+     * Adds the enemies to the insertion queue. Currently handles on sight and interval shooters.
+     */
+    public void addEnemies(){
+        float dwidth  = enemyTexture.getRegionWidth()/scale.x;
+        float dheight = enemyTexture.getRegionHeight()/scale.y;
+        JsonValue enemies = levelParser.getEnemies();
+
+        //add interval shooters
+        JsonValue interval = enemies.get("interval");
+        JsonValue.JsonIterator iter = interval.iterator();
+        JsonValue enemy;
+        while (iter.hasNext()){
+            enemy = iter.next();
+            EnemyModel obj = new EnemyModel(enemy.get("x").asInt(), enemy.get("y").asFloat(), dwidth, dheight,
+                            enemy.get("isFacingRight").asBoolean(), false, enemy.get("interval").asInt());
+            obj.setDrawScale(scale);
+            obj.setTexture(enemyTexture);
+            obj.setAnimation(enemyAnimation);
+            addQueuedObject(obj);
+        }
+
+        //add on sight shooters
+        JsonValue onSight = enemies.get("on_sight");
+        iter = onSight.iterator();
+        while (iter.hasNext()){
+            enemy = iter.next();
+            EnemyModel obj = new EnemyModel(enemy.get("x").asInt(), enemy.get("y").asFloat(), dwidth, dheight,
+                    enemy.get("isFacingRight").asBoolean(), true, 0);
+            obj.setDrawScale(scale);
+            obj.setTexture(enemyTexture);
+            obj.setAnimation(enemyAnimation);
+            addQueuedObject(obj);
+        }
+    }
+
+    /**
+     * Adds the resources to the insertion queue. Currently only handles ammo depots.
+     */
+    public void addResources(){
+        JsonValue resources = levelParser.getResources();
+        float dheight = depotTexture.getRegionHeight()/scale.y;
+        float dwidth = depotTexture.getRegionWidth()/scale.x;
+
+        JsonValue ammoDepots = resources.get("ammo_depots");
+        JsonValue.JsonIterator iter = ammoDepots.iterator();
+        JsonValue depot;
+        while (iter.hasNext()){
+            depot = iter.next();
+            AmmoDepotModel ammoDepot = new AmmoDepotModel(depot.get("x").asFloat(), depot.get("y").asFloat(), dwidth,
+                    dheight, depot.get("amount").asInt());
+            ammoDepot.setDrawScale(scale);
+            ammoDepot.setTexture(depotTexture);
+            addQueuedObject(ammoDepot);
+        }
+    }
+
+    /**
+     * Adds the target to the insertion queue
+     */
+    public void addTarget(){
+        float dwidth  = goalTile.getRegionWidth()/scale.x;
+        float dheight = goalTile.getRegionHeight()/scale.y;
+        JsonValue target = levelParser.getTarget();
+        BoxObstacle goalDoor = new GoalModel(target.get("x").asFloat(),target.get("y").asFloat(),dwidth, dheight);
+        goalDoor.setDrawScale(scale);
+        goalDoor.setTexture(goalTile);
+        addQueuedObject(goalDoor);
+    }
+
     @Override
     public void preLoadContent(AssetManager manager) {
         // Load the shared tiles.
         manager.load(PLATFORM_FILE,Texture.class);
         manager.load(GOAL_FILE,Texture.class);
         manager.load(BACKGROUND_FILE,Texture.class);
-        manager.load(ENEMY_FILE,Texture.class);
-        manager.load(CHARACTER_FILE, Texture.class);
+        manager.load(ENEMY_STILL_FILE,Texture.class);
+        manager.load(ENEMY_SHOOT_FILE,Texture.class);
+        manager.load(ENEMY_SPOTTED_FILE,Texture.class);
+        manager.load(ENEMY_STUNNED_FILE,Texture.class);
+        manager.load(CHARACTER_STILL_FILE, Texture.class);
+        manager.load(CHARACTER_FALLING_FILE, Texture.class);
+        manager.load(CHARACTER_IDLE_FILE, Texture.class);
+        manager.load(CHARACTER_MIDAIR_FILE, Texture.class);
+        manager.load(CHARACTER_RISING_FILE, Texture.class);
+        manager.load(CHARACTER_RUN_FILE, Texture.class);
+        manager.load(CHARACTER_SHOOT_FILE, Texture.class);
         manager.load(AMMO_DEPOT_FILE, Texture.class);
     }
 
     @Override
     public void loadContent(AssetManager manager) {
-        bgTile  = AssetRetriever.createTexture(manager, BACKGROUND_FILE,true);
-        platformTile = AssetRetriever.createTexture(manager,PLATFORM_FILE,true);
-        goalTile  = AssetRetriever.createTexture(manager,GOAL_FILE,false);
-        enemyTexture  = AssetRetriever.createTexture(manager,ENEMY_FILE,false);
-        playerTexture = AssetRetriever.createTexture(manager, CHARACTER_FILE, false);
-        depotTexture = AssetRetriever.createTexture(manager, AMMO_DEPOT_FILE, false);
+        // static texture loading
+        bgTile  = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE,true);
+        platformTile = AssetRetriever.createTextureRegion(manager,PLATFORM_FILE,true);
+        goalTile  = AssetRetriever.createTextureRegion(manager,GOAL_FILE,false);
+        enemyTexture  = AssetRetriever.createTextureRegion(manager,ENEMY_STILL_FILE,false);
+        playerTexture = AssetRetriever.createTextureRegion(manager, CHARACTER_STILL_FILE, false);
+        depotTexture = AssetRetriever.createTextureRegion(manager, AMMO_DEPOT_FILE, false);
+
+        // animation spritesheet loading
+        playerAnimation = new Animation();
+        playerAnimation.addTexture("idle", AssetRetriever.createTexture(manager, CHARACTER_IDLE_FILE, false), 1,4);
+        playerAnimation.addTexture("run", AssetRetriever.createTexture(manager, CHARACTER_RUN_FILE, false), 1,8);
+        playerAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, CHARACTER_SHOOT_FILE, false), 1,8);
+        playerAnimation.addTexture("rising", AssetRetriever.createTexture(manager, CHARACTER_RISING_FILE, false), 1,2);
+        playerAnimation.addTexture("falling", AssetRetriever.createTexture(manager, CHARACTER_FALLING_FILE, false), 1,4);
+        playerAnimation.addTexture("midair shoot", AssetRetriever.createTexture(manager, CHARACTER_MIDAIR_FILE, false), 1,4);
+        playerAnimation.addTexture("still", playerTexture.getTexture(), 1, 1);
+        playerAnimation.setPlaying(false);
+        playerAnimation.setPlayingAnimation("idle");
+
+        enemyAnimation = new Animation();
+        enemyAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, ENEMY_SHOOT_FILE, false), 1,12);
+        enemyAnimation.addTexture("spotted", AssetRetriever.createTexture(manager, ENEMY_SPOTTED_FILE, false), 1,6);
+        enemyAnimation.addTexture("stunned", AssetRetriever.createTexture(manager, ENEMY_STUNNED_FILE, false), 1,12);
+        enemyAnimation.addTexture("still", enemyTexture.getTexture(), 1, 1);
+        enemyAnimation.setPlaying(false);
+        enemyAnimation.setPlayingAnimation("still");
     }
 
     @Override
@@ -186,8 +299,17 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.unload(BACKGROUND_FILE);
         manager.unload(PLATFORM_FILE);
         manager.unload(GOAL_FILE);
-        manager.unload(ENEMY_FILE);
-        manager.unload(CHARACTER_FILE);
+        manager.unload(ENEMY_STILL_FILE);
+        manager.unload(ENEMY_SHOOT_FILE);
+        manager.unload(ENEMY_SPOTTED_FILE);
+        manager.unload(ENEMY_STUNNED_FILE);
+        manager.unload(CHARACTER_STILL_FILE);
+        manager.unload(CHARACTER_FALLING_FILE);
+        manager.unload(CHARACTER_IDLE_FILE);
+        manager.unload(CHARACTER_MIDAIR_FILE);
+        manager.unload(CHARACTER_RISING_FILE);
+        manager.unload(CHARACTER_RUN_FILE);
+        manager.unload(CHARACTER_SHOOT_FILE);
     }
 
     @Override
@@ -211,6 +333,9 @@ public class LevelLoader implements AssetUser, Disposable{
         return horiz && vert;
     }
 
+    /**
+    * Debugging method
+     */
     private void printMatrix(float[][] matrix) {
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[i].length; j++) {
