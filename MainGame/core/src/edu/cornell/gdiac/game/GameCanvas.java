@@ -23,6 +23,7 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.*;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.Align;
 
 /**
  * Primary view class for the game, abstracting the basic graphics calls.
@@ -929,8 +930,11 @@ public class GameCanvas {
 			Gdx.app.error("GameCanvas", "Cannot draw without active begin()", new IllegalStateException());
 			return;
 		}
-		GlyphLayout layout = new GlyphLayout(font,text);
+
+		Color color = font.getColor().sub(0,0,0,0.3f);
+		GlyphLayout layout = new GlyphLayout(font,text,color,0, Align.left, false);
 		font.draw(spriteBatch, layout, x, y);
+		spriteBatch.setColor(1f,1f,1f,1f);
     }
 
     /**
@@ -945,8 +949,9 @@ public class GameCanvas {
 			Gdx.app.error("GameCanvas", "Cannot draw without active begin()", new IllegalStateException());
 			return;
 		}
-		
-		GlyphLayout layout = new GlyphLayout(font,text);
+
+		Color color = font.getColor().sub(0,0,0,0.3f);
+		GlyphLayout layout = new GlyphLayout(font,text,color,0, Align.left, false);
 		float x = (getWidth()  - layout.width) / 2.0f;
 		float y = (getHeight() + layout.height) / 2.0f;
 		font.draw(spriteBatch, layout, x, y+offset);
