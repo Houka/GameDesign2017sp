@@ -162,14 +162,14 @@
   "enemies": {
     "interval": [
       {
-        "x": 2.0,
-        "y": 15,
+        "x": 3.0,
+        "y": 17,
         "isFacingRight": 1,
         "interval": 200
       },
       {
         "x": 29.0,
-        "y": 47,
+        "y": 49,
         "isFacingRight": 0,
         "interval": 200
       }
@@ -177,12 +177,12 @@
     "on_sight": [
       {
         "x": 2.0,
-        "y": 33,
+        "y": 35,
         "isFacingRight": 1
       },
       {
         "x": 29.0,
-        "y": 33,
+        "y": 35,
         "isFacingRight": 0
       }
     ]
