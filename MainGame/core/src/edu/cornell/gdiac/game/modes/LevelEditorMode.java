@@ -64,7 +64,7 @@ public class LevelEditorMode extends Mode {
     private static final String JSON_DIRECTORY = "JSON";
 
     /** Speed at which to move the camera */
-    private static final int CAMERA_SPEED = 10;
+    private static final int CAMERA_SPEED = DEFAULT_GRID;
 
     /** The font for giving messages to the player */
     private BitmapFont displayFont;
@@ -190,8 +190,13 @@ public class LevelEditorMode extends Mode {
         return newPos;
     }
 
-    private Vector2 getWorldCoordinates(Vector2 pos){
+    private Vector2 getScaledCoordinates(Vector2 pos){
         return new Vector2(pos.x/scaleVector.x,pos.y/scaleVector.y);
+    }
+
+    private Vector2 getWorldCoordinates(Vector2 pos){
+        return new Vector2(pos.x+worldCamera.getTargetLocation().x-canvas.getWidth()/2,
+                            pos.y-worldCamera.getTargetLocation().y+canvas.getHeight()/2);
     }
 
     private String getLoadFileName(){
@@ -273,7 +278,7 @@ public class LevelEditorMode extends Mode {
     private void updateMouseInput(){
         int mouseX = Gdx.input.getX()+gridCell/2;
         int mouseY = Gdx.input.getY();
-        mousePos = getCell(new Vector2(mouseX, mouseY));
+        mousePos = getCell(getWorldCoordinates(new Vector2(mouseX, mouseY)));
 
         if(input.didTouch() && mouseX >= canvas.getWidth()-125) {
             for(int i=0; i<regions.length; i++) {
@@ -291,8 +296,8 @@ public class LevelEditorMode extends Mode {
         if(!input.didTouch()) {
             textureClicked = false;
         }
-        if(!input.didTouch() &&  mouseX <= canvas.getWidth()-200 && underMouse != null) {
-            Vector2 newPos = getWorldCoordinates(mousePos);
+        if(!input.didTouch() &&  mouseX <= canvas.getWidth()-170 && underMouse != null) {
+            Vector2 newPos = getScaledCoordinates(mousePos);
             if(underMouse.equals(regions[0])) {
                 PlayerModel newP = new PlayerModel(newPos.x,newPos.y,
                         underMouse.getRegionWidth(), underMouse.getRegionHeight());
@@ -390,14 +395,12 @@ public class LevelEditorMode extends Mode {
      * @param gridCell the length of a side of a grid
      */
     private void drawGrid(int gridCell) {
-        int sidebarOffset = 150;
-        for(int i=0; i<canvas.getWidth()-sidebarOffset; i+=gridCell)
+        for(int i=0; i<canvas.getWidth(); i+=gridCell)
             for (int j =0; j < canvas.getHeight(); j += gridCell)
                 drawRectangle(i, j, gridCell, gridCell, Color.WHITE);
 
         // draw hover over cell
-        if (mousePos.x < canvas.getWidth()-sidebarOffset)
-            drawRectangle(mousePos.x, mousePos.y, gridCell, gridCell, Color.RED);
+        drawRectangle(mousePos.x, mousePos.y, gridCell, gridCell, Color.RED);
     }
 
     private void drawRectangle(float x, float y, float width, float height, Color color){
