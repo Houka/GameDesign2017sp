@@ -28,6 +28,7 @@ import edu.cornell.gdiac.game.input.EditorInputController;
 import edu.cornell.gdiac.game.levelLoading.LevelCreator;
 import edu.cornell.gdiac.game.levelLoading.LevelLoader;
 import edu.cornell.gdiac.util.AssetRetriever;
+import edu.cornell.gdiac.util.FileReaderWriter;
 import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 
@@ -57,17 +58,8 @@ public class LevelEditorMode extends Mode {
     /** Height of the game world in Box2d units	 */
     private static final float DEFAULT_HEIGHT = 18.0f;
 
-    /** Retro font for displaying messages */
-    private static final String FONT_FILE = "fonts/RetroGame.ttf";
-
-    /** Director of json files */
-    private static final String JSON_DIRECTORY = "JSON";
-
     /** Speed at which to move the camera */
     private static final int CAMERA_SPEED = DEFAULT_GRID;
-
-    /** The font for giving messages to the player */
-    private BitmapFont displayFont;
 
     /** Texture for sidebar background*/
     private TextureRegion sidebarTexture;
@@ -152,32 +144,6 @@ public class LevelEditorMode extends Mode {
         gridCell = dim;
     }
 
-    /**
-     * Gets a list of all files in the JSON directory in the assets folder.
-     * @return Pretty formated string of the list of all current files in the JSON directory
-     */
-    private String getAllJsonFiles(){
-        String result = "";
-        for(Object s:getJsonFiles(new ArrayList<String>(), Gdx.files.local(JSON_DIRECTORY).file()).toArray()){
-            result+="        "+s+"\n";
-        }
-        return result+"\n";
-    }
-
-    private ArrayList<String> getJsonFiles(ArrayList<String> list, File directory)
-    {
-        for(File file: directory.listFiles()){
-            if (file.isDirectory())
-            {
-                getJsonFiles(list, file);
-            }
-            String path = file.getPath();
-            list.add(path.substring(path.indexOf(JSON_DIRECTORY),path.length()));
-        }
-
-        return list;
-    }
-
     private Vector2 getCell(Vector2 pos) {
         int tileX = (int) pos.x/gridCell;
         int tileY = (int) pos.y/gridCell;
@@ -202,7 +168,7 @@ public class LevelEditorMode extends Mode {
     private String getLoadFileName(){
         setUpPopUpFrame();
         String response = JOptionPane.showInputDialog(dummyFrame,
-                "What's the relative file path of the file you want to load? \n\n List of all level files:\n"+getAllJsonFiles());
+                "What's the relative file path of the file you want to load? \n\n List of all level files:\n"+ FileReaderWriter.getJsonFilesString());
         dummyFrame.dispose();
         return response;
     }
@@ -427,10 +393,6 @@ public class LevelEditorMode extends Mode {
         levelLoader.loadContent(manager);
         sidebarTexture = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true);
         whitePixelTexture = AssetRetriever.createTextureRegion(manager, WHITE_PIXEL_FILE, true);
-        if (manager.isLoaded(FONT_FILE))
-            displayFont = manager.get(FONT_FILE, BitmapFont.class);
-        else
-            displayFont = null;
 
         regions[0] = AssetRetriever.createTextureRegion(manager, PLAYER_FILE, false);
         regions[1] = AssetRetriever.createTextureRegion(manager, ENEMY_FILE, false);
@@ -466,7 +428,7 @@ public class LevelEditorMode extends Mode {
     }
 
     private void saveLevel() {
-        String saveFileName = JSON_DIRECTORY+"/"+getSaveFileName();
+        String saveFileName = FileReaderWriter.JSON_DIRECTORY+"/"+getSaveFileName();
         ArrayList<PlatformModel> platforms = new ArrayList<PlatformModel>();
         ArrayList<WallModel> walls = new ArrayList<WallModel>();
         PlayerModel player = null;

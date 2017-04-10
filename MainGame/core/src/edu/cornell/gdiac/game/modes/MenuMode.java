@@ -27,7 +27,7 @@ public class MenuMode extends Mode {
 	/** Selection menu items y offset between each menu item*/
 	private static final int MENU_ITEM_GAP_OFFSET_Y = 20;
 	/** Retro font for displaying messages */
-	private static String FONT_FILE = "fonts/RetroGame.ttf";
+	private static String FONT_FILE = "fonts/LightPixel7.ttf";
 	private static int FONT_SIZE = 64;
 
 	/** The font for giving messages to the player */

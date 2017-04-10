@@ -53,7 +53,7 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
  */
 public class GameMode extends Mode implements Settable {
 	/** Retro font for displaying messages */
-	private static String FONT_FILE = "fonts/RetroGame.ttf";
+	private static String FONT_FILE = "fonts/LightPixel7.ttf";
 
 	/** The amount of time for a physics engine step.	 */
 	public static final float WORLD_STEP = 1 / 60.0f;

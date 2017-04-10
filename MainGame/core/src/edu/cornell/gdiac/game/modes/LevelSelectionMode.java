@@ -17,26 +17,26 @@ import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
+import edu.cornell.gdiac.util.FileReaderWriter;
+
+import java.util.ArrayList;
 
 /**
  * Class that provides a Level Selection screen for the state of the game.
  */
 public class LevelSelectionMode extends Mode {
 	// TODO: remove this once we have working json file loading in assetmanager
-	private static final String[] NUM_LEVELS = {
-			"JSON/level1.json","JSON/level2.json","JSON/level3.json","JSON/level4.json","JSON/level5.json",
-			"JSON/test.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
-			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
-			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json"};
+	private static final ArrayList<String> NUM_LEVELS = FileReaderWriter.getJsonFiles();
 	private static final int TOTAL_COLUMNS = 4;
-	private static final int TOTAL_ROWS = (int)Math.ceil((float)NUM_LEVELS.length/TOTAL_COLUMNS);
+	private static final int TOTAL_ROWS = (int)Math.ceil((float)NUM_LEVELS.size()/TOTAL_COLUMNS);
 	private static final int BORDER_X = 50;
 	private static final int BORDER_Y = 50;
+	private static final int PADDING_Y = 90;
 
 	/** Textures necessary to support the loading screen */
 	private static final String BACKGROUND_FILE = "ui/bg/level_selection.png";
 	/** Retro font for displaying messages */
-	private static String FONT_FILE = "fonts/RetroGame.ttf";
+	private static String FONT_FILE = "fonts/LightPixel7.ttf";
 	private static int FONT_SIZE = 64;
 
 	/** The font for giving messages to the player */
@@ -81,13 +81,13 @@ public class LevelSelectionMode extends Mode {
 		input.readInput();
 
 		if (input.didDown())
-			selected = (selected+TOTAL_COLUMNS >= NUM_LEVELS.length)?	selected : selected+TOTAL_COLUMNS;
+			selected = (selected+TOTAL_COLUMNS >= NUM_LEVELS.size())?	selected : selected+TOTAL_COLUMNS;
 		else if (input.didUp())
 			selected = (selected < TOTAL_COLUMNS) ? selected : selected - TOTAL_COLUMNS;
 		else if (input.didRight())
-			selected=(selected+1) % NUM_LEVELS.length;
+			selected=(selected+1) % NUM_LEVELS.size();
 		else if (input.didLeft())
-			selected=(selected <= 0)? NUM_LEVELS.length -1 : selected-1;
+			selected=(selected <= 0)? NUM_LEVELS.size() -1 : selected-1;
 		else if (input.didSelect())
 			setComplete(true);
 	}
@@ -95,7 +95,8 @@ public class LevelSelectionMode extends Mode {
 	@Override
 	protected void onComplete(){
 		canvas.getCamera().setAutosnap(true);
-		gameMode.setLevel(NUM_LEVELS[selected]);
+		System.out.println(NUM_LEVELS.get(selected));
+		gameMode.setLevel(NUM_LEVELS.get(selected));
 		listener.switchToScreen(this, gameMode.getName());
 	}
 
@@ -110,10 +111,10 @@ public class LevelSelectionMode extends Mode {
 				else
 					displayFont.setColor(Color.DARK_GRAY);
 
-				if (convertToIndex(i,j) < NUM_LEVELS.length) {
-					canvas.drawText("/" + (convertToIndex(i, j) + 1)+"\\", displayFont,
+				if (convertToIndex(i,j) < NUM_LEVELS.size()) {
+					canvas.drawText("[" + (convertToIndex(i, j) + 1)+"]", displayFont,
 							i * ((canvas.getWidth() - BORDER_X * 2) / TOTAL_COLUMNS) + BORDER_X,
-							canvas.getHeight() - j * displayFont.getLineHeight() - BORDER_Y);
+							canvas.getHeight() - j * PADDING_Y - BORDER_Y);
 				}else{
 					break;
 				}
