@@ -24,8 +24,8 @@ import edu.cornell.gdiac.game.interfaces.ScreenListener;
 public class LevelSelectionMode extends Mode {
 	// TODO: remove this once we have working json file loading in assetmanager
 	private static final String[] NUM_LEVELS = {
-			"JSON/level1.json","JSON/level3.json","JSON/default.json","JSON/default.json","JSON/level5.json",
-			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
+			"JSON/level1.json","JSON/level2.json","JSON/level3.json","JSON/level4.json","JSON/level5.json",
+			"JSON/test.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json",
 			"JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json","JSON/default.json"};
 	private static final int TOTAL_COLUMNS = 4;
@@ -94,6 +94,7 @@ public class LevelSelectionMode extends Mode {
 
 	@Override
 	protected void onComplete(){
+		canvas.getCamera().setAutosnap(true);
 		gameMode.setLevel(NUM_LEVELS[selected]);
 		listener.switchToScreen(this, gameMode.getName());
 	}
