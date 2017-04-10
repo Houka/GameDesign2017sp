@@ -36,9 +36,7 @@ public class EnemyController extends EntityController {
     }
 
     private void updateAnimation(){
-        if(enemy.isStunned())
-            enemy.getAnimation().playOnce("stunned");
-        else if(enemy.isShooting()) {
+        if(enemy.isShooting()) {
             if (enemy.isOnSight() && getInLineOfSight())
                 enemy.getAnimation().playOnce("shoot");
             else if (!enemy.isOnSight())
