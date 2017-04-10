@@ -117,8 +117,6 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
      */
     public PlayerModel(float x, float y, float width, float height) {
         super(x,y,width*PLAYER_HSHRINK,height*PLAYER_VSHRINK);
-        System.out.println(width*PLAYER_HSHRINK);
-        System.out.println(height*PLAYER_VSHRINK);
         setDensity(PLAYER_DENSITY);
         setFriction(PLAYER_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
         setFixedRotation(true);
