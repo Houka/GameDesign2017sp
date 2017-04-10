@@ -25,6 +25,10 @@ public class EditorInputController implements InputProcessor{
     private boolean loadPressed;
     private boolean resetPressed;
     private boolean ammoPressed;
+    private boolean upPressed;
+    private boolean downPressed;
+    private boolean leftPressed;
+    private boolean rightPressed;
 
     /** keyboard prev states */
     private boolean savePrevious;
@@ -47,6 +51,18 @@ public class EditorInputController implements InputProcessor{
 
 
     // BEGIN: Getters and Setters
+    public boolean didUp() {
+        return upPressed;
+    }
+    public boolean didDown() {
+        return downPressed;
+    }
+    public boolean didLeft() {
+        return leftPressed;
+    }
+    public boolean didRight() {
+        return rightPressed;
+    }
     public boolean didSave() {
         return savePressed && !savePrevious;
     }
@@ -90,6 +106,11 @@ public class EditorInputController implements InputProcessor{
         loadPressed = ctrlPressed&& (Gdx.input.isKeyPressed(Input.Keys.O));
         resetPressed = (Gdx.input.isKeyPressed(Input.Keys.R));
         ammoPressed = ctrlPressed&& (Gdx.input.isKeyPressed(Input.Keys.A));
+        upPressed  = !ctrlPressed && (Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W));
+        downPressed  = !ctrlPressed && (Gdx.input.isKeyPressed(Input.Keys.DOWN)|| Gdx.input.isKeyPressed(Input.Keys.S));
+        leftPressed  = !ctrlPressed && (Gdx.input.isKeyPressed(Input.Keys.LEFT)|| Gdx.input.isKeyPressed(Input.Keys.A));
+        rightPressed  = !ctrlPressed && (Gdx.input.isKeyPressed(Input.Keys.RIGHT)|| Gdx.input.isKeyPressed(Input.Keys.D));
+
 
         // mouse scrolling
         if (scrollTickPrev == scrollTick){
