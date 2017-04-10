@@ -43,7 +43,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
     /** The amount to shrink the body fixture (vertically) relative to the image */
     private static final float PLAYER_VSHRINK = 1f;
     /** The amount to shrink the body fixture (horizontally) relative to the image */
-    private static final float PLAYER_HSHRINK = 1f;
+    private static final float PLAYER_HSHRINK = 0.45f;
     /** The amount to shrink the sensor fixture (horizontally) relative to the image */
     private static final float PLAYER_SSHRINK = 0.6f;
 
@@ -116,8 +116,9 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
      * @param height	The object width in physics units
      */
     public PlayerModel(float x, float y, float width, float height) {
-
         super(x,y,width*PLAYER_HSHRINK,height*PLAYER_VSHRINK);
+        System.out.println(width*PLAYER_HSHRINK);
+        System.out.println(height*PLAYER_VSHRINK);
         setDensity(PLAYER_DENSITY);
         setFriction(PLAYER_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
         setFixedRotation(true);

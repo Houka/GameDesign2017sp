@@ -24,19 +24,19 @@ import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
  */
 public class LevelLoader implements AssetUser, Disposable{
     /** Filenames for sprites of objects */
-    private static String PLATFORM_FILE = "sprites/fixtures/solid.png";
+    private static String PLATFORM_FILE = "sprites/fixtures/window_tile.png";
     private static String GOAL_FILE = "sprites/security_camera.png";
-    private static String BACKGROUND_FILE = "sprites/wall/plain_wall_tile.png";
+    private static String BACKGROUND_FILE = "sprites/wall/brick_wall_tile.png";
     private static String ENEMY_STILL_FILE = "sprites/enemy/enemy_still.png";
     private static String ENEMY_SHOOT_FILE = "sprites/enemy/enemy_shoot.png";
     private static String ENEMY_SPOTTED_FILE = "sprites/enemy/enemy_spotted.png";
     private static String ENEMY_STUNNED_FILE = "sprites/enemy/enemy_stunned.png";
     private static String CHARACTER_STILL_FILE = "sprites/char/char_still.png";
-    private static String CHARACTER_RUN_FILE = "sprites/char/char_run.png";
-    private static String CHARACTER_FALLING_FILE = "sprites/char/char_falling.png";
-    private static String CHARACTER_IDLE_FILE = "sprites/char/char_idle.png";
+    private static String CHARACTER_RUN_FILE = "sprites/char/char_run_strip4.png";
+    private static String CHARACTER_FALLING_FILE = "sprites/char/char_fall.png";
+    private static String CHARACTER_IDLE_FILE = "sprites/char/char_idle_strip5.png";
     private static String CHARACTER_MIDAIR_FILE = "sprites/char/char_midair_shoot.png";
-    private static String CHARACTER_RISING_FILE = "sprites/char/char_rising.png";
+    private static String CHARACTER_RISING_FILE = "sprites/char/char_jump.png";
     private static String CHARACTER_SHOOT_FILE = "sprites/char/char_shoot.png";
     private static String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
 
@@ -275,11 +275,11 @@ public class LevelLoader implements AssetUser, Disposable{
 
         // animation spritesheet loading
         playerAnimation = new Animation();
-        playerAnimation.addTexture("idle", AssetRetriever.createTexture(manager, CHARACTER_IDLE_FILE, false), 1,4);
-        playerAnimation.addTexture("run", AssetRetriever.createTexture(manager, CHARACTER_RUN_FILE, false), 1,8);
+        playerAnimation.addTexture("idle", AssetRetriever.createTexture(manager, CHARACTER_IDLE_FILE, false), 1,5);
+        playerAnimation.addTexture("run", AssetRetriever.createTexture(manager, CHARACTER_RUN_FILE, false), 1,4);
         playerAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, CHARACTER_SHOOT_FILE, false), 1,8);
-        playerAnimation.addTexture("rising", AssetRetriever.createTexture(manager, CHARACTER_RISING_FILE, false), 1,2);
-        playerAnimation.addTexture("falling", AssetRetriever.createTexture(manager, CHARACTER_FALLING_FILE, false), 1,4);
+        playerAnimation.addTexture("rising", AssetRetriever.createTexture(manager, CHARACTER_RISING_FILE, false), 1,1);
+        playerAnimation.addTexture("falling", AssetRetriever.createTexture(manager, CHARACTER_FALLING_FILE, false), 1,1);
         playerAnimation.addTexture("midair shoot", AssetRetriever.createTexture(manager, CHARACTER_MIDAIR_FILE, false), 1,4);
         playerAnimation.addTexture("still", playerTexture.getTexture(), 1, 1);
         playerAnimation.setPlaying(false);

@@ -43,10 +43,10 @@ import java.util.ArrayList;
 public class LevelEditorMode extends Mode {
     /** Textures necessary to support the loading screen */
     private static final String BACKGROUND_FILE = "ui/bg/level_editor.png";
-    private static final String PLAYER_FILE = "sprites/char/char_still.png";
+    private static final String PLAYER_FILE = "sprites/char/char_icon.png";
     private static final String ENEMY_FILE = "sprites/enemy/enemy_still.png";
     private static final String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
-    private static final String PLATFORM_FILE = "sprites/fixtures/solid.png";
+    private static final String PLATFORM_FILE = "sprites/fixtures/window_tile.png";
     private static final String CAMERA_FILE = "sprites/security_camera.png";
     private static final String WHITE_PIXEL_FILE = "ui/white_pixel.png";
 
