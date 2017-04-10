@@ -29,6 +29,7 @@ public class MenuMode extends Mode {
 	/** Retro font for displaying messages */
 	private static String FONT_FILE = "fonts/LightPixel7.ttf";
 	private static int FONT_SIZE = 64;
+	private static Color DARK_PURPLE = new Color(123/255f, 118/255f, 131/255f, 1f);
 
 	/** The font for giving messages to the player */
 	protected BitmapFont displayFont;
@@ -99,9 +100,9 @@ public class MenuMode extends Mode {
 		// draw menu items
 		for (int i = 0; i<modeNames.length; i++) {
 			if (selected == i)
-				displayFont.setColor(Color.WHITE);
-			else
 				displayFont.setColor(Color.DARK_GRAY);
+			else
+				displayFont.setColor(DARK_PURPLE);
 			canvas.drawTextCentered(modeNames[i], displayFont,
 					(displayFont.getLineHeight()+ MENU_ITEM_GAP_OFFSET_Y)*-i+MENU_ITEM_START_OFFSET_Y);
 		}

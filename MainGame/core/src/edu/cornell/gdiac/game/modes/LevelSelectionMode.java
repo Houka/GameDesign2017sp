@@ -27,9 +27,9 @@ import java.util.ArrayList;
 public class LevelSelectionMode extends Mode {
 	// TODO: remove this once we have working json file loading in assetmanager
 	private static final ArrayList<String> NUM_LEVELS = FileReaderWriter.getJsonFiles();
-	private static final int TOTAL_COLUMNS = 4;
+	private static final int TOTAL_COLUMNS = 3;
 	private static final int TOTAL_ROWS = (int)Math.ceil((float)NUM_LEVELS.size()/TOTAL_COLUMNS);
-	private static final int BORDER_X = 50;
+	private static final int BORDER_X = 100;
 	private static final int BORDER_Y = 50;
 	private static final int PADDING_Y = 90;
 
@@ -38,6 +38,7 @@ public class LevelSelectionMode extends Mode {
 	/** Retro font for displaying messages */
 	private static String FONT_FILE = "fonts/LightPixel7.ttf";
 	private static int FONT_SIZE = 64;
+	private static Color DARK_PURPLE = new Color(123/255f, 118/255f, 131/255f, 1f);
 
 	/** The font for giving messages to the player */
 	protected BitmapFont displayFont;
@@ -107,9 +108,9 @@ public class LevelSelectionMode extends Mode {
 		for (int i = 0; i < TOTAL_COLUMNS; i++){
 			for (int j = 0; j < TOTAL_ROWS; j++) {
 				if (selected == convertToIndex(i,j))
-					displayFont.setColor(Color.WHITE);
-				else
 					displayFont.setColor(Color.DARK_GRAY);
+				else
+					displayFont.setColor(DARK_PURPLE);
 
 				if (convertToIndex(i,j) < NUM_LEVELS.size()) {
 					canvas.drawText("[" + (convertToIndex(i, j) + 1)+"]", displayFont,
