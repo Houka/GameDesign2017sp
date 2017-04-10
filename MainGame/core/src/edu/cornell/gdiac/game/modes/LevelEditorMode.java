@@ -44,7 +44,8 @@ public class LevelEditorMode extends Mode {
     /** Textures necessary to support the loading screen */
     private static final String BACKGROUND_FILE = "ui/bg/level_editor.png";
     private static final String PLAYER_FILE = "sprites/char/char_icon.png";
-    private static final String ENEMY_FILE = "sprites/enemy/enemy_still.png";
+    private static final String ENEMY_ONSIGHT_FILE = "sprites/enemy/enemy_onsight.png";
+    private static final String ENEMY_INTERVAL_FILE = "sprites/enemy/enemy_interval.png";
     private static final String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
     private static final String PLATFORM_FILE = "sprites/fixtures/window_tile.png";
     private static final String CAMERA_FILE = "sprites/security_camera.png";
@@ -413,7 +414,8 @@ public class LevelEditorMode extends Mode {
     @Override
     public void preLoadContent(AssetManager manager) {
         manager.load(BACKGROUND_FILE,Texture.class);
-        manager.load(ENEMY_FILE,Texture.class);
+        manager.load(ENEMY_INTERVAL_FILE,Texture.class);
+        manager.load(ENEMY_ONSIGHT_FILE,Texture.class);
         manager.load(PLAYER_FILE,Texture.class);
         manager.load(PLATFORM_FILE,Texture.class);
         manager.load(AMMO_DEPOT_FILE,Texture.class);
@@ -433,11 +435,11 @@ public class LevelEditorMode extends Mode {
             displayFont = null;
 
         regions[0] = AssetRetriever.createTextureRegion(manager, PLAYER_FILE, false);
-        regions[1] = AssetRetriever.createTextureRegion(manager, ENEMY_FILE, false);
+        regions[1] = AssetRetriever.createTextureRegion(manager, ENEMY_INTERVAL_FILE, false);
         regions[2] = AssetRetriever.createTextureRegion(manager, PLATFORM_FILE, false);
         regions[3] = AssetRetriever.createTextureRegion(manager, AMMO_DEPOT_FILE, false);
         regions[4] = AssetRetriever.createTextureRegion(manager, CAMERA_FILE, false);
-        regions[5] = AssetRetriever.createTextureRegion(manager, ENEMY_FILE, false);
+        regions[5] = AssetRetriever.createTextureRegion(manager, ENEMY_ONSIGHT_FILE, false);
     }
 
     @Override
@@ -445,8 +447,11 @@ public class LevelEditorMode extends Mode {
         if (manager.isLoaded(BACKGROUND_FILE)) {
             manager.unload(BACKGROUND_FILE);
         }
-        if (manager.isLoaded(ENEMY_FILE)) {
-            manager.unload(ENEMY_FILE);
+        if (manager.isLoaded(ENEMY_INTERVAL_FILE)) {
+            manager.unload(ENEMY_INTERVAL_FILE);
+        }
+        if (manager.isLoaded(ENEMY_ONSIGHT_FILE)) {
+            manager.unload(ENEMY_ONSIGHT_FILE);
         }
         if (manager.isLoaded(PLAYER_FILE)) {
             manager.unload(PLAYER_FILE);

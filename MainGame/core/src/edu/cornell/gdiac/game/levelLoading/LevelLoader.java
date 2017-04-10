@@ -27,10 +27,9 @@ public class LevelLoader implements AssetUser, Disposable{
     private static String PLATFORM_FILE = "sprites/fixtures/window_tile.png";
     private static String GOAL_FILE = "sprites/security_camera.png";
     private static String BACKGROUND_FILE = "sprites/wall/brick_wall_tile.png";
-    private static String ENEMY_STILL_FILE = "sprites/enemy/enemy_still.png";
-    private static String ENEMY_SHOOT_FILE = "sprites/enemy/enemy_shoot.png";
+    private static String ENEMY_ONSIGHT_FILE = "sprites/enemy/enemy_onsight.png";
+    private static String ENEMY_INTERVAL_FILE = "sprites/enemy/enemy_interval.png";
     private static String ENEMY_SPOTTED_FILE = "sprites/enemy/enemy_spotted.png";
-    private static String ENEMY_STUNNED_FILE = "sprites/enemy/enemy_stunned.png";
     private static String CHARACTER_STILL_FILE = "sprites/char/char_still.png";
     private static String CHARACTER_RUN_FILE = "sprites/char/char_run_strip4.png";
     private static String CHARACTER_FALLING_FILE = "sprites/char/char_fall.png";
@@ -44,13 +43,15 @@ public class LevelLoader implements AssetUser, Disposable{
     private TextureRegion platformTile;
     private TextureRegion goalTile;
     private TextureRegion bgTile;
-    private TextureRegion enemyTexture;
+    private TextureRegion enemyOnsightTexture;
+    private TextureRegion enemyIntervalTexture;
     private TextureRegion playerTexture;
     private TextureRegion depotTexture;
 
     /** Animations */
     private Animation playerAnimation;
-    private Animation enemyAnimation;
+    private Animation enemyOnsightAnimation;
+    private Animation enemyIntervalAnimation;
 
     /** Bounds of the window*/
     private Rectangle bounds;
@@ -177,8 +178,8 @@ public class LevelLoader implements AssetUser, Disposable{
      * Adds the enemies to the insertion queue. Currently handles on sight and interval shooters.
      */
     public void addEnemies(){
-        float dwidth  = enemyTexture.getRegionWidth()/scale.x;
-        float dheight = enemyTexture.getRegionHeight()/scale.y;
+        float dwidth  = enemyIntervalTexture.getRegionWidth()/scale.x;
+        float dheight = enemyIntervalTexture.getRegionHeight()/scale.y;
         JsonValue enemies = levelParser.getEnemies();
 
         //add interval shooters
@@ -190,11 +191,13 @@ public class LevelLoader implements AssetUser, Disposable{
             EnemyModel obj = new EnemyModel(enemy.get("x").asInt(), enemy.get("y").asFloat(), dwidth, dheight,
                             enemy.get("isFacingRight").asBoolean(), false, enemy.get("interval").asInt());
             obj.setDrawScale(scale);
-            obj.setTexture(enemyTexture);
-            obj.setAnimation(enemyAnimation);
+            obj.setTexture(enemyIntervalTexture);
+            obj.setAnimation(enemyIntervalAnimation);
             addQueuedObject(obj);
         }
 
+        dwidth  = enemyOnsightTexture.getRegionWidth()/scale.x;
+        dheight = enemyOnsightTexture.getRegionHeight()/scale.y;
         //add on sight shooters
         JsonValue onSight = enemies.get("on_sight");
         iter = onSight.iterator();
@@ -203,8 +206,8 @@ public class LevelLoader implements AssetUser, Disposable{
             EnemyModel obj = new EnemyModel(enemy.get("x").asInt(), enemy.get("y").asFloat(), dwidth, dheight,
                     enemy.get("isFacingRight").asBoolean(), true, 0);
             obj.setDrawScale(scale);
-            obj.setTexture(enemyTexture);
-            obj.setAnimation(enemyAnimation);
+            obj.setTexture(enemyOnsightTexture);
+            obj.setAnimation(enemyOnsightAnimation);
             addQueuedObject(obj);
         }
     }
@@ -249,10 +252,9 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(PLATFORM_FILE,Texture.class);
         manager.load(GOAL_FILE,Texture.class);
         manager.load(BACKGROUND_FILE,Texture.class);
-        manager.load(ENEMY_STILL_FILE,Texture.class);
-        manager.load(ENEMY_SHOOT_FILE,Texture.class);
+        manager.load(ENEMY_INTERVAL_FILE,Texture.class);
+        manager.load(ENEMY_ONSIGHT_FILE,Texture.class);
         manager.load(ENEMY_SPOTTED_FILE,Texture.class);
-        manager.load(ENEMY_STUNNED_FILE,Texture.class);
         manager.load(CHARACTER_STILL_FILE, Texture.class);
         manager.load(CHARACTER_FALLING_FILE, Texture.class);
         manager.load(CHARACTER_IDLE_FILE, Texture.class);
@@ -269,7 +271,8 @@ public class LevelLoader implements AssetUser, Disposable{
         bgTile  = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE,true);
         platformTile = AssetRetriever.createTextureRegion(manager,PLATFORM_FILE,true);
         goalTile  = AssetRetriever.createTextureRegion(manager,GOAL_FILE,false);
-        enemyTexture  = AssetRetriever.createTextureRegion(manager,ENEMY_STILL_FILE,false);
+        enemyIntervalTexture  = AssetRetriever.createTextureRegion(manager,ENEMY_INTERVAL_FILE,false);
+        enemyOnsightTexture  = AssetRetriever.createTextureRegion(manager,ENEMY_ONSIGHT_FILE,false);
         playerTexture = AssetRetriever.createTextureRegion(manager, CHARACTER_STILL_FILE, false);
         depotTexture = AssetRetriever.createTextureRegion(manager, AMMO_DEPOT_FILE, false);
 
@@ -277,21 +280,27 @@ public class LevelLoader implements AssetUser, Disposable{
         playerAnimation = new Animation();
         playerAnimation.addTexture("idle", AssetRetriever.createTexture(manager, CHARACTER_IDLE_FILE, false), 1,5);
         playerAnimation.addTexture("run", AssetRetriever.createTexture(manager, CHARACTER_RUN_FILE, false), 1,4);
-        playerAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, CHARACTER_SHOOT_FILE, false), 1,8);
+        playerAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, CHARACTER_SHOOT_FILE, false), 1,1);
         playerAnimation.addTexture("rising", AssetRetriever.createTexture(manager, CHARACTER_RISING_FILE, false), 1,1);
         playerAnimation.addTexture("falling", AssetRetriever.createTexture(manager, CHARACTER_FALLING_FILE, false), 1,1);
-        playerAnimation.addTexture("midair shoot", AssetRetriever.createTexture(manager, CHARACTER_MIDAIR_FILE, false), 1,4);
+        playerAnimation.addTexture("midair shoot", AssetRetriever.createTexture(manager, CHARACTER_MIDAIR_FILE, false), 1,1);
         playerAnimation.addTexture("still", playerTexture.getTexture(), 1, 1);
         playerAnimation.setPlaying(false);
         playerAnimation.setPlayingAnimation("idle");
 
-        enemyAnimation = new Animation();
-        enemyAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, ENEMY_SHOOT_FILE, false), 1,12);
-        enemyAnimation.addTexture("spotted", AssetRetriever.createTexture(manager, ENEMY_SPOTTED_FILE, false), 1,6);
-        enemyAnimation.addTexture("stunned", AssetRetriever.createTexture(manager, ENEMY_STUNNED_FILE, false), 1,12);
-        enemyAnimation.addTexture("still", enemyTexture.getTexture(), 1, 1);
-        enemyAnimation.setPlaying(false);
-        enemyAnimation.setPlayingAnimation("still");
+        enemyIntervalAnimation= new Animation();
+        enemyIntervalAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, ENEMY_INTERVAL_FILE, false), 1,1);
+        enemyIntervalAnimation.addTexture("spotted", AssetRetriever.createTexture(manager, ENEMY_SPOTTED_FILE, false), 1,1);
+        enemyIntervalAnimation.addTexture("still", enemyIntervalTexture.getTexture(), 1, 1);
+        enemyIntervalAnimation.setPlaying(false);
+        enemyIntervalAnimation.setPlayingAnimation("still");
+
+        enemyOnsightAnimation= new Animation();
+        enemyOnsightAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, ENEMY_ONSIGHT_FILE, false), 1,1);
+        enemyOnsightAnimation.addTexture("spotted", AssetRetriever.createTexture(manager, ENEMY_SPOTTED_FILE, false), 1,1);
+        enemyOnsightAnimation.addTexture("still", enemyOnsightTexture.getTexture(), 1, 1);
+        enemyOnsightAnimation.setPlaying(false);
+        enemyOnsightAnimation.setPlayingAnimation("still");
     }
 
     @Override
@@ -299,10 +308,9 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.unload(BACKGROUND_FILE);
         manager.unload(PLATFORM_FILE);
         manager.unload(GOAL_FILE);
-        manager.unload(ENEMY_STILL_FILE);
-        manager.unload(ENEMY_SHOOT_FILE);
+        manager.unload(ENEMY_ONSIGHT_FILE);
+        manager.unload(ENEMY_INTERVAL_FILE);
         manager.unload(ENEMY_SPOTTED_FILE);
-        manager.unload(ENEMY_STUNNED_FILE);
         manager.unload(CHARACTER_STILL_FILE);
         manager.unload(CHARACTER_FALLING_FILE);
         manager.unload(CHARACTER_IDLE_FILE);
