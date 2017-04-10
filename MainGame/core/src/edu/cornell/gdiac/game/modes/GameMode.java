@@ -13,6 +13,7 @@ package edu.cornell.gdiac.game.modes;
 import java.util.Iterator;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.assets.*;
@@ -52,6 +53,7 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
  * place nicely with the static assets.
  */
 public class GameMode extends Mode implements Settable {
+	public static String GAME_MUSIC_FILE = "music/gameplay_background.mp3";
 	/** Retro font for displaying messages */
 	private static String FONT_FILE = "fonts/RetroGame.ttf";
 
@@ -100,6 +102,9 @@ public class GameMode extends Mode implements Settable {
 	private boolean succeeded;
 	/** Whether we have failed at this world (and need a reset)	 */
 	private boolean failed;
+
+	/** Sound controller */
+	private SoundController soundController;
 
 	/**
 	 * Creates a new game world with the default values.
@@ -161,6 +166,9 @@ public class GameMode extends Mode implements Settable {
 		gameCamera.setAutosnap(false);
 		hudCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
 		hudCamera.setAutosnap(true);
+
+		soundController = SoundController.getInstance();
+		soundController.setTimeLimit(20000);
 
 		succeeded = false;
 		failed = false;
@@ -229,6 +237,7 @@ public class GameMode extends Mode implements Settable {
 
 	@Override
 	public void update(float dt) {
+		soundController.update();
 		for (EntityController e : entityControllers)
 			e.update(dt);
 
@@ -279,15 +288,18 @@ public class GameMode extends Mode implements Settable {
 	public void preLoadContent(AssetManager manager) {
 		paintballFactory.preLoadContent(manager);
 		levelLoader.preLoadContent(manager);
+		manager.load(GAME_MUSIC_FILE, Sound.class);
 	}
 
 	@Override
 	public void loadContent(AssetManager manager) {
+		soundController.allocate(manager, GAME_MUSIC_FILE);
 		paintballFactory.loadContent(manager);
 		levelLoader.loadContent(manager);
 		if (manager.isLoaded(FONT_FILE))
 			hud.setFont(manager.get(FONT_FILE, BitmapFont.class));
 		loadLevel();
+		soundController.play("gameMode", GAME_MUSIC_FILE, true);
 	}
 
 	@Override
@@ -307,6 +319,11 @@ public class GameMode extends Mode implements Settable {
 		else
 			gameCamera.enableRumble();
 
+	}
+
+	@Override
+	public void hide(){
+		soundController.stop("gameMode");
 	}
 
 	/**

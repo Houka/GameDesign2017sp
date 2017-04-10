@@ -2,10 +2,12 @@ package edu.cornell.gdiac.game;
 
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.utils.Disposable;
 import edu.cornell.gdiac.game.interfaces.AssetUser;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
 import edu.cornell.gdiac.game.modes.*;
+import edu.cornell.gdiac.util.SoundController;
 import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 import java.util.HashMap;
@@ -19,7 +21,6 @@ public class GameModeManager implements Disposable, AssetUser{
     public static String LEVEL_EDITOR = "levelEditor";
     public static String GAME_MODE = "gameMode";
     public static String LOADING = "loading";
-
 
     /** AssetManager to be loading in the background */
     private AssetManager manager;
@@ -37,7 +38,6 @@ public class GameModeManager implements Disposable, AssetUser{
         modes = new HashMap<String, Mode>();
         modeExitMapping = new HashMap<String, String>();
         initModes();
-
     }
 
     // BEGIN: setters and getters
@@ -109,7 +109,6 @@ public class GameModeManager implements Disposable, AssetUser{
 
     @Override
     public void loadContent(AssetManager manager) {
-        // the manager has no content to load, it is a model class that manages data
     }
 
     @Override
