@@ -31,7 +31,7 @@ public class EnemyModel extends CapsuleObstacle implements Shooter, Animatable {
     /** The amount to shrink the body fixture (vertically) relative to the image */
     private static final float ENEMY_VSHRINK = 0.95f;
     /** The amount to shrink the body fixture (horizontally) relative to the image */
-    private static final float ENEMY_HSHRINK = 0.7f;
+    private static final float ENEMY_HSHRINK = 0.6f;
     /** The amount to shrink the sensor fixture (horizontally) relative to the image */
     private static final float ENEMY_SSHRINK = 0.6f;
     /** Height of the sensor attached to the player's feet */
