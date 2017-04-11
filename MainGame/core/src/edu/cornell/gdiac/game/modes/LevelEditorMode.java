@@ -321,9 +321,10 @@ public class LevelEditorMode extends Mode {
                 System.out.println("mouse coords: " + getScaledCoordinates(getWorldCoordinates(new Vector2(mouseX,canvas.getHeight()-mouseY))));
                 Vector2 scaledMouse = getScaledCoordinates(getWorldCoordinates(new Vector2(mouseX,canvas.getHeight()-mouseY)));
                 if(o instanceof PlatformModel) {
-                    float newW = ((PlatformModel) o).getWidth()/scaleVector.x;
-                    float newH = ((PlatformModel) o).getHeight()/scaleVector.y;
-                    bounds = new Rectangle(o.getX(), o.getY()-(newH/2), newW, newH);
+                    float[] points = ((PlatformModel)o).getPoints();
+                    float newW = points[2]-points[0];
+                    float newH = points[3]-points[7];
+                    bounds = new Rectangle(points[6]+(newW/2), points[5], newW, newH);
                 }
                 else if(o instanceof GoalModel) {
                     float newW = ((GoalModel) o).getWidth()/scaleVector.x;
@@ -347,7 +348,6 @@ public class LevelEditorMode extends Mode {
                 }
                 System.out.println("bounds: " + bounds);
                 if(bounds.contains(scaledMouse)) {
-                    System.out.println("removed obj");
                     objects.remove(o);
                 }
             }
