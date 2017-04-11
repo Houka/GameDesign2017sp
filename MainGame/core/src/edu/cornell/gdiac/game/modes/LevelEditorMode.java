@@ -19,6 +19,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import edu.cornell.gdiac.game.Camera2;
@@ -163,7 +164,7 @@ public class LevelEditorMode extends Mode {
 
     private Vector2 getWorldCoordinates(Vector2 pos){
         return new Vector2(pos.x+worldCamera.getTargetLocation().x-canvas.getWidth()/2,
-                            pos.y-worldCamera.getTargetLocation().y+canvas.getHeight()/2);
+                pos.y-worldCamera.getTargetLocation().y+canvas.getHeight()/2);
     }
 
     private String getLoadFileName(){
@@ -260,10 +261,7 @@ public class LevelEditorMode extends Mode {
                 }
             }
         }
-        if(!input.didTouch()) {
-            textureClicked = false;
-        }
-        if(!input.didTouch() &&  mouseX <= canvas.getWidth()-170 && underMouse != null) {
+        if(input.didTouch() && mouseX <= canvas.getWidth()-170 && underMouse != null && textureClicked) {
             Vector2 newPos = getScaledCoordinates(mousePos);
             if(underMouse.equals(regions[0])) {
                 PlayerModel newP = new PlayerModel(newPos.x,newPos.y,
@@ -313,6 +311,46 @@ public class LevelEditorMode extends Mode {
                 objects.add(newP);
             }
             underMouse = null;
+            textureClicked = false;
+        }
+
+        if(input.didRightClick() && underMouse == null) {
+            Rectangle bounds = new Rectangle();
+            for(Obstacle o: objects) {
+                System.out.println("obj coords: " + o.getPosition());
+                System.out.println("mouse coords: " + getScaledCoordinates(getWorldCoordinates(new Vector2(mouseX,canvas.getHeight()-mouseY))));
+                Vector2 scaledMouse = getScaledCoordinates(getWorldCoordinates(new Vector2(mouseX,canvas.getHeight()-mouseY)));
+                if(o instanceof PlatformModel) {
+                    float newW = ((PlatformModel) o).getWidth()/scaleVector.x;
+                    float newH = ((PlatformModel) o).getHeight()/scaleVector.y;
+                    bounds = new Rectangle(o.getX(), o.getY()-(newH/2), newW, newH);
+                }
+                else if(o instanceof GoalModel) {
+                    float newW = ((GoalModel) o).getWidth()/scaleVector.x;
+                    float newH = ((GoalModel) o).getHeight()/scaleVector.y;
+                    bounds = new Rectangle(o.getX(),o.getY()-(newH/2), newW, newH);
+                }
+                else if(o instanceof AmmoDepotModel) {
+                    float newW = ((AmmoDepotModel) o).getWidth()/scaleVector.x;
+                    float newH = ((AmmoDepotModel) o).getHeight()/scaleVector.y;
+                    bounds = new Rectangle(o.getX(),o.getY()-(newH/2), newW, newH);
+                }
+                else if(o instanceof EnemyModel) {
+                    float newW = ((EnemyModel) o).getWidth()/scaleVector.x;
+                    float newH = ((EnemyModel) o).getHeight()/scaleVector.y;
+                    bounds = new Rectangle(o.getX()-(newW/2),o.getY()-(newH/2), newW, newH);
+                }
+                else if(o instanceof PlayerModel) {
+                    float newW = ((PlayerModel) o).getWidth()/scaleVector.x;
+                    float newH = ((PlayerModel) o).getHeight()/scaleVector.y;
+                    bounds = new Rectangle(o.getX(),o.getY()-(newH/2), newW, newH);
+                }
+                System.out.println("bounds: " + bounds);
+                if(bounds.contains(scaledMouse)) {
+                    System.out.println("removed obj");
+                    objects.remove(o);
+                }
+            }
         }
 
         // scrolling the sidebar
