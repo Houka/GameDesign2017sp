@@ -269,6 +269,8 @@ public class LevelEditorMode extends Mode {
                 newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
                 objects.add(newP);
+                underMouse = null;
+                textureClicked = false;
             }
             else if(underMouse.equals(regions[1])) {
                 int interval = 3;
@@ -300,6 +302,8 @@ public class LevelEditorMode extends Mode {
                 newG.setDrawScale(scaleVector);
                 newG.setTexture(underMouse);
                 objects.add(newG);
+                underMouse = null;
+                textureClicked = false;
             }
             else if(underMouse.equals(regions[2])) {
                 float offset = .75f;
@@ -309,9 +313,8 @@ public class LevelEditorMode extends Mode {
                 newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
                 objects.add(newP);
+
             }
-            underMouse = null;
-            textureClicked = false;
         }
 
         if(input.didRightClick() && underMouse == null) {
