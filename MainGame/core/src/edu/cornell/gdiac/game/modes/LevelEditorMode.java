@@ -51,6 +51,8 @@ public class LevelEditorMode extends Mode {
     private static final String PLATFORM_FILE = "sprites/fixtures/window_tile.png";
     private static final String CAMERA_FILE = "sprites/security_camera.png";
     private static final String WHITE_PIXEL_FILE = "ui/white_pixel.png";
+    private static final String WALL_FILE = "sprites/fixtures/solid.png";
+
 
     /** size of the grid */
     private static final int DEFAULT_GRID = 48;
@@ -128,8 +130,8 @@ public class LevelEditorMode extends Mode {
 
         input = EditorInputController.getInstance();
         textureClicked = false;
-        regions = new TextureRegion[6];
-        startHeights = new int[6];
+        regions = new TextureRegion[7];
+        startHeights = new int[7];
 
         worldCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
         worldCamera.setAutosnap(false);
@@ -312,6 +314,15 @@ public class LevelEditorMode extends Mode {
                 newP.setTexture(underMouse);
                 objects.add(newP);
             }
+            else if(underMouse.equals(regions[6])) {
+                float offset = .75f;
+                float[] arr = {newPos.x-offset, newPos.y+offset, newPos.x+offset, newPos.y+offset,
+                        newPos.x+offset, newPos.y-offset, newPos.x-offset, newPos.y-offset};
+                WallModel newW = new WallModel(arr);
+                newW.setDrawScale(scaleVector);
+                newW.setTexture(underMouse);
+                objects.add(newW);
+            }
             underMouse = null;
         }
 
@@ -346,6 +357,7 @@ public class LevelEditorMode extends Mode {
 
         // Draw the sidebar textures into the right sidebar
         int startHeight = this.startHeight;
+
         for (int i=0; i<regions.length; i++) {
             canvas.draw(regions[i], canvas.getWidth()-125, startHeight);
             startHeights[i] = startHeight;
@@ -387,6 +399,7 @@ public class LevelEditorMode extends Mode {
         manager.load(AMMO_DEPOT_FILE,Texture.class);
         manager.load(CAMERA_FILE,Texture.class);
         manager.load(WHITE_PIXEL_FILE,Texture.class);
+        manager.load(WALL_FILE,Texture.class);
         levelLoader.preLoadContent(manager);
     }
 
@@ -402,6 +415,7 @@ public class LevelEditorMode extends Mode {
         regions[3] = AssetRetriever.createTextureRegion(manager, AMMO_DEPOT_FILE, false);
         regions[4] = AssetRetriever.createTextureRegion(manager, CAMERA_FILE, false);
         regions[5] = AssetRetriever.createTextureRegion(manager, ENEMY_ONSIGHT_FILE, false);
+        regions[6] = AssetRetriever.createTextureRegion(manager, WALL_FILE, false);
     }
 
     @Override
@@ -423,6 +437,10 @@ public class LevelEditorMode extends Mode {
         }
         if (manager.isLoaded(PLATFORM_FILE)) {
             manager.unload(PLATFORM_FILE);
+        }
+        if (manager.isLoaded(WALL_FILE)) {
+            manager.unload(WALL_FILE);
+            manager.unload(WALL_FILE);
         }
         if (manager.isLoaded(CAMERA_FILE)) {
             manager.unload(CAMERA_FILE);
