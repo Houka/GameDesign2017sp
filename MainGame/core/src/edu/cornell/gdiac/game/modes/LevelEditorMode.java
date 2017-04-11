@@ -53,7 +53,7 @@ public class LevelEditorMode extends Mode {
     private static final String WHITE_PIXEL_FILE = "ui/white_pixel.png";
 
     /** size of the grid */
-    private static final int DEFAULT_GRID = 50;
+    private static final int DEFAULT_GRID = 48;
     /** Width of the game world in Box2d units	 */
     private static final float DEFAULT_WIDTH = 32.0f;
     /** Height of the game world in Box2d units	 */
@@ -151,7 +151,7 @@ public class LevelEditorMode extends Mode {
         Vector2 newPos = pos;
 
         newPos.x = tileX * gridCell;
-        newPos.y = tileY * gridCell + gridCell/2;
+        newPos.y = tileY * gridCell;
         newPos.y = canvas.getHeight()-newPos.y;
 
         return newPos;
