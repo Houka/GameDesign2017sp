@@ -25,6 +25,7 @@ import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
 public class LevelLoader implements AssetUser, Disposable{
     /** Filenames for sprites of objects */
     private static String PLATFORM_FILE = "sprites/fixtures/window_tile.png";
+    private static String WALL_FILE = "sprites/fixtures/solid.png";
     private static String GOAL_FILE = "sprites/security_camera.png";
     private static String BACKGROUND_FILE = "sprites/wall/brick_wall_tile.png";
     private static String ENEMY_ONSIGHT_FILE = "sprites/enemy/enemy_onsight.png";
@@ -41,6 +42,7 @@ public class LevelLoader implements AssetUser, Disposable{
 
     /** Textures */
     private TextureRegion platformTile;
+    private TextureRegion wallTile;
     private TextureRegion goalTile;
     private TextureRegion bgTile;
     private TextureRegion enemyOnsightTexture;
@@ -156,7 +158,7 @@ public class LevelLoader implements AssetUser, Disposable{
             vertices = iter.next();
             PolygonObstacle obj = new WallModel(vertices.asFloatArray());
             obj.setDrawScale(scale);
-            obj.setTexture(platformTile);
+            obj.setTexture(wallTile);
             addQueuedObject(obj);
         }
     }
@@ -250,6 +252,7 @@ public class LevelLoader implements AssetUser, Disposable{
     public void preLoadContent(AssetManager manager) {
         // Load the shared tiles.
         manager.load(PLATFORM_FILE,Texture.class);
+        manager.load(WALL_FILE,Texture.class);
         manager.load(GOAL_FILE,Texture.class);
         manager.load(BACKGROUND_FILE,Texture.class);
         manager.load(ENEMY_INTERVAL_FILE,Texture.class);
@@ -270,6 +273,7 @@ public class LevelLoader implements AssetUser, Disposable{
         // static texture loading
         bgTile  = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE,true);
         platformTile = AssetRetriever.createTextureRegion(manager,PLATFORM_FILE,true);
+        wallTile = AssetRetriever.createTextureRegion(manager,WALL_FILE,true);
         goalTile  = AssetRetriever.createTextureRegion(manager,GOAL_FILE,false);
         enemyIntervalTexture  = AssetRetriever.createTextureRegion(manager,ENEMY_INTERVAL_FILE,false);
         enemyOnsightTexture  = AssetRetriever.createTextureRegion(manager,ENEMY_ONSIGHT_FILE,false);
