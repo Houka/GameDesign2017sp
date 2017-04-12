@@ -335,8 +335,6 @@ public class LevelEditorMode extends Mode {
         if(input.didRightClick()) {
             Rectangle bounds = new Rectangle();
             for(Obstacle o: objects) {
-                System.out.println("obj coords: " + o.getPosition());
-                System.out.println("mouse coords: " + getScaledCoordinates(getWorldCoordinates(new Vector2(mouseX,canvas.getHeight()-mouseY))));
                 Vector2 scaledMouse = getScaledCoordinates(getWorldCoordinates(new Vector2(mouseX,canvas.getHeight()-mouseY)));
                 if(o instanceof PlatformModel) {
                     float[] points = ((PlatformModel)o).getPoints();
@@ -364,7 +362,6 @@ public class LevelEditorMode extends Mode {
                     float newH = ((PlayerModel) o).getHeight()/scaleVector.y;
                     bounds = new Rectangle(o.getX(),o.getY()-(newH/2), newW, newH);
                 }
-                System.out.println("bounds: " + bounds);
                 if(bounds.contains(scaledMouse)) {
                     objects.remove(o);
                 }
