@@ -134,7 +134,7 @@ public class LevelEditorMode extends Mode {
         startHeights = new int[7];
 
         worldCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
-        worldCamera.setAutosnap(false);
+        worldCamera.setAutosnap(true);
         hudCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
         hudCamera.setAutosnap(true);
         cameraPos = new Vector2(canvas.getWidth()/2,canvas.getHeight()/2);
@@ -147,9 +147,13 @@ public class LevelEditorMode extends Mode {
         gridCell = dim;
     }
 
+    private float mod(float x,int n) {
+        return x>0 ? x % n : x % n + n;
+    }
+
     private Vector2 getCell(Vector2 pos) {
-        int tileX = (int) pos.x/gridCell;
-        int tileY = (int) pos.y/gridCell;
+        int tileX = (int) (pos.x-mod(pos.x,gridCell))/gridCell;
+        int tileY = (int) (pos.y-mod(pos.y,gridCell))/gridCell;
         Vector2 newPos = pos;
 
         newPos.x = tileX * gridCell;
@@ -164,8 +168,8 @@ public class LevelEditorMode extends Mode {
     }
 
     private Vector2 getWorldCoordinates(Vector2 pos){
-        return new Vector2(pos.x+worldCamera.getTargetLocation().x-canvas.getWidth()/2,
-                            pos.y-worldCamera.getTargetLocation().y+canvas.getHeight()/2);
+        return new Vector2(pos.x+worldCamera.position.x-canvas.getWidth()/2,
+                            pos.y-worldCamera.position.y+canvas.getHeight()/2);
     }
 
     private String getLoadFileName(){
@@ -246,7 +250,7 @@ public class LevelEditorMode extends Mode {
 
     private void updateMouseInput(){
         int mouseX = Gdx.input.getX()+gridCell/2;
-        int mouseY = Gdx.input.getY();
+        int mouseY = Gdx.input.getY()+gridCell/2;
         mousePos = getCell(getWorldCoordinates(new Vector2(mouseX, mouseY)));
 
         if(input.didTouch() && mouseX >= canvas.getWidth()-125) {
