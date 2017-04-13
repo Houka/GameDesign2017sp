@@ -227,6 +227,11 @@ public class LevelEditorMode extends Mode {
         updateKeyInput();
     }
 
+    private String setInterval() {
+        String result = JOptionPane.showInputDialog("Enter an interval time in seconds.");
+        return result;
+    }
+
     private void updateKeyInput(){
         // camera movement
         if(input.didUp())
@@ -270,7 +275,7 @@ public class LevelEditorMode extends Mode {
         if(input.didTouch() && mouseX <= canvas.getWidth()-170 && underMouse != null && textureClicked) {
             Vector2 newPos = getScaledCoordinates(mousePos);
             if(underMouse.equals(regions[0])) {
-                PlayerModel newP = new PlayerModel(newPos.x,newPos.y,
+                PlayerModel newP = new PlayerModel(newPos.x,getScaledCoordinates(new Vector2(mousePos.x, mousePos.y+(underMouse.getRegionHeight()/4))).y,
                         underMouse.getRegionWidth(), underMouse.getRegionHeight());
                 newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
@@ -287,7 +292,7 @@ public class LevelEditorMode extends Mode {
                 objects.add(newE);
             }
             else if(underMouse.equals(regions[5])) {
-                int interval = 200;
+                int interval = Integer.parseInt(setInterval());
                 EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
                         underMouse.getRegionWidth(), underMouse.getRegionHeight(), true, false, interval);
                 newE.setDrawScale(scaleVector);
@@ -338,6 +343,12 @@ public class LevelEditorMode extends Mode {
                 Vector2 scaledMouse = getScaledCoordinates(getWorldCoordinates(new Vector2(mouseX,canvas.getHeight()-mouseY)));
                 if(o instanceof PlatformModel) {
                     float[] points = ((PlatformModel)o).getPoints();
+                    float newW = points[2]-points[0];
+                    float newH = points[3]-points[7];
+                    bounds = new Rectangle(points[6]+(newW/2), points[5], newW, newH);
+                }
+                else if(o instanceof WallModel) {
+                    float[] points = ((WallModel)o).getPoints();
                     float newW = points[2]-points[0];
                     float newH = points[3]-points[7];
                     bounds = new Rectangle(points[6]+(newW/2), points[5], newW, newH);
