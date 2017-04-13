@@ -53,18 +53,18 @@ public class Sidebar {
         created = true;
 
         //Below fields are just samples
-        Sidebar.addSlider("Gravity",-30f,0f,-20.0f);
-        Sidebar.addSlider("Jump Height",20f,50f, 30f);
-        Sidebar.addSlider("Player Speed",1f,10f,5.0f);
+        Sidebar.addSlider("Gravity",-30f,0f,-24.0f);
+        Sidebar.addSlider("Jump Height",20f,70f, 60f);
+        Sidebar.addSlider("Player Speed",1f,10f,8.0f);
         Sidebar.addSlider("Knockback Force",0f,30f, 8f);
         Sidebar.addSlider("Knockback Friction",0f,.1f, .06f);
         Sidebar.addSlider("Knockback Duration",0f,80f, 3f);
         Sidebar.addSlider("Knockback Stun Duration",0f,60f, 30f);
-        Sidebar.addSlider("Paintball Height",.1f,.5f,.25f);
-        Sidebar.addSlider("Paintball Width",.5f,6.5f,3f);
-        Sidebar.addSlider("Paintball Speed",1f,7.5f,3.2f);
-        Sidebar.addSlider("Paintball-paintball Stick Time",0f,10f,5f);
-        Sidebar.addSlider("Paintball-Wall Stick Time",0f,10f,5f);
+        Sidebar.addSlider("Paintball Height",.1f,.5f,.22f);
+        Sidebar.addSlider("Paintball Width",.5f,6.5f,3.5f);
+        Sidebar.addSlider("Paintball Speed",1f,7.5f,3.6f);
+        Sidebar.addSlider("Paintball-paintball Stick Time",0f,10f,3.6f);
+        Sidebar.addSlider("Paintball-Wall Stick Time",0f,10f,2f);
         Sidebar.addSlider("Camera Speed",0f,.3f,.1f);
         Sidebar.addSlider("Rumble Intensity",0f,100f,0f);
         Sidebar.addSlider("Rumble Interval",0f,10f,3f);

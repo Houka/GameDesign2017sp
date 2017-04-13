@@ -118,7 +118,7 @@ public class EnemyModel extends CapsuleObstacle implements Shooter, Animatable {
         }
 
         // Ground Fixture
-        Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
+        Vector2 sensorCenter = new Vector2(0, -getHeight() / 2 );
         FixtureDef sensorDef = new FixtureDef();
         sensorDef.density = ENEMY_DENSITY;
         sensorDef.isSensor = true;

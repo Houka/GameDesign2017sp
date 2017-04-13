@@ -28,6 +28,7 @@ import edu.cornell.gdiac.game.input.EditorInputController;
 import edu.cornell.gdiac.game.levelLoading.LevelCreator;
 import edu.cornell.gdiac.game.levelLoading.LevelLoader;
 import edu.cornell.gdiac.util.AssetRetriever;
+import edu.cornell.gdiac.util.FileReaderWriter;
 import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 
@@ -50,25 +51,18 @@ public class LevelEditorMode extends Mode {
     private static final String PLATFORM_FILE = "sprites/fixtures/window_tile.png";
     private static final String CAMERA_FILE = "sprites/security_camera.png";
     private static final String WHITE_PIXEL_FILE = "ui/white_pixel.png";
+    private static final String WALL_FILE = "sprites/fixtures/solid.png";
+
 
     /** size of the grid */
-    private static final int DEFAULT_GRID = 50;
+    private static final int DEFAULT_GRID = 48;
     /** Width of the game world in Box2d units	 */
     private static final float DEFAULT_WIDTH = 32.0f;
     /** Height of the game world in Box2d units	 */
     private static final float DEFAULT_HEIGHT = 18.0f;
 
-    /** Retro font for displaying messages */
-    private static final String FONT_FILE = "fonts/RetroGame.ttf";
-
-    /** Director of json files */
-    private static final String JSON_DIRECTORY = "JSON";
-
     /** Speed at which to move the camera */
     private static final int CAMERA_SPEED = DEFAULT_GRID;
-
-    /** The font for giving messages to the player */
-    private BitmapFont displayFont;
 
     /** Texture for sidebar background*/
     private TextureRegion sidebarTexture;
@@ -136,11 +130,11 @@ public class LevelEditorMode extends Mode {
 
         input = EditorInputController.getInstance();
         textureClicked = false;
-        regions = new TextureRegion[6];
-        startHeights = new int[6];
+        regions = new TextureRegion[7];
+        startHeights = new int[7];
 
         worldCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
-        worldCamera.setAutosnap(false);
+        worldCamera.setAutosnap(true);
         hudCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
         hudCamera.setAutosnap(true);
         cameraPos = new Vector2(canvas.getWidth()/2,canvas.getHeight()/2);
@@ -153,39 +147,17 @@ public class LevelEditorMode extends Mode {
         gridCell = dim;
     }
 
-    /**
-     * Gets a list of all files in the JSON directory in the assets folder.
-     * @return Pretty formated string of the list of all current files in the JSON directory
-     */
-    private String getAllJsonFiles(){
-        String result = "";
-        for(Object s:getJsonFiles(new ArrayList<String>(), Gdx.files.local(JSON_DIRECTORY).file()).toArray()){
-            result+="        "+s+"\n";
-        }
-        return result+"\n";
-    }
-
-    private ArrayList<String> getJsonFiles(ArrayList<String> list, File directory)
-    {
-        for(File file: directory.listFiles()){
-            if (file.isDirectory())
-            {
-                getJsonFiles(list, file);
-            }
-            String path = file.getPath();
-            list.add(path.substring(path.indexOf(JSON_DIRECTORY),path.length()));
-        }
-
-        return list;
+    private float mod(float x,int n) {
+        return x>0 ? x % n : x % n + n;
     }
 
     private Vector2 getCell(Vector2 pos) {
-        int tileX = (int) pos.x/gridCell;
-        int tileY = (int) pos.y/gridCell;
+        int tileX = (int) (pos.x-mod(pos.x,gridCell))/gridCell;
+        int tileY = (int) (pos.y-mod(pos.y,gridCell))/gridCell;
         Vector2 newPos = pos;
 
         newPos.x = tileX * gridCell;
-        newPos.y = tileY * gridCell + gridCell/2;
+        newPos.y = tileY * gridCell;
         newPos.y = canvas.getHeight()-newPos.y;
 
         return newPos;
@@ -196,14 +168,14 @@ public class LevelEditorMode extends Mode {
     }
 
     private Vector2 getWorldCoordinates(Vector2 pos){
-        return new Vector2(pos.x+worldCamera.getTargetLocation().x-canvas.getWidth()/2,
-                            pos.y-worldCamera.getTargetLocation().y+canvas.getHeight()/2);
+        return new Vector2(pos.x+worldCamera.position.x-canvas.getWidth()/2,
+                            pos.y-worldCamera.position.y+canvas.getHeight()/2);
     }
 
     private String getLoadFileName(){
         setUpPopUpFrame();
         String response = JOptionPane.showInputDialog(dummyFrame,
-                "What's the relative file path of the file you want to load? \n\n List of all level files:\n"+getAllJsonFiles());
+                "What's the relative file path of the file you want to load? \n\n List of all level files:\n"+ FileReaderWriter.getJsonFilesString());
         dummyFrame.dispose();
         return response;
     }
@@ -278,7 +250,7 @@ public class LevelEditorMode extends Mode {
 
     private void updateMouseInput(){
         int mouseX = Gdx.input.getX()+gridCell/2;
-        int mouseY = Gdx.input.getY();
+        int mouseY = Gdx.input.getY()+gridCell/2;
         mousePos = getCell(getWorldCoordinates(new Vector2(mouseX, mouseY)));
 
         if(input.didTouch() && mouseX >= canvas.getWidth()-125) {
@@ -346,6 +318,15 @@ public class LevelEditorMode extends Mode {
                 newP.setTexture(underMouse);
                 objects.add(newP);
             }
+            else if(underMouse.equals(regions[6])) {
+                float offset = .75f;
+                float[] arr = {newPos.x-offset, newPos.y+offset, newPos.x+offset, newPos.y+offset,
+                        newPos.x+offset, newPos.y-offset, newPos.x-offset, newPos.y-offset};
+                WallModel newW = new WallModel(arr);
+                newW.setDrawScale(scaleVector);
+                newW.setTexture(underMouse);
+                objects.add(newW);
+            }
             underMouse = null;
         }
 
@@ -380,6 +361,7 @@ public class LevelEditorMode extends Mode {
 
         // Draw the sidebar textures into the right sidebar
         int startHeight = this.startHeight;
+
         for (int i=0; i<regions.length; i++) {
             canvas.draw(regions[i], canvas.getWidth()-125, startHeight);
             startHeights[i] = startHeight;
@@ -421,6 +403,7 @@ public class LevelEditorMode extends Mode {
         manager.load(AMMO_DEPOT_FILE,Texture.class);
         manager.load(CAMERA_FILE,Texture.class);
         manager.load(WHITE_PIXEL_FILE,Texture.class);
+        manager.load(WALL_FILE,Texture.class);
         levelLoader.preLoadContent(manager);
     }
 
@@ -429,10 +412,6 @@ public class LevelEditorMode extends Mode {
         levelLoader.loadContent(manager);
         sidebarTexture = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true);
         whitePixelTexture = AssetRetriever.createTextureRegion(manager, WHITE_PIXEL_FILE, true);
-        if (manager.isLoaded(FONT_FILE))
-            displayFont = manager.get(FONT_FILE, BitmapFont.class);
-        else
-            displayFont = null;
 
         regions[0] = AssetRetriever.createTextureRegion(manager, PLAYER_FILE, false);
         regions[1] = AssetRetriever.createTextureRegion(manager, ENEMY_INTERVAL_FILE, false);
@@ -440,6 +419,7 @@ public class LevelEditorMode extends Mode {
         regions[3] = AssetRetriever.createTextureRegion(manager, AMMO_DEPOT_FILE, false);
         regions[4] = AssetRetriever.createTextureRegion(manager, CAMERA_FILE, false);
         regions[5] = AssetRetriever.createTextureRegion(manager, ENEMY_ONSIGHT_FILE, false);
+        regions[6] = AssetRetriever.createTextureRegion(manager, WALL_FILE, false);
     }
 
     @Override
@@ -462,6 +442,10 @@ public class LevelEditorMode extends Mode {
         if (manager.isLoaded(PLATFORM_FILE)) {
             manager.unload(PLATFORM_FILE);
         }
+        if (manager.isLoaded(WALL_FILE)) {
+            manager.unload(WALL_FILE);
+            manager.unload(WALL_FILE);
+        }
         if (manager.isLoaded(CAMERA_FILE)) {
             manager.unload(CAMERA_FILE);
         }
@@ -471,7 +455,7 @@ public class LevelEditorMode extends Mode {
     }
 
     private void saveLevel() {
-        String saveFileName = JSON_DIRECTORY+"/"+getSaveFileName();
+        String saveFileName = FileReaderWriter.JSON_DIRECTORY+"/"+getSaveFileName();
         ArrayList<PlatformModel> platforms = new ArrayList<PlatformModel>();
         ArrayList<WallModel> walls = new ArrayList<WallModel>();
         PlayerModel player = null;

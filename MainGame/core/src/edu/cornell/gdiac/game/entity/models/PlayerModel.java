@@ -33,7 +33,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
     /** Cooldown (in animation frames) for jumping */
     private static final int JUMP_COOLDOWN = 10;
     /** Cooldown (in animation frames) for shooting */
-    private static final int SHOOT_COOLDOWN = 50;
+    private static final int SHOOT_COOLDOWN = 40;
     /** Height of the sensor attached to the player's feet */
     private static final float SENSOR_HEIGHT = 0.05f;
     /** Identifier to allow us to track the sensor in ContactListener */
