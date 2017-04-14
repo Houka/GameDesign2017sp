@@ -93,7 +93,7 @@ public class CollisionController implements ContactListener {
         }
         else{
             obj1.setKnockedBack(0);
-            if(!obj2.isDying() && obj1.getX()*sign>obj2.getX()*sign+obj2.getHeadSize()*-sign+(sign>0?obj2.getWidth()/2f:0))
+            if(!obj2.isPlayerBullet() && !obj2.isDying() && obj1.getX()*sign>obj2.getX()*sign+obj2.getHeadSize()*-sign+(sign>0?obj2.getWidth()/2f:0))
                 obj1.setKnockedBack(sign);
         }
     }
@@ -296,7 +296,37 @@ public class CollisionController implements ContactListener {
     }
 
     @Override
-    public void preSolve(Contact contact, Manifold oldManifold) {}
+    public void preSolve(Contact contact, Manifold oldManifold) {
+        Fixture fix1 = contact.getFixtureA();
+        Fixture fix2 = contact.getFixtureB();
+
+        Body body1 = fix1.getBody();
+        Body body2 = fix2.getBody();
+
+        try {
+            Obstacle bd1 = (Obstacle) body1.getUserData();
+            Obstacle bd2 = (Obstacle) body2.getUserData();
+
+            PlayerModel player;
+            PaintballModel paintball;
+
+            if(bd1.getName().equals("player") && bd2.getName().equals("paintball")) {
+               player = (PlayerModel) bd1;
+               paintball = (PaintballModel) bd2;
+            } else if (bd2.getName().equals("player") && bd1.getName().equals("paintball")) {
+                player = (PlayerModel) bd2;
+                paintball = (PaintballModel) bd1;
+            } else {
+                return;
+            }
+            if(player.getVY()>=0 && paintball.isPlayerBullet()) {
+                contact.setEnabled(false);
+            }
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {}
 }
