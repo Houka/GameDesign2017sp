@@ -88,6 +88,8 @@ public class GameModeManager implements Disposable, AssetUser{
     }
 
     private void initModes(){
+        Sidebar.initializeVariables();
+
         GameMode gameMode = new GameMode(GAME_MODE, canvas,manager);
         modes.put(MENU, new MenuMode(MENU, canvas, manager));
         modes.put(LEVEL_EDITOR, new LevelEditorMode(LEVEL_EDITOR, canvas, manager));

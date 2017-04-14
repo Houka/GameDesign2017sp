@@ -93,6 +93,30 @@ public class Sidebar {
         });
     }
 
+    public static void initializeVariables(){
+        Sidebar.addVariable("Gravity",-20.0f);
+        Sidebar.addVariable("Jump Height", 60f);
+        Sidebar.addVariable("Player Speed",5.0f);
+        Sidebar.addVariable("Knockback Force", 8f);
+        Sidebar.addVariable("Knockback Friction", .06f);
+        Sidebar.addVariable("Knockback Duration", 3f);
+        Sidebar.addVariable("Knockback Stun Duration",30f);
+        Sidebar.addVariable("Paintball Height",.25f);
+        Sidebar.addVariable("Paintball Width",3f);
+        Sidebar.addVariable("Paintball Speed",3.2f);
+        Sidebar.addVariable("Paintball-paintball Stick Time",5f);
+        Sidebar.addVariable("Paintball-Wall Stick Time",5f);
+        Sidebar.addVariable("Camera Speed",.1f);
+        Sidebar.addVariable("Rumble Intensity",0f);
+        Sidebar.addVariable("Rumble Interval",3f);
+    }
+
+    public static void addVariable(String myReference, float value) {
+        if(theMap==null)
+            theMap = new HashMap<String, Float>();
+        theMap.put(myReference,value);
+    }
+
     /**
     *Create a slider which represents a variable
     *@param myReference     String to call new variable by
