@@ -107,37 +107,61 @@ public class CollisionController implements ContactListener {
         obj2.markRemoved(true);
     }
     private void handleCollision(PaintballModel obj1, PaintballModel obj2){
-        if(obj1.isDead() || obj2.isDead())
+        if(obj1.recentlyCreated())
+            obj1.instakill();
+        if(obj2.recentlyCreated())
+            obj2.instakill();
+
+        if(obj1.isDead() || obj2.isDead() || obj1.getRecentCollision() || obj2.getRecentCollision())
             return;
+
+        float newWidth = obj1.getWidth()+obj2.getWidth();
+        float midPoint;
+        if(obj1.getX()<obj2.getX())
+            midPoint =obj1.getX()-obj1.getWidth()/2f + newWidth/2f;
+        else
+            midPoint =obj2.getX()-obj2.getWidth()/2f + newWidth/2f;
 
         float oneSign = obj1.getVX() / Math.abs(obj1.getVX());
         float twoSign = obj2.getVX() / Math.abs(obj2.getVX());
         if(oneSign == twoSign) {
             if(obj1.getPosition().x*oneSign<obj2.getPosition().x*oneSign) {
-                obj2.setTimeToDie(0);
-            } else {
-                obj1.setTimeToDie(0);
+                obj2.instakill();
+                obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
+                obj1.setTimeToDie(obj1.getPaintballToPaintballDuration());
             }
             return;
         }
 
-        if(obj2.isDying())
-            obj1.setTimeToDie(obj2.getTimeToDie());
-        else
+        if(obj2.isDying()) {
+            obj1.instakill();
+            obj2.newSize(midPoint,obj2.getPosition().y,obj1.getWidth()+obj2.getWidth());
+        }
+        else if(obj1.isDying()) {
+            obj2.instakill();
+            obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
+        } else {
+            obj2.instakill();
+            obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
             obj1.setTimeToDie(obj1.getPaintballToPaintballDuration());
+        }
 
-        if(obj1.isDying())
-            obj2.setTimeToDie(obj1.getTimeToDie());
-        else
-            obj2.setTimeToDie(obj2.getPaintballToPaintballDuration());
         obj1.fixX(0f);
         obj2.fixX(0f);
+        obj1.markRecentCollision();
+        obj2.markRecentCollision();
     }
     private void handleCollision(PlatformModel obj1, PaintballModel obj2){
+        if(obj2.recentlyCreated())
+            obj2.instakill();
+
         obj2.setTimeToDie(obj2.getPaintballToWallDuration());
         obj2.fixX(0f);
     }
     private void handleCollision(WallModel obj1, PaintballModel obj2){
+        if(obj2.recentlyCreated())
+            obj2.instakill();
+
         obj2.setTimeToDie(obj2.getPaintballToPlatformDuration());
         obj2.fixX(0f);
     }

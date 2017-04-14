@@ -68,6 +68,15 @@ public class PaintballModel extends BoxObstacle {
     private float lastUpdate;
 
     private boolean snapping;
+    private float newX;
+    private float newY;
+    private float newW;
+    private boolean updateReady;
+
+    private float initY;
+    private boolean recentCollision;
+    private boolean recentCreation;
+    private boolean isPlayerBullet;
 
     /**
      * PaintballModel constructor
@@ -110,6 +119,11 @@ public class PaintballModel extends BoxObstacle {
         snapping = true;
         updateTime = .1f;
         lastUpdate = 0f;
+        updateReady=false;
+        initY = y;
+        recentCollision = false;
+        recentCreation = true;
+        isPlayerBullet = false;
     }
 
     //BEGIN: GETTERS AND SETTERS
@@ -121,11 +135,19 @@ public class PaintballModel extends BoxObstacle {
         }
     }
 
-    private float getScaledX() {
+    public boolean isPlayerBullet(){
+        return isPlayerBullet;
+    }
+
+    public void setPlayerBullet(boolean truth){
+        isPlayerBullet = truth;
+    }
+
+    public float getScaledX() {
         return xScale*xtransform;
     }
 
-    private float getScaledY() {
+    public float getScaledY() {
         return yScale*ytransform;
     }
 
@@ -189,6 +211,18 @@ public class PaintballModel extends BoxObstacle {
         return paintballToPlatformDuration;
     }
 
+    public void markRecentCollision(){
+        recentCollision = true;
+    }
+
+    public boolean getRecentCollision(){
+        return recentCollision;
+    }
+
+    public boolean recentlyCreated() {
+        return recentCreation;
+    }
+
     public float getTimeToDie() {
         return timeToDie-deathDuration;
     }
@@ -203,8 +237,8 @@ public class PaintballModel extends BoxObstacle {
     /** Enable gravity**/
     public void enableGravity() {
         gravity = true;
-       // this.setGravityScale(1/3f);
-        this.setVY(-2); //Uncomment and comment above line for constant falling
+        this.setGravityScale(1/3f);
+       // this.setVY(-2); //Uncomment and comment above line for constant falling
     }
 
     /**
@@ -233,9 +267,32 @@ public class PaintballModel extends BoxObstacle {
         this.createFixtures();
     }
 
+    public void newSize(float x, float y, float w) {
+        newX = x;
+        newY = y;
+        newW = w;
+        updateReady=true;
+    }
+
+    public void instakill() {
+        dying = true;
+        timeToDie = 0;
+        markRemoved(true);
+    }
+
     @Override
     public void update(float delta) {
         lastUpdate +=delta;
+        recentCollision = false;
+        recentCreation = false;
+
+        if(updateReady) {
+            newWidth(newW);
+            xtransform = newW/initWidth;
+            setPosition(newX,newY);
+            updateReady=false;
+        }
+
         if(xtransform<maxXScale && growing) {
             xtransform += delta*Math.abs(speed)*1.5f;
             if(lastUpdate>updateTime) {
@@ -262,15 +319,16 @@ public class PaintballModel extends BoxObstacle {
             if(timeToDie<0)
                 markRemoved(true);
         }
-        if(!gravity)
+        if(!gravity) {
+            this.setY(initY);
             this.setVY(0.0f);
+        }
+
         this.setVX(speed);
         maxLifeTime-=delta;
         if(snapping)
             setPosition(getPosition().x,snapToGrid(getPosition().y));
 
-        if(gravity)
-            enableGravity();
     }
 
     @Override

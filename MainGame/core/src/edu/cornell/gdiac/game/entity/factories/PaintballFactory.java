@@ -49,6 +49,18 @@ public class PaintballFactory implements AssetUser, Settable {
     }
 
     /**
+     *  Creates a player paintball at the given location moving in the given direction
+     *  @param x            Initial x position of the paintball
+     *  @param y            Initial y position of the paintball
+     *  @param direction    Initial traveling direction of the paintball (true for right, left otherwise)
+     */
+    public PaintballModel createPlayerPaintball(float x, float y, boolean direction) {
+        PaintballModel paintball = createPaintball(x,y,direction);
+        paintball.setPlayerBullet(true);
+        return paintball;
+    }
+
+    /**
      *  Creates a paintball at the given location moving in the given direction
      *  @param x            Initial x position of the paintball
      *  @param y            Initial y position of the paintball
