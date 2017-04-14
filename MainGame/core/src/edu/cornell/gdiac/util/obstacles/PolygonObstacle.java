@@ -378,7 +378,7 @@ public class PolygonObstacle extends SimpleObstacle {
 	 */
 	public void drawDebug(GameCanvas canvas) {
 		for(PolygonShape tri : shapes) {
-			canvas.drawPhysics(tri,Color.YELLOW,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+			canvas.drawPhysics(tri,Color.BLUE,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
 		}
 	}
 	

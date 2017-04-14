@@ -13,6 +13,7 @@ import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
+import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
@@ -33,11 +34,8 @@ public class LevelSelectionMode extends Mode {
 	private static final int BORDER_Y = 50;
 	private static final int PADDING_Y = 90;
 
-	/** Textures necessary to support the loading screen */
+	/** Textures necessary to support the screen */
 	private static final String BACKGROUND_FILE = "ui/bg/level_selection.png";
-	/** Retro font for displaying messages */
-	private static String FONT_FILE = "fonts/LightPixel7.ttf";
-	private static int FONT_SIZE = 64;
 	private static Color DARK_PURPLE = new Color(123/255f, 118/255f, 131/255f, 1f);
 
 	/** The font for giving messages to the player */
@@ -128,9 +126,9 @@ public class LevelSelectionMode extends Mode {
 
 		// Load the font
 		FreetypeFontLoader.FreeTypeFontLoaderParameter size2Params = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
-		size2Params.fontFileName = FONT_FILE;
-		size2Params.fontParameters.size = FONT_SIZE;
-		manager.load(FONT_FILE, BitmapFont.class, size2Params);
+		size2Params.fontFileName = Constants.FONT_FILE;
+		size2Params.fontParameters.size = Constants.FONT_SIZE;
+		manager.load(Constants.FONT_FILE, BitmapFont.class, size2Params);
 	}
 
 	@Override
@@ -138,8 +136,8 @@ public class LevelSelectionMode extends Mode {
 		background = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true).getTexture();
 
 		// Allocate the font
-		if (manager.isLoaded(FONT_FILE))
-			displayFont = manager.get(FONT_FILE, BitmapFont.class);
+		if (manager.isLoaded(Constants.FONT_FILE))
+			displayFont = manager.get(Constants.FONT_FILE, BitmapFont.class);
 		else
 			displayFont = null;
 	}

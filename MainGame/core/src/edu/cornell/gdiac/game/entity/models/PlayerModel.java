@@ -1,5 +1,6 @@
 package edu.cornell.gdiac.game.entity.models;
 
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
@@ -9,7 +10,10 @@ import edu.cornell.gdiac.game.interfaces.Animatable;
 import edu.cornell.gdiac.game.interfaces.Settable;
 import edu.cornell.gdiac.game.interfaces.Shooter;
 import edu.cornell.gdiac.util.Animation;
+import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
+import edu.cornell.gdiac.util.obstacles.ComplexObstacle;
+import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
 import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 /**
@@ -18,7 +22,7 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
  * Note that this class returns to static loading.  That is because there are
  * no other subclasses that we might loop through.
  */
-public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, Animatable {
+public class PlayerModel extends PolygonObstacle implements Shooter, Settable, Animatable {
     // Physics constants
     /** The density of the character */
     private static final float PLAYER_DENSITY = 1.0f;
@@ -38,14 +42,18 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
     private static final float SENSOR_HEIGHT = 0.05f;
     /** Identifier to allow us to track the sensor in ContactListener */
     private static final String SENSOR_NAME = "PlayerGroundSensor";
+    /** Ratio of jump force to double jump force */
+    private static final float DOUBLE_JUMP_MULTIPLIER = 1.2f;
 
     // This is to fit the image to a tigher hitbox
-    /** The amount to shrink the body fixture (vertically) relative to the image */
-    private static final float PLAYER_VSHRINK = 1f;
+    /** The head space of the texture to remove*/
+    private static final float PLAYER_HEAD_SPACE= 1.2f;
     /** The amount to shrink the body fixture (horizontally) relative to the image */
-    private static final float PLAYER_HSHRINK = 0.45f;
+    private static final float PLAYER_HSHRINK = 0.3f;
     /** The amount to shrink the sensor fixture (horizontally) relative to the image */
     private static final float PLAYER_SSHRINK = 0.6f;
+    /** The position in physics units where the sensor ground should be at*/
+    private float sensorX = 0f;
 
     /** The current max speed of the player */
     private float maxSpeed;
@@ -116,11 +124,19 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
      * @param height	The object width in physics units
      */
     public PlayerModel(float x, float y, float width, float height) {
-        super(x,y,width*PLAYER_HSHRINK,height*PLAYER_VSHRINK);
+        super(
+                new float[]{
+                        -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
+                        -width/2.0f*PLAYER_HSHRINK, height/2.0f - PLAYER_HEAD_SPACE,
+                        width/2.0f*PLAYER_HSHRINK, height/2.0f - PLAYER_HEAD_SPACE,
+                        width/2.0f*PLAYER_HSHRINK, -height/2.0f
+                },
+                x,y);
         setDensity(PLAYER_DENSITY);
         setFriction(PLAYER_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
         setFixedRotation(true);
         setName("player");
+        sensorX = -height/2;
 
         // Gameplay attributes
         isGrounded = false;
@@ -140,6 +156,13 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
     }
 
     // BEGIN: Setters and Getters
+    @Override
+    public void setTexture(TextureRegion region){
+        super.setTexture(region);
+        texture = region;
+        origin.set(region.getRegionWidth()/2.0f, region.getRegionHeight()/2.0f);
+    }
+
     @Override
     public void setAnimation(Animation animation){
         this.animation = animation;
@@ -338,7 +361,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
         // To determine whether or not the player is on the ground,
         // we create a thin sensor under his feet, which reports
         // collisions with the world but has no collision response.
-        Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
+        Vector2 sensorCenter = new Vector2(0, sensorX);
         FixtureDef sensorDef = new FixtureDef();
         sensorDef.density = PLAYER_DENSITY;
         sensorDef.isSensor = true;
@@ -410,7 +433,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
         }
         if (isDoubleJumping() && !stunned) {
             //dividing by sqrt 2 makes it such that from 0 velocity it goes half the height of a regular jump
-            forceCache.set(0, jumpForce/((float)Math.sqrt(2)));
+            forceCache.set(0, jumpForce/(DOUBLE_JUMP_MULTIPLIER));
             //set velocity to 0 so that the jump height is independent of how the model is moving
             setLinearVelocity(zeroVector);
             body.applyLinearImpulse(forceCache,getPosition(),true);
