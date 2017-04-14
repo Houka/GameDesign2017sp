@@ -4,6 +4,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.entity.models.PaintballModel;
 import edu.cornell.gdiac.game.interfaces.AssetUser;
 import edu.cornell.gdiac.game.interfaces.Settable;
@@ -16,8 +17,6 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
  * Factory class for paintballs. Handles creation and removal of paintballs.
  */
 public class PaintballFactory implements AssetUser, Settable {
-    /** Texture file */
-    private static final String PAINTBALL_FILE = "sprites/paintball.png";
     /** Offset for Paintball when firing */
     private static float x_offset = 1.7f;
     private static float y_offset = 0.25f;
@@ -170,17 +169,17 @@ public class PaintballFactory implements AssetUser, Settable {
 
     @Override
     public void preLoadContent(AssetManager manager) {
-        manager.load(PAINTBALL_FILE,Texture.class);
+        manager.load(Constants.PAINTBALL_FILE,Texture.class);
     }
 
     @Override
     public void loadContent(AssetManager manager) {
-        texture = AssetRetriever.createTextureRegion(manager, PAINTBALL_FILE, false);
+        texture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_FILE, false);
     }
 
     @Override
     public void unloadContent(AssetManager manager) {
-        if(manager.isLoaded(PAINTBALL_FILE))
-            manager.unload(PAINTBALL_FILE);
+        if(manager.isLoaded(Constants.PAINTBALL_FILE))
+            manager.unload(Constants.PAINTBALL_FILE);
     }
 }
