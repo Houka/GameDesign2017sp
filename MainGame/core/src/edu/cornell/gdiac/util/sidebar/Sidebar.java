@@ -69,22 +69,31 @@ public class Sidebar {
         Sidebar.addSlider("Rumble Intensity",0f,100f,0f);
         Sidebar.addSlider("Rumble Interval",0f,10f,3f);
     }
-    /**
-    * Call this to bootup the level editor sidebar to change grid size
-    */
-    public static void editorBootup(){
-        if (created)
-            return;
-        Sidebar.bootUp();
-        created = true;
 
-        //Below fields are just samples
-        Sidebar.addSlider("Grid Size",30,70,50);
+    public static void initDefaultSettings(){
+        if (theMap == null)
+            theMap = new HashMap<String, Float>();
+        Sidebar.setValue("Gravity",-24.0f);
+        Sidebar.setValue("Jump Height",55f);
+        Sidebar.setValue("Player Speed",6.0f);
+        Sidebar.setValue("Knockback Force",8f);
+        Sidebar.setValue("Knockback Friction",.06f);
+        Sidebar.setValue("Knockback Duration",3f);
+        Sidebar.setValue("Knockback Stun Duration",30f);
+        Sidebar.setValue("Paintball Height",.22f);
+        Sidebar.setValue("Paintball Width",3.5f);
+        Sidebar.setValue("Paintball Speed",3.6f);
+        Sidebar.setValue("Paintball-paintball Stick Time",3.6f);
+        Sidebar.setValue("Paintball-Wall Stick Time",2f);
+        Sidebar.setValue("Camera Speed",.1f);
+        Sidebar.setValue("Rumble Intensity",0f);
+        Sidebar.setValue("Rumble Interval",3f);
     }
 
     /**Initialize sidebar*/
     public static void bootUp() {
-        theMap = new HashMap<String,Float>();
+        if (theMap == null)
+            theMap = new HashMap<String,Float>();
         currHeight = 50;
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -183,5 +192,20 @@ public class Sidebar {
         if(theMap == null || !theMap.containsKey(key))
             return 0.0f;
         return theMap.get(key);
+    }
+
+    /**
+     * Puts values into the hashmap with
+     *
+     * @param key   Variable name to get value of
+     * @param value The value to set the variable name to
+     *
+     * @returns whether or not we have successfully set the value
+     */
+    public static boolean setValue(String key, float value){
+        if (theMap==null)
+            return false;
+        theMap.put(key, value);
+        return true;
     }
 }
