@@ -47,8 +47,15 @@ public class BackgroundModel extends BoxObstacle {
     @Override
     public void draw(GameCanvas canvas){
         if (texture != null) {
-            canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),
-                    texture.getRegionWidth()/getWidth(),texture.getRegionHeight()/getHeight());
+            float scaleX = texture.getRegionWidth()/getWidth(), scaleY = texture.getRegionHeight()/getHeight();
+            for (int i = 0; i < scaleX; i++){
+                for(int j = 0; j < scaleY; j++){
+                    canvas.draw(texture,Color.WHITE,origin.x,origin.y,
+                            getX()*drawScale.x + texture.getRegionWidth()*i,
+                            getY()*drawScale.y + texture.getRegionHeight()*j,
+                            getAngle(),1,1);
+                }
+            }
         }
     }
 

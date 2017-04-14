@@ -40,7 +40,12 @@ public class FileReaderWriter {
      * @return arraylist of all current files in the JSON directory
      */
     public static ArrayList<String> getJsonFiles(){
-        return getJsonFiles(new ArrayList<String>(), Gdx.files.local(JSON_DIRECTORY).file());
+        try{
+            return getJsonFiles(new ArrayList<String>(), Gdx.files.local(JSON_DIRECTORY).file());
+        }catch (Exception e){
+            System.out.println("Error: Json directory not found");
+            return null;
+        }
     }
 
     /**

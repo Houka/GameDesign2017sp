@@ -22,6 +22,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import edu.cornell.gdiac.game.Camera2;
+import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.game.input.EditorInputController;
@@ -36,23 +37,15 @@ import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
 
+
 /**
  * Class that provides a Level Editor screen for the state of the game.
  *
  * The level editor screen allows players to create/edit their own levels
  */
 public class LevelEditorMode extends Mode {
-    /** Textures necessary to support the loading screen */
+    /** Textures necessary to support the screen */
     private static final String BACKGROUND_FILE = "ui/bg/level_editor.png";
-    private static final String PLAYER_FILE = "sprites/char/char_icon.png";
-    private static final String ENEMY_ONSIGHT_FILE = "sprites/enemy/enemy_onsight.png";
-    private static final String ENEMY_INTERVAL_FILE = "sprites/enemy/enemy_interval.png";
-    private static final String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
-    private static final String PLATFORM_FILE = "sprites/fixtures/window_tile.png";
-    private static final String CAMERA_FILE = "sprites/security_camera.png";
-    private static final String WHITE_PIXEL_FILE = "ui/white_pixel.png";
-    private static final String WALL_FILE = "sprites/fixtures/solid.png";
-
 
     /** size of the grid */
     private static final int DEFAULT_GRID = 48;
@@ -396,14 +389,14 @@ public class LevelEditorMode extends Mode {
     @Override
     public void preLoadContent(AssetManager manager) {
         manager.load(BACKGROUND_FILE,Texture.class);
-        manager.load(ENEMY_INTERVAL_FILE,Texture.class);
-        manager.load(ENEMY_ONSIGHT_FILE,Texture.class);
-        manager.load(PLAYER_FILE,Texture.class);
-        manager.load(PLATFORM_FILE,Texture.class);
-        manager.load(AMMO_DEPOT_FILE,Texture.class);
-        manager.load(CAMERA_FILE,Texture.class);
-        manager.load(WHITE_PIXEL_FILE,Texture.class);
-        manager.load(WALL_FILE,Texture.class);
+        manager.load(Constants.ENEMY_INTERVAL_FILE,Texture.class);
+        manager.load(Constants.ENEMY_ONSIGHT_FILE,Texture.class);
+        manager.load(Constants.PLAYER_FILE,Texture.class);
+        manager.load(Constants.PLATFORM_FILE,Texture.class);
+        manager.load(Constants.AMMO_DEPOT_FILE,Texture.class);
+        manager.load(Constants.CAMERA_FILE,Texture.class);
+        manager.load(Constants.WHITE_PIXEL_FILE,Texture.class);
+        manager.load(Constants.WALL_FILE,Texture.class);
         levelLoader.preLoadContent(manager);
     }
 
@@ -411,15 +404,15 @@ public class LevelEditorMode extends Mode {
     public void loadContent(AssetManager manager) {
         levelLoader.loadContent(manager);
         sidebarTexture = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true);
-        whitePixelTexture = AssetRetriever.createTextureRegion(manager, WHITE_PIXEL_FILE, true);
+        whitePixelTexture = AssetRetriever.createTextureRegion(manager, Constants.WHITE_PIXEL_FILE, true);
 
-        regions[0] = AssetRetriever.createTextureRegion(manager, PLAYER_FILE, false);
-        regions[1] = AssetRetriever.createTextureRegion(manager, ENEMY_INTERVAL_FILE, false);
-        regions[2] = AssetRetriever.createTextureRegion(manager, PLATFORM_FILE, false);
-        regions[3] = AssetRetriever.createTextureRegion(manager, AMMO_DEPOT_FILE, false);
-        regions[4] = AssetRetriever.createTextureRegion(manager, CAMERA_FILE, false);
-        regions[5] = AssetRetriever.createTextureRegion(manager, ENEMY_ONSIGHT_FILE, false);
-        regions[6] = AssetRetriever.createTextureRegion(manager, WALL_FILE, false);
+        regions[0] = AssetRetriever.createTextureRegion(manager, Constants.PLAYER_FILE, false);
+        regions[1] = AssetRetriever.createTextureRegion(manager, Constants.ENEMY_INTERVAL_FILE, false);
+        regions[2] = AssetRetriever.createTextureRegion(manager, Constants.PLATFORM_FILE, false);
+        regions[3] = AssetRetriever.createTextureRegion(manager, Constants.AMMO_DEPOT_FILE, false);
+        regions[4] = AssetRetriever.createTextureRegion(manager, Constants.CAMERA_FILE, false);
+        regions[5] = AssetRetriever.createTextureRegion(manager, Constants.ENEMY_ONSIGHT_FILE, false);
+        regions[6] = AssetRetriever.createTextureRegion(manager, Constants.WALL_FILE, false);
     }
 
     @Override
@@ -427,30 +420,29 @@ public class LevelEditorMode extends Mode {
         if (manager.isLoaded(BACKGROUND_FILE)) {
             manager.unload(BACKGROUND_FILE);
         }
-        if (manager.isLoaded(ENEMY_INTERVAL_FILE)) {
-            manager.unload(ENEMY_INTERVAL_FILE);
+        if (manager.isLoaded(Constants.ENEMY_INTERVAL_FILE)) {
+            manager.unload(Constants.ENEMY_INTERVAL_FILE);
         }
-        if (manager.isLoaded(ENEMY_ONSIGHT_FILE)) {
-            manager.unload(ENEMY_ONSIGHT_FILE);
+        if (manager.isLoaded(Constants.ENEMY_ONSIGHT_FILE)) {
+            manager.unload(Constants.ENEMY_ONSIGHT_FILE);
         }
-        if (manager.isLoaded(PLAYER_FILE)) {
-            manager.unload(PLAYER_FILE);
+        if (manager.isLoaded(Constants.PLAYER_FILE)) {
+            manager.unload(Constants.PLAYER_FILE);
         }
-        if (manager.isLoaded(AMMO_DEPOT_FILE)) {
-            manager.unload(AMMO_DEPOT_FILE);
+        if (manager.isLoaded(Constants.AMMO_DEPOT_FILE)) {
+            manager.unload(Constants.AMMO_DEPOT_FILE);
         }
-        if (manager.isLoaded(PLATFORM_FILE)) {
-            manager.unload(PLATFORM_FILE);
+        if (manager.isLoaded(Constants.PLATFORM_FILE)) {
+            manager.unload(Constants.PLATFORM_FILE);
         }
-        if (manager.isLoaded(WALL_FILE)) {
-            manager.unload(WALL_FILE);
-            manager.unload(WALL_FILE);
+        if (manager.isLoaded(Constants.WALL_FILE)) {
+            manager.unload(Constants.WALL_FILE);
         }
-        if (manager.isLoaded(CAMERA_FILE)) {
-            manager.unload(CAMERA_FILE);
+        if (manager.isLoaded(Constants.CAMERA_FILE)) {
+            manager.unload(Constants.CAMERA_FILE);
         }
-        if (manager.isLoaded(WHITE_PIXEL_FILE)) {
-            manager.unload(WHITE_PIXEL_FILE);
+        if (manager.isLoaded(Constants.WHITE_PIXEL_FILE)) {
+            manager.unload(Constants.WHITE_PIXEL_FILE);
         }
     }
 
