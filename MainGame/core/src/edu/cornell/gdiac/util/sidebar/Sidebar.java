@@ -54,8 +54,8 @@ public class Sidebar {
 
         //Below fields are just samples
         Sidebar.addSlider("Gravity",-30f,0f,-24.0f);
-        Sidebar.addSlider("Jump Height",20f,70f, 60f);
-        Sidebar.addSlider("Player Speed",1f,10f,8.0f);
+        Sidebar.addSlider("Jump Height",20f,70f, 55f);
+        Sidebar.addSlider("Player Speed",1f,10f,6.0f);
         Sidebar.addSlider("Knockback Force",0f,30f, 8f);
         Sidebar.addSlider("Knockback Friction",0f,.1f, .06f);
         Sidebar.addSlider("Knockback Duration",0f,80f, 3f);

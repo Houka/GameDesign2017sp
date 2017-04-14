@@ -38,6 +38,8 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
     private static final float SENSOR_HEIGHT = 0.05f;
     /** Identifier to allow us to track the sensor in ContactListener */
     private static final String SENSOR_NAME = "PlayerGroundSensor";
+    /** Ratio of jump force to double jump force */
+    private static final float DOUBLE_JUMP_MULTIPLIER = 1.2f;
 
     // This is to fit the image to a tigher hitbox
     /** The amount to shrink the body fixture (vertically) relative to the image */
@@ -410,7 +412,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
         }
         if (isDoubleJumping() && !stunned) {
             //dividing by sqrt 2 makes it such that from 0 velocity it goes half the height of a regular jump
-            forceCache.set(0, jumpForce/((float)Math.sqrt(2)));
+            forceCache.set(0, jumpForce/(DOUBLE_JUMP_MULTIPLIER));
             //set velocity to 0 so that the jump height is independent of how the model is moving
             setLinearVelocity(zeroVector);
             body.applyLinearImpulse(forceCache,getPosition(),true);
