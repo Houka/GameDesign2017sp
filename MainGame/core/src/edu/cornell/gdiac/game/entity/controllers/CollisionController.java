@@ -77,7 +77,7 @@ public class CollisionController implements ContactListener {
     // END: helper functions
 
     // BEGIN: Simple Collision handlers
-    private void handleCollision(PlayerModel obj1, EnemyModel obj2){}
+    private void handleCollision(PlayerModel obj1, EnemyModel obj2){hud.setLose(true);}
     private void handleCollision(PlayerModel obj1, GoalModel obj2){}
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
         touchedGround(obj1,obj2,userData1,userData2);

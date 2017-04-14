@@ -71,6 +71,9 @@ public class GameMode extends Mode implements Settable {
 	/** The default value of gravity (going down)	 */
 	private static final float DEFAULT_GRAVITY = -20.0f;
 
+	/** The time until reset after loss*/
+	private final float TIME_TO_RESET = 3f;
+
 	/** All the objects in the world.	 */
 	private PooledList<Obstacle> objects = new PooledList<Obstacle>();
 	/** All the Entity Controllers in the world	 */
@@ -249,12 +252,14 @@ public class GameMode extends Mode implements Settable {
 			if(obj instanceof Shooter)
 				updateShooter(obj);
 		}
+		hud.update(dt);
 
-		if(MainInputController.getInstance().didDebug())
-
-
+		//if(MainInputController.getInstance().didDebug())
 		if (player.getY() < -player.getHeight())
 			hud.setLose(true);
+
+		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isLose())
+			reset();
 
 		postUpdate(dt);
 	}
