@@ -38,6 +38,7 @@ public class GameModeManager implements Disposable, AssetUser{
         modes = new HashMap<String, Mode>();
         modeExitMapping = new HashMap<String, String>();
         initModes();
+        Sidebar.initDefaultSettings();
     }
 
     // BEGIN: setters and getters
@@ -88,7 +89,6 @@ public class GameModeManager implements Disposable, AssetUser{
     }
 
     private void initModes(){
-        Sidebar.initializeVariables();
 
         GameMode gameMode = new GameMode(GAME_MODE, canvas,manager);
         modes.put(MENU, new MenuMode(MENU, canvas, manager));

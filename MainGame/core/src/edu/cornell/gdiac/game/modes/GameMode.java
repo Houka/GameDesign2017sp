@@ -19,6 +19,7 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.Camera2;
+import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.entity.controllers.CollisionController;
 import edu.cornell.gdiac.game.entity.controllers.EnemyController;
@@ -53,10 +54,6 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
  * place nicely with the static assets.
  */
 public class GameMode extends Mode implements Settable {
-	public static String GAME_MUSIC_FILE = "music/gameplay_background.mp3";
-	/** Retro font for displaying messages */
-	private static String FONT_FILE = "fonts/LightPixel7.ttf";
-
 	/** The amount of time for a physics engine step.	 */
 	public static final float WORLD_STEP = 1 / 60.0f;
 	/** Number of velocity iterations for the constrain solvers	 */
@@ -261,6 +258,9 @@ public class GameMode extends Mode implements Settable {
 		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isLose())
 			reset();
 
+		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isWin())
+			reset(); //TODO: make go to next level instead of reset
+
 		postUpdate(dt);
 	}
 
@@ -293,18 +293,18 @@ public class GameMode extends Mode implements Settable {
 	public void preLoadContent(AssetManager manager) {
 		paintballFactory.preLoadContent(manager);
 		levelLoader.preLoadContent(manager);
-		manager.load(GAME_MUSIC_FILE, Sound.class);
+		manager.load(Constants.GAME_MUSIC_FILE, Sound.class);
 	}
 
 	@Override
 	public void loadContent(AssetManager manager) {
-		soundController.allocate(manager, GAME_MUSIC_FILE);
+		soundController.allocate(manager, Constants.GAME_MUSIC_FILE);
 		paintballFactory.loadContent(manager);
 		levelLoader.loadContent(manager);
-		if (manager.isLoaded(FONT_FILE))
-			hud.setFont(manager.get(FONT_FILE, BitmapFont.class));
+		if (manager.isLoaded(Constants.FONT_FILE))
+			hud.setFont(manager.get(Constants.FONT_FILE, BitmapFont.class));
 		loadLevel();
-		soundController.play("gameMode", GAME_MUSIC_FILE, true);
+		soundController.play("gameMode", Constants.GAME_MUSIC_FILE, true);
 	}
 
 	@Override
