@@ -1,0 +1,40 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf760
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Text for Tutorials:\
+\
+1. Walking\
+\
+\'93Hello, and welcome to the wonderful world of Paint It Up. You are the graffiti avatar to the lower left. Move your avatar using the arrow keys. Try crossing balcony now.\'94\
+\
+\
+2. Jumping\
+\
+\'93There you go: moving art! You can hop on railing and other building structures called \'93platforms\'94. Press the up arrow to hop onto the railing in front of you.\'94\
+\
+\
+3. Shooting/Riding\
+\
+\'93Keep it up! Now it\'92s time to ~Paint It Up~. Your avatar was drawn with a handy paintball gun that lets him create his own graffiti. This graffiti even serves as a platform! Shoot your gun, and then hop on the paint before it moves too far away. Ride your paint all the way to the right and hop onto the other railing.\'94\
+\
+\
+4. Ammo Resourcing\
+\
+\'93Truly a work of art. But darn, your gun is out of paint, and you\'92re looking rather transparent yourself. In order to give your gun more paint, and liven your avatar back up, you\'92ll need to collect graffiti that looks like paint cans. Theres one now! Grab it, then make your way up to the next railing.\'94\
+\
+\
+5. Interval Shooters\
+\
+\'93Whoops, you\'92re out of paint again, and to make it worse there\'92s a spy over there! All spy\'92s are critics, and they aren\'92t a fan of how you look. Some spy\'92s, like the one to your right, aren\'92t too smart and will shoot at nothing every few seconds. Just like your gun, theirs shoots platforms too. Try to ride the spy\'92s paint shots to the next railing.\'94\
+\
+\
+6. OnSite Shooters\
+\
+\'93Another spy! This one\'92s smarter though; he\'92ll try to shoot only when he sees you. You\'92re still out of ammo, so you can\'92t get to the other railing on your own. Maybe you can convince him to send some paint your way\'85\'94\
+\
+\
+}
