@@ -35,6 +35,7 @@ import edu.cornell.gdiac.util.obstacles.Obstacle;
 
 import javax.swing.*;
 import java.io.File;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 /**
@@ -229,7 +230,24 @@ public class LevelEditorMode extends Mode {
 
     private String setInterval() {
         String result = JOptionPane.showInputDialog("Enter an interval time in seconds.");
-        return result;
+        if(result != null) {
+            return result;
+        }
+        else {
+            return null;
+        }
+    }
+
+    private String setDir() {
+        String[] values = {"left", "right"};
+        String result = (String) JOptionPane.showInputDialog(null, "Choose a direction for your enemy to face", "Input",
+                JOptionPane.INFORMATION_MESSAGE, null, values, values[0]);
+        if(result != null) {
+            return result;
+        }
+        else {
+            return null;
+        }
     }
 
     private void updateKeyInput(){
@@ -284,20 +302,36 @@ public class LevelEditorMode extends Mode {
                 textureClicked = false;
             }
             else if(underMouse.equals(regions[1])) {
-                int interval = 3;
-                EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
-                        underMouse.getRegionWidth(), underMouse.getRegionHeight(), true, true, interval);
-                newE.setDrawScale(scaleVector);
-                newE.setTexture(underMouse);
-                objects.add(newE);
+                try {
+                    int interval = 3;
+                    String dir = setDir();
+                    boolean right = false;
+                    if(dir.equals("right")) { right = true; }
+                    EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
+                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, true, interval);
+                    newE.setDrawScale(scaleVector);
+                    newE.setTexture(underMouse);
+                    objects.add(newE);
+                }
+                catch (NullPointerException e) {
+                }
             }
             else if(underMouse.equals(regions[5])) {
-                int interval = Integer.parseInt(setInterval());
-                EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
-                        underMouse.getRegionWidth(), underMouse.getRegionHeight(), true, false, interval);
-                newE.setDrawScale(scaleVector);
-                newE.setTexture(underMouse);
-                objects.add(newE);
+                try {
+                    int interval = Math.max(0, Integer.parseInt(setInterval()));
+                    String dir = setDir();
+                    boolean right = false;
+                    if(dir.equals("right")) { right = true; }
+                    EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
+                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, false, interval);
+                    newE.setDrawScale(scaleVector);
+                    newE.setTexture(underMouse);
+                    objects.add(newE);
+                }
+                catch (NumberFormatException e) {
+                }
+                catch (NullPointerException e) {
+                }
             }
             else if(underMouse.equals(regions[3])) {
                 int ammoAmount = 3;
