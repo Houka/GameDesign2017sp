@@ -21,6 +21,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.Camera2;
 import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.GameModeManager;
 import edu.cornell.gdiac.game.entity.controllers.CollisionController;
 import edu.cornell.gdiac.game.entity.controllers.EnemyController;
 import edu.cornell.gdiac.game.entity.controllers.EntityController;
@@ -91,6 +92,8 @@ public class GameMode extends Mode implements Settable {
 	private LevelLoader levelLoader;
 	/** The level this game mode loads in	 */
 	private String levelFile;
+	/** The level number this game mode loads in	 */
+	private int levelNumber;
 
 	/** Camera's used in-game**/
 	private Camera2 gameCamera;
@@ -163,7 +166,7 @@ public class GameMode extends Mode implements Settable {
 		this.bounds = new Rectangle(bounds);
 		hud.setDrawScale(scaleVector);
 		gameCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
-		gameCamera.setAutosnap(false);
+		gameCamera.setAutosnap(true);
 		hudCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
 		hudCamera.setAutosnap(true);
 
@@ -178,8 +181,18 @@ public class GameMode extends Mode implements Settable {
 	/**
 	 * Sets the level of this game mode
 	 */
-	public void setLevel(String levelFile) {
+	public void setLevel(String levelFile,int levelNumber) {
 		this.levelFile = levelFile;
+		this.levelNumber = levelNumber;
+
+	}
+
+	/**
+	 * Returns the level number
+	 * @return level file number
+	 */
+	public int getLevelNum() {
+		return levelNumber;
 	}
 
 	/**
@@ -216,6 +229,12 @@ public class GameMode extends Mode implements Settable {
 		scaleVector = null;
 		world = null;
 		canvas = null;
+	}
+
+	@Override
+	public void show() {
+		active = true;
+		resume();
 	}
 
 	@Override
@@ -303,7 +322,7 @@ public class GameMode extends Mode implements Settable {
 		levelLoader.loadContent(manager);
 		if (manager.isLoaded(Constants.FONT_FILE))
 			hud.setFont(manager.get(Constants.FONT_FILE, BitmapFont.class));
-		loadLevel();
+		//loadLevel(); TODO ask if this is important
 		soundController.play("gameMode", Constants.GAME_MUSIC_FILE, true);
 	}
 
@@ -430,4 +449,7 @@ public class GameMode extends Mode implements Settable {
 		boolean vert = (bounds.y <= obj.getY() && obj.getY() <= bounds.y + bounds.height);
 		return horiz && vert;
 	}
+
+	@Override
+	public void pauseGame() {super.pauseGame();listener.switchToScreen(this, GameModeManager.PAUSE);}
 }

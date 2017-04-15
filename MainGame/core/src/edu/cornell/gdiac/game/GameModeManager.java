@@ -17,6 +17,7 @@ import java.util.HashMap;
  */
 public class GameModeManager implements Disposable, AssetUser{
     public static String MENU = "menu";
+    public static String PAUSE = "pause";
     public static String LEVEL_SELECTION = "levelSelection";
     public static String LEVEL_EDITOR = "levelEditor";
     public static String GAME_MODE = "gameMode";
@@ -92,11 +93,13 @@ public class GameModeManager implements Disposable, AssetUser{
 
         GameMode gameMode = new GameMode(GAME_MODE, canvas,manager);
         modes.put(MENU, new MenuMode(MENU, canvas, manager));
+        modes.put(PAUSE, new PauseMode(PAUSE, canvas, manager,gameMode));
         modes.put(LEVEL_EDITOR, new LevelEditorMode(LEVEL_EDITOR, canvas, manager));
         modes.put(GAME_MODE, gameMode);
         modes.put(LEVEL_SELECTION, new LevelSelectionMode(LEVEL_SELECTION, canvas, manager, gameMode));
 
         modeExitMapping.put(MENU, ""); // if menu exits we want to exit the game
+        modeExitMapping.put(PAUSE, GAME_MODE);
         modeExitMapping.put(LOADING, MENU);
         modeExitMapping.put(LEVEL_SELECTION, MENU);
         modeExitMapping.put(LEVEL_EDITOR, MENU);
