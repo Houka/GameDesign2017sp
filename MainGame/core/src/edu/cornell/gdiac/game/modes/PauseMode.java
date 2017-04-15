@@ -146,11 +146,14 @@ public class PauseMode extends Mode {
 	 */
 	@Override
 	public void render(float delta) {
-	    gameMode.render(delta);
 		if (active) {
 			if (preUpdate(delta))
 				update(delta);
 
+			canvas.begin();
+			gameMode.draw();
+			canvas.end();
+			
 			canvas.begin(camera);
 			draw();
 			canvas.end();
