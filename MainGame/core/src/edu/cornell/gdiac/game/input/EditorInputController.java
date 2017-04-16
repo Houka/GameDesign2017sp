@@ -29,6 +29,7 @@ public class EditorInputController implements InputProcessor{
     private boolean downPressed;
     private boolean leftPressed;
     private boolean rightPressed;
+    private boolean rightClick;
 
     /** keyboard prev states */
     private boolean savePrevious;
@@ -82,6 +83,7 @@ public class EditorInputController implements InputProcessor{
     public boolean didScrolledDown() {
         return scrollAmount<0;
     }
+    public boolean didRightClick() { return rightClick; }
     // END: Getters and Setters
 
 
@@ -138,6 +140,9 @@ public class EditorInputController implements InputProcessor{
         if(button == Input.Buttons.LEFT) {
             didTouch = true;
         }
+        else if(button == Input.Buttons.RIGHT) {
+            rightClick = true;
+        }
         return false;
     }
 
@@ -146,6 +151,9 @@ public class EditorInputController implements InputProcessor{
             didTouch = false;
             didDrag = false;
             lastPos = new Vector2(x,y);
+        }
+        else if(button == Input.Buttons.RIGHT) {
+            rightClick = false;
         }
         return false;
     }
@@ -164,4 +172,5 @@ public class EditorInputController implements InputProcessor{
         scrollAmount = amount;
         return false;
     }
+
 }
