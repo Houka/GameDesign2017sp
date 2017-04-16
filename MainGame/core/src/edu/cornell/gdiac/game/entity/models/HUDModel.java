@@ -32,6 +32,9 @@ public class HUDModel extends BoxObstacle {
     /** Start in the playing state*/
     private int state = STATE_PLAYING;
 
+    /** Time since last state change*/
+    private float lastStateChange;
+
     /**
      * Creates a new HUD at the given position.
      *
@@ -52,16 +55,27 @@ public class HUDModel extends BoxObstacle {
 
         ammoLeft = DEFAULT_STARTING_AMMO;
         startingAmmo = DEFAULT_STARTING_AMMO;
+        lastStateChange = 0.0f;
     }
 
     // BEGIN: Setters and Getters
-    public void setWin(boolean value){ state = value? STATE_WIN: state; }
+    public void setWin(boolean value){
+        if(state!=STATE_WIN)
+            lastStateChange=0;
+        state = value? STATE_WIN: state;
+    }
 
     public boolean isWin(){ return state == STATE_WIN; }
 
-    public void setLose(boolean value){ state = value? STATE_LOSE: state; }
+    public void setLose(boolean value){
+        if(state!=STATE_LOSE)
+            lastStateChange=0;
+        state = value? STATE_LOSE: state;
+    }
 
     public boolean isLose(){ return state == STATE_LOSE; }
+
+    public float getLastStateChange() {return lastStateChange;}
 
     public void setFont(BitmapFont font){ this.font = font; }
 
@@ -91,6 +105,11 @@ public class HUDModel extends BoxObstacle {
     public void reset(){
         ammoLeft = startingAmmo;
         state = STATE_PLAYING;
+        lastStateChange = 0;
+    }
+
+    @Override public void update(float delta) {
+        lastStateChange+=delta;
     }
 
     @Override
@@ -102,5 +121,6 @@ public class HUDModel extends BoxObstacle {
             canvas.drawTextCentered("VICTORY", font, getY()-canvas.getHeight());
         else if (state == STATE_LOSE)
             canvas.drawTextCentered("FAILURE", font, getY()-canvas.getHeight());
+
     }
 }

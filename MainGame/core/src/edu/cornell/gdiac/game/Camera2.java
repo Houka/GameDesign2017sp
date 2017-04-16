@@ -59,10 +59,13 @@ public class Camera2 extends OrthographicCamera{
     public void setLocation(Vector2 l) {
         this.position.x=l.x;
         this.position.y=l.y;
+        update();
     }
 
     public void setTargetLocation(float x, float y) {
         targetLocation.set(x,y);
+        if(autosnap)
+            snap();
     }
 
     public void setAutosnap(boolean bool) {
