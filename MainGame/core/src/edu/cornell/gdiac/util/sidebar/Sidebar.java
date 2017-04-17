@@ -53,8 +53,8 @@ public class Sidebar {
         created = true;
 
         //Below fields are just samples
-        Sidebar.addSlider("Gravity",-30f,0f,-24.0f);
-        Sidebar.addSlider("Jump Height",20f,70f, 55f);
+        Sidebar.addSlider("Gravity",-30f,0f,-29.0f);
+        Sidebar.addSlider("Jump Height",20f,70f, 32f);
         Sidebar.addSlider("Player Speed",1f,10f,6.0f);
         Sidebar.addSlider("Knockback Force",0f,30f, 8f);
         Sidebar.addSlider("Knockback Friction",0f,.1f, .06f);
@@ -73,8 +73,8 @@ public class Sidebar {
     public static void initDefaultSettings(){
         if (theMap == null)
             theMap = new HashMap<String, Float>();
-        Sidebar.setValue("Gravity",-24.0f);
-        Sidebar.setValue("Jump Height",55f);
+        Sidebar.setValue("Gravity",-29.0f);
+        Sidebar.setValue("Jump Height",32f);
         Sidebar.setValue("Player Speed",6.0f);
         Sidebar.setValue("Knockback Force",8f);
         Sidebar.setValue("Knockback Friction",.06f);

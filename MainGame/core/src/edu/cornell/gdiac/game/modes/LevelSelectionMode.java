@@ -94,8 +94,9 @@ public class LevelSelectionMode extends Mode {
 	@Override
 	protected void onComplete(){
 		canvas.getCamera().setAutosnap(true);
-		gameMode.setLevel(NUM_LEVELS.get(selected));
+		gameMode.setLevel(NUM_LEVELS.get(selected),selected);
 		listener.switchToScreen(this, gameMode.getName());
+		gameMode.reset();
 	}
 
 	@Override
