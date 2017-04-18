@@ -112,8 +112,8 @@ public class PlayerInputController {
         // Give priority to gamepad results
         upPressed  = (secondary && upPressed) || (Gdx.input.isKeyPressed(Input.Keys.UP));
         downPressed  = (secondary && downPressed) || (Gdx.input.isKeyPressed(Input.Keys.DOWN));
-        shootPressed = (secondary && shootPressed) || (Gdx.input.isKeyPressed(Input.Keys.Z));
-        jumpPressed = (secondary && jumpPressed) || (Gdx.input.isKeyPressed(Input.Keys.X));
+        shootPressed = (secondary && shootPressed) || (Gdx.input.isKeyPressed(Input.Keys.Z) || (Gdx.input.isKeyPressed(Input.Keys.SPACE)));
+        jumpPressed = (secondary && jumpPressed) || (Gdx.input.isKeyPressed(Input.Keys.X) || upPressed);
 
         // Directional controls
         horizontal = (secondary ? horizontal : 0.0f);
