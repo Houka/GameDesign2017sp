@@ -5,7 +5,6 @@
  */
 package edu.cornell.gdiac.game.modes;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -26,7 +25,7 @@ import java.util.ArrayList;
 /**
  * Class that provides a menu screen for the state of the game.
  */
-public class PauseMode extends Mode {
+public class WinMode extends Mode {
 	/** Background texture */
 	private static final String BACKGROUND_FILE = "ui/bg/menu.png";
 	/** Selection menu items y offset from the center*/
@@ -40,8 +39,7 @@ public class PauseMode extends Mode {
 	protected BitmapFont displayFont;
 
 	/** Player modes that are selectable from menu mode */
-	private String[] modes = {GameModeManager.GAME_MODE};
-	private String[] modeNames = {"Resume","Previous Level","Next Level", "Settings", "Quit"};
+	private String[] modeNames = {"Next Level","Retry Level", "Settings", "Quit"};
 	private int selected = 0;
 
 	/** Input controller for menu selection */
@@ -59,7 +57,7 @@ public class PauseMode extends Mode {
 	 * @param canvas The GameCanvas to draw to
 	 * @param manager The AssetManager to load in the background
 	 */
-	public PauseMode(String name, GameCanvas canvas, AssetManager manager, GameMode gameMode) {
+	public WinMode(String name, GameCanvas canvas, AssetManager manager, GameMode gameMode) {
 		super(name, canvas, manager);
 		this.gameMode = gameMode;
 		onExit = ScreenListener.EXIT_QUIT;
@@ -106,19 +104,15 @@ public class PauseMode extends Mode {
 				// TODO: remove, for tech demo and testing values
 				Sidebar.defaultBootup();
 			else if (selected == modeNames.length-3) {
-				int levelNum = (gameMode.getLevelNum() + 1) % NUM_LEVELS.size();
-				gameMode.setLevel(NUM_LEVELS.get(levelNum),levelNum);
 			    listener.switchToScreen(this, gameMode.getName());
 			    gameMode.reset();
 			}
 			else if (selected == modeNames.length-4) {
-				int levelNum = Math.max(gameMode.getLevelNum() - 1,0);
-				gameMode.setLevel(NUM_LEVELS.get(levelNum),levelNum);
 				listener.switchToScreen(this, gameMode.getName());
-				gameMode.reset();
+				gameMode.nextLevel();
 			}
 			else
-				setComplete(true);
+				assert(false);
 		}
 	}
 
