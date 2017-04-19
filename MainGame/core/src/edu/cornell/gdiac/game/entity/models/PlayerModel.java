@@ -44,6 +44,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private static final String SENSOR_NAME = "PlayerGroundSensor";
     /** Ratio of jump force to double jump force */
     private static final float DOUBLE_JUMP_MULTIPLIER = 1.2f;
+    /** Mass of the player */
+    private static final float PLAYER_MASS = 4f;
 
     // This is to fit the image to a tigher hitbox
     /** The head space of the texture to remove*/
@@ -132,6 +134,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
                         width/2.0f*PLAYER_HSHRINK, -height/2.0f
                 },
                 x,y);
+        setMass(PLAYER_MASS);
         setDensity(PLAYER_DENSITY);
         setFriction(PLAYER_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
         setFixedRotation(true);

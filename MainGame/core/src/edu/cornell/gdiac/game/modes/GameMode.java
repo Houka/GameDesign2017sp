@@ -21,6 +21,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import edu.cornell.gdiac.game.Camera2;
 import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.game.GameModeManager;
 import edu.cornell.gdiac.game.entity.controllers.CollisionController;
 import edu.cornell.gdiac.game.entity.controllers.EnemyController;
 import edu.cornell.gdiac.game.entity.controllers.EntityController;
@@ -68,6 +69,9 @@ public class GameMode extends Mode implements Settable {
 	/** The default value of gravity (going down)	 */
 	private static final float DEFAULT_GRAVITY = -20.0f;
 
+	/** The time until reset after loss*/
+	private final float TIME_TO_RESET = 3f;
+
 	/** All the objects in the world.	 */
 	private PooledList<Obstacle> objects = new PooledList<Obstacle>();
 	/** All the Entity Controllers in the world	 */
@@ -88,6 +92,8 @@ public class GameMode extends Mode implements Settable {
 	private LevelLoader levelLoader;
 	/** The level this game mode loads in	 */
 	private String levelFile;
+	/** The level number this game mode loads in	 */
+	private int levelNumber;
 
 	/** Camera's used in-game**/
 	private Camera2 gameCamera;
@@ -160,7 +166,7 @@ public class GameMode extends Mode implements Settable {
 		this.bounds = new Rectangle(bounds);
 		hud.setDrawScale(scaleVector);
 		gameCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
-		gameCamera.setAutosnap(false);
+		gameCamera.setAutosnap(true);
 		hudCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
 		hudCamera.setAutosnap(true);
 
@@ -175,8 +181,18 @@ public class GameMode extends Mode implements Settable {
 	/**
 	 * Sets the level of this game mode
 	 */
-	public void setLevel(String levelFile) {
+	public void setLevel(String levelFile,int levelNumber) {
 		this.levelFile = levelFile;
+		this.levelNumber = levelNumber;
+
+	}
+
+	/**
+	 * Returns the level number
+	 * @return level file number
+	 */
+	public int getLevelNum() {
+		return levelNumber;
 	}
 
 	/**
@@ -216,6 +232,12 @@ public class GameMode extends Mode implements Settable {
 	}
 
 	@Override
+	public void show() {
+		active = true;
+		resume();
+	}
+
+	@Override
 	public void reset() {
 		super.reset();
 
@@ -246,12 +268,17 @@ public class GameMode extends Mode implements Settable {
 			if(obj instanceof Shooter)
 				updateShooter(obj);
 		}
+		hud.update(dt);
 
-		if(MainInputController.getInstance().didDebug())
-
-
+		//if(MainInputController.getInstance().didDebug())
 		if (player.getY() < -player.getHeight())
 			hud.setLose(true);
+
+		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isLose())
+			reset();
+
+		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isWin())
+			reset(); //TODO: make go to next level instead of reset
 
 		postUpdate(dt);
 	}
@@ -295,7 +322,7 @@ public class GameMode extends Mode implements Settable {
 		levelLoader.loadContent(manager);
 		if (manager.isLoaded(Constants.FONT_FILE))
 			hud.setFont(manager.get(Constants.FONT_FILE, BitmapFont.class));
-		loadLevel();
+		//loadLevel(); TODO ask if this is important
 		soundController.play("gameMode", Constants.GAME_MUSIC_FILE, true);
 	}
 
@@ -346,7 +373,7 @@ public class GameMode extends Mode implements Settable {
 	private void updateShooter(Obstacle obj) {
 		if (((Shooter)obj).isShooting()) {
 			if (obj.getName().equals("player") && hud.useAmmo())
-				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
+				addObject(paintballFactory.createPlayerPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
 			else if (obj.getName().equals("enemy"))
 				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
 		}
@@ -422,4 +449,7 @@ public class GameMode extends Mode implements Settable {
 		boolean vert = (bounds.y <= obj.getY() && obj.getY() <= bounds.y + bounds.height);
 		return horiz && vert;
 	}
+
+	@Override
+	public void pauseGame() {super.pauseGame();listener.switchToScreen(this, GameModeManager.PAUSE);}
 }
