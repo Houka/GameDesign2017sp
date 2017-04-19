@@ -166,8 +166,10 @@ public class CollisionController implements ContactListener {
         obj2.fixX(0f);
     }
     private void handleCollision(PlayerModel obj1, AmmoDepotModel obj2) {
-        obj2.setUsed(true);
-        hud.addAmmo(obj2.getAmmoAmount());
+        if (!obj2.isUsed()) {
+            obj2.setUsed(true);
+            hud.addAmmo(obj2.getAmmoAmount());
+        }
     }
 
     // Collision end handlers
