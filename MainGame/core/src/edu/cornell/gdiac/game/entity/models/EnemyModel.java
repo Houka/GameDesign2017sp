@@ -108,13 +108,13 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
                         width/2.0f, -BELOW_ARM,
                         0, -BELOW_ARM,
                         0, -BELOW_POSTER,
-                        -width/4.0f, -height/2.0f
                 },
                 x,y);
         setDensity(ENEMY_DENSITY);
         setFriction(ENEMY_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
         setFixedRotation(true);
         setName("enemy");
+        bodyinfo.type = BodyDef.BodyType.StaticBody;
 
         // Gameplay attributes
         isShooting = false;
