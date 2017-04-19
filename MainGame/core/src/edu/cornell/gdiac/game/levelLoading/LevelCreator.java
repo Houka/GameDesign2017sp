@@ -57,8 +57,8 @@ public class LevelCreator {
             defaultWalls.add(new WallModel(DEFAULT_WALLS[i]));
 
         defaultPlayer = new PlayerModel(2.5f, 5.0f,38 ,95 );
-        defaultOnSightEnemies.add(new EnemyModel(5.5f, 10f, 1, 1, true, true, 0));
-        defaultIntervalEnemies.add(new EnemyModel(3.5f, 8f, 1, 1, true, false, 200));
+        defaultOnSightEnemies.add(new EnemyModel(5.5f, 10f, 1, 1, true, true, 0, "normal"));
+        defaultIntervalEnemies.add(new EnemyModel(3.5f, 8f, 1, 1, true, false, 200, "normal"));
         defaultAmmoDepots.add(new AmmoDepotModel(5.5f, 4f, 1, 1, 3));
         defaultTarget = new GoalModel(29.5f, 15.0f, 1, 1);
         defaultAmmo = 4;

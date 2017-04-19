@@ -33,6 +33,11 @@ public class PlayerController extends EntityController {
         player.setShooting(input.didShoot());
         player.applyForce();
 
+        if(player.isTrampGrounded() && input.didJump()) {
+            player.setVY(20);
+            player.setTrampGrounded(false);
+        }
+
         updateAnimation();
     }
 

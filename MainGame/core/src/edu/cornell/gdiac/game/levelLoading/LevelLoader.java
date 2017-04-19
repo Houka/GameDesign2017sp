@@ -69,6 +69,8 @@ public class LevelLoader implements AssetUser, Disposable{
         addQueue.clear();
         //sets the new world bounds
         bounds = new Rectangle(0,0,32,18*3);
+        // TODO: remove
+        System.out.println(JSONFile);
         levelParser.loadLevel(JSONFile);
         populateLevel();
     }
@@ -175,7 +177,8 @@ public class LevelLoader implements AssetUser, Disposable{
         while (iter.hasNext()){
             enemy = iter.next();
             EnemyModel obj = new EnemyModel(enemy.get("x").asInt(), enemy.get("y").asFloat(), dwidth, dheight,
-                            enemy.get("isFacingRight").asBoolean(), false, enemy.get("interval").asInt());
+                            enemy.get("isFacingRight").asBoolean(), false, enemy.get("interval").asInt(),
+                            enemy.get("enemyType").asString());
             obj.setDrawScale(scale);
             obj.setTexture(enemyIntervalTexture);
             obj.setAnimation(enemyIntervalAnimation);
@@ -190,7 +193,8 @@ public class LevelLoader implements AssetUser, Disposable{
         while (iter.hasNext()){
             enemy = iter.next();
             EnemyModel obj = new EnemyModel(enemy.get("x").asInt(), enemy.get("y").asFloat(), dwidth, dheight,
-                    enemy.get("isFacingRight").asBoolean(), true, 0);
+                    enemy.get("isFacingRight").asBoolean(), true, 0,
+                    enemy.get("enemyType").asString());
             obj.setDrawScale(scale);
             obj.setTexture(enemyOnsightTexture);
             obj.setAnimation(enemyOnsightAnimation);

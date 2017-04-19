@@ -78,6 +78,9 @@ public class PaintballModel extends BoxObstacle {
     private boolean recentCreation;
     private boolean isPlayerBullet;
 
+    /** Type of paintball */
+    private String paintballType;
+
     /**
      * PaintballModel constructor
      * @param x         Starting x position
@@ -89,7 +92,7 @@ public class PaintballModel extends BoxObstacle {
      * @param yScl      Starting y-scale
      * @param scl       Screen scale
      */
-    public PaintballModel(float x, float y, float w, float h, float s, float xScl, float yScl, Vector2 scl){
+    public PaintballModel(float x, float y, float w, float h, float s, float xScl, float yScl, Vector2 scl, String type){
         super(x,y,w,h);
         setName("paintball");
         if(yScl == 0 || xScl == 0) {
@@ -124,6 +127,7 @@ public class PaintballModel extends BoxObstacle {
         recentCollision = false;
         recentCreation = true;
         isPlayerBullet = false;
+        paintballType = type;
     }
 
     //BEGIN: GETTERS AND SETTERS
@@ -232,6 +236,9 @@ public class PaintballModel extends BoxObstacle {
     public boolean isDead() {
         return dying && timeToDie<deathDuration;
     }
+
+    public String getPaintballType() { return paintballType; }
+    public void setPaintballType(String type) { paintballType = type; }
     //END: GETTERS AND SETTERS
 
     /** Enable gravity**/

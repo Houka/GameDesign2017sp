@@ -84,6 +84,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private int shootCooldown;
     /** Whether our feet are on the ground */
     private boolean isGrounded;
+    /** If we are on player */
+    private boolean isTrampGrounded;
     /** Whether we've used our double jump */
     private boolean canDoubleJump;
     /** Whether we are actively shooting */
@@ -338,6 +340,9 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     public boolean isFacingRight() {
         return isFacingRight;
     }
+
+    public boolean isTrampGrounded() { return isTrampGrounded; }
+    public void setTrampGrounded(boolean value) { isTrampGrounded = value; }
 
     // END: Setters and Getters
 

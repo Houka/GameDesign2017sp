@@ -366,16 +366,17 @@ public class GameMode extends Mode implements Settable {
 
 	/**
 	 * Updates any objects that are shooters so that this class can create/add bullets 
-     * to the shooting entity. Special case applies for the player involving the HUD
+     * to the shooting entity. Special case applies for the player involving the HUD.
+	 * The player will always shoot normal paintballs.
      *
      * @param obj the obstacle that we are checking is a shooter
 	 */
 	private void updateShooter(Obstacle obj) {
 		if (((Shooter)obj).isShooting()) {
 			if (obj.getName().equals("player") && hud.useAmmo())
-				addObject(paintballFactory.createPlayerPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
+				addObject(paintballFactory.createPlayerPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight(),"normal"));
 			else if (obj.getName().equals("enemy"))
-				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
+				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight(), ((EnemyModel)obj).getEnemyType()));
 		}
 	}
 

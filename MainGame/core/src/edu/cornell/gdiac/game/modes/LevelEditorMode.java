@@ -301,7 +301,7 @@ public class LevelEditorMode extends Mode {
                     boolean right = false;
                     if(dir.equals("right")) { right = true; }
                     EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
-                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, true, interval);
+                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, true, interval, "normal");
                     newE.setDrawScale(scaleVector);
                     newE.setTexture(underMouse);
                     objects.add(newE);
@@ -316,7 +316,7 @@ public class LevelEditorMode extends Mode {
                     boolean right = false;
                     if(dir.equals("right")) { right = true; }
                     EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
-                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, false, interval);
+                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, false, interval, "normal");
                     newE.setDrawScale(scaleVector);
                     newE.setTexture(underMouse);
                     objects.add(newE);
