@@ -87,7 +87,7 @@ public class CollisionController implements ContactListener {
     }
     private void handleCollision(PlayerModel obj1, PaintballModel obj2, Object userData1, Object userData2) {
         float sign = obj2.getVX() / Math.abs(obj2.getVX());
-        if(obj1.getY()-obj1.getHeight()/2f>=obj2.getY()){
+        if(obj1.getY()-obj1.getHeight()/2f>=obj2.getY() && !obj1.isGhosting()){
             touchedGround(obj1, obj2, userData1, userData2);
             obj1.setRidingVX(obj2);
         }
@@ -136,14 +136,17 @@ public class CollisionController implements ContactListener {
         if(obj2.isDying()) {
             obj1.instakill();
             obj2.newSize(midPoint,obj2.getPosition().y,obj1.getWidth()+obj2.getWidth());
+            obj2.setPlayerBullet(true);
         }
         else if(obj1.isDying()) {
             obj2.instakill();
             obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
+            obj1.setPlayerBullet(true);
         } else {
             obj2.instakill();
             obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
             obj1.setTimeToDie(obj1.getPaintballToPaintballDuration());
+            obj1.setPlayerBullet(true);
         }
 
         obj1.fixX(0f);
@@ -307,18 +310,40 @@ public class CollisionController implements ContactListener {
             Obstacle bd1 = (Obstacle) body1.getUserData();
             Obstacle bd2 = (Obstacle) body2.getUserData();
 
-            PlayerModel player;
-            PaintballModel paintball;
+            PlayerModel player = null;
+            PaintballModel paintball = null;
 
-            if(bd1.getName().equals("player") && bd2.getName().equals("paintball")) {
-               player = (PlayerModel) bd1;
-               paintball = (PaintballModel) bd2;
-            } else if (bd2.getName().equals("player") && bd1.getName().equals("paintball")) {
-                player = (PlayerModel) bd2;
+            if(bd2.getName().equals("paintball")) {
+                paintball = (PaintballModel) bd2;
+                if(paintball.isDead()) {
+                    contact.setEnabled(false);
+                    return;
+                }
+            } else if (bd1.getName().equals("paintball")) {
                 paintball = (PaintballModel) bd1;
-            } else {
+                if(paintball.isDead()) {
+                    contact.setEnabled(false);
+                    return;
+                }
+            }
+
+
+            if(bd1.getName().equals("player")) {
+               player = (PlayerModel) bd1;
+            } else if (bd2.getName().equals("player")) {
+                player = (PlayerModel) bd2;
+            }
+            
+            if (paintball == null ||  player == null){
                 return;
             }
+
+            if (player.isGhosting()) {
+                contact.setEnabled(false);
+                return;
+            }
+
+
             if(player.getVY()>=0 && paintball.isPlayerBullet()) {
                 contact.setEnabled(false);
             }
@@ -328,5 +353,44 @@ public class CollisionController implements ContactListener {
         }
     }
     @Override
-    public void postSolve(Contact contact, ContactImpulse impulse) {}
+    public void postSolve(Contact contact, ContactImpulse impulse) {
+
+        Fixture fix1 = contact.getFixtureA();
+        Fixture fix2 = contact.getFixtureB();
+
+        Body body1 = fix1.getBody();
+        Body body2 = fix2.getBody();
+
+        try {
+            Obstacle bd1 = (Obstacle) body1.getUserData();
+            Obstacle bd2 = (Obstacle) body2.getUserData();
+
+            PlayerModel player;
+            PaintballModel paintball;
+
+            if(bd1.getName().equals("player") && bd2.getName().equals("paintball")) {
+                player = (PlayerModel) bd1;
+                paintball = (PaintballModel) bd2;
+            } else if (bd2.getName().equals("player") && bd1.getName().equals("paintball")) {
+                player = (PlayerModel) bd2;
+                paintball = (PaintballModel) bd1;
+            } else {
+                return;
+            }
+
+            if (player.isGhosting()) {
+                contact.setEnabled(false);
+                return;
+            }
+
+            if(player.getVY()>=0 && paintball.isPlayerBullet()) {
+                contact.setEnabled(false);
+            }
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }
