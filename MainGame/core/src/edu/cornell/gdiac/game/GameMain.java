@@ -115,6 +115,7 @@ public class GameMain extends Game implements ScreenListener {
 	 * @param height The new height in pixels
 	 */
 	public void resize(int width, int height) {
+		canvas.setSize(width,height);
 		canvas.resize();
 		super.resize(width,height);
 	}
