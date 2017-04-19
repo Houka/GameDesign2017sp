@@ -2,6 +2,10 @@ package edu.cornell.gdiac.util;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.JsonWriter;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -17,12 +21,13 @@ import java.io.*;
 public class FileReaderWriter {
     /** Director of json files */
     public static final String JSON_DIRECTORY = "JSON";
+    public static final String JSON_LEVELS = JSON_DIRECTORY+"/levelsDirectory.json";
 
     /**
      * loads all level data
      * populates platforms, walls, enemies, player, target, resources
      */
-    public String readJson(String JsonFile){
+    public static String readJson(String JsonFile){
         try {
             FileHandle handler = Gdx.files.local(JsonFile);
             String content = handler.readString();
@@ -39,41 +44,53 @@ public class FileReaderWriter {
      * Gets a list of all files in the JSON directory in the assets folder.
      * @return arraylist of all current files in the JSON directory
      */
-    public static ArrayList<String> getJsonFiles(){
+    public static String[] getJsonFiles(){
         try{
-            return getJsonFiles(new ArrayList<String>(), Gdx.files.local(JSON_DIRECTORY).file());
+            String content = FileReaderWriter.readJson(JSON_LEVELS);
+            JsonReader reader = new JsonReader();
+            JsonValue objects = reader.parse(content);
+
+            String[] result = objects.get("levels").asStringArray();
+            return result;
         }catch (Exception e){
             System.out.println("Error: Json directory not found");
-            return null;
+            return new String[]{};
         }
     }
 
     /**
      * Gets a list of all files in the JSON directory in the assets folder.
-     * @return Pretty formated string of the list of all current files in the JSON directory
+     * @return arraylist of all current files in the JSON directory
      */
-    public static String getJsonFilesString(){
-        String result = "";
-        for(Object s:getJsonFiles(new ArrayList<String>(), Gdx.files.local(JSON_DIRECTORY).file()).toArray()){
-            result+="        "+s+"\n";
-        }
-        return result+"\n";
-    }
+    public static void addJsonFile(String jsonFile){
+        try{
+            // get old file
+            String content = FileReaderWriter.readJson(JSON_LEVELS);
+            JsonReader reader = new JsonReader();
+            JsonValue objects = reader.parse(content);
+            String[] result = objects.get("levels").asStringArray();
 
-    private static ArrayList<String> getJsonFiles(ArrayList<String> list, File directory)
-    {
-        for(File file: directory.listFiles()){
-            if (file.isDirectory())
-            {
-                getJsonFiles(list, file);
+            // write new file with old file stuff
+            FileHandle fileHandle = new FileHandle(new File(JSON_LEVELS));
+            JsonWriter writer = new JsonWriter(fileHandle.writer(false));
+            Json json = new Json();
+            json.setOutputType(JsonWriter.OutputType.json);
+            json.setWriter(writer);
+
+            json.writeObjectStart();
+            json.writeArrayStart("levels");
+            for(String s:result){
+                json.writeValue(s);
             }
-            String path = file.getPath();
-            list.add(path.substring(path.indexOf(JSON_DIRECTORY),path.length()));
+            json.writeValue(jsonFile);
+            json.writeArrayEnd();
+            json.writeObjectEnd();
+
+            writer.close();
+        }catch (Exception e){
+            System.out.println("Error: Cannot add jsonFile to levels directory");
         }
-
-        return list;
     }
-
 }
 
 
