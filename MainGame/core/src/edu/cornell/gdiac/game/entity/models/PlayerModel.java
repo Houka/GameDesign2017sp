@@ -69,6 +69,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private float jumpForce;
     /** Whether we are getting knocked back*/
     private boolean isKnockedBack;
+    /** Whether we are crouching*/
+    private boolean isCrouching;
     /** Direction of said knockback**/
     private Vector2 knockbackDirection;
     /** Force of said knockback**/
@@ -98,6 +100,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
     /** The animation associated with this entity */
     private Animation animation;
+
+    /** Store hitboxes depending on state of the player*/
+    private float[] defaultBox;
+    private float[] crouchingBox;
 
     /**
      * Creates a new player avatar at the origin.
@@ -134,6 +140,20 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
                         width/2.0f*PLAYER_HSHRINK, -height/2.0f
                 },
                 x,y);
+
+        defaultBox = new float[]{
+                -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
+                -width/2.0f*PLAYER_HSHRINK, height/2.0f - PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, height/2.0f - PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, -height/2.0f
+        };
+        crouchingBox = new float[]{
+                -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
+                -width/2.0f*PLAYER_HSHRINK, height/2.0f - 2*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, height/2.0f - 2*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, -height/2.0f
+        };
+
         setMass(PLAYER_MASS);
         setDensity(PLAYER_DENSITY);
         setFriction(PLAYER_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
@@ -202,11 +222,15 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         } else if (movement > 0) {
             isFacingRight = true;
         }
+
+        if (isCrouching()){
+            movement = 0;
+        }
     }
 
     @Override
     public boolean isShooting() {
-        return isShooting && shootCooldown <= 0;
+        return isShooting && shootCooldown <= 0 && !isCrouching();
     }
 
     @Override
@@ -234,6 +258,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
     public boolean isKnockedBack() {
         return isKnockedBack && knockbackDuration > defaultKnockbackDuration-Math.max(defaultKnockbackDuration,knockbackStunDuration);
+    }
+
+    public boolean isCrouching(){
+        return isGrounded() && isCrouching;
     }
 
     public void setKnockedBack(float dir){
@@ -301,6 +329,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
      */
     public void setGrounded(boolean value) {
         isGrounded = value;
+    }
+
+    public void setCrouching(boolean value) {
+        isCrouching = value;
     }
 
     /**
@@ -479,6 +511,16 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
             knockbackDuration = knockbackDuration - 1;
         } else {
             isKnockedBack=false;
+        }
+
+        if (isCrouching()){
+            initShapes(crouchingBox);
+            initBounds();
+        }
+
+        else{
+            initShapes(defaultBox);
+            initBounds();
         }
 
         super.update(dt);

@@ -64,7 +64,6 @@ public class PlayerInputController {
         return shootPressed && !shootPrevious;
     }
     public boolean didJump() { return jumpPressed && !jumpPrevious; }
-
     /**
      * Returns the amount of sideways movement.
      *
@@ -103,6 +102,13 @@ public class PlayerInputController {
         readKeyboard(false);
     }
 
+    /**
+     * Reads the input for down. Need this method to allow continuous crouching while holding button down.
+     *
+     */
+    public boolean isDownHeld(){
+        return (Gdx.input.isKeyPressed(Input.Keys.DOWN));
+    }
     /**
      * Reads input from the keyboard.
      *

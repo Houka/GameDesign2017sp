@@ -31,6 +31,7 @@ public class PlayerController extends EntityController {
         player.setMovement(input.getHorizontal());
         player.setJumping(input.didJump());
         player.setShooting(input.didShoot());
+        player.setCrouching(input.isDownHeld());
         player.applyForce();
 
         updateAnimation();
