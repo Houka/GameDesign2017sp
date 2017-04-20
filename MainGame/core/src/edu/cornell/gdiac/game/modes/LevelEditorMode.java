@@ -243,6 +243,18 @@ public class LevelEditorMode extends Mode {
         }
     }
 
+    private String setEnemyType() {
+        String[] values = {"normal", "trampoline"};
+        String result = (String) JOptionPane.showInputDialog(null, "Choose a type of paintball you want your enemy to shoot", "Input",
+                JOptionPane.INFORMATION_MESSAGE, null, values, values[0]);
+        if(result != null) {
+            return result;
+        }
+        else {
+            return null;
+        }
+    }
+
     private void updateKeyInput(){
         // camera movement
         if(input.didUp())
@@ -298,10 +310,11 @@ public class LevelEditorMode extends Mode {
                 try {
                     int interval = 3;
                     String dir = setDir();
+                    String type = setEnemyType();
                     boolean right = false;
                     if(dir.equals("right")) { right = true; }
                     EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
-                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, true, interval, "normal");
+                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, true, interval, type);
                     newE.setDrawScale(scaleVector);
                     newE.setTexture(underMouse);
                     objects.add(newE);
@@ -313,10 +326,11 @@ public class LevelEditorMode extends Mode {
                 try {
                     int interval = Math.max(0, Integer.parseInt(setInterval()));
                     String dir = setDir();
+                    String type = setEnemyType();
                     boolean right = false;
                     if(dir.equals("right")) { right = true; }
                     EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
-                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, false, interval, "normal");
+                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, false, interval, type);
                     newE.setDrawScale(scaleVector);
                     newE.setTexture(underMouse);
                     objects.add(newE);

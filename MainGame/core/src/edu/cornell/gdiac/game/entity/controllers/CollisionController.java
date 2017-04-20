@@ -98,7 +98,6 @@ public class CollisionController implements ContactListener {
                 obj1.setKnockedBack(sign);
         }
         if(obj2.getPaintballType().equals("trampolineComb")) {
-            obj1.setVY(10);
             if(obj1.isGrounded() && !obj1.isJumping() && !obj1.isDoubleJumping()) {
                 obj1.setTrampGrounded(true);
             }
@@ -185,11 +184,13 @@ public class CollisionController implements ContactListener {
     private void handleEndCollision(PlayerModel obj1,WallModel obj2){ }
     private void handleEndCollision(PlayerModel obj1,PlatformModel obj2, Object userData1, Object userData2){
         leftGround(obj1,obj2,userData1,userData2);
-        obj1.setTrampGrounded(false);
     }
     private void handleEndCollision(PlayerModel obj1,PaintballModel obj2, Object userData1, Object userData2){
         leftGround(obj1,obj2,userData1,userData2);
         obj1.setRidingVX(null);
+        if(obj2.getPaintballType().equals("trampolineComb")) {
+            obj2.instakill();
+        }
     }
     private void handleEndCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){}
     private void handleEndCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}

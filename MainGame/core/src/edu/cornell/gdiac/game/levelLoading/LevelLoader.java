@@ -69,8 +69,6 @@ public class LevelLoader implements AssetUser, Disposable{
         addQueue.clear();
         //sets the new world bounds
         bounds = new Rectangle(0,0,32,18*3);
-        // TODO: remove
-        System.out.println(JSONFile);
         levelParser.loadLevel(JSONFile);
         populateLevel();
     }
