@@ -113,7 +113,7 @@ public class GameMode extends Mode implements Settable {
 	private SoundController soundController;
 
 	/** An array to store the levels **/
-	private static final ArrayList<String> NUM_LEVELS = FileReaderWriter.getJsonFiles();
+	private static final String[] NUM_LEVELS = FileReaderWriter.getJsonFiles();
 
 	/**
 	 * Creates a new game world with the default values.
@@ -362,8 +362,8 @@ public class GameMode extends Mode implements Settable {
 
 
 	public void nextLevel() {
-	    int nextLevel = (levelNumber+1)%NUM_LEVELS.size();
-	    setLevel(NUM_LEVELS.get(nextLevel),nextLevel);
+	    int nextLevel = (levelNumber+1)%NUM_LEVELS.length;
+	    setLevel(NUM_LEVELS[nextLevel],nextLevel);
 	    reset();
 	}
 

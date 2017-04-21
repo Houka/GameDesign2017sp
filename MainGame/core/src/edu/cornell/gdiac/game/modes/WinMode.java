@@ -33,7 +33,7 @@ public class WinMode extends Mode {
 	/** Selection menu items y offset between each menu item*/
 	private static final int MENU_ITEM_GAP_OFFSET_Y = 20;
 	private static Color DARK_PURPLE = new Color(123/255f, 118/255f, 131/255f, 1f);
-	private static final ArrayList<String> NUM_LEVELS = FileReaderWriter.getJsonFiles();
+	private static final String[] NUM_LEVELS = FileReaderWriter.getJsonFiles();
 
 	/** The font for giving messages to the player */
 	protected BitmapFont displayFont;
