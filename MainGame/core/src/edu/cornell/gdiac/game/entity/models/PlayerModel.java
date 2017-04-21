@@ -82,8 +82,12 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private float knockbackStunDuration = 5;
     private float defaultKnockbackDuration = 60;
 
+    /** Duration that player will pass through bullets**/
+    private float passThroughDuration;
+    private final float GO_THROUGH_TIME = 2;
+
     /** Whether we getting knockedBack jumping */
-    private boolean isJumping;
+    public boolean isJumping;
     /** How long until we can shoot again */
     private int shootCooldown;
     /** Whether our feet are on the ground */
@@ -102,6 +106,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
     /** The animation associated with this entity */
     private Animation animation;
+    /** The color associated with this entity */
+    private Color drawColor;
 
     /** Store hitboxes depending on state of the player*/
     private float[] defaultBox;
@@ -143,7 +149,6 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
                         width/2.0f*PLAYER_HSHRINK, -height/2.0f
                 },
                 x,y);
-
         defaultBox = new float[]{
                 -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
                 -width/2.0f*PLAYER_HSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
@@ -162,6 +167,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
                 width/2.0f*PLAYER_HSHRINK, height/2.0f - 2*height*PLAYER_HEAD_SPACE,
                 width/2.0f*PLAYER_HSHRINK, -height/2.0f
         };
+        drawColor = new Color(256f,256f,256f,1f);
 
         setDensity(PLAYER_DENSITY);
         setFriction(PLAYER_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
@@ -275,7 +281,6 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
     public void setKnockedBack(float dir){
 
-
         if(dir==0) {
             isKnockedBack=false;
             return;
@@ -283,6 +288,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
         if(isKnockedBack)
             return;
+
+        passThroughDuration = GO_THROUGH_TIME;
+        canDoubleJump = false;
+        setVY(0.0f);
 
        isKnockedBack=true;
         knockbackDuration = defaultKnockbackDuration;
@@ -373,6 +382,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
      */
     public String getSensorName() {
         return SENSOR_NAME;
+    }
+
+    public boolean isGhosting() {
+        return passThroughDuration>0;
     }
 
     @Override
@@ -522,6 +535,9 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
             isKnockedBack=false;
         }
 
+        if(isGhosting())
+            passThroughDuration= Math.max(passThroughDuration-dt,0);
+      
         if (isCrouching()){
             initShapes(crouchingBox);
             initBounds();
@@ -547,10 +563,12 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     public void draw(GameCanvas canvas) {
         float effect = isFacingRight ? 1.0f : -1.0f;
 
+        drawColor.a = isGhosting() ? .6f : 1.0f;
+
         if (animation == null)
-            canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+            canvas.draw(texture,drawColor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
         else
-            canvas.draw(animation.getTextureRegion(),Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+            canvas.draw(animation.getTextureRegion(),drawColor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
     }
 
     /**

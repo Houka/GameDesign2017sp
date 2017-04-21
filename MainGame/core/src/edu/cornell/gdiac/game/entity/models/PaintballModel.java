@@ -60,7 +60,7 @@ public class PaintballModel extends BoxObstacle {
     private Vector2 scale;
 
     /** Paintball color**/
-    private Color paintcolor = Color.WHITE;
+    private Color paintcolor = new Color(256f,256f,256,1f);
 
     /** Update time**/
     private float updateTime;

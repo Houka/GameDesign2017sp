@@ -68,6 +68,8 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
     private boolean isFacingRight;
     /** If the enemy is OnSight or not */
     private boolean onSight;
+    /** The type of enemy, i.e. what kind of bullet it shoots*/
+    private int enemyType;
 
     /** The animation associated with this entity */
     private Animation animation;
