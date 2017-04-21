@@ -44,6 +44,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private static final String SENSOR_NAME = "PlayerGroundSensor";
     /** Ratio of jump force to double jump force */
     private static final float DOUBLE_JUMP_MULTIPLIER = 1.2f;
+    /** Mass of the player */
+    private static final float PLAYER_MASS = 4f;
 
     // This is to fit the image to a tigher hitbox
     /** The head space of the texture to remove*/
@@ -67,6 +69,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private float jumpForce;
     /** Whether we are getting knocked back*/
     private boolean isKnockedBack;
+    /** Whether we are crouching*/
+    private boolean isCrouching;
     /** Direction of said knockback**/
     private Vector2 knockbackDirection;
     /** Force of said knockback**/
@@ -103,6 +107,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     /** The color associated with this entity */
     private Color drawColor;
 
+    /** Store hitboxes depending on state of the player*/
+    private float[] defaultBox;
+    private float[] crouchingBox;
+
     /**
      * Creates a new player avatar at the origin.
      *
@@ -138,7 +146,21 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
                         width/2.0f*PLAYER_HSHRINK, -height/2.0f
                 },
                 x,y);
+        defaultBox = new float[]{
+                -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
+                -width/2.0f*PLAYER_HSHRINK, height/2.0f - PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, height/2.0f - PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, -height/2.0f
+        };
+        crouchingBox = new float[]{
+                -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
+                -width/2.0f*PLAYER_HSHRINK, height/2.0f - 2*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, height/2.0f - 2*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, -height/2.0f
+        };
         drawColor = new Color(256f,256f,256f,1f);
+
+        setMass(PLAYER_MASS);
         setDensity(PLAYER_DENSITY);
         setFriction(PLAYER_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
         setFixedRotation(true);
@@ -206,11 +228,15 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         } else if (movement > 0) {
             isFacingRight = true;
         }
+
+        if (isCrouching()){
+            movement = 0;
+        }
     }
 
     @Override
     public boolean isShooting() {
-        return isShooting && shootCooldown <= 0;
+        return isShooting && shootCooldown <= 0 && !isCrouching();
     }
 
     @Override
@@ -238,6 +264,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
     public boolean isKnockedBack() {
         return isKnockedBack && knockbackDuration > defaultKnockbackDuration-Math.max(defaultKnockbackDuration,knockbackStunDuration);
+    }
+
+    public boolean isCrouching(){
+        return isGrounded() && isCrouching;
     }
 
     public void setKnockedBack(float dir){
@@ -308,6 +338,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
      */
     public void setGrounded(boolean value) {
         isGrounded = value;
+    }
+
+    public void setCrouching(boolean value) {
+        isCrouching = value;
     }
 
     /**
@@ -494,6 +528,16 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
         if(isGhosting())
             passThroughDuration= Math.max(passThroughDuration-dt,0);
+      
+        if (isCrouching()){
+            initShapes(crouchingBox);
+            initBounds();
+        }
+
+        else{
+            initShapes(defaultBox);
+            initBounds();
+        }
 
         super.update(dt);
         animation.update(dt);

@@ -19,6 +19,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import edu.cornell.gdiac.game.Camera2;
@@ -35,6 +36,7 @@ import edu.cornell.gdiac.util.obstacles.Obstacle;
 
 import javax.swing.*;
 import java.io.File;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 
@@ -168,7 +170,7 @@ public class LevelEditorMode extends Mode {
     private String getLoadFileName(){
         setUpPopUpFrame();
         String response = JOptionPane.showInputDialog(dummyFrame,
-                "What's the relative file path of the file you want to load? \n\n List of all level files:\n"+ FileReaderWriter.getJsonFilesString());
+                "What's the relative file path of the file you want to load? \n\n List of all level files:\n"+ FileReaderWriter.getJsonFiles());
         dummyFrame.dispose();
         return response;
     }
@@ -219,6 +221,28 @@ public class LevelEditorMode extends Mode {
         updateKeyInput();
     }
 
+    private String setInterval() {
+        String result = JOptionPane.showInputDialog("Enter an interval time in seconds.");
+        if(result != null) {
+            return result;
+        }
+        else {
+            return null;
+        }
+    }
+
+    private String setDir() {
+        String[] values = {"left", "right"};
+        String result = (String) JOptionPane.showInputDialog(null, "Choose a direction for your enemy to face", "Input",
+                JOptionPane.INFORMATION_MESSAGE, null, values, values[0]);
+        if(result != null) {
+            return result;
+        }
+        else {
+            return null;
+        }
+    }
+
     private void updateKeyInput(){
         // camera movement
         if(input.didUp())
@@ -259,33 +283,48 @@ public class LevelEditorMode extends Mode {
                 }
             }
         }
-        if(!input.didTouch()) {
-            textureClicked = false;
-        }
-        if(!input.didTouch() &&  mouseX <= canvas.getWidth()-170 && underMouse != null) {
+        if(input.didTouch() && mouseX <= canvas.getWidth()-170 && underMouse != null && textureClicked) {
             Vector2 newPos = getScaledCoordinates(mousePos);
             if(underMouse.equals(regions[0])) {
-                PlayerModel newP = new PlayerModel(newPos.x,newPos.y,
+                PlayerModel newP = new PlayerModel(newPos.x,getScaledCoordinates(new Vector2(mousePos.x, mousePos.y+(underMouse.getRegionHeight()/4))).y,
                         underMouse.getRegionWidth(), underMouse.getRegionHeight());
                 newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
                 objects.add(newP);
-            }
-            else if(underMouse.equals(regions[1])) {
-                int interval = 3;
-                EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
-                        underMouse.getRegionWidth(), underMouse.getRegionHeight(), true, true, interval);
-                newE.setDrawScale(scaleVector);
-                newE.setTexture(underMouse);
-                objects.add(newE);
+                underMouse = null;
+                textureClicked = false;
             }
             else if(underMouse.equals(regions[5])) {
-                int interval = 200;
-                EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
-                        underMouse.getRegionWidth(), underMouse.getRegionHeight(), true, false, interval);
-                newE.setDrawScale(scaleVector);
-                newE.setTexture(underMouse);
-                objects.add(newE);
+                try {
+                    int interval = 3;
+                    String dir = setDir();
+                    boolean right = false;
+                    if(dir.equals("right")) { right = true; }
+                    EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
+                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, true, interval);
+                    newE.setDrawScale(scaleVector);
+                    newE.setTexture(underMouse);
+                    objects.add(newE);
+                }
+                catch (NullPointerException e) {
+                }
+            }
+            else if(underMouse.equals(regions[1])) {
+                try {
+                    int interval = Math.max(0, Integer.parseInt(setInterval()));
+                    String dir = setDir();
+                    boolean right = false;
+                    if(dir.equals("right")) { right = true; }
+                    EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
+                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, false, interval);
+                    newE.setDrawScale(scaleVector);
+                    newE.setTexture(underMouse);
+                    objects.add(newE);
+                }
+                catch (NumberFormatException e) {
+                }
+                catch (NullPointerException e) {
+                }
             }
             else if(underMouse.equals(regions[3])) {
                 int ammoAmount = 3;
@@ -301,6 +340,8 @@ public class LevelEditorMode extends Mode {
                 newG.setDrawScale(scaleVector);
                 newG.setTexture(underMouse);
                 objects.add(newG);
+                underMouse = null;
+                textureClicked = false;
             }
             else if(underMouse.equals(regions[2])) {
                 float offset = .75f;
@@ -310,6 +351,7 @@ public class LevelEditorMode extends Mode {
                 newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
                 objects.add(newP);
+
             }
             else if(underMouse.equals(regions[6])) {
                 float offset = .75f;
@@ -320,7 +362,48 @@ public class LevelEditorMode extends Mode {
                 newW.setTexture(underMouse);
                 objects.add(newW);
             }
-            underMouse = null;
+        }
+
+        if(input.didRightClick()) {
+            Rectangle bounds = new Rectangle();
+            for(Obstacle o: objects) {
+                Vector2 scaledMouse = getScaledCoordinates(getWorldCoordinates(new Vector2(mouseX,canvas.getHeight()-mouseY)));
+                if(o instanceof PlatformModel) {
+                    float[] points = ((PlatformModel)o).getPoints();
+                    float newW = points[2]-points[0];
+                    float newH = points[3]-points[7];
+                    bounds = new Rectangle(points[6]+(newW/2), points[5]-(newH/2), newW, newH);
+                }
+                else if(o instanceof WallModel) {
+                    float[] points = ((WallModel)o).getPoints();
+                    float newW = points[2]-points[0];
+                    float newH = points[3]-points[7];
+                    bounds = new Rectangle(points[6]+(newW/2), points[5], newW, newH);
+                }
+                else if(o instanceof GoalModel) {
+                    float newW = ((GoalModel) o).getWidth()/scaleVector.x;
+                    float newH = ((GoalModel) o).getHeight()/scaleVector.y;
+                    bounds = new Rectangle(o.getX(),o.getY()-(newH/2), newW, newH);
+                }
+                else if(o instanceof AmmoDepotModel) {
+                    float newW = ((AmmoDepotModel) o).getWidth()/scaleVector.x;
+                    float newH = ((AmmoDepotModel) o).getHeight()/scaleVector.y;
+                    bounds = new Rectangle(o.getX(),o.getY()-(newH/2), newW, newH);
+                }
+                else if(o instanceof EnemyModel) {
+                    float newW = ((EnemyModel) o).getWidth()/scaleVector.x;
+                    float newH = ((EnemyModel) o).getHeight()/scaleVector.y;
+                    bounds = new Rectangle(o.getX()-(newW/2),o.getY()-(newH/2), newW+(newW/2), newH);
+                }
+                else if(o instanceof PlayerModel) {
+                    float newW = ((PlayerModel) o).getWidth()/scaleVector.x;
+                    float newH = ((PlayerModel) o).getHeight()/scaleVector.y;
+                    bounds = new Rectangle(o.getX(),o.getY()-(newH/2), newW, newH);
+                }
+                if(bounds.contains(scaledMouse)) {
+                    objects.remove(o);
+                }
+            }
         }
 
         // scrolling the sidebar
@@ -473,8 +556,10 @@ public class LevelEditorMode extends Mode {
                 target = (GoalModel) obj;
         }
 
-        if (player != null && target != null)
+        if (player != null && target != null) {
             levelCreator.writeLevel(saveFileName, platforms, walls, player, intervalEnemies, onSightEnemies, ammoDepots, target, ammo);
+            FileReaderWriter.addJsonFile(saveFileName);
+        }
         else{
             System.out.println("ERROR: cannot create JSON without a player or goal in the map or file name is invalid");
         }

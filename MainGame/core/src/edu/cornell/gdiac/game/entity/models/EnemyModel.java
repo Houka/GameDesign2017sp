@@ -1,5 +1,6 @@
 package edu.cornell.gdiac.game.entity.models;
 
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
@@ -8,6 +9,7 @@ import edu.cornell.gdiac.game.interfaces.Animatable;
 import edu.cornell.gdiac.game.interfaces.Shooter;
 import edu.cornell.gdiac.util.Animation;
 import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
+import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
 
 
 /**
@@ -16,7 +18,7 @@ import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
  * Note that this class returns to static loading.  That is because there are
  * no other subclasses that we might loop through.
  */
-public class EnemyModel extends CapsuleObstacle implements Shooter, Animatable {
+public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
     // Physics constants
     /** The density of the character */
     private static final float ENEMY_DENSITY = 500.0f;
@@ -38,6 +40,16 @@ public class EnemyModel extends CapsuleObstacle implements Shooter, Animatable {
     private static final float SENSOR_HEIGHT = 0.05f;
     /** Identifier to allow us to track the sensor in ContactListener */
     private static final String SENSOR_NAME = "EnemyGroundSensor";
+    /** Width of the sensor, made small to make bottom hitbox smaller*/
+    private static final float SENSOR_WIDTH = 0.1f;
+    /** Offset for hitbox for upper part of arm*/
+    private static final float ABOVE_ARM = 0.1f;
+    /** Offset for hitbox for lower part of arm*/
+    private static final float BELOW_ARM = 0.3f;
+    /** Offset for hitbox for where the poster ends below*/
+    private static final float BELOW_POSTER = 0.7f;
+
+    private static final float VERTICAL_OFFSET = 1f;
 
     /** Ground sensor to represent our feet */
     private Fixture sensorFixture;  // TODO: use sensors as ways to detect the ends of platforms (sensors in front/behind entity)
@@ -57,6 +69,8 @@ public class EnemyModel extends CapsuleObstacle implements Shooter, Animatable {
     private boolean isFacingRight;
     /** If the enemy is OnSight or not */
     private boolean onSight;
+    /** The type of enemy, i.e. what kind of bullet it shoots*/
+    private int enemyType;
 
     /** The animation associated with this entity */
     private Animation animation;
@@ -86,11 +100,23 @@ public class EnemyModel extends CapsuleObstacle implements Shooter, Animatable {
      * @param isFacingRight Whether or not the enemy is facing right
      */
     public EnemyModel(float x, float y, float width, float height, boolean isFacingRight, boolean onSight, int interval) {
-        super(x,y,width* ENEMY_HSHRINK,height* ENEMY_VSHRINK);
+        super(
+                new float[]{
+                        -width/2.0f, -BELOW_POSTER,
+                        -width/2.0f, height/2.0f,
+                        0, height/2.0f,
+                        0, ABOVE_ARM,
+                        width/2.0f, ABOVE_ARM,
+                        width/2.0f, -BELOW_ARM,
+                        0, -BELOW_ARM,
+                        0, -BELOW_POSTER,
+                },
+                x,y);
         setDensity(ENEMY_DENSITY);
         setFriction(ENEMY_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
         setFixedRotation(true);
         setName("enemy");
+        bodyinfo.type = BodyDef.BodyType.StaticBody;
 
         // Gameplay attributes
         isShooting = false;
@@ -118,12 +144,12 @@ public class EnemyModel extends CapsuleObstacle implements Shooter, Animatable {
         }
 
         // Ground Fixture
-        Vector2 sensorCenter = new Vector2(0, -getHeight() / 2 );
+        Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
         FixtureDef sensorDef = new FixtureDef();
         sensorDef.density = ENEMY_DENSITY;
         sensorDef.isSensor = true;
         sensorShape = new PolygonShape();
-        sensorShape.setAsBox(ENEMY_SSHRINK *getWidth()/2.0f, SENSOR_HEIGHT, sensorCenter, 0.0f);
+        sensorShape.setAsBox(SENSOR_WIDTH, SENSOR_HEIGHT, sensorCenter, 0.0f);
         sensorDef.shape = sensorShape;
 
         sensorFixture = body.createFixture(sensorDef);
@@ -133,6 +159,13 @@ public class EnemyModel extends CapsuleObstacle implements Shooter, Animatable {
     }
 
     // BEGIN: Setters and Getters
+    @Override
+    public void setTexture(TextureRegion region){
+        super.setTexture(region);
+        texture = region;
+        origin.set(region.getRegionWidth()/2.0f, region.getRegionHeight()/2.0f);
+    }
+
     @Override
     public void setAnimation(Animation animation){
         this.animation = animation;

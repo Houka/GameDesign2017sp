@@ -70,6 +70,8 @@ public class GameMode extends Mode implements Settable {
 	/** The default value of gravity (going down)	 */
 	private static final float DEFAULT_GRAVITY = -20.0f;
 
+	/** offset for enemies to shoot without hitting themselves in the arm*/
+	private static final float SHOOT_OFFSET = 0.4f;
 	/** The time until reset after loss*/
 	private final float TIME_TO_RESET = 3f;
 
@@ -389,8 +391,11 @@ public class GameMode extends Mode implements Settable {
 		if (((Shooter)obj).isShooting()) {
 			if (obj.getName().equals("player") && hud.useAmmo())
 				addObject(paintballFactory.createPlayerPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
-			else if (obj.getName().equals("enemy"))
-				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
+			else if (obj.getName().equals("enemy")) {
+				int direction = ((Shooter) obj).isFacingRight() ? 1 : 0;
+				addObject(paintballFactory.createPaintball(obj.getX()+ direction * SHOOT_OFFSET, obj.getY(),
+							((Shooter) obj).isFacingRight()));
+			}
 		}
 	}
 

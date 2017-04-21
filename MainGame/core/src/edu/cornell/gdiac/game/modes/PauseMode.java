@@ -34,7 +34,7 @@ public class PauseMode extends Mode {
 	/** Selection menu items y offset between each menu item*/
 	private static final int MENU_ITEM_GAP_OFFSET_Y = 20;
 	private static Color DARK_PURPLE = new Color(123/255f, 118/255f, 131/255f, 1f);
-	private static final ArrayList<String> NUM_LEVELS = FileReaderWriter.getJsonFiles();
+	private static String[] NUM_LEVELS = FileReaderWriter.getJsonFiles();
 
 	/** The font for giving messages to the player */
 	protected BitmapFont displayFont;
@@ -106,14 +106,14 @@ public class PauseMode extends Mode {
 				// TODO: remove, for tech demo and testing values
 				Sidebar.defaultBootup();
 			else if (selected == modeNames.length-3) {
-				int levelNum = (gameMode.getLevelNum() + 1) % NUM_LEVELS.size();
-				gameMode.setLevel(NUM_LEVELS.get(levelNum),levelNum);
+				int levelNum = (gameMode.getLevelNum() + 1) % NUM_LEVELS.length;
+				gameMode.setLevel(NUM_LEVELS[levelNum],levelNum);
 			    listener.switchToScreen(this, gameMode.getName());
 			    gameMode.reset();
 			}
 			else if (selected == modeNames.length-4) {
 				int levelNum = Math.max(gameMode.getLevelNum() - 1,0);
-				gameMode.setLevel(NUM_LEVELS.get(levelNum),levelNum);
+				gameMode.setLevel(NUM_LEVELS[levelNum],levelNum);
 				listener.switchToScreen(this, gameMode.getName());
 				gameMode.reset();
 			}
@@ -198,6 +198,9 @@ public class PauseMode extends Mode {
 			displayFont = manager.get(Constants.FONT_FILE, BitmapFont.class);
 		else
 			displayFont = null;
+
+		// load level files
+		NUM_LEVELS =FileReaderWriter.getJsonFiles();
 	}
 
 	@Override
