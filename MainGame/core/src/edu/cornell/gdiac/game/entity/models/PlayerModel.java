@@ -25,7 +25,7 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
 public class PlayerModel extends PolygonObstacle implements Shooter, Settable, Animatable {
     // Physics constants
     /** The density of the character */
-    private static final float PLAYER_DENSITY = 1.0f;
+    private static final float PLAYER_DENSITY = 0.0f;
     /** The factor to multiply by the input */
     private static final float PLAYER_FORCE = 50.0f;
     /** The player is a slippery one */
@@ -45,13 +45,15 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     /** Ratio of jump force to double jump force */
     private static final float DOUBLE_JUMP_MULTIPLIER = 1.2f;
     /** Mass of the player */
-    private static final float PLAYER_MASS = 4f;
+    private static final float PLAYER_MASS = 40f;
 
     // This is to fit the image to a tigher hitbox
-    /** The head space of the texture to remove*/
-    private static final float PLAYER_HEAD_SPACE= 1.2f;
+    /** The amount to shrink  head space of the texture to remove*/
+    private static final float PLAYER_HEAD_SPACE= .15f;
     /** The amount to shrink the body fixture (horizontally) relative to the image */
     private static final float PLAYER_HSHRINK = 0.3f;
+    /** The amount to shrink the body fixture (horizontally) relative to the image */
+    private static final float PLAYER_HSHRINK_RUNNING = 0.7f;
     /** The amount to shrink the sensor fixture (horizontally) relative to the image */
     private static final float PLAYER_SSHRINK = 0.6f;
     /** The position in physics units where the sensor ground should be at*/
@@ -69,6 +71,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private float jumpForce;
     /** Whether we are getting knocked back*/
     private boolean isKnockedBack;
+    /** Whether we are crouching*/
+    private boolean isCrouching;
     /** Direction of said knockback**/
     private Vector2 knockbackDirection;
     /** Force of said knockback**/
@@ -78,8 +82,12 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private float knockbackStunDuration = 5;
     private float defaultKnockbackDuration = 60;
 
+    /** Duration that player will pass through bullets**/
+    private float passThroughDuration;
+    private final float GO_THROUGH_TIME = 2;
+
     /** Whether we getting knockedBack jumping */
-    private boolean isJumping;
+    public boolean isJumping;
     /** How long until we can shoot again */
     private int shootCooldown;
     /** Whether our feet are on the ground */
@@ -92,12 +100,27 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private Fixture sensorFixture;
     private PolygonShape sensorShape;
 
+    /** Fixtures for different hitboxes*/
+    private Fixture playerFixture;
+    private Fixture crouchFixture;
+    private PolygonShape playerShape;
+    private PolygonShape crouchShape;
+
+    private float playerHeight;
+    private float playerWidth;
     /** Cache for internal force calculations */
     private Vector2 forceCache = new Vector2();
     private Vector2 zeroVector = new Vector2(0,0);
 
     /** The animation associated with this entity */
     private Animation animation;
+    /** The color associated with this entity */
+    private Color drawColor;
+
+    /** Store hitboxes depending on state of the player*/
+    private float[] defaultBox;
+    private float[] runningBox;
+    private float[] crouchingBox;
 
     /**
      * Creates a new player avatar at the origin.
@@ -129,16 +152,40 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         super(
                 new float[]{
                         -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
-                        -width/2.0f*PLAYER_HSHRINK, height/2.0f - PLAYER_HEAD_SPACE,
-                        width/2.0f*PLAYER_HSHRINK, height/2.0f - PLAYER_HEAD_SPACE,
+                        -width/2.0f*PLAYER_HSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
+                        width/2.0f*PLAYER_HSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
                         width/2.0f*PLAYER_HSHRINK, -height/2.0f
                 },
                 x,y);
+        defaultBox = new float[]{
+                -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
+                -width/2.0f*PLAYER_HSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, -height/2.0f
+        };
+        runningBox = new float[]{
+                -width/2.0f*PLAYER_HSHRINK_RUNNING, -height/2.0f,
+                -width/2.0f*PLAYER_HSHRINK_RUNNING, height/2.0f - 2f*height*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK_RUNNING, height/2.0f - 2f*height*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK_RUNNING, -height/2.0f
+        };
+        crouchingBox = new float[]{
+                -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
+                -width/2.0f*PLAYER_HSHRINK, height/2.0f - 2*height*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, height/2.0f - 2*height*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, -height/2.0f
+        };
+        drawColor = new Color(256f,256f,256f,1f);
+
+        playerWidth = width;
+        playerHeight = height;
         setMass(PLAYER_MASS);
+
         setDensity(PLAYER_DENSITY);
         setFriction(PLAYER_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
         setFixedRotation(true);
         setName("player");
+        setMass(PLAYER_MASS);
         sensorX = -height/2;
 
         // Gameplay attributes
@@ -202,11 +249,15 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         } else if (movement > 0) {
             isFacingRight = true;
         }
+
+        if (isCrouching()){
+            movement = 0;
+        }
     }
 
     @Override
     public boolean isShooting() {
-        return isShooting && shootCooldown <= 0;
+        return isShooting && shootCooldown <= 0 && !isCrouching();
     }
 
     @Override
@@ -236,8 +287,11 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         return isKnockedBack && knockbackDuration > defaultKnockbackDuration-Math.max(defaultKnockbackDuration,knockbackStunDuration);
     }
 
-    public void setKnockedBack(float dir){
+    public boolean isCrouching(){
+        return isGrounded() && isCrouching;
+    }
 
+    public void setKnockedBack(float dir){
 
         if(dir==0) {
             isKnockedBack=false;
@@ -246,6 +300,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
         if(isKnockedBack)
             return;
+
+        passThroughDuration = GO_THROUGH_TIME;
+        canDoubleJump = false;
+        setVY(0.0f);
 
        isKnockedBack=true;
         knockbackDuration = defaultKnockbackDuration;
@@ -303,6 +361,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         isGrounded = value;
     }
 
+    public void setCrouching(boolean value) {
+        isCrouching = value;
+    }
+
     /**
      * Returns the upper limit on player left-right movement.
      *
@@ -332,6 +394,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
      */
     public String getSensorName() {
         return SENSOR_NAME;
+    }
+
+    public boolean isGhosting() {
+        return passThroughDuration>0;
     }
 
     @Override
@@ -375,6 +441,28 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         sensorFixture = body.createFixture(sensorDef);
         sensorFixture.setUserData(getSensorName());
 
+        //player default and crouching hitboxes
+        Vector2 playerCenter = new Vector2(0, 0);
+        FixtureDef playerDef = new FixtureDef();
+        playerDef.density = PLAYER_DENSITY;
+        playerDef.isSensor = true;
+        playerShape = new PolygonShape();
+        playerShape.setAsBox(PLAYER_HSHRINK*getWidth(), getHeight(), playerCenter, 0.0f);
+        playerDef.shape = playerShape;
+
+        playerFixture = body.createFixture(playerDef);
+        playerFixture.setUserData("Default hitbox");
+
+        Vector2 crouchCenter = new Vector2(0, -getHeight()/2);
+        FixtureDef crouchDef = new FixtureDef();
+        crouchDef.density = PLAYER_DENSITY;
+        crouchDef.isSensor = true;
+        crouchShape = new PolygonShape();
+        crouchShape.setAsBox(PLAYER_HSHRINK*getWidth(), getHeight()/2, crouchCenter, 0.0f);
+        crouchDef.shape = crouchShape;
+
+        crouchFixture = body.createFixture(playerDef);
+        crouchFixture.setUserData("Crouching hitbox");
         return true;
     }
 
@@ -481,6 +569,22 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
             isKnockedBack=false;
         }
 
+        if(isGhosting())
+            passThroughDuration= Math.max(passThroughDuration-dt,0);
+      
+        if (isCrouching()){
+            initShapes(crouchingBox);
+            initBounds();
+        }
+        else if (getMovement() != 0){
+            initShapes(runningBox);
+            initBounds();
+        }
+        else{
+            initShapes(defaultBox);
+            initBounds();
+        }
+
         super.update(dt);
         animation.update(dt);
     }
@@ -493,10 +597,12 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     public void draw(GameCanvas canvas) {
         float effect = isFacingRight ? 1.0f : -1.0f;
 
+        drawColor.a = isGhosting() ? .6f : 1.0f;
+
         if (animation == null)
-            canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+            canvas.draw(texture,drawColor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
         else
-            canvas.draw(animation.getTextureRegion(),Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+            canvas.draw(animation.getTextureRegion(),drawColor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
     }
 
     /**

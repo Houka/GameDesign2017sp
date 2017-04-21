@@ -6,6 +6,9 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 
+import java.sql.Time;
+import java.util.Calendar;
+
 /**
  * Created by Lu on 3/17/2017.
  *
@@ -35,6 +38,9 @@ public class HUDModel extends BoxObstacle {
     /** Time since last state change*/
     private float lastStateChange;
 
+    /** Timer for a race the clock situation (in seconds) **/
+    private Time time;
+
     /**
      * Creates a new HUD at the given position.
      *
@@ -56,6 +62,7 @@ public class HUDModel extends BoxObstacle {
         ammoLeft = DEFAULT_STARTING_AMMO;
         startingAmmo = DEFAULT_STARTING_AMMO;
         lastStateChange = 0.0f;
+        time = new Time(0);
     }
 
     // BEGIN: Setters and Getters
@@ -106,16 +113,20 @@ public class HUDModel extends BoxObstacle {
         ammoLeft = startingAmmo;
         state = STATE_PLAYING;
         lastStateChange = 0;
+        time.setTime(0);
     }
 
-    @Override public void update(float delta) {
+    @Override
+    public void update(float delta) {
         lastStateChange+=delta;
+        time.setTime((int)lastStateChange * 1000);
     }
 
     @Override
     public void draw(GameCanvas canvas){
         font.setColor(Color.DARK_GRAY);
         canvas.drawText("Ammo:"+ammoLeft, font, 30, getY()-30);
+        canvas.drawText(time.toString().substring(3), font, canvas.getWidth()/2, getY()-30);
 
         if (state == STATE_WIN)
             canvas.drawTextCentered("VICTORY", font, getY()-canvas.getHeight());

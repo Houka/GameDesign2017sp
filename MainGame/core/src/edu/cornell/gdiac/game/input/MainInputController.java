@@ -86,7 +86,10 @@ public class MainInputController {
         // Give priority to gamepad results
         exitPressed  = (secondary && exitPressed) || (Gdx.input.isKeyPressed(Input.Keys.ESCAPE));
         resetPressed = (secondary && resetPressed) || (Gdx.input.isKeyPressed(Input.Keys.R));
-        debugPressed = (secondary && debugPressed) || (Gdx.input.isKeyPressed(Input.Keys.D));
+        debugPressed = (secondary && debugPressed) ||
+                (Gdx.input.isKeyPressed(Input.Keys.D) && Gdx.input.isKeyPressed(Input.Keys.E)
+                && Gdx.input.isKeyPressed(Input.Keys.B) && Gdx.input.isKeyPressed(Input.Keys.U)
+                && Gdx.input.isKeyPressed(Input.Keys.G));
         pausePressed = (secondary && debugPressed) || (Gdx.input.isKeyPressed(Input.Keys.P));
     }
 }
