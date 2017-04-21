@@ -49,11 +49,11 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
     // This is to fit the image to a tigher hitbox
     /** The amount to shrink  head space of the texture to remove*/
-    private static final float PLAYER_HEAD_SPACE= .3f;
+    private static final float PLAYER_HEAD_SPACE= .15f;
     /** The amount to shrink the body fixture (horizontally) relative to the image */
     private static final float PLAYER_HSHRINK = 0.3f;
     /** The amount to shrink the body fixture (horizontally) relative to the image */
-    private static final float PLAYER_HSHRINK_RUNNING = 0.5f;
+    private static final float PLAYER_HSHRINK_RUNNING = 0.7f;
     /** The amount to shrink the sensor fixture (horizontally) relative to the image */
     private static final float PLAYER_SSHRINK = 0.6f;
     /** The position in physics units where the sensor ground should be at*/
@@ -157,8 +157,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         };
         runningBox = new float[]{
                 -width/2.0f*PLAYER_HSHRINK_RUNNING, -height/2.0f,
-                -width/2.0f*PLAYER_HSHRINK_RUNNING, height/2.0f - 1.5f*height*PLAYER_HEAD_SPACE,
-                width/2.0f*PLAYER_HSHRINK_RUNNING, height/2.0f - 1.5f*height*PLAYER_HEAD_SPACE,
+                -width/2.0f*PLAYER_HSHRINK_RUNNING, height/2.0f - 2f*height*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK_RUNNING, height/2.0f - 2f*height*PLAYER_HEAD_SPACE,
                 width/2.0f*PLAYER_HSHRINK_RUNNING, -height/2.0f
         };
         crouchingBox = new float[]{
