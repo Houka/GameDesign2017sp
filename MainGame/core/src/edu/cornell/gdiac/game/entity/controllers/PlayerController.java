@@ -10,7 +10,8 @@ import edu.cornell.gdiac.game.input.PlayerInputController;
  * 
  */
 public class PlayerController extends EntityController {
-
+    /** Threshold to play Animation when player is off the ground **/
+    private static final int OFF_GROUND_THRESHOLD = 5;
     /** The input controller associated with the PlayerModel **/
     private PlayerInputController input;
 
@@ -31,6 +32,7 @@ public class PlayerController extends EntityController {
         player.setMovement(input.getHorizontal());
         player.setJumping(input.didJump());
         player.setShooting(input.didShoot());
+        player.setCrouching(input.isDownHeld());
         player.applyForce();
 
         if(player.isTrampGrounded() && input.didJump()) {
@@ -44,16 +46,19 @@ public class PlayerController extends EntityController {
     private void updateAnimation(){
         if (player.isShooting())
             player.getAnimation().playOnce("shoot");
-        if (!player.isGrounded() && player.getVY() < 0)
+        else if (!player.isGrounded() && player.getVY() < -OFF_GROUND_THRESHOLD)
             player.getAnimation().play("falling", false);
-        else if (!player.isGrounded() && player.getVY() > 0) {
+        else if (!player.isGrounded() && player.getVY() > OFF_GROUND_THRESHOLD) {
             if (player.isDoubleJumping())
                 player.getAnimation().setPlayingAnimation("still");
-            player.getAnimation().playOnce("rising");
+            player.getAnimation().play("rising", true);
         }
-        else if (input.getHorizontal() != 0)
+        else if (!player.isGrounded() &&
+                player.getVY() <= OFF_GROUND_THRESHOLD + 1 && player.getVY() >= OFF_GROUND_THRESHOLD-1)
+            player.getAnimation().playOnce("peak");
+        else if (player.isGrounded() && input.getHorizontal() != 0)
             player.getAnimation().play("run", true);
-        else
+        else if (player.isGrounded())
             player.getAnimation().play("idle", true);
     }
 }

@@ -106,7 +106,7 @@ public class LevelLoader implements AssetUser, Disposable{
     public void addBackground() {
         float dwidth = bgTile.getRegionWidth() / scale.x;
         float dheight = bgTile.getRegionHeight() / scale.y;
-        BoxObstacle bg = new BackgroundModel(dwidth / 2, dheight / 2, dwidth * 2, dheight * 3);
+        BoxObstacle bg = new BackgroundModel(dwidth / 2, dheight / 2, dwidth * 2, dheight * 10);
         bg.setDrawScale(scale);
         bgTile.getTexture().setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
         bg.setTexture(bgTile);
@@ -249,6 +249,7 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(Constants.CHARACTER_IDLE_FILE, Texture.class);
         manager.load(Constants.CHARACTER_MIDAIR_FILE, Texture.class);
         manager.load(Constants.CHARACTER_RISING_FILE, Texture.class);
+        manager.load(Constants.CHARACTER_TRANSITION_FILE, Texture.class);
         manager.load(Constants.CHARACTER_RUN_FILE, Texture.class);
         manager.load(Constants.CHARACTER_SHOOT_FILE, Texture.class);
         manager.load(Constants.AMMO_DEPOT_FILE, Texture.class);
@@ -271,8 +272,9 @@ public class LevelLoader implements AssetUser, Disposable{
         playerAnimation.addTexture("idle", AssetRetriever.createTexture(manager, Constants.CHARACTER_IDLE_FILE, false), 1,5);
         playerAnimation.addTexture("run", AssetRetriever.createTexture(manager, Constants.CHARACTER_RUN_FILE, false), 1,4);
         playerAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, Constants.CHARACTER_SHOOT_FILE, false), 1,1);
-        playerAnimation.addTexture("rising", AssetRetriever.createTexture(manager, Constants.CHARACTER_RISING_FILE, false), 1,1);
-        playerAnimation.addTexture("falling", AssetRetriever.createTexture(manager, Constants.CHARACTER_FALLING_FILE, false), 1,1);
+        playerAnimation.addTexture("rising", AssetRetriever.createTexture(manager, Constants.CHARACTER_RISING_FILE, false), 1,2);
+        playerAnimation.addTexture("falling", AssetRetriever.createTexture(manager, Constants.CHARACTER_FALLING_FILE, false), 1,2);
+        playerAnimation.addTexture("peak", AssetRetriever.createTexture(manager, Constants.CHARACTER_TRANSITION_FILE, false), 1,2);
         playerAnimation.addTexture("midair shoot", AssetRetriever.createTexture(manager, Constants.CHARACTER_MIDAIR_FILE, false), 1,1);
         playerAnimation.addTexture("still", playerTexture.getTexture(), 1, 1);
         playerAnimation.setPlaying(false);
@@ -306,6 +308,7 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.unload(Constants.CHARACTER_IDLE_FILE);
         manager.unload(Constants.CHARACTER_MIDAIR_FILE);
         manager.unload(Constants.CHARACTER_RISING_FILE);
+        manager.unload(Constants.CHARACTER_TRANSITION_FILE);
         manager.unload(Constants.CHARACTER_RUN_FILE);
         manager.unload(Constants.CHARACTER_SHOOT_FILE);
     }

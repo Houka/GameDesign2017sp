@@ -10,6 +10,7 @@
  */
 package edu.cornell.gdiac.game.modes;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.badlogic.gdx.Gdx;
@@ -69,6 +70,8 @@ public class GameMode extends Mode implements Settable {
 	/** The default value of gravity (going down)	 */
 	private static final float DEFAULT_GRAVITY = -20.0f;
 
+	/** offset for enemies to shoot without hitting themselves in the arm*/
+	private static final float SHOOT_OFFSET = 0.4f;
 	/** The time until reset after loss*/
 	private final float TIME_TO_RESET = 3f;
 
@@ -108,6 +111,9 @@ public class GameMode extends Mode implements Settable {
 
 	/** Sound controller */
 	private SoundController soundController;
+
+	/** An array to store the levels **/
+	private static final String[] NUM_LEVELS = FileReaderWriter.getJsonFiles();
 
 	/**
 	 * Creates a new game world with the default values.
@@ -274,11 +280,15 @@ public class GameMode extends Mode implements Settable {
 		if (player.getY() < -player.getHeight())
 			hud.setLose(true);
 
-		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isLose())
-			reset();
+		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isLose()) {
+			hud.reset();
+			listener.switchToScreen(this, GameModeManager.LOSS);
+		}
 
-		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isWin())
-			reset(); //TODO: make go to next level instead of reset
+		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isWin()) {
+			hud.reset();
+			listener.switchToScreen(this, GameModeManager.WIN);
+		}
 
 		postUpdate(dt);
 	}
@@ -350,6 +360,13 @@ public class GameMode extends Mode implements Settable {
 		soundController.stop("gameMode");
 	}
 
+
+	public void nextLevel() {
+	    int nextLevel = (levelNumber+1)%NUM_LEVELS.length;
+	    setLevel(NUM_LEVELS[nextLevel],nextLevel);
+	    reset();
+	}
+
 	/**
 	 * Loads the level based on a json file. Will queue up a list of objects to
      * add to the game world and sets all starting attributes to their initial starting
@@ -375,8 +392,11 @@ public class GameMode extends Mode implements Settable {
 		if (((Shooter)obj).isShooting()) {
 			if (obj.getName().equals("player") && hud.useAmmo())
 				addObject(paintballFactory.createPlayerPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight(),"normal"));
-			else if (obj.getName().equals("enemy"))
-				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight(), ((EnemyModel)obj).getEnemyType()));
+			else if (obj.getName().equals("enemy")) {
+				int direction = ((Shooter) obj).isFacingRight() ? 1 : 0;
+				addObject(paintballFactory.createPaintball(obj.getX()+ direction * SHOOT_OFFSET, obj.getY(),
+						((Shooter) obj).isFacingRight(),((EnemyModel)obj).getEnemyType()));
+			}
 		}
 	}
 

@@ -34,9 +34,9 @@
       [
         1,
         14.5,
-        5,
+        4,
         14.5,
-        5,
+        4,
         14,
         1,
         14
@@ -163,14 +163,14 @@
     "interval": [
       {
         "x": 3.0,
-        "y": 17,
+        "y": 16,
         "isFacingRight": 1,
         "interval": 200,
         "enemyType": "normal"
       },
       {
         "x": 29.0,
-        "y": 49,
+        "y": 48,
         "isFacingRight": 0,
         "interval": 200,
         "enemyType": "normal"
@@ -178,14 +178,14 @@
     ],
     "on_sight": [
       {
-        "x": 2.0,
-        "y": 35,
+        "x": 3.0,
+        "y": 34,
         "isFacingRight": 1,
         "enemyType": "normal"
       },
       {
         "x": 29.0,
-        "y": 35,
+        "y": 34,
         "isFacingRight": 0,
         "enemyType": "normal"
       }

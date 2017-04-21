@@ -170,7 +170,7 @@ public class LevelEditorMode extends Mode {
     private String getLoadFileName(){
         setUpPopUpFrame();
         String response = JOptionPane.showInputDialog(dummyFrame,
-                "What's the relative file path of the file you want to load? \n\n List of all level files:\n"+ FileReaderWriter.getJsonFilesString());
+                "What's the relative file path of the file you want to load? \n\n List of all level files:\n"+ FileReaderWriter.getJsonFiles());
         dummyFrame.dispose();
         return response;
     }
@@ -570,8 +570,10 @@ public class LevelEditorMode extends Mode {
                 target = (GoalModel) obj;
         }
 
-        if (player != null && target != null)
+        if (player != null && target != null) {
             levelCreator.writeLevel(saveFileName, platforms, walls, player, intervalEnemies, onSightEnemies, ammoDepots, target, ammo);
+            FileReaderWriter.addJsonFile(saveFileName);
+        }
         else{
             System.out.println("ERROR: cannot create JSON without a player or goal in the map or file name is invalid");
         }

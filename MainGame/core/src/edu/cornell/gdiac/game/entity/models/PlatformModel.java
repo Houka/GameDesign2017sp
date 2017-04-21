@@ -1,6 +1,8 @@
 package edu.cornell.gdiac.game.entity.models;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
 
 /**
