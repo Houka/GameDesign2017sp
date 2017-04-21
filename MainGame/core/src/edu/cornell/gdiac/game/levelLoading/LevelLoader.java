@@ -26,6 +26,7 @@ import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
 public class LevelLoader implements AssetUser, Disposable{
     /** Textures */
     private TextureRegion platformTile;
+    private TextureRegion spikesTile;
     private TextureRegion wallTile;
     private TextureRegion goalTile;
     private TextureRegion bgTile;
@@ -123,7 +124,7 @@ public class LevelLoader implements AssetUser, Disposable{
         JsonValue vertices;
         while (iter.hasNext()){
             vertices = iter.next();
-            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray());
+            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray(), 0);
             obj.setDrawScale(scale);
             obj.setTexture(platformTile);
             addQueuedObject(obj);

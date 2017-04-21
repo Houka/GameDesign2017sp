@@ -347,7 +347,7 @@ public class LevelEditorMode extends Mode {
                 float offset = .75f;
                 float[] arr = {newPos.x-offset, newPos.y+offset, newPos.x+offset, newPos.y+offset,
                         newPos.x+offset, newPos.y-offset, newPos.x-offset, newPos.y-offset};
-                PlatformModel newP = new PlatformModel(arr);
+                PlatformModel newP = new PlatformModel(arr, 0);
                 newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
                 objects.add(newP);

@@ -51,7 +51,7 @@ public class LevelCreator {
 
 
         for (int i = 0; i < DEFAULT_PLATFORMS.length; i++)
-            defaultPlatforms.add(new PlatformModel(DEFAULT_PLATFORMS[i]));
+            defaultPlatforms.add(new PlatformModel(DEFAULT_PLATFORMS[i], 0));
 
         for (int i = 0; i < DEFAULT_WALLS.length; i++)
             defaultWalls.add(new WallModel(DEFAULT_WALLS[i]));
