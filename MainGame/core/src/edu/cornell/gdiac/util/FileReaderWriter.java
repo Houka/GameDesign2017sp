@@ -79,10 +79,14 @@ public class FileReaderWriter {
 
             json.writeObjectStart();
             json.writeArrayStart("levels");
+            boolean alreadyContains = false;
             for(String s:result){
                 json.writeValue(s);
+                if (s.equals(jsonFile))
+                    alreadyContains = true;
             }
-            json.writeValue(jsonFile);
+            if (!alreadyContains)
+                json.writeValue(jsonFile);
             json.writeArrayEnd();
             json.writeObjectEnd();
 
