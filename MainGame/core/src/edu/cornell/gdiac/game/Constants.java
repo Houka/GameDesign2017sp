@@ -25,12 +25,13 @@ public class Constants {
     public static String ENEMY_INTERVAL_FILE = "sprites/enemy/enemy_interval.png";
     public static String ENEMY_SPOTTED_FILE = "sprites/enemy/enemy_spotted.png";
 
-    public static String CHARACTER_STILL_FILE = "sprites/char/char_still.png";
+    public static String CHARACTER_STILL_FILE = "sprites/char/char_icon.png";
     public static String CHARACTER_RUN_FILE = "sprites/char/char_run_strip4.png";
-    public static String CHARACTER_FALLING_FILE = "sprites/char/char_fall.png";
+    public static String CHARACTER_FALLING_FILE = "sprites/char/char_fall_strip2.png";
     public static String CHARACTER_IDLE_FILE = "sprites/char/char_idle_strip5.png";
     public static String CHARACTER_MIDAIR_FILE = "sprites/char/char_midair_shoot.png";
-    public static String CHARACTER_RISING_FILE = "sprites/char/char_jump.png";
+    public static String CHARACTER_RISING_FILE = "sprites/char/char_jump_strip2.png";
+    public static String CHARACTER_TRANSITION_FILE = "sprites/char/char_transition_strip2.png";
     public static String CHARACTER_SHOOT_FILE = "sprites/char/char_shoot.png";
 
     /** Texture file */

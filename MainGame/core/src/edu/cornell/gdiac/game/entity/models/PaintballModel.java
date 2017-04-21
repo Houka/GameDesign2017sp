@@ -60,7 +60,7 @@ public class PaintballModel extends BoxObstacle {
     private Vector2 scale;
 
     /** Paintball color**/
-    private Color paintcolor = Color.WHITE;
+    private Color paintcolor = new Color(256f,256f,256,1f);
 
     /** Update time**/
     private float updateTime;
@@ -335,12 +335,12 @@ public class PaintballModel extends BoxObstacle {
     public void draw(GameCanvas canvas) {
         paintcolor.a = opacity;
         if (texture != null) {
-            canvas.draw(texture, paintcolor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),getScaledX(),getScaledY());
+            canvas.draw(texture, paintcolor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),getScaledX(),getScaledY());
         }
 
         //TODO Find better solution later
         paintcolor.a = 1;
-        canvas.draw(texture, paintcolor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),0,0);
+        canvas.draw(texture, paintcolor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),0,0);
     }
 
     private float snapToGrid(float yVal) {

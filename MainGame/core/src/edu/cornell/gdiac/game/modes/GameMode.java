@@ -10,6 +10,7 @@
  */
 package edu.cornell.gdiac.game.modes;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.badlogic.gdx.Gdx;
@@ -110,6 +111,9 @@ public class GameMode extends Mode implements Settable {
 
 	/** Sound controller */
 	private SoundController soundController;
+
+	/** An array to store the levels **/
+	private static final String[] NUM_LEVELS = FileReaderWriter.getJsonFiles();
 
 	/**
 	 * Creates a new game world with the default values.
@@ -276,11 +280,15 @@ public class GameMode extends Mode implements Settable {
 		if (player.getY() < -player.getHeight())
 			hud.setLose(true);
 
-		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isLose())
-			reset();
+		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isLose()) {
+			hud.reset();
+			listener.switchToScreen(this, GameModeManager.LOSS);
+		}
 
-		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isWin())
-			reset(); //TODO: make go to next level instead of reset
+		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isWin()) {
+			hud.reset();
+			listener.switchToScreen(this, GameModeManager.WIN);
+		}
 
 		postUpdate(dt);
 	}
@@ -350,6 +358,13 @@ public class GameMode extends Mode implements Settable {
 	@Override
 	public void hide(){
 		soundController.stop("gameMode");
+	}
+
+
+	public void nextLevel() {
+	    int nextLevel = (levelNumber+1)%NUM_LEVELS.length;
+	    setLevel(NUM_LEVELS[nextLevel],nextLevel);
+	    reset();
 	}
 
 	/**
