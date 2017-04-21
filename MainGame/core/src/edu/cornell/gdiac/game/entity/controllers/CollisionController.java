@@ -86,6 +86,7 @@ public class CollisionController implements ContactListener {
         obj1.setKnockedBack(0);
     }
     private void handleCollision(PlayerModel obj1, PaintballModel obj2, Object userData1, Object userData2) {
+
         float sign = obj2.getVX() / Math.abs(obj2.getVX());
         if(obj1.getY()-obj1.getHeight()/2f>=obj2.getY() && !obj1.isGhosting()){
             touchedGround(obj1, obj2, userData1, userData2);
@@ -95,6 +96,12 @@ public class CollisionController implements ContactListener {
             obj1.setKnockedBack(0);
             if(!obj2.isPlayerBullet() && !obj2.isDying() && obj1.getX()*sign>obj2.getX()*sign+obj2.getHeadSize()*-sign+(sign>0?obj2.getWidth()/2f:0))
                 obj1.setKnockedBack(sign);
+        }
+        if(obj2.getPaintballType().equals("trampolineComb")) {
+            if(obj1.isGrounded() && !obj1.isJumping() && !obj1.isDoubleJumping()) {
+                obj1.setTrampGrounded(true);
+            }
+
         }
     }
     private void handleCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){
@@ -143,6 +150,9 @@ public class CollisionController implements ContactListener {
             obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
             obj1.setPlayerBullet(true);
         } else {
+            if(obj1.getPaintballType().equals("trampoline") || obj2.getPaintballType().equals("trampoline")) {
+                obj1.setPaintballType("trampolineComb");
+            }
             obj2.instakill();
             obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
             obj1.setTimeToDie(obj1.getPaintballToPaintballDuration());
@@ -331,11 +341,11 @@ public class CollisionController implements ContactListener {
 
 
             if(bd1.getName().equals("player")) {
-               player = (PlayerModel) bd1;
+                player = (PlayerModel) bd1;
             } else if (bd2.getName().equals("player")) {
                 player = (PlayerModel) bd2;
             }
-            
+
             if (paintball == null ||  player == null){
                 return;
             }

@@ -53,8 +53,8 @@ public class PaintballFactory implements AssetUser, Settable {
      *  @param y            Initial y position of the paintball
      *  @param direction    Initial traveling direction of the paintball (true for right, left otherwise)
      */
-    public PaintballModel createPlayerPaintball(float x, float y, boolean direction) {
-        PaintballModel paintball = createPaintball(x,y,direction);
+    public PaintballModel createPlayerPaintball(float x, float y, boolean direction, String paintballType) {
+        PaintballModel paintball = createPaintball(x,y,direction,paintballType);
         paintball.setPlayerBullet(true);
         return paintball;
     }
@@ -65,12 +65,12 @@ public class PaintballFactory implements AssetUser, Settable {
      *  @param y            Initial y position of the paintball
      *  @param direction    Initial traveling direction of the paintball (true for right, left otherwise)
      */
-    public PaintballModel createPaintball(float x, float y, boolean direction){
+    public PaintballModel createPaintball(float x, float y, boolean direction, String paintballType){
         float xOffset = (direction ? x_offset : -x_offset);
         float width = texture.getRegionWidth()/(scale.x);
         float height = texture.getRegionHeight()/(scale.y);
         float speed  = (direction ? initial_speed : -initial_speed);
-        PaintballModel paintball = new PaintballModel(x+xOffset, y+y_offset, width, height,speed,xScale,yScale,scale);
+        PaintballModel paintball = new PaintballModel(x+xOffset, y+y_offset, width, height,speed,xScale,yScale,scale,paintballType);
         paintball.setDensity(heavy_density);
         paintball.setDrawScale(scale);
         paintball.setTexture(texture);
@@ -83,6 +83,7 @@ public class PaintballFactory implements AssetUser, Settable {
         paintball.setFixedRotation(true);
         paintball.setVX(speed);
         paintball.setMaxLifeTime(MAX_LIFE_TIME);
+        paintball.setPaintballType(paintballType);
         return paintball;
     }
 
@@ -166,6 +167,7 @@ public class PaintballFactory implements AssetUser, Settable {
     public static void setyScale(float yScale) {
         PaintballFactory.yScale = yScale;
     }
+
 
     // END: Setters and Getters
 
