@@ -193,6 +193,9 @@ public class CollisionController implements ContactListener {
     private void handleEndCollision(PlayerModel obj1,PaintballModel obj2, Object userData1, Object userData2){
         leftGround(obj1,obj2,userData1,userData2);
         obj1.setRidingVX(null);
+        if(obj2.getPaintballType().equals("trampolineComb")) {
+            obj2.instakill();
+        }
     }
     private void handleEndCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){}
     private void handleEndCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}

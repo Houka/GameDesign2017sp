@@ -209,7 +209,6 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
         enemyType = type;
     }
 
-
     // END: Setters and Getters
 
     /**
