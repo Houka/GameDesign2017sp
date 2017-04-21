@@ -54,8 +54,8 @@ public class Sidebar {
 
         //Below fields are just samples
         Sidebar.addSlider("Gravity",-30f,0f,-29.0f);
-        Sidebar.addSlider("Jump Height",20f,70f, 32f);
-        Sidebar.addSlider("Player Speed",1f,10f,6.0f);
+        Sidebar.addSlider("Jump Height",1f,70f, 14f);
+        Sidebar.addSlider("Player Speed",1f,20f,10.0f);
         Sidebar.addSlider("Knockback Force",0f,30f, 8f);
         Sidebar.addSlider("Knockback Friction",0f,.1f, .06f);
         Sidebar.addSlider("Knockback Duration",0f,80f, 3f);
@@ -74,8 +74,8 @@ public class Sidebar {
         if (theMap == null)
             theMap = new HashMap<String, Float>();
         Sidebar.setValue("Gravity",-29.0f);
-        Sidebar.setValue("Jump Height",32f);
-        Sidebar.setValue("Player Speed",6.0f);
+        Sidebar.setValue("Jump Height",14f);
+        Sidebar.setValue("Player Speed",10.0f);
         Sidebar.setValue("Knockback Force",8f);
         Sidebar.setValue("Knockback Friction",.06f);
         Sidebar.setValue("Knockback Duration",3f);

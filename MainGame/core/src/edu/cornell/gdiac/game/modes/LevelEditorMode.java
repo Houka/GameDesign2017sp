@@ -294,7 +294,7 @@ public class LevelEditorMode extends Mode {
                 underMouse = null;
                 textureClicked = false;
             }
-            else if(underMouse.equals(regions[1])) {
+            else if(underMouse.equals(regions[5])) {
                 try {
                     int interval = 3;
                     String dir = setDir();
@@ -309,7 +309,7 @@ public class LevelEditorMode extends Mode {
                 catch (NullPointerException e) {
                 }
             }
-            else if(underMouse.equals(regions[5])) {
+            else if(underMouse.equals(regions[1])) {
                 try {
                     int interval = Math.max(0, Integer.parseInt(setInterval()));
                     String dir = setDir();
@@ -372,7 +372,7 @@ public class LevelEditorMode extends Mode {
                     float[] points = ((PlatformModel)o).getPoints();
                     float newW = points[2]-points[0];
                     float newH = points[3]-points[7];
-                    bounds = new Rectangle(points[6]+(newW/2), points[5], newW, newH);
+                    bounds = new Rectangle(points[6]+(newW/2), points[5]-(newH/2), newW, newH);
                 }
                 else if(o instanceof WallModel) {
                     float[] points = ((WallModel)o).getPoints();
@@ -393,7 +393,7 @@ public class LevelEditorMode extends Mode {
                 else if(o instanceof EnemyModel) {
                     float newW = ((EnemyModel) o).getWidth()/scaleVector.x;
                     float newH = ((EnemyModel) o).getHeight()/scaleVector.y;
-                    bounds = new Rectangle(o.getX()-(newW/2),o.getY()-(newH/2), newW, newH);
+                    bounds = new Rectangle(o.getX()-(newW/2),o.getY()-(newH/2), newW+(newW/2), newH);
                 }
                 else if(o instanceof PlayerModel) {
                     float newW = ((PlayerModel) o).getWidth()/scaleVector.x;
