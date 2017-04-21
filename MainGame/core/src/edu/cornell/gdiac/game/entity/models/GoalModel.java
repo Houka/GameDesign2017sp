@@ -1,6 +1,8 @@
 package edu.cornell.gdiac.game.entity.models;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 
 /**
@@ -30,5 +32,10 @@ public class GoalModel extends BoxObstacle {
         setRestitution(0.0f);
         setSensor(true);
         setName("goal");
+    }
+
+    @Override
+    public void draw(GameCanvas canvas){
+        canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),1f,1.0f);
     }
 }
