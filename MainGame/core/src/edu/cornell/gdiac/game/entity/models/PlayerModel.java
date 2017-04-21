@@ -79,7 +79,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private float defaultKnockbackDuration = 60;
 
     /** Whether we getting knockedBack jumping */
-    private boolean isJumping;
+    public boolean isJumping;
     /** How long until we can shoot again */
     private int shootCooldown;
     /** Whether our feet are on the ground */
