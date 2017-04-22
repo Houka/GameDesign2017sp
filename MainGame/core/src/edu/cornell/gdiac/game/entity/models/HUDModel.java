@@ -6,6 +6,9 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 
+import java.sql.Time;
+import java.util.Calendar;
+
 /**
  * Created by Lu on 3/17/2017.
  *
@@ -32,6 +35,12 @@ public class HUDModel extends BoxObstacle {
     /** Start in the playing state*/
     private int state = STATE_PLAYING;
 
+    /** Time since last state change*/
+    private float lastStateChange;
+
+    /** Timer for a race the clock situation (in seconds) **/
+    private Time time;
+
     /**
      * Creates a new HUD at the given position.
      *
@@ -52,16 +61,28 @@ public class HUDModel extends BoxObstacle {
 
         ammoLeft = DEFAULT_STARTING_AMMO;
         startingAmmo = DEFAULT_STARTING_AMMO;
+        lastStateChange = 0.0f;
+        time = new Time(0);
     }
 
     // BEGIN: Setters and Getters
-    public void setWin(boolean value){ state = value? STATE_WIN: state; }
+    public void setWin(boolean value){
+        if(state!=STATE_WIN)
+            lastStateChange=0;
+        state = value? STATE_WIN: state;
+    }
 
     public boolean isWin(){ return state == STATE_WIN; }
 
-    public void setLose(boolean value){ state = value? STATE_LOSE: state; }
+    public void setLose(boolean value){
+        if(state!=STATE_LOSE)
+            lastStateChange=0;
+        state = value? STATE_LOSE: state;
+    }
 
     public boolean isLose(){ return state == STATE_LOSE; }
+
+    public float getLastStateChange() {return lastStateChange;}
 
     public void setFont(BitmapFont font){ this.font = font; }
 
@@ -91,16 +112,26 @@ public class HUDModel extends BoxObstacle {
     public void reset(){
         ammoLeft = startingAmmo;
         state = STATE_PLAYING;
+        lastStateChange = 0;
+        time.setTime(0);
+    }
+
+    @Override
+    public void update(float delta) {
+        lastStateChange+=delta;
+        time.setTime((int)lastStateChange * 1000);
     }
 
     @Override
     public void draw(GameCanvas canvas){
         font.setColor(Color.DARK_GRAY);
         canvas.drawText("Ammo:"+ammoLeft, font, 30, getY()-30);
+        canvas.drawText(time.toString().substring(3), font, canvas.getWidth()/2, getY()-30);
 
         if (state == STATE_WIN)
             canvas.drawTextCentered("VICTORY", font, getY()-canvas.getHeight());
         else if (state == STATE_LOSE)
             canvas.drawTextCentered("FAILURE", font, getY()-canvas.getHeight());
+
     }
 }

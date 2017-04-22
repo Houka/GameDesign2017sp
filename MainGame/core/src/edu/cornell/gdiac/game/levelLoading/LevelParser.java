@@ -38,8 +38,7 @@ public class LevelParser {
     //* Loads a json level file into class variables
     public void loadLevel(String JsonFile){
         try {
-            FileReaderWriter f = new FileReaderWriter();
-            String content = f.readJson(JsonFile);
+            String content = FileReaderWriter.readJson(JsonFile);
             JsonReader reader = new JsonReader();
             JsonValue objects = reader.parse(content);
 

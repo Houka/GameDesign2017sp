@@ -13,6 +13,7 @@ import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
+import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
@@ -25,20 +26,18 @@ import java.util.ArrayList;
  * Class that provides a Level Selection screen for the state of the game.
  */
 public class LevelSelectionMode extends Mode {
-	// TODO: remove this once we have working json file loading in assetmanager
-	private static final ArrayList<String> NUM_LEVELS = FileReaderWriter.getJsonFiles();
 	private static final int TOTAL_COLUMNS = 3;
-	private static final int TOTAL_ROWS = (int)Math.ceil((float)NUM_LEVELS.size()/TOTAL_COLUMNS);
 	private static final int BORDER_X = 100;
 	private static final int BORDER_Y = 50;
 	private static final int PADDING_Y = 90;
 
-	/** Textures necessary to support the loading screen */
+	/** Textures necessary to support the screen */
 	private static final String BACKGROUND_FILE = "ui/bg/level_selection.png";
-	/** Retro font for displaying messages */
-	private static String FONT_FILE = "fonts/LightPixel7.ttf";
-	private static int FONT_SIZE = 64;
-	private static Color DARK_PURPLE = new Color(123/255f, 118/255f, 131/255f, 1f);
+	private static final Color DARK_PURPLE = new Color(123/255f, 118/255f, 131/255f, 1f);
+
+	/** Level file finding vars **/
+	private static String[] NUM_LEVELS = FileReaderWriter.getJsonFiles();
+	private static int TOTAL_ROWS = (int)Math.ceil((float)NUM_LEVELS.length/TOTAL_COLUMNS);
 
 	/** The font for giving messages to the player */
 	protected BitmapFont displayFont;
@@ -82,13 +81,13 @@ public class LevelSelectionMode extends Mode {
 		input.readInput();
 
 		if (input.didDown())
-			selected = (selected+TOTAL_COLUMNS >= NUM_LEVELS.size())?	selected : selected+TOTAL_COLUMNS;
+			selected = (selected+TOTAL_COLUMNS >= NUM_LEVELS.length)?	selected : selected+TOTAL_COLUMNS;
 		else if (input.didUp())
 			selected = (selected < TOTAL_COLUMNS) ? selected : selected - TOTAL_COLUMNS;
 		else if (input.didRight())
-			selected=(selected+1) % NUM_LEVELS.size();
+			selected=(selected+1) % NUM_LEVELS.length;
 		else if (input.didLeft())
-			selected=(selected <= 0)? NUM_LEVELS.size() -1 : selected-1;
+			selected=(selected <= 0)? NUM_LEVELS.length -1 : selected-1;
 		else if (input.didSelect())
 			setComplete(true);
 	}
@@ -96,8 +95,9 @@ public class LevelSelectionMode extends Mode {
 	@Override
 	protected void onComplete(){
 		canvas.getCamera().setAutosnap(true);
-		gameMode.setLevel(NUM_LEVELS.get(selected));
+		gameMode.setLevel(NUM_LEVELS[selected],selected);
 		listener.switchToScreen(this, gameMode.getName());
+		gameMode.reset();
 	}
 
 	@Override
@@ -111,7 +111,7 @@ public class LevelSelectionMode extends Mode {
 				else
 					displayFont.setColor(DARK_PURPLE);
 
-				if (convertToIndex(i,j) < NUM_LEVELS.size()) {
+				if (convertToIndex(i,j) < NUM_LEVELS.length) {
 					canvas.drawText("[" + (convertToIndex(i, j) + 1)+"]", displayFont,
 							i * ((canvas.getWidth() - BORDER_X * 2) / TOTAL_COLUMNS) + BORDER_X,
 							canvas.getHeight() - j * PADDING_Y - BORDER_Y);
@@ -128,9 +128,9 @@ public class LevelSelectionMode extends Mode {
 
 		// Load the font
 		FreetypeFontLoader.FreeTypeFontLoaderParameter size2Params = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
-		size2Params.fontFileName = FONT_FILE;
-		size2Params.fontParameters.size = FONT_SIZE;
-		manager.load(FONT_FILE, BitmapFont.class, size2Params);
+		size2Params.fontFileName = Constants.FONT_FILE;
+		size2Params.fontParameters.size = Constants.FONT_SIZE;
+		manager.load(Constants.FONT_FILE, BitmapFont.class, size2Params);
 	}
 
 	@Override
@@ -138,10 +138,14 @@ public class LevelSelectionMode extends Mode {
 		background = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true).getTexture();
 
 		// Allocate the font
-		if (manager.isLoaded(FONT_FILE))
-			displayFont = manager.get(FONT_FILE, BitmapFont.class);
+		if (manager.isLoaded(Constants.FONT_FILE))
+			displayFont = manager.get(Constants.FONT_FILE, BitmapFont.class);
 		else
 			displayFont = null;
+
+		// load levels
+		NUM_LEVELS = FileReaderWriter.getJsonFiles();
+		TOTAL_ROWS = (int)Math.ceil((float)NUM_LEVELS.length/TOTAL_COLUMNS);
 	}
 
 	@Override

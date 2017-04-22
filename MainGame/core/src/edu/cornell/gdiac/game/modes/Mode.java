@@ -48,7 +48,7 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable, 
 	/** Whether or not this mode is completed*/
 	private boolean completed;
 	/** Whether or not this mode is still active */
-	private boolean active;
+	protected boolean active;
 	/** Whether or not this mode is paused */
 	private boolean paused;
 	/** Whether or not debug mode is active */
@@ -227,7 +227,7 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable, 
     /**
      * Behavior for when the mode wishes to exit
      */
-	private void onExit(){ listener.exitScreen(this, onExit); }
+	protected void onExit(){ listener.exitScreen(this, onExit); }
 
     /**
      * Behavor for when the mode is paused

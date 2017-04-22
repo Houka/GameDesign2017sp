@@ -25,11 +25,15 @@ public class AmmoDepotModel extends BoxObstacle {
     private static final float AMMO_DEPOT_VSHRINK = 0.95f;
     /** The amount to shrink the body fixture (horizontally) relative to the image */
     private static final float AMMO_DEPOT_HSHRINK = 0.7f;
+    /** The amount of cooldown to wait for before allowing ammo depots to be used again **/
+    private static final int USED_COOLDOWN = 500;
 
     /** The amount of ammo that this ammo depot provides on contact**/
     private int ammoAmount;
     /** Whether or not the ammo depot has been used already**/
     private boolean used;
+    /** Whether or not the ammo depot has been used already**/
+    private int usedCooldown;
 
     /**
      * Creates a new Ammo Depot at the given position.
@@ -55,6 +59,7 @@ public class AmmoDepotModel extends BoxObstacle {
         // Gameplay attributes
         this.ammoAmount = ammoAmount;
         this.used = false;
+        this.usedCooldown = 0;
     }
 
     // BEGIN: Setters and Getters
@@ -88,11 +93,17 @@ public class AmmoDepotModel extends BoxObstacle {
     @Override
     public void update(float dt) {
         super.update(dt);
-        markRemoved(isUsed());
+        if(isUsed() && usedCooldown == 0)
+            usedCooldown = USED_COOLDOWN;
+        if(usedCooldown > 0)
+            usedCooldown --;
+        if(usedCooldown == 0)
+            setUsed(false);
     }
 
     @Override
     public void draw(GameCanvas canvas) {
-        canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),1.0f,1.0f);
+        if (!isUsed())
+            canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),1.0f,1.0f);
     }
 }

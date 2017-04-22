@@ -1,5 +1,6 @@
 package edu.cornell.gdiac.game.entity.models;
 
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
@@ -9,7 +10,10 @@ import edu.cornell.gdiac.game.interfaces.Animatable;
 import edu.cornell.gdiac.game.interfaces.Settable;
 import edu.cornell.gdiac.game.interfaces.Shooter;
 import edu.cornell.gdiac.util.Animation;
+import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
+import edu.cornell.gdiac.util.obstacles.ComplexObstacle;
+import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
 import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 /**
@@ -18,10 +22,10 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
  * Note that this class returns to static loading.  That is because there are
  * no other subclasses that we might loop through.
  */
-public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, Animatable {
+public class PlayerModel extends PolygonObstacle implements Shooter, Settable, Animatable {
     // Physics constants
     /** The density of the character */
-    private static final float PLAYER_DENSITY = 1.0f;
+    private static final float PLAYER_DENSITY = 0.0f;
     /** The factor to multiply by the input */
     private static final float PLAYER_FORCE = 50.0f;
     /** The player is a slippery one */
@@ -33,19 +37,27 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
     /** Cooldown (in animation frames) for jumping */
     private static final int JUMP_COOLDOWN = 10;
     /** Cooldown (in animation frames) for shooting */
-    private static final int SHOOT_COOLDOWN = 50;
+    private static final int SHOOT_COOLDOWN = 40;
     /** Height of the sensor attached to the player's feet */
     private static final float SENSOR_HEIGHT = 0.05f;
     /** Identifier to allow us to track the sensor in ContactListener */
     private static final String SENSOR_NAME = "PlayerGroundSensor";
+    /** Ratio of jump force to double jump force */
+    private static final float DOUBLE_JUMP_MULTIPLIER = 1.2f;
+    /** Mass of the player */
+    private static final float PLAYER_MASS = 40f;
 
     // This is to fit the image to a tigher hitbox
-    /** The amount to shrink the body fixture (vertically) relative to the image */
-    private static final float PLAYER_VSHRINK = 1f;
+    /** The amount to shrink  head space of the texture to remove*/
+    private static final float PLAYER_HEAD_SPACE= .15f;
     /** The amount to shrink the body fixture (horizontally) relative to the image */
-    private static final float PLAYER_HSHRINK = 0.45f;
+    private static final float PLAYER_HSHRINK = 0.3f;
+    /** The amount to shrink the body fixture (horizontally) relative to the image */
+    private static final float PLAYER_HSHRINK_RUNNING = 0.7f;
     /** The amount to shrink the sensor fixture (horizontally) relative to the image */
     private static final float PLAYER_SSHRINK = 0.6f;
+    /** The position in physics units where the sensor ground should be at*/
+    private float sensorX = 0f;
 
     /** The current max speed of the player */
     private float maxSpeed;
@@ -59,6 +71,8 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
     private float jumpForce;
     /** Whether we are getting knocked back*/
     private boolean isKnockedBack;
+    /** Whether we are crouching*/
+    private boolean isCrouching;
     /** Direction of said knockback**/
     private Vector2 knockbackDirection;
     /** Force of said knockback**/
@@ -68,8 +82,12 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
     private float knockbackStunDuration = 5;
     private float defaultKnockbackDuration = 60;
 
+    /** Duration that player will pass through bullets**/
+    private float passThroughDuration;
+    private final float GO_THROUGH_TIME = 2;
+
     /** Whether we getting knockedBack jumping */
-    private boolean isJumping;
+    public boolean isJumping;
     /** How long until we can shoot again */
     private int shootCooldown;
     /** Whether our feet are on the ground */
@@ -82,12 +100,27 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
     private Fixture sensorFixture;
     private PolygonShape sensorShape;
 
+    /** Fixtures for different hitboxes*/
+    private Fixture playerFixture;
+    private Fixture crouchFixture;
+    private PolygonShape playerShape;
+    private PolygonShape crouchShape;
+
+    private float playerHeight;
+    private float playerWidth;
     /** Cache for internal force calculations */
     private Vector2 forceCache = new Vector2();
     private Vector2 zeroVector = new Vector2(0,0);
 
     /** The animation associated with this entity */
     private Animation animation;
+    /** The color associated with this entity */
+    private Color drawColor;
+
+    /** Store hitboxes depending on state of the player*/
+    private float[] defaultBox;
+    private float[] runningBox;
+    private float[] crouchingBox;
 
     /**
      * Creates a new player avatar at the origin.
@@ -116,11 +149,44 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
      * @param height	The object width in physics units
      */
     public PlayerModel(float x, float y, float width, float height) {
-        super(x,y,width*PLAYER_HSHRINK,height*PLAYER_VSHRINK);
+        super(
+                new float[]{
+                        -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
+                        -width/2.0f*PLAYER_HSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
+                        width/2.0f*PLAYER_HSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
+                        width/2.0f*PLAYER_HSHRINK, -height/2.0f
+                },
+                x,y);
+        defaultBox = new float[]{
+                -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
+                -width/2.0f*PLAYER_HSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, -height/2.0f
+        };
+        runningBox = new float[]{
+                -width/2.0f*PLAYER_HSHRINK_RUNNING, -height/2.0f,
+                -width/2.0f*PLAYER_HSHRINK_RUNNING, height/2.0f - 2f*height*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK_RUNNING, height/2.0f - 2f*height*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK_RUNNING, -height/2.0f
+        };
+        crouchingBox = new float[]{
+                -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
+                -width/2.0f*PLAYER_HSHRINK, height/2.0f - 2*height*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, height/2.0f - 2*height*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, -height/2.0f
+        };
+        drawColor = new Color(256f,256f,256f,1f);
+
+        playerWidth = width;
+        playerHeight = height;
+        setMass(PLAYER_MASS);
+
         setDensity(PLAYER_DENSITY);
         setFriction(PLAYER_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
         setFixedRotation(true);
         setName("player");
+        setMass(PLAYER_MASS);
+        sensorX = -height/2;
 
         // Gameplay attributes
         isGrounded = false;
@@ -140,6 +206,13 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
     }
 
     // BEGIN: Setters and Getters
+    @Override
+    public void setTexture(TextureRegion region){
+        super.setTexture(region);
+        texture = region;
+        origin.set(region.getRegionWidth()/2.0f, region.getRegionHeight()/2.0f);
+    }
+
     @Override
     public void setAnimation(Animation animation){
         this.animation = animation;
@@ -176,11 +249,15 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
         } else if (movement > 0) {
             isFacingRight = true;
         }
+
+        if (isCrouching()){
+            movement = 0;
+        }
     }
 
     @Override
     public boolean isShooting() {
-        return isShooting && shootCooldown <= 0;
+        return isShooting && shootCooldown <= 0 && !isCrouching();
     }
 
     @Override
@@ -210,8 +287,11 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
         return isKnockedBack && knockbackDuration > defaultKnockbackDuration-Math.max(defaultKnockbackDuration,knockbackStunDuration);
     }
 
-    public void setKnockedBack(float dir){
+    public boolean isCrouching(){
+        return isGrounded() && isCrouching;
+    }
 
+    public void setKnockedBack(float dir){
 
         if(dir==0) {
             isKnockedBack=false;
@@ -220,6 +300,10 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
 
         if(isKnockedBack)
             return;
+
+        passThroughDuration = GO_THROUGH_TIME;
+        canDoubleJump = false;
+        setVY(0.0f);
 
        isKnockedBack=true;
         knockbackDuration = defaultKnockbackDuration;
@@ -277,6 +361,10 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
         isGrounded = value;
     }
 
+    public void setCrouching(boolean value) {
+        isCrouching = value;
+    }
+
     /**
      * Returns the upper limit on player left-right movement.
      *
@@ -306,6 +394,10 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
      */
     public String getSensorName() {
         return SENSOR_NAME;
+    }
+
+    public boolean isGhosting() {
+        return passThroughDuration>0;
     }
 
     @Override
@@ -338,7 +430,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
         // To determine whether or not the player is on the ground,
         // we create a thin sensor under his feet, which reports
         // collisions with the world but has no collision response.
-        Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
+        Vector2 sensorCenter = new Vector2(0, sensorX);
         FixtureDef sensorDef = new FixtureDef();
         sensorDef.density = PLAYER_DENSITY;
         sensorDef.isSensor = true;
@@ -349,6 +441,28 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
         sensorFixture = body.createFixture(sensorDef);
         sensorFixture.setUserData(getSensorName());
 
+        //player default and crouching hitboxes
+        Vector2 playerCenter = new Vector2(0, 0);
+        FixtureDef playerDef = new FixtureDef();
+        playerDef.density = PLAYER_DENSITY;
+        playerDef.isSensor = true;
+        playerShape = new PolygonShape();
+        playerShape.setAsBox(PLAYER_HSHRINK*getWidth(), getHeight(), playerCenter, 0.0f);
+        playerDef.shape = playerShape;
+
+        playerFixture = body.createFixture(playerDef);
+        playerFixture.setUserData("Default hitbox");
+
+        Vector2 crouchCenter = new Vector2(0, -getHeight()/2);
+        FixtureDef crouchDef = new FixtureDef();
+        crouchDef.density = PLAYER_DENSITY;
+        crouchDef.isSensor = true;
+        crouchShape = new PolygonShape();
+        crouchShape.setAsBox(PLAYER_HSHRINK*getWidth(), getHeight()/2, crouchCenter, 0.0f);
+        crouchDef.shape = crouchShape;
+
+        crouchFixture = body.createFixture(playerDef);
+        crouchFixture.setUserData("Crouching hitbox");
         return true;
     }
 
@@ -410,7 +524,7 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
         }
         if (isDoubleJumping() && !stunned) {
             //dividing by sqrt 2 makes it such that from 0 velocity it goes half the height of a regular jump
-            forceCache.set(0, jumpForce/((float)Math.sqrt(2)));
+            forceCache.set(0, jumpForce/(DOUBLE_JUMP_MULTIPLIER));
             //set velocity to 0 so that the jump height is independent of how the model is moving
             setLinearVelocity(zeroVector);
             body.applyLinearImpulse(forceCache,getPosition(),true);
@@ -455,6 +569,22 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
             isKnockedBack=false;
         }
 
+        if(isGhosting())
+            passThroughDuration= Math.max(passThroughDuration-dt,0);
+      
+        if (isCrouching()){
+            initShapes(crouchingBox);
+            initBounds();
+        }
+        else if (getMovement() != 0){
+            initShapes(runningBox);
+            initBounds();
+        }
+        else{
+            initShapes(defaultBox);
+            initBounds();
+        }
+
         super.update(dt);
         animation.update(dt);
     }
@@ -467,10 +597,12 @@ public class PlayerModel extends CapsuleObstacle implements Shooter, Settable, A
     public void draw(GameCanvas canvas) {
         float effect = isFacingRight ? 1.0f : -1.0f;
 
+        drawColor.a = isGhosting() ? .6f : 1.0f;
+
         if (animation == null)
-            canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+            canvas.draw(texture,drawColor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
         else
-            canvas.draw(animation.getTextureRegion(),Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+            canvas.draw(animation.getTextureRegion(),drawColor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
     }
 
     /**

@@ -53,38 +53,47 @@ public class Sidebar {
         created = true;
 
         //Below fields are just samples
-        Sidebar.addSlider("Gravity",-30f,0f,-20.0f);
-        Sidebar.addSlider("Jump Height",20f,50f, 30f);
-        Sidebar.addSlider("Player Speed",1f,10f,5.0f);
+        Sidebar.addSlider("Gravity",-30f,0f,-29.0f);
+        Sidebar.addSlider("Jump Height",1f,70f, 14f);
+        Sidebar.addSlider("Player Speed",1f,20f,10.0f);
         Sidebar.addSlider("Knockback Force",0f,30f, 8f);
         Sidebar.addSlider("Knockback Friction",0f,.1f, .06f);
         Sidebar.addSlider("Knockback Duration",0f,80f, 3f);
         Sidebar.addSlider("Knockback Stun Duration",0f,60f, 30f);
-        Sidebar.addSlider("Paintball Height",.1f,.5f,.25f);
-        Sidebar.addSlider("Paintball Width",.5f,6.5f,3f);
-        Sidebar.addSlider("Paintball Speed",1f,7.5f,3.2f);
-        Sidebar.addSlider("Paintball-paintball Stick Time",0f,10f,5f);
-        Sidebar.addSlider("Paintball-Wall Stick Time",0f,10f,5f);
+        Sidebar.addSlider("Paintball Height",.1f,.5f,.22f);
+        Sidebar.addSlider("Paintball Width",.5f,6.5f,3.5f);
+        Sidebar.addSlider("Paintball Speed",1f,7.5f,3.6f);
+        Sidebar.addSlider("Paintball-paintball Stick Time",0f,10f,3.6f);
+        Sidebar.addSlider("Paintball-Wall Stick Time",0f,10f,2f);
         Sidebar.addSlider("Camera Speed",0f,.3f,.1f);
         Sidebar.addSlider("Rumble Intensity",0f,100f,0f);
         Sidebar.addSlider("Rumble Interval",0f,10f,3f);
     }
-    /**
-    * Call this to bootup the level editor sidebar to change grid size
-    */
-    public static void editorBootup(){
-        if (created)
-            return;
-        Sidebar.bootUp();
-        created = true;
 
-        //Below fields are just samples
-        Sidebar.addSlider("Grid Size",30,70,50);
+    public static void initDefaultSettings(){
+        if (theMap == null)
+            theMap = new HashMap<String, Float>();
+        Sidebar.setValue("Gravity",-29.0f);
+        Sidebar.setValue("Jump Height",14f);
+        Sidebar.setValue("Player Speed",10.0f);
+        Sidebar.setValue("Knockback Force",8f);
+        Sidebar.setValue("Knockback Friction",.06f);
+        Sidebar.setValue("Knockback Duration",3f);
+        Sidebar.setValue("Knockback Stun Duration",30f);
+        Sidebar.setValue("Paintball Height",.22f);
+        Sidebar.setValue("Paintball Width",3.5f);
+        Sidebar.setValue("Paintball Speed",3.6f);
+        Sidebar.setValue("Paintball-paintball Stick Time",3.6f);
+        Sidebar.setValue("Paintball-Wall Stick Time",2f);
+        Sidebar.setValue("Camera Speed",.1f);
+        Sidebar.setValue("Rumble Intensity",0f);
+        Sidebar.setValue("Rumble Interval",3f);
     }
 
     /**Initialize sidebar*/
     public static void bootUp() {
-        theMap = new HashMap<String,Float>();
+        if (theMap == null)
+            theMap = new HashMap<String,Float>();
         currHeight = 50;
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -183,5 +192,20 @@ public class Sidebar {
         if(theMap == null || !theMap.containsKey(key))
             return 0.0f;
         return theMap.get(key);
+    }
+
+    /**
+     * Puts values into the hashmap with
+     *
+     * @param key   Variable name to get value of
+     * @param value The value to set the variable name to
+     *
+     * @returns whether or not we have successfully set the value
+     */
+    public static boolean setValue(String key, float value){
+        if (theMap==null)
+            return false;
+        theMap.put(key, value);
+        return true;
     }
 }

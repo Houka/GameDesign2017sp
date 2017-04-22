@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
+import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.game.interfaces.AssetUser;
 import edu.cornell.gdiac.util.Animation;
@@ -23,24 +24,9 @@ import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
  * The level loader class puts objects from a json file into the world.
  */
 public class LevelLoader implements AssetUser, Disposable{
-    /** Filenames for sprites of objects */
-    private static String PLATFORM_FILE = "sprites/fixtures/window_tile.png";
-    private static String GOAL_FILE = "sprites/security_camera.png";
-    private static String BACKGROUND_FILE = "sprites/wall/brick_wall_tile.png";
-    private static String ENEMY_ONSIGHT_FILE = "sprites/enemy/enemy_onsight.png";
-    private static String ENEMY_INTERVAL_FILE = "sprites/enemy/enemy_interval.png";
-    private static String ENEMY_SPOTTED_FILE = "sprites/enemy/enemy_spotted.png";
-    private static String CHARACTER_STILL_FILE = "sprites/char/char_still.png";
-    private static String CHARACTER_RUN_FILE = "sprites/char/char_run_strip4.png";
-    private static String CHARACTER_FALLING_FILE = "sprites/char/char_fall.png";
-    private static String CHARACTER_IDLE_FILE = "sprites/char/char_idle_strip5.png";
-    private static String CHARACTER_MIDAIR_FILE = "sprites/char/char_midair_shoot.png";
-    private static String CHARACTER_RISING_FILE = "sprites/char/char_jump.png";
-    private static String CHARACTER_SHOOT_FILE = "sprites/char/char_shoot.png";
-    private static String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
-
     /** Textures */
     private TextureRegion platformTile;
+    private TextureRegion wallTile;
     private TextureRegion goalTile;
     private TextureRegion bgTile;
     private TextureRegion enemyOnsightTexture;
@@ -122,7 +108,7 @@ public class LevelLoader implements AssetUser, Disposable{
     public void addBackground() {
         float dwidth = bgTile.getRegionWidth() / scale.x;
         float dheight = bgTile.getRegionHeight() / scale.y;
-        BoxObstacle bg = new BackgroundModel(dwidth / 2, dheight / 2, dwidth * 2, dheight * 3);
+        BoxObstacle bg = new BackgroundModel(dwidth / 2, dheight / 2, dwidth * 2, dheight * 10);
         bg.setDrawScale(scale);
         bgTile.getTexture().setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
         bg.setTexture(bgTile);
@@ -158,7 +144,7 @@ public class LevelLoader implements AssetUser, Disposable{
             vertices = iter.next();
             PolygonObstacle obj = new WallModel(vertices.asFloatArray());
             obj.setDrawScale(scale);
-            obj.setTexture(platformTile);
+            obj.setTexture(wallTile);
             addQueuedObject(obj);
         }
     }
@@ -273,55 +259,59 @@ public class LevelLoader implements AssetUser, Disposable{
     @Override
     public void preLoadContent(AssetManager manager) {
         // Load the shared tiles.
-        manager.load(PLATFORM_FILE,Texture.class);
-        manager.load(GOAL_FILE,Texture.class);
-        manager.load(BACKGROUND_FILE,Texture.class);
-        manager.load(ENEMY_INTERVAL_FILE,Texture.class);
-        manager.load(ENEMY_ONSIGHT_FILE,Texture.class);
-        manager.load(ENEMY_SPOTTED_FILE,Texture.class);
-        manager.load(CHARACTER_STILL_FILE, Texture.class);
-        manager.load(CHARACTER_FALLING_FILE, Texture.class);
-        manager.load(CHARACTER_IDLE_FILE, Texture.class);
-        manager.load(CHARACTER_MIDAIR_FILE, Texture.class);
-        manager.load(CHARACTER_RISING_FILE, Texture.class);
-        manager.load(CHARACTER_RUN_FILE, Texture.class);
-        manager.load(CHARACTER_SHOOT_FILE, Texture.class);
-        manager.load(AMMO_DEPOT_FILE, Texture.class);
+        manager.load(Constants.PLATFORM_FILE,Texture.class);
+        manager.load(Constants.WALL_FILE,Texture.class);
+        manager.load(Constants.GOAL_FILE,Texture.class);
+        manager.load(Constants.BACKGROUND_FILE,Texture.class);
+        manager.load(Constants.ENEMY_INTERVAL_FILE,Texture.class);
+        manager.load(Constants.ENEMY_ONSIGHT_FILE,Texture.class);
+        manager.load(Constants.ENEMY_SPOTTED_FILE,Texture.class);
+        manager.load(Constants.CHARACTER_STILL_FILE, Texture.class);
+        manager.load(Constants.CHARACTER_FALLING_FILE, Texture.class);
+        manager.load(Constants.CHARACTER_IDLE_FILE, Texture.class);
+        manager.load(Constants.CHARACTER_MIDAIR_FILE, Texture.class);
+        manager.load(Constants.CHARACTER_RISING_FILE, Texture.class);
+        manager.load(Constants.CHARACTER_TRANSITION_FILE, Texture.class);
+        manager.load(Constants.CHARACTER_RUN_FILE, Texture.class);
+        manager.load(Constants.CHARACTER_SHOOT_FILE, Texture.class);
+        manager.load(Constants.AMMO_DEPOT_FILE, Texture.class);
     }
 
     @Override
     public void loadContent(AssetManager manager) {
         // static texture loading
-        bgTile  = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE,true);
-        platformTile = AssetRetriever.createTextureRegion(manager,PLATFORM_FILE,true);
-        goalTile  = AssetRetriever.createTextureRegion(manager,GOAL_FILE,false);
-        enemyIntervalTexture  = AssetRetriever.createTextureRegion(manager,ENEMY_INTERVAL_FILE,false);
-        enemyOnsightTexture  = AssetRetriever.createTextureRegion(manager,ENEMY_ONSIGHT_FILE,false);
-        playerTexture = AssetRetriever.createTextureRegion(manager, CHARACTER_STILL_FILE, false);
-        depotTexture = AssetRetriever.createTextureRegion(manager, AMMO_DEPOT_FILE, false);
+        bgTile  = AssetRetriever.createTextureRegion(manager, Constants.BACKGROUND_FILE,true);
+        platformTile = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_FILE,true);
+        wallTile = AssetRetriever.createTextureRegion(manager,Constants.WALL_FILE,true);
+        goalTile  = AssetRetriever.createTextureRegion(manager,Constants.GOAL_FILE,false);
+        enemyIntervalTexture  = AssetRetriever.createTextureRegion(manager,Constants.ENEMY_INTERVAL_FILE,false);
+        enemyOnsightTexture  = AssetRetriever.createTextureRegion(manager,Constants.ENEMY_ONSIGHT_FILE,false);
+        playerTexture = AssetRetriever.createTextureRegion(manager, Constants.CHARACTER_STILL_FILE, false);
+        depotTexture = AssetRetriever.createTextureRegion(manager, Constants.AMMO_DEPOT_FILE, false);
 
         // animation spritesheet loading
         playerAnimation = new Animation();
-        playerAnimation.addTexture("idle", AssetRetriever.createTexture(manager, CHARACTER_IDLE_FILE, false), 1,5);
-        playerAnimation.addTexture("run", AssetRetriever.createTexture(manager, CHARACTER_RUN_FILE, false), 1,4);
-        playerAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, CHARACTER_SHOOT_FILE, false), 1,1);
-        playerAnimation.addTexture("rising", AssetRetriever.createTexture(manager, CHARACTER_RISING_FILE, false), 1,1);
-        playerAnimation.addTexture("falling", AssetRetriever.createTexture(manager, CHARACTER_FALLING_FILE, false), 1,1);
-        playerAnimation.addTexture("midair shoot", AssetRetriever.createTexture(manager, CHARACTER_MIDAIR_FILE, false), 1,1);
+        playerAnimation.addTexture("idle", AssetRetriever.createTexture(manager, Constants.CHARACTER_IDLE_FILE, false), 1,5);
+        playerAnimation.addTexture("run", AssetRetriever.createTexture(manager, Constants.CHARACTER_RUN_FILE, false), 1,4);
+        playerAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, Constants.CHARACTER_SHOOT_FILE, false), 1,1);
+        playerAnimation.addTexture("rising", AssetRetriever.createTexture(manager, Constants.CHARACTER_RISING_FILE, false), 1,2);
+        playerAnimation.addTexture("falling", AssetRetriever.createTexture(manager, Constants.CHARACTER_FALLING_FILE, false), 1,2);
+        playerAnimation.addTexture("peak", AssetRetriever.createTexture(manager, Constants.CHARACTER_TRANSITION_FILE, false), 1,2);
+        playerAnimation.addTexture("midair shoot", AssetRetriever.createTexture(manager, Constants.CHARACTER_MIDAIR_FILE, false), 1,1);
         playerAnimation.addTexture("still", playerTexture.getTexture(), 1, 1);
         playerAnimation.setPlaying(false);
         playerAnimation.setPlayingAnimation("idle");
 
         enemyIntervalAnimation= new Animation();
-        enemyIntervalAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, ENEMY_INTERVAL_FILE, false), 1,1);
-        enemyIntervalAnimation.addTexture("spotted", AssetRetriever.createTexture(manager, ENEMY_SPOTTED_FILE, false), 1,1);
+        enemyIntervalAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, Constants.ENEMY_INTERVAL_FILE, false), 1,1);
+        enemyIntervalAnimation.addTexture("spotted", AssetRetriever.createTexture(manager, Constants.ENEMY_SPOTTED_FILE, false), 1,1);
         enemyIntervalAnimation.addTexture("still", enemyIntervalTexture.getTexture(), 1, 1);
         enemyIntervalAnimation.setPlaying(false);
         enemyIntervalAnimation.setPlayingAnimation("still");
 
         enemyOnsightAnimation= new Animation();
-        enemyOnsightAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, ENEMY_ONSIGHT_FILE, false), 1,1);
-        enemyOnsightAnimation.addTexture("spotted", AssetRetriever.createTexture(manager, ENEMY_SPOTTED_FILE, false), 1,1);
+        enemyOnsightAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, Constants.ENEMY_ONSIGHT_FILE, false), 1,1);
+        enemyOnsightAnimation.addTexture("spotted", AssetRetriever.createTexture(manager, Constants.ENEMY_SPOTTED_FILE, false), 1,1);
         enemyOnsightAnimation.addTexture("still", enemyOnsightTexture.getTexture(), 1, 1);
         enemyOnsightAnimation.setPlaying(false);
         enemyOnsightAnimation.setPlayingAnimation("still");
@@ -329,19 +319,20 @@ public class LevelLoader implements AssetUser, Disposable{
 
     @Override
     public void unloadContent(AssetManager manager) {
-        manager.unload(BACKGROUND_FILE);
-        manager.unload(PLATFORM_FILE);
-        manager.unload(GOAL_FILE);
-        manager.unload(ENEMY_ONSIGHT_FILE);
-        manager.unload(ENEMY_INTERVAL_FILE);
-        manager.unload(ENEMY_SPOTTED_FILE);
-        manager.unload(CHARACTER_STILL_FILE);
-        manager.unload(CHARACTER_FALLING_FILE);
-        manager.unload(CHARACTER_IDLE_FILE);
-        manager.unload(CHARACTER_MIDAIR_FILE);
-        manager.unload(CHARACTER_RISING_FILE);
-        manager.unload(CHARACTER_RUN_FILE);
-        manager.unload(CHARACTER_SHOOT_FILE);
+        manager.unload(Constants.BACKGROUND_FILE);
+        manager.unload(Constants.PLATFORM_FILE);
+        manager.unload(Constants.GOAL_FILE);
+        manager.unload(Constants.ENEMY_ONSIGHT_FILE);
+        manager.unload(Constants.ENEMY_INTERVAL_FILE);
+        manager.unload(Constants.ENEMY_SPOTTED_FILE);
+        manager.unload(Constants.CHARACTER_STILL_FILE);
+        manager.unload(Constants.CHARACTER_FALLING_FILE);
+        manager.unload(Constants.CHARACTER_IDLE_FILE);
+        manager.unload(Constants.CHARACTER_MIDAIR_FILE);
+        manager.unload(Constants.CHARACTER_RISING_FILE);
+        manager.unload(Constants.CHARACTER_TRANSITION_FILE);
+        manager.unload(Constants.CHARACTER_RUN_FILE);
+        manager.unload(Constants.CHARACTER_SHOOT_FILE);
     }
 
     @Override

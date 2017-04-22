@@ -2,6 +2,7 @@ package edu.cornell.gdiac.game.entity.controllers;
 
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.ObjectSet;
+import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
 import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 
@@ -77,7 +78,8 @@ public class CollisionController implements ContactListener {
     // END: helper functions
 
     // BEGIN: Simple Collision handlers
-    private void handleCollision(PlayerModel obj1, EnemyModel obj2){}
+    private void handleCollision(PlayerModel obj1, EnemyModel obj2){
+        hud.setLose(true);}
     private void handleCollision(PlayerModel obj1, GoalModel obj2){}
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
         touchedGround(obj1,obj2,userData1,userData2);
@@ -87,13 +89,13 @@ public class CollisionController implements ContactListener {
     }
     private void handleCollision(PlayerModel obj1, PaintballModel obj2, Object userData1, Object userData2) {
         float sign = obj2.getVX() / Math.abs(obj2.getVX());
-        if(obj1.getY()-obj1.getHeight()/2f>=obj2.getY()){
+        if(obj1.getY()-obj1.getHeight()/2f>=obj2.getY() && !obj1.isGhosting()){
             touchedGround(obj1, obj2, userData1, userData2);
             obj1.setRidingVX(obj2);
         }
         else{
             obj1.setKnockedBack(0);
-            if(!obj2.isDying() && obj1.getX()*sign>obj2.getX()*sign+obj2.getHeadSize()*-sign+(sign>0?obj2.getWidth()/2f:0))
+            if(!obj2.isPlayerBullet() && !obj2.isDying() && obj1.getX()*sign>obj2.getX()*sign+obj2.getHeadSize()*-sign+(sign>0?obj2.getWidth()/2f:0))
                 obj1.setKnockedBack(sign);
         }
     }
@@ -107,43 +109,82 @@ public class CollisionController implements ContactListener {
         obj2.markRemoved(true);
     }
     private void handleCollision(PaintballModel obj1, PaintballModel obj2){
-        if(obj1.isDead() || obj2.isDead())
+        if(obj1.recentlyCreated())
+            obj1.instakill();
+        if(obj2.recentlyCreated())
+            obj2.instakill();
+
+        if(obj1.isDead() || obj2.isDead() || obj1.getRecentCollision() || obj2.getRecentCollision())
             return;
+
+        float newWidth = obj1.getWidth()+obj2.getWidth();
+        float midPoint;
+        if(obj1.getX()<obj2.getX())
+            midPoint =obj1.getX()-obj1.getWidth()/2f + newWidth/2f;
+        else
+            midPoint =obj2.getX()-obj2.getWidth()/2f + newWidth/2f;
 
         float oneSign = obj1.getVX() / Math.abs(obj1.getVX());
         float twoSign = obj2.getVX() / Math.abs(obj2.getVX());
         if(oneSign == twoSign) {
             if(obj1.getPosition().x*oneSign<obj2.getPosition().x*oneSign) {
-                obj2.setTimeToDie(0);
-            } else {
-                obj1.setTimeToDie(0);
+                obj2.instakill();
+                obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
+                obj1.setTimeToDie(obj1.getPaintballToPaintballDuration());
             }
             return;
         }
 
-        if(obj2.isDying())
-            obj1.setTimeToDie(obj2.getTimeToDie());
-        else
+        if(obj2.isDying()) {
+            obj1.instakill();
+            obj2.newSize(midPoint,obj2.getPosition().y,obj1.getWidth()+obj2.getWidth());
+            obj2.setPlayerBullet(true);
+        }
+        else if(obj1.isDying()) {
+            obj2.instakill();
+            obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
+            obj1.setPlayerBullet(true);
+        } else {
+            obj2.instakill();
+            obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
             obj1.setTimeToDie(obj1.getPaintballToPaintballDuration());
+            obj1.setPlayerBullet(true);
+        }
 
-        if(obj1.isDying())
-            obj2.setTimeToDie(obj1.getTimeToDie());
-        else
-            obj2.setTimeToDie(obj2.getPaintballToPaintballDuration());
         obj1.fixX(0f);
         obj2.fixX(0f);
+        obj1.markRecentCollision();
+        obj2.markRecentCollision();
     }
     private void handleCollision(PlatformModel obj1, PaintballModel obj2){
+        if(obj2.recentlyCreated())
+            obj2.instakill();
+
         obj2.setTimeToDie(obj2.getPaintballToWallDuration());
         obj2.fixX(0f);
     }
     private void handleCollision(WallModel obj1, PaintballModel obj2){
+        if(obj2.recentlyCreated())
+            obj2.instakill();
+
         obj2.setTimeToDie(obj2.getPaintballToPlatformDuration());
         obj2.fixX(0f);
     }
     private void handleCollision(PlayerModel obj1, AmmoDepotModel obj2) {
-        obj2.setUsed(true);
-        hud.addAmmo(obj2.getAmmoAmount());
+        if (!obj2.isUsed()) {
+            obj2.setUsed(true);
+            hud.addAmmo(obj2.getAmmoAmount());
+        }
+    }
+    private void handleCollision(SplattererModel obj1, PaintballModel obj2) {
+        boolean dir = false;
+        if(obj2.getX() < obj1.getX()) {
+            dir = true;
+        }
+        PaintballFactory pbFact = new PaintballFactory(obj2.getDrawScale());
+        PaintballModel pb = pbFact.createPaintball(obj1.getX()-(obj1.getWidth()/2), obj1.getY(), dir);
+        sensorObjects.add(pb);
+
     }
 
     // Collision end handlers
@@ -157,6 +198,7 @@ public class CollisionController implements ContactListener {
     }
     private void handleEndCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){}
     private void handleEndCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}
+
     // END: Simple Collision handlers
 
     /**
@@ -194,6 +236,8 @@ public class CollisionController implements ContactListener {
                 handleCollision((WallModel)obj2,(PaintballModel) obj1);
             else if (obj2.getName().equals("paintball"))
                 handleCollision((PaintballModel)obj2,(PaintballModel) obj1);
+            else if (obj2.getName().equals("splatterer"))
+                handleCollision((SplattererModel)obj2,(PaintballModel) obj1);
         }else if (obj1.getName().equals("enemy")) {
             if (obj2.getName().equals("paintball"))
                 handleCollision((EnemyModel)obj1, (PaintballModel) obj2, userData1);
@@ -272,7 +316,98 @@ public class CollisionController implements ContactListener {
     }
 
     @Override
-    public void preSolve(Contact contact, Manifold oldManifold) {}
+    public void preSolve(Contact contact, Manifold oldManifold) {
+        Fixture fix1 = contact.getFixtureA();
+        Fixture fix2 = contact.getFixtureB();
+
+        Body body1 = fix1.getBody();
+        Body body2 = fix2.getBody();
+
+        try {
+            Obstacle bd1 = (Obstacle) body1.getUserData();
+            Obstacle bd2 = (Obstacle) body2.getUserData();
+
+            PlayerModel player = null;
+            PaintballModel paintball = null;
+
+            if(bd2.getName().equals("paintball")) {
+                paintball = (PaintballModel) bd2;
+                if(paintball.isDead()) {
+                    contact.setEnabled(false);
+                    return;
+                }
+            } else if (bd1.getName().equals("paintball")) {
+                paintball = (PaintballModel) bd1;
+                if(paintball.isDead()) {
+                    contact.setEnabled(false);
+                    return;
+                }
+            }
+
+
+            if(bd1.getName().equals("player")) {
+               player = (PlayerModel) bd1;
+            } else if (bd2.getName().equals("player")) {
+                player = (PlayerModel) bd2;
+            }
+            
+            if (paintball == null ||  player == null){
+                return;
+            }
+
+            if (player.isGhosting()) {
+                contact.setEnabled(false);
+                return;
+            }
+
+
+            if(player.getVY()>=0 && paintball.isPlayerBullet()) {
+                contact.setEnabled(false);
+            }
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     @Override
-    public void postSolve(Contact contact, ContactImpulse impulse) {}
+    public void postSolve(Contact contact, ContactImpulse impulse) {
+
+        Fixture fix1 = contact.getFixtureA();
+        Fixture fix2 = contact.getFixtureB();
+
+        Body body1 = fix1.getBody();
+        Body body2 = fix2.getBody();
+
+        try {
+            Obstacle bd1 = (Obstacle) body1.getUserData();
+            Obstacle bd2 = (Obstacle) body2.getUserData();
+
+            PlayerModel player;
+            PaintballModel paintball;
+
+            if(bd1.getName().equals("player") && bd2.getName().equals("paintball")) {
+                player = (PlayerModel) bd1;
+                paintball = (PaintballModel) bd2;
+            } else if (bd2.getName().equals("player") && bd1.getName().equals("paintball")) {
+                player = (PlayerModel) bd2;
+                paintball = (PaintballModel) bd1;
+            } else {
+                return;
+            }
+
+            if (player.isGhosting()) {
+                contact.setEnabled(false);
+                return;
+            }
+
+            if(player.getVY()>=0 && paintball.isPlayerBullet()) {
+                contact.setEnabled(false);
+            }
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }
