@@ -25,6 +25,15 @@ public class Constants {
     public static String ENEMY_INTERVAL_FILE = "sprites/enemy/enemy_interval.png";
     public static String ENEMY_SPOTTED_FILE = "sprites/enemy/enemy_spotted.png";
 
+    public static String PAINTBALL_CHARACTER_FILE = "sprites/bullets/char_paintball_strip5.png";
+    public static String PAINTBALL_ENEMY_MINE_FILE = "sprites/bullets/enemy_paintball_mine_strip5.png";
+    public static String PAINTBALL_ENEMY_NORMAL_FILE = "sprites/bullets/enemy_paintball_normal_strip5.png";
+    public static String PAINTBALL_MINE_TRAIL_FILE = "sprites/trails/moving_mine_strip5.png";
+    public static String PAINTBALL_NORMAL_TRAIL_FILE = "sprites/trails/moving_normal_strip5.png";
+    public static String PAINTBALL_SPLAT_EFFECT_FILE = "sprites/paint_splat_ef_strip10.png";
+    public static String PAINTBALL_STATIONARY_MINE_FILE = "sprites/trails/stationary_mine.png";
+    public static String PAINTBALL_STATIONARY_NORMAL_FILE = "sprites/trails/stationary_normal.png";
+
     public static String CHARACTER_STILL_FILE = "sprites/char/char_icon.png";
     public static String CHARACTER_RUN_FILE = "sprites/char/char_run_strip4.png";
     public static String CHARACTER_FALLING_FILE = "sprites/char/char_fall_strip2.png";
@@ -34,7 +43,11 @@ public class Constants {
     public static String CHARACTER_TRANSITION_FILE = "sprites/char/char_transition_strip2.png";
     public static String CHARACTER_SHOOT_FILE = "sprites/char/char_shoot.png";
 
+    /** Texture column numbers**/
+    public static int PAINTBALL_TRAIL_COLUMNS = 5;
+
     /** Texture file */
     public static final String PAINTBALL_FILE = "sprites/paintball.png";
+
 
 }
