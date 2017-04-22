@@ -151,6 +151,7 @@ public class CollisionController implements ContactListener {
                 dies = obj2;
             }
             survives.setTimeToDie(obj1.getPaintballToPaintballDuration());
+            dies.instakill();
         }
         dies.pop();
         if(!obj1.isPlayerBullet() && !obj2.isPlayerBullet())
