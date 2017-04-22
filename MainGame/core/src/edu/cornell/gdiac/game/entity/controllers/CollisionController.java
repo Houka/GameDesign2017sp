@@ -152,7 +152,7 @@ public class CollisionController implements ContactListener {
             dies.instakill();
         }
         dies.pop();
-        if(!obj1.isPlayerBullet() && !obj2.isPlayerBullet())
+        if(!obj1.isPlayerBullet() && !obj2.isPlayerBullet()&&!obj1.isDying()&&!obj2.isDying())
             survives.newSize(midPoint,obj2.getPosition().y,obj1.getWidth()+obj2.getWidth());
         survives.setPassThrough(true);
 
