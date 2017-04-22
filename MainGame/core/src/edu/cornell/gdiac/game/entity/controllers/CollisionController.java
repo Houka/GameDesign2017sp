@@ -126,9 +126,7 @@ public class CollisionController implements ContactListener {
         float twoSign = obj2.getVX() / Math.abs(obj2.getVX());
         if(oneSign == twoSign) {
             if(obj1.getPosition().x*oneSign<obj2.getPosition().x*oneSign) {
-                obj2.instakill();
-                obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
-                obj1.setTimeToDie(obj1.getPaintballToPaintballDuration());
+                obj1.pop();
             }
             return;
         }

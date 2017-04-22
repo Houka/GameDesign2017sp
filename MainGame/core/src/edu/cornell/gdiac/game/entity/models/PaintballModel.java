@@ -157,6 +157,7 @@ public class PaintballModel extends BoxObstacle {
     //BEGIN: GETTERS AND SETTERS
     public void setTimeToDie(float xd) {
         splatEffectTexture.playOnce("splat");
+        fixX(0);
         if(!trailEnabled)
             pop();
         if(!dying) {
@@ -350,6 +351,7 @@ public class PaintballModel extends BoxObstacle {
     public void pop() {
         popped = true;
         timeToDie = 0;
+        fixX(0);
         splatEffectTexture.playOnce("splat");
     }
 
