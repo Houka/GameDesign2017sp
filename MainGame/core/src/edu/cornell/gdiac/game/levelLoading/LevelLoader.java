@@ -33,6 +33,7 @@ public class LevelLoader implements AssetUser, Disposable{
     private TextureRegion enemyIntervalTexture;
     private TextureRegion playerTexture;
     private TextureRegion depotTexture;
+    private TextureRegion splattererTexture;
 
     /** Animations */
     private Animation playerAnimation;
@@ -238,7 +239,7 @@ public class LevelLoader implements AssetUser, Disposable{
             SplattererModel splatterer = new SplattererModel(splat.get("x").asFloat(), splat.get("y").asFloat(), dwidth, dheight);
             splatterer.setDrawScale(scale);
             // TODO: change from depot texture
-            splatterer.setTexture(depotTexture);
+            splatterer.setTexture(splattererTexture);
             addQueuedObject(splatterer);
         }
     }
@@ -275,6 +276,7 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(Constants.CHARACTER_RUN_FILE, Texture.class);
         manager.load(Constants.CHARACTER_SHOOT_FILE, Texture.class);
         manager.load(Constants.AMMO_DEPOT_FILE, Texture.class);
+        manager.load(Constants.SPLATTERER_FILE, Texture.class);
     }
 
     @Override
@@ -288,6 +290,7 @@ public class LevelLoader implements AssetUser, Disposable{
         enemyOnsightTexture  = AssetRetriever.createTextureRegion(manager,Constants.ENEMY_ONSIGHT_FILE,false);
         playerTexture = AssetRetriever.createTextureRegion(manager, Constants.CHARACTER_STILL_FILE, false);
         depotTexture = AssetRetriever.createTextureRegion(manager, Constants.AMMO_DEPOT_FILE, false);
+        splattererTexture = AssetRetriever.createTextureRegion(manager, Constants.SPLATTERER_FILE, false);
 
         // animation spritesheet loading
         playerAnimation = new Animation();
@@ -333,6 +336,7 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.unload(Constants.CHARACTER_TRANSITION_FILE);
         manager.unload(Constants.CHARACTER_RUN_FILE);
         manager.unload(Constants.CHARACTER_SHOOT_FILE);
+        manager.unload(Constants.SPLATTERER_FILE);
     }
 
     @Override

@@ -9,8 +9,6 @@ import edu.cornell.gdiac.util.obstacles.BoxObstacle;
  */
 public class SplattererModel extends BoxObstacle{
 
-    /** Whether or not the splatterer has been used already**/
-    private boolean used;
 
     public SplattererModel(float x, float y, float width, float height) {
         super(x,y,width,height);

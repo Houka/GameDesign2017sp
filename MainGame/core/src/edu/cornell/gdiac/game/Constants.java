@@ -20,6 +20,7 @@ public class Constants {
     public static String GOAL_FILE = "sprites/fixtures/security_camera.png";
     public static String BACKGROUND_FILE = "sprites/bg/brick_wall_tile.png";
     public static String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
+    public static String SPLATTERER_FILE = "sprites/fixtures/splatterer.png";
 
     public static String ENEMY_ONSIGHT_FILE = "sprites/enemy/enemy_onsight.png";
     public static String ENEMY_INTERVAL_FILE = "sprites/enemy/enemy_interval.png";
@@ -36,6 +37,6 @@ public class Constants {
 
     /** Texture file */
     public static final String PAINTBALL_FILE = "sprites/paintball.png";
-    public static String SPLATTERER_FILE = "sprites/fixtures/splatterer.png";
+
 
 }
