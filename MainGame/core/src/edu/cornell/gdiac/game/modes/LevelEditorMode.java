@@ -441,6 +441,7 @@ public class LevelEditorMode extends Mode {
         ArrayList<EnemyModel> onSightEnemies = new ArrayList<EnemyModel>();
         ArrayList<AmmoDepotModel> ammoDepots = new ArrayList<AmmoDepotModel>();
         GoalModel target = null;
+        ArrayList<SplattererModel> splatterers = new ArrayList<SplattererModel>();
 
         for (Obstacle obj: objects){
             if (obj instanceof PlatformModel)
@@ -457,10 +458,12 @@ public class LevelEditorMode extends Mode {
                 player = (PlayerModel) obj;
             else if (obj instanceof GoalModel)
                 target = (GoalModel) obj;
+            else if (obj instanceof SplattererModel)
+                splatterers.add((SplattererModel) obj);
         }
 
         if (player != null && target != null)
-            levelCreator.writeLevel(saveFileName, platforms, walls, player, intervalEnemies, onSightEnemies, ammoDepots, target, ammo);
+            levelCreator.writeLevel(saveFileName, platforms, walls, player, intervalEnemies, onSightEnemies, ammoDepots, splatterers, target, ammo);
         else{
             System.out.println("ERROR: cannot create JSON without a player or goal in the map or file name is invalid");
         }
