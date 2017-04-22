@@ -1,5 +1,6 @@
 package edu.cornell.gdiac.game.entity.controllers;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.ObjectSet;
 import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
@@ -181,6 +182,7 @@ public class CollisionController implements ContactListener {
         if(obj2.getX() < obj1.getX()) {
             dir = true;
         }
+
         PaintballFactory pbFact = new PaintballFactory(obj2.getDrawScale());
         PaintballModel pb = pbFact.createPaintball(obj1.getX()-(obj1.getWidth()/2), obj1.getY(), dir);
         sensorObjects.add(pb);
