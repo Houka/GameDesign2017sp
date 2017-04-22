@@ -19,6 +19,7 @@ public class PlatformModel extends PolygonObstacle {
     /** "Bounciness" of the platforms*/
     private static final float  BASIC_RESTITUTION = 0.1f;
     private float[] pointArray;
+    private static int type = 0;
 
     /**
      * Creates a new platform.
@@ -29,7 +30,7 @@ public class PlatformModel extends PolygonObstacle {
      *
      * @param points    Vertices outlining the platform. In form [x1, y1, x2, y2 ...]
      */
-    public PlatformModel(float[] points) {
+    public PlatformModel(float[] points, int type) {
         super(points);
         pointArray = points;
         setBodyType(BodyDef.BodyType.StaticBody);
@@ -37,9 +38,18 @@ public class PlatformModel extends PolygonObstacle {
         setFriction(BASIC_FRICTION);
         setRestitution(BASIC_RESTITUTION);
         setName("platform");
+        this.type = type;
     }
 
     public float[] getPoints(){
         return pointArray;
+    }
+
+    public int getType() {
+        return this.type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 }
