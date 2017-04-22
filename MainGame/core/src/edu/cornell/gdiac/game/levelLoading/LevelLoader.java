@@ -79,6 +79,7 @@ public class LevelLoader implements AssetUser, Disposable{
      * loads the level based on the json file.
      */
     public void loadLevel(String JSONFile){
+        System.out.println(JSONFile);
         // reset queue of objects
         addQueue.clear();
         //sets the new world bounds
