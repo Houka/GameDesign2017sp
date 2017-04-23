@@ -127,28 +127,35 @@ public class CollisionController implements ContactListener {
         float twoSign = obj2.getVX() / Math.abs(obj2.getVX());
         if(oneSign == twoSign) {
             if(obj1.getPosition().x*oneSign<obj2.getPosition().x*oneSign) {
-                obj2.instakill();
-                obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
-                obj1.setTimeToDie(obj1.getPaintballToPaintballDuration());
+                obj1.pop();
             }
             return;
         }
 
+        PaintballModel survives;
+        PaintballModel dies;
         if(obj2.isDying()) {
-            obj1.instakill();
-            obj2.newSize(midPoint,obj2.getPosition().y,obj1.getWidth()+obj2.getWidth());
-            obj2.setPlayerBullet(true);
+            survives = obj2;
+            dies = obj1;
         }
         else if(obj1.isDying()) {
-            obj2.instakill();
-            obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
-            obj1.setPlayerBullet(true);
+            survives = obj1;
+            dies = obj2;
         } else {
-            obj2.instakill();
-            obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
-            obj1.setTimeToDie(obj1.getPaintballToPaintballDuration());
-            obj1.setPlayerBullet(true);
+            if(obj1.isPlayerBullet()) {
+                survives = obj2;
+                dies = obj1;
+            } else {
+                survives = obj1;
+                dies = obj2;
+            }
+            survives.setTimeToDie(obj1.getPaintballToPaintballDuration());
+            dies.instakill();
         }
+        dies.pop();
+        if(!obj1.isPlayerBullet() && !obj2.isPlayerBullet()&&!obj1.isDying()&&!obj2.isDying())
+            survives.newSize(midPoint,obj2.getPosition().y,obj1.getWidth()+obj2.getWidth());
+        survives.setPassThrough(true);
 
         obj1.fixX(0f);
         obj2.fixX(0f);
@@ -157,14 +164,14 @@ public class CollisionController implements ContactListener {
     }
     private void handleCollision(PlatformModel obj1, PaintballModel obj2){
         if(obj2.recentlyCreated())
-            obj2.instakill();
+            obj2.pop();
 
         obj2.setTimeToDie(obj2.getPaintballToWallDuration());
         obj2.fixX(0f);
     }
     private void handleCollision(WallModel obj1, PaintballModel obj2){
         if(obj2.recentlyCreated())
-            obj2.instakill();
+            obj2.pop();
 
         obj2.setTimeToDie(obj2.getPaintballToPlatformDuration());
         obj2.fixX(0f);
@@ -347,7 +354,7 @@ public class CollisionController implements ContactListener {
             }
 
 
-            if(player.getVY()>=0 && paintball.isPlayerBullet()) {
+            if(player.getVY()>=0 && paintball.canPassThrough()) {
                 contact.setEnabled(false);
             }
 

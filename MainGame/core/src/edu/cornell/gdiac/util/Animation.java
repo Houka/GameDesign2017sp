@@ -61,7 +61,17 @@ public class Animation implements Disposable{
     public void setPlaying(boolean value){
         isPlaying = value;
     }
-    // END: setters and getters
+
+    /**
+     * Whether or not the current strip is playing
+     *
+     * @return  whether animation is playing or not
+     */
+    public boolean isPlaying(){
+        return isPlaying;
+    }
+
+        // END: setters and getters
 
     /**
      * Add a spritesheet and converts it to a filmstrip to be included in this animation group
@@ -111,6 +121,13 @@ public class Animation implements Disposable{
             return;
         framesPassed = 0f;
 
+        advanceFrame();
+    }
+
+    /**
+     * Advance the animation one frame.
+     */
+    public void advanceFrame() {
         if (isPlaying){
             FilmStrip filmStrip = filmStrips.get(currentStrip);
             filmStrip.setFrame(currentFrame);
