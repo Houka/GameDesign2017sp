@@ -21,7 +21,7 @@ public class Constants {
     public static String BACKGROUND_FILE = "sprites/bg/brick_wall_tile.png";
     public static String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
     public static String SPLATTERER_FILE = "sprites/fixtures/splatterer.png";
-    public static String SPIKE_FILE = "sprites/fixtures/spikes/spikes_up_strip8.png";
+    public static String SPIKE_FILE = "sprites/fixtures/spikes/spikes_up.png";
     public static String ENEMY_ONSIGHT_FILE = "sprites/enemy/enemy_onsight.png";
     public static String ENEMY_INTERVAL_FILE = "sprites/enemy/enemy_interval.png";
     public static String ENEMY_SPOTTED_FILE = "sprites/enemy/enemy_spotted.png";

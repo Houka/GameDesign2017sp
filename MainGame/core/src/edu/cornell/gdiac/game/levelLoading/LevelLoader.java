@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
+import com.sun.tools.internal.jxc.ap.Const;
+import com.sun.tools.javac.code.Attribute;
 import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.game.interfaces.AssetUser;
@@ -287,6 +289,7 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(Constants.CHARACTER_SHOOT_FILE, Texture.class);
         manager.load(Constants.AMMO_DEPOT_FILE, Texture.class);
         manager.load(Constants.SPLATTERER_FILE, Texture.class);
+        manager.load(Constants.SPIKE_FILE, Texture.class);
     }
 
     @Override
@@ -301,6 +304,7 @@ public class LevelLoader implements AssetUser, Disposable{
         playerTexture = AssetRetriever.createTextureRegion(manager, Constants.CHARACTER_STILL_FILE, false);
         depotTexture = AssetRetriever.createTextureRegion(manager, Constants.AMMO_DEPOT_FILE, false);
         splattererTexture = AssetRetriever.createTextureRegion(manager, Constants.SPLATTERER_FILE, false);
+        spikesTile = AssetRetriever.createTextureRegion(manager, Constants.SPIKE_FILE, false);
 
         // animation spritesheet loading
         playerAnimation = new Animation();
@@ -347,6 +351,7 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.unload(Constants.CHARACTER_RUN_FILE);
         manager.unload(Constants.CHARACTER_SHOOT_FILE);
         manager.unload(Constants.SPLATTERER_FILE);
+        manager.unload(Constants.SPIKE_FILE);
     }
 
     @Override
