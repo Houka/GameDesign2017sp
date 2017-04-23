@@ -51,7 +51,7 @@ public class LevelCreator {
 
 
         for (int i = 0; i < DEFAULT_PLATFORMS.length; i++)
-            defaultPlatforms.add(new PlatformModel(DEFAULT_PLATFORMS[i]));
+            defaultPlatforms.add(new PlatformModel(DEFAULT_PLATFORMS[i], 0));
 
         for (int i = 0; i < DEFAULT_WALLS.length; i++)
             defaultWalls.add(new WallModel(DEFAULT_WALLS[i]));
@@ -82,9 +82,18 @@ public class LevelCreator {
         json.writeObjectStart("platforms");
         json.writeArrayStart("default");
         for (int i = 0; i < platforms.size(); i ++) {
-            json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
+            if (platforms.get(i).getType() == 0)
+                json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
         }
         json.writeArrayEnd();
+
+        json.writeArrayStart("spikes");
+        for (int i = 0; i < platforms.size(); i ++) {
+            if (platforms.get(i).getType() == 1)
+                json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
+        }
+        json.writeArrayEnd();
+
         json.writeObjectEnd();
         //walls
         json.writeObjectStart("walls");

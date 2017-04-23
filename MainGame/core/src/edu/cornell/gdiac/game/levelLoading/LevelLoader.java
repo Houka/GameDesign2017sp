@@ -123,7 +123,17 @@ public class LevelLoader implements AssetUser, Disposable{
         JsonValue vertices;
         while (iter.hasNext()){
             vertices = iter.next();
-            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray());
+            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray(), 0);
+            obj.setDrawScale(scale);
+            obj.setTexture(platformTile);
+            addQueuedObject(obj);
+        }
+        JsonValue spikes = platforms.get("spikes");
+        iter = spikes.iterator();
+
+        while (iter.hasNext()) {
+            vertices = iter.next();
+            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray(), 1);
             obj.setDrawScale(scale);
             obj.setTexture(platformTile);
             addQueuedObject(obj);
