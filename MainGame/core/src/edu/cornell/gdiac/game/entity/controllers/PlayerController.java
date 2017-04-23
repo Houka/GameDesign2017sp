@@ -14,6 +14,7 @@ public class PlayerController extends EntityController {
     private static final int OFF_GROUND_THRESHOLD = 5;
     /** The input controller associated with the PlayerModel **/
     private PlayerInputController input;
+    private boolean superJumpEnabled;
 
     /**
      * PlayerController's contructor
@@ -36,11 +37,20 @@ public class PlayerController extends EntityController {
         player.applyForce();
 
         if(player.isTrampGrounded() && input.didJump()) {
+            superJumpEnabled(true);
             player.setVY(20);
             player.setTrampGrounded(false);
         }
+        /*if(superJumpEnabled) {
+            player.setVY(player.getPlayerJump());
+            superJumpEnabled(false);
+        }*/
 
         updateAnimation();
+    }
+
+    public void superJumpEnabled(boolean value) {
+        superJumpEnabled = value;
     }
 
     private void updateAnimation(){

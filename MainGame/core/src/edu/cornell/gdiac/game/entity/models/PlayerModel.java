@@ -196,6 +196,9 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     }
 
     // BEGIN: Setters and Getters
+    public float getPlayerJump() {
+        return PLAYER_JUMP;
+    }
     @Override
     public void setTexture(TextureRegion region){
         super.setTexture(region);

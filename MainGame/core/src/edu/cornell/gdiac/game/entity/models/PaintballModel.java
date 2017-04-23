@@ -78,6 +78,9 @@ public class PaintballModel extends BoxObstacle {
     private boolean recentCreation;
     private boolean isPlayerBullet;
 
+    /** If the paintball is being stood on*/
+    private boolean isUsed;
+
     /** Type of paintball */
     private String paintballType;
 
@@ -128,9 +131,17 @@ public class PaintballModel extends BoxObstacle {
         recentCreation = true;
         isPlayerBullet = false;
         paintballType = type;
+        isUsed = false;
     }
 
     //BEGIN: GETTERS AND SETTERS
+    public boolean isUsed() {
+        return isUsed;
+    }
+    public void setUsed(boolean value) {
+        isUsed = value;
+    }
+
     public void setTimeToDie(float xd) {
         if(!dying) {
             timeToDie = xd + deathDuration;
