@@ -17,7 +17,7 @@ public class Constants {
     /** Filenames for sprites of objects */
     public static String PLATFORM_FILE = "sprites/fixtures/window_tile.png";
     public static String WALL_FILE = "sprites/fixtures/solid.png";
-    public static String GOAL_FILE = "sprites/fixtures/security_camera.png";
+    public static String GOAL_FILE = CAMERA_FILE;
     public static String BACKGROUND_FILE = "sprites/bg/brick_wall_tile.png";
     public static String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
 
@@ -33,9 +33,9 @@ public class Constants {
     public static String CHARACTER_RISING_FILE = "sprites/char/char_jump_strip2.png";
     public static String CHARACTER_TRANSITION_FILE = "sprites/char/char_transition_strip2.png";
     public static String CHARACTER_SHOOT_FILE = "sprites/char/char_shoot.png";
+    public static String CHARACTER_CROUCH_FILE = "sprites/char/char_crouch.png";
 
     /** Texture file */
     public static final String PAINTBALL_FILE = "sprites/paintball.png";
-    public static String SPLATTERER_FILE = "sprites/fixtures/splatterer.png";
-
+    public static final String SPLATTERER_FILE = "sprites/fixtures/splatterer.png";
 }
