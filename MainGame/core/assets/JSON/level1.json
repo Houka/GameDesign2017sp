@@ -58,7 +58,15 @@
       "ammo_depots":[
 
     ]
-},
+    },
+    "splatterers": {
+      "default":[
+        {
+          "x": 10.5,
+          "y": 3.5
+        }
+      ]
+    },
     "target": {
       "x": 29.5,
       "y": 15

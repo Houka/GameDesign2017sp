@@ -65,6 +65,7 @@ public class LevelLoader implements AssetUser, Disposable{
      * loads the level based on the json file.
      */
     public void loadLevel(String JSONFile){
+        System.out.println(JSONFile);
         // reset queue of objects
         addQueue.clear();
         //sets the new world bounds
@@ -84,6 +85,7 @@ public class LevelLoader implements AssetUser, Disposable{
         addEnemies();
         addResources();
         addTarget();
+        addSplatterers();
     }
 
     /**
@@ -216,6 +218,28 @@ public class LevelLoader implements AssetUser, Disposable{
             ammoDepot.setDrawScale(scale);
             ammoDepot.setTexture(depotTexture);
             addQueuedObject(ammoDepot);
+        }
+    }
+
+    /**
+     * Adds the resources to the insertion queue. Currently only handles ammo depots.
+     */
+    public void addSplatterers(){
+        JsonValue splatterers = levelParser.getSplatterers();
+        // TODO: change after texture
+        float dheight = 48;
+        float dwidth = 48;
+
+        JsonValue dflt = splatterers.get("default");
+        JsonValue.JsonIterator iter = dflt.iterator();
+        JsonValue splat;
+        while (iter.hasNext()){
+            splat = iter.next();
+            SplattererModel splatterer = new SplattererModel(splat.get("x").asFloat(), splat.get("y").asFloat(), dwidth, dheight);
+            splatterer.setDrawScale(scale);
+            // TODO: change from depot texture
+            splatterer.setTexture(depotTexture);
+            addQueuedObject(splatterer);
         }
     }
 
