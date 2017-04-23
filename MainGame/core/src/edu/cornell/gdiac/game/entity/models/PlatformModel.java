@@ -19,7 +19,7 @@ public class PlatformModel extends PolygonObstacle {
     /** "Bounciness" of the platforms*/
     private static final float  BASIC_RESTITUTION = 0.1f;
     private float[] pointArray;
-    private static int type = 0;
+    private static int type;
 
     /**
      * Creates a new platform.
