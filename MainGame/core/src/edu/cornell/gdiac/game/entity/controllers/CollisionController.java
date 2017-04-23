@@ -1,7 +1,9 @@
 package edu.cornell.gdiac.game.entity.controllers;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.ObjectSet;
+import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
 import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 
@@ -77,7 +79,8 @@ public class CollisionController implements ContactListener {
     // END: helper functions
 
     // BEGIN: Simple Collision handlers
-    private void handleCollision(PlayerModel obj1, EnemyModel obj2){hud.setLose(true);}
+    private void handleCollision(PlayerModel obj1, EnemyModel obj2){
+        hud.setLose(true);}
     private void handleCollision(PlayerModel obj1, GoalModel obj2){}
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
         touchedGround(obj1,obj2,userData1,userData2);
@@ -175,6 +178,17 @@ public class CollisionController implements ContactListener {
             hud.addAmmo(obj2.getAmmoAmount());
         }
     }
+    private void handleCollision(SplattererModel obj1, PaintballModel obj2) {
+        boolean dir = false;
+        if(obj2.getX() < obj1.getX()) {
+            dir = true;
+        }
+
+        PaintballFactory pbFact = new PaintballFactory(obj2.getDrawScale());
+        PaintballModel pb = pbFact.createPaintball(obj1.getX()-(obj1.getWidth()/2), obj1.getY(), dir);
+        sensorObjects.add(pb);
+
+    }
 
     // Collision end handlers
     private void handleEndCollision(PlayerModel obj1,WallModel obj2){ }
@@ -187,6 +201,7 @@ public class CollisionController implements ContactListener {
     }
     private void handleEndCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){}
     private void handleEndCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}
+
     // END: Simple Collision handlers
 
     /**
@@ -224,6 +239,8 @@ public class CollisionController implements ContactListener {
                 handleCollision((WallModel)obj2,(PaintballModel) obj1);
             else if (obj2.getName().equals("paintball"))
                 handleCollision((PaintballModel)obj2,(PaintballModel) obj1);
+            else if (obj2.getName().equals("splatterer"))
+                handleCollision((SplattererModel)obj2,(PaintballModel) obj1);
         }else if (obj1.getName().equals("enemy")) {
             if (obj2.getName().equals("paintball"))
                 handleCollision((EnemyModel)obj1, (PaintballModel) obj2, userData1);

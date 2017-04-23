@@ -38,5 +38,4 @@ public class Constants {
     /** Texture file */
     public static final String PAINTBALL_FILE = "sprites/paintball.png";
     public static final String SPLATTERER_FILE = "sprites/fixtures/splatterer.png";
-
 }
