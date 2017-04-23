@@ -224,7 +224,7 @@ public class LevelEditorMode extends Mode {
     private String setInterval() {
         String result = JOptionPane.showInputDialog("Enter an interval time in seconds.");
         if(result != null) {
-            return result;
+            return Integer.toString(Integer.parseInt(result)*60);
         }
         else {
             return null;
@@ -234,6 +234,18 @@ public class LevelEditorMode extends Mode {
     private String setDir() {
         String[] values = {"left", "right"};
         String result = (String) JOptionPane.showInputDialog(null, "Choose a direction for your enemy to face", "Input",
+                JOptionPane.INFORMATION_MESSAGE, null, values, values[0]);
+        if(result != null) {
+            return result;
+        }
+        else {
+            return null;
+        }
+    }
+
+    private String setEnemyType() {
+        String[] values = {"normal", "trampoline"};
+        String result = (String) JOptionPane.showInputDialog(null, "Choose a type of paintball you want your enemy to shoot", "Input",
                 JOptionPane.INFORMATION_MESSAGE, null, values, values[0]);
         if(result != null) {
             return result;
@@ -298,10 +310,11 @@ public class LevelEditorMode extends Mode {
                 try {
                     int interval = 3;
                     String dir = setDir();
+                    String type = setEnemyType();
                     boolean right = false;
                     if(dir.equals("right")) { right = true; }
                     EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
-                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, true, interval);
+                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, true, interval, type);
                     newE.setDrawScale(scaleVector);
                     newE.setTexture(underMouse);
                     objects.add(newE);
@@ -313,10 +326,11 @@ public class LevelEditorMode extends Mode {
                 try {
                     int interval = Math.max(0, Integer.parseInt(setInterval()));
                     String dir = setDir();
+                    String type = setEnemyType();
                     boolean right = false;
                     if(dir.equals("right")) { right = true; }
                     EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
-                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, false, interval);
+                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, false, interval, type);
                     newE.setDrawScale(scaleVector);
                     newE.setTexture(underMouse);
                     objects.add(newE);
@@ -397,27 +411,51 @@ public class LevelEditorMode extends Mode {
                     float[] points = ((WallModel)o).getPoints();
                     float newW = points[2]-points[0];
                     float newH = points[3]-points[7];
-                    bounds = new Rectangle(points[6]+(newW/2), points[5], newW, newH);
+                    bounds = new Rectangle(points[6]+(newW/2), points[5]-(newH/2), newW, newH);
                 }
                 else if(o instanceof GoalModel) {
-                    float newW = ((GoalModel) o).getWidth()/scaleVector.x;
-                    float newH = ((GoalModel) o).getHeight()/scaleVector.y;
+                    float newW = ((GoalModel) o).getWidth();
+                    if(newW/scaleVector.x > .5) {
+                        newW /= scaleVector.x;
+                    }
+                    float newH = ((GoalModel) o).getHeight();
+                    if(newH/scaleVector.y > .5) {
+                        newH /= scaleVector.y;
+                    }
                     bounds = new Rectangle(o.getX(),o.getY()-newH, newW, newH);
                 }
                 else if(o instanceof AmmoDepotModel) {
-                    float newW = ((AmmoDepotModel) o).getWidth()/scaleVector.x;
-                    float newH = ((AmmoDepotModel) o).getHeight()/scaleVector.y;
-                    bounds = new Rectangle(o.getX(),o.getY()-(newH/2), newW, newH);
+                    float newW = ((AmmoDepotModel) o).getWidth();
+                    if(newW/scaleVector.x > .5) {
+                        newW /= scaleVector.x;
+                    }
+                    float newH = ((AmmoDepotModel) o).getHeight();
+                    if(newH/scaleVector.y > .5) {
+                        newH /= scaleVector.y;
+                    }
+                    bounds = new Rectangle(o.getX(),o.getY()-(newH), newW+(newW/2), newH);
                 }
                 else if(o instanceof EnemyModel) {
-                    float newW = ((EnemyModel) o).getWidth()/scaleVector.x;
-                    float newH = ((EnemyModel) o).getHeight()/scaleVector.y;
+                    float newW = ((EnemyModel) o).getWidth();
+                    if(newW/scaleVector.x > .5) {
+                        newW /= scaleVector.x;
+                    }
+                    float newH = ((EnemyModel) o).getHeight();
+                    if(newH/scaleVector.y > .5) {
+                        newH /= scaleVector.y;
+                    }
                     bounds = new Rectangle(o.getX()-(newW/2),o.getY()-(newH/2), newW+(newW/2), newH);
                 }
                 else if(o instanceof PlayerModel) {
-                    float newW = ((PlayerModel) o).getWidth()/scaleVector.x;
-                    float newH = ((PlayerModel) o).getHeight()/scaleVector.y;
-                    bounds = new Rectangle(o.getX(),o.getY()-(newH/2), newW, newH);
+                    float newW = ((PlayerModel) o).getWidth();
+                    if(newW/scaleVector.x > .5) {
+                        newW /= scaleVector.x;
+                    }
+                    float newH = ((PlayerModel) o).getHeight();
+                    if(newH/scaleVector.y > .5) {
+                        newH /= scaleVector.y;
+                    }
+                    bounds = new Rectangle(o.getX(),o.getY()-(newH), newW, newH+(newH/2));
                 }
                 else if(o instanceof SplattererModel) {
                     float newW = ((SplattererModel) o).getWidth()/scaleVector.x;

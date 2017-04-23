@@ -7,7 +7,7 @@ import edu.cornell.gdiac.game.input.PlayerInputController;
  * Created by Lu on 3/16/2017.
  *
  * This class handles the PlayerModel's logic
- * 
+ *
  */
 public class PlayerController extends EntityController {
     /** Threshold to play Animation when player is off the ground **/
@@ -16,9 +16,9 @@ public class PlayerController extends EntityController {
     private PlayerInputController input;
 
     /**
-    * PlayerController's contructor
-    * @player The PlayerModel that this PlayerController controls
-    **/
+     * PlayerController's contructor
+     * @player The PlayerModel that this PlayerController controls
+     **/
     public PlayerController(PlayerModel player){
         super(player);
         input = PlayerInputController.getInstance();
@@ -34,6 +34,11 @@ public class PlayerController extends EntityController {
         player.setShooting(input.didShoot());
         player.setCrouching(input.isDownHeld());
         player.applyForce();
+
+        if(player.isTrampGrounded() && input.didJump()) {
+            player.setVY(20);
+            player.setTrampGrounded(false);
+        }
 
         updateAnimation();
     }
