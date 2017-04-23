@@ -142,18 +142,6 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
             return false;
         }
 
-        // Ground Fixture
-//        Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
-//        FixtureDef sensorDef = new FixtureDef();
-//        sensorDef.density = ENEMY_DENSITY;
-//        sensorDef.isSensor = true;
-//        sensorShape = new PolygonShape();
-//        sensorShape.setAsBox(SENSOR_WIDTH, SENSOR_HEIGHT, sensorCenter, 0.0f);
-//        sensorDef.shape = sensorShape;
-//
-//        sensorFixture = body.createFixture(sensorDef);
-//        sensorFixture.setUserData(getSensorName());
-
         return true;
     }
 
