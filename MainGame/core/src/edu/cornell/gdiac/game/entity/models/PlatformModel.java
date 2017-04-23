@@ -12,6 +12,9 @@ import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
  */
 public class PlatformModel extends PolygonObstacle {
     //constants for the platforms
+    public static final int NORMAL_PLATFORM = 0;
+    public static final int SPIKE_PLATFORM = 1;
+
     /** Density of the platforms*/
     private static final float  BASIC_DENSITY = 0.0f;
     /** Friction of the platforms*/
@@ -19,7 +22,7 @@ public class PlatformModel extends PolygonObstacle {
     /** "Bounciness" of the platforms*/
     private static final float  BASIC_RESTITUTION = 0.1f;
     private float[] pointArray;
-    private static int type = 0;
+    private int type = 0;
 
     /**
      * Creates a new platform.
@@ -41,15 +44,13 @@ public class PlatformModel extends PolygonObstacle {
         this.type = type;
     }
 
-    public float[] getPoints(){
-        return pointArray;
-    }
-
+    // BEGIN: Setters and Getters
+    public float[] getPoints(){ return pointArray; }
     public int getType() {
         return type;
     }
-
     public void setType(int type) {
         this.type = type;
     }
+    // END: Setters and GEtters
 }

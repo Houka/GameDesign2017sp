@@ -123,7 +123,7 @@ public class LevelLoader implements AssetUser, Disposable{
         JsonValue vertices;
         while (iter.hasNext()){
             vertices = iter.next();
-            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray(), 0);
+            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray(), PlatformModel.NORMAL_PLATFORM);
             obj.setDrawScale(scale);
             obj.setTexture(platformTile);
             addQueuedObject(obj);
@@ -133,7 +133,7 @@ public class LevelLoader implements AssetUser, Disposable{
 
         while (iter.hasNext()) {
             vertices = iter.next();
-            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray(), 1);
+            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray(), PlatformModel.SPIKE_PLATFORM);
             obj.setDrawScale(scale);
             obj.setTexture(platformTile);
             addQueuedObject(obj);
