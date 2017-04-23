@@ -102,6 +102,15 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private Fixture sensorFixture;
     private PolygonShape sensorShape;
 
+    /** Fixtures for different hitboxes*/
+    private Fixture playerFixture;
+    private Fixture crouchFixture;
+    private PolygonShape playerShape;
+    private PolygonShape crouchShape;
+
+    private float playerHeight;
+    private float playerWidth;
+
     /** Cache for internal force calculations */
     private Vector2 forceCache = new Vector2();
     private Vector2 zeroVector = new Vector2(0,0);
@@ -170,6 +179,9 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
                 width/2.0f*PLAYER_HSHRINK, -height/2.0f
         };
         drawColor = new Color(256f,256f,256f,1f);
+
+        playerWidth = width;
+        playerHeight = height;
 
         setDensity(PLAYER_DENSITY);
         setFriction(PLAYER_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
@@ -437,6 +449,29 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         sensorFixture = body.createFixture(sensorDef);
         sensorFixture.setUserData(getSensorName());
 
+        //player default and crouching hitboxes
+        Vector2 playerCenter = new Vector2(0, 0);
+        FixtureDef playerDef = new FixtureDef();
+        playerDef.density = PLAYER_DENSITY;
+        playerDef.isSensor = true;
+        playerShape = new PolygonShape();
+        playerShape.setAsBox(PLAYER_HSHRINK*getWidth(), getHeight(), playerCenter, 0.0f);
+        playerDef.shape = playerShape;
+
+        playerFixture = body.createFixture(playerDef);
+        playerFixture.setUserData("Default hitbox");
+
+        Vector2 crouchCenter = new Vector2(0, -getHeight()/2);
+        FixtureDef crouchDef = new FixtureDef();
+        crouchDef.density = PLAYER_DENSITY;
+        crouchDef.isSensor = true;
+        crouchShape = new PolygonShape();
+        crouchShape.setAsBox(PLAYER_HSHRINK*getWidth(), getHeight()/2, crouchCenter, 0.0f);
+        crouchDef.shape = crouchShape;
+
+        crouchFixture = body.createFixture(playerDef);
+        crouchFixture.setUserData("Crouching hitbox");
+
         return true;
     }
 
@@ -464,9 +499,6 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
             if (knockbackDuration < 0) {
                 setVX(getVX() * knockbackFriction);
-                //  if (Math.abs(getVX()) < .01)
-                //stunned = false;
-
             }
         }
 

@@ -325,7 +325,6 @@ public class PaintballModel extends BoxObstacle {
     public void enableGravity() {
         gravity = true;
         this.setGravityScale(1/3f);
-        // this.setVY(-2); //Uncomment and comment above line for constant falling
     }
 
     /**

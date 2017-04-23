@@ -98,7 +98,6 @@ public class PaintballFactory implements AssetUser, Settable {
         paintball.setPlatformTexture(normalPlatfromTexture);
         paintball.setTrailTexture(trailTexture);
         paintball.setSplatEffectTexture(splatEffectTexture);
-      
         return paintball;
     }
 
@@ -182,7 +181,6 @@ public class PaintballFactory implements AssetUser, Settable {
     public static void setyScale(float yScale) {
         PaintballFactory.yScale = yScale;
     }
-
 
     // END: Setters and Getters
 

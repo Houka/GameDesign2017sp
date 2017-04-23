@@ -379,18 +379,11 @@ public class GameMode extends Mode implements Settable {
 	}
 
 	/**
-	 * Updates any objects that are shooters so that this class can create/add bullets 
-<<<<<<< HEAD
+	 * Updates any objects that are shooters so that this class can create/add bullets
 	 * to the shooting entity. Special case applies for the player involving the HUD.
 	 * The player will always shoot normal paintballs.
 	 *
 	 * @param obj the obstacle that we are checking is a shooter
-=======
-     * to the shooting entity. Special case applies for the player involving the HUD.
-	 * The player will always shoot normal paintballs.
-     *
-     * @param obj the obstacle that we are checking is a shooter
->>>>>>> 8ffce434ed136dc6fd24eb94cdf9e639fcefd90e
 	 */
 	private void updateShooter(Obstacle obj) {
 		if (((Shooter)obj).isShooting()) {

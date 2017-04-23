@@ -41,10 +41,6 @@ public class PlayerController extends EntityController {
             player.setVY(20);
             player.setTrampGrounded(false);
         }
-        /*if(superJumpEnabled) {
-            player.setVY(player.getPlayerJump());
-            superJumpEnabled(false);
-        }*/
 
         updateAnimation();
     }

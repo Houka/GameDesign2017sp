@@ -89,7 +89,6 @@ public class CollisionController implements ContactListener {
         obj1.setKnockedBack(0);
     }
     private void handleCollision(PlayerModel obj1, PaintballModel obj2, Object userData1, Object userData2) {
-
         float sign = obj2.getVX() / Math.abs(obj2.getVX());
         if(obj1.getY()-obj1.getHeight()/2f>=obj2.getY() && !obj1.isGhosting()){
             touchedGround(obj1, obj2, userData1, userData2);
@@ -105,7 +104,6 @@ public class CollisionController implements ContactListener {
                 obj1.setTrampGrounded(true);
                 obj2.setUsed(true);
             }
-
         }
     }
     private void handleCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){
@@ -152,8 +150,6 @@ public class CollisionController implements ContactListener {
             survives = obj1;
             dies = obj2;
         } else {
-
-
             if(obj1.isPlayerBullet()) {
                 survives = obj2;
                 dies = obj1;
@@ -161,7 +157,7 @@ public class CollisionController implements ContactListener {
                 survives = obj1;
                 dies = obj2;
             }
-                  
+
             if(obj1.getPaintballType().equals("trampoline") || obj2.getPaintballType().equals("trampoline")) {
                survives.setPaintballType("trampolineComb");
             }
