@@ -620,7 +620,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
      */
     public void drawDebug(GameCanvas canvas) {
         super.drawDebug(canvas);
-        if (sensorShape != null)
-            canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+        if (sensorShape != null) {
+            canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+            canvas.drawPhysics(crouchShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+            canvas.drawPhysics(playerShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+        }
     }
 }
