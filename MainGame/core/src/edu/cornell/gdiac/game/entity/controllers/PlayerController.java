@@ -1,7 +1,9 @@
 package edu.cornell.gdiac.game.entity.controllers;
 
+import com.sun.scenario.Settings;
 import edu.cornell.gdiac.game.entity.models.PlayerModel;
 import edu.cornell.gdiac.game.input.PlayerInputController;
+import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 /**
  * Created by Lu on 3/16/2017.
@@ -37,8 +39,9 @@ public class PlayerController extends EntityController {
         player.applyForce();
 
         if(player.isTrampGrounded() && input.didJump()) {
-            superJumpEnabled(true);
-            player.setVY(20);
+            System.out.println("tramp grounded");
+            player.setVY(Sidebar.getValue("Jump Height")*1.5f);
+            System.out.println(Sidebar.getValue("Jump Height")*1.5);
             player.setTrampGrounded(false);
         }
 

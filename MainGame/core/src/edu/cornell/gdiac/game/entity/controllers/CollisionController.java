@@ -51,6 +51,10 @@ public class CollisionController implements ContactListener {
         if (obj1.getSensorName().equals(userData1)) {
             obj1.setGrounded(true);
             obj1.setJumpForce(obj1.getPlayerJump());
+            if(!(obj2 instanceof PaintballModel) ||
+                    (obj2 instanceof PaintballModel && !((PaintballModel) obj2).getPaintballType().equals("trampolineComb"))) {
+                obj1.setTrampGrounded(false);
+            }
             if(userData2==null)
                 userData2 = obj2;
             sensorObjects.add(userData2); // Could have more than one ground
