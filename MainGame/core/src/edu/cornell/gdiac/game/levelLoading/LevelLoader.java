@@ -34,6 +34,7 @@ public class LevelLoader implements AssetUser, Disposable{
     private TextureRegion enemyIntervalTexture;
     private TextureRegion playerTexture;
     private TextureRegion depotTexture;
+    private TextureRegion splattererTexture;
 
     /** Animations */
     private Animation playerAnimation;
@@ -66,6 +67,7 @@ public class LevelLoader implements AssetUser, Disposable{
      * loads the level based on the json file.
      */
     public void loadLevel(String JSONFile){
+        System.out.println(JSONFile);
         // reset queue of objects
         addQueue.clear();
         //sets the new world bounds
@@ -85,6 +87,7 @@ public class LevelLoader implements AssetUser, Disposable{
         addEnemies();
         addResources();
         addTarget();
+        addSplatterers();
     }
 
     /**
@@ -221,6 +224,28 @@ public class LevelLoader implements AssetUser, Disposable{
     }
 
     /**
+     * Adds the resources to the insertion queue. Currently only handles ammo depots.
+     */
+    public void addSplatterers(){
+        JsonValue splatterers = levelParser.getSplatterers();
+        // TODO: change after texture
+        float dheight = 48;
+        float dwidth = 48;
+
+        JsonValue dflt = splatterers.get("default");
+        JsonValue.JsonIterator iter = dflt.iterator();
+        JsonValue splat;
+        while (iter.hasNext()){
+            splat = iter.next();
+            SplattererModel splatterer = new SplattererModel(splat.get("x").asFloat(), splat.get("y").asFloat(), dwidth, dheight);
+            splatterer.setDrawScale(scale);
+            // TODO: change from depot texture
+            splatterer.setTexture(splattererTexture);
+            addQueuedObject(splatterer);
+        }
+    }
+
+    /**
      * Adds the target to the insertion queue
      */
     public void addTarget(){
@@ -252,6 +277,7 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(Constants.CHARACTER_RUN_FILE, Texture.class);
         manager.load(Constants.CHARACTER_SHOOT_FILE, Texture.class);
         manager.load(Constants.AMMO_DEPOT_FILE, Texture.class);
+        manager.load(Constants.SPLATTERER_FILE, Texture.class);
     }
 
     @Override
@@ -265,6 +291,7 @@ public class LevelLoader implements AssetUser, Disposable{
         enemyOnsightTexture  = AssetRetriever.createTextureRegion(manager,Constants.ENEMY_ONSIGHT_FILE,false);
         playerTexture = AssetRetriever.createTextureRegion(manager, Constants.CHARACTER_STILL_FILE, false);
         depotTexture = AssetRetriever.createTextureRegion(manager, Constants.AMMO_DEPOT_FILE, false);
+        splattererTexture = AssetRetriever.createTextureRegion(manager, Constants.SPLATTERER_FILE, false);
 
         // animation spritesheet loading
         playerAnimation = new Animation();
@@ -310,6 +337,7 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.unload(Constants.CHARACTER_TRANSITION_FILE);
         manager.unload(Constants.CHARACTER_RUN_FILE);
         manager.unload(Constants.CHARACTER_SHOOT_FILE);
+        manager.unload(Constants.SPLATTERER_FILE);
     }
 
     @Override

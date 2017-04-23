@@ -11,15 +11,16 @@ public class Constants {
 
     /** Textures necessary to support the loading screen */
     public static final String PLAYER_FILE = "sprites/char/char_icon.png";
-    public static final String CAMERA_FILE = "sprites/security_camera.png";
+    public static final String CAMERA_FILE = "sprites/fixtures/security_camera.png";
     public static final String WHITE_PIXEL_FILE = "ui/white_pixel.png";
 
     /** Filenames for sprites of objects */
     public static String PLATFORM_FILE = "sprites/fixtures/window_tile.png";
     public static String WALL_FILE = "sprites/fixtures/solid.png";
-    public static String GOAL_FILE = "sprites/security_camera.png";
-    public static String BACKGROUND_FILE = "sprites/wall/brick_wall_tile.png";
+    public static String GOAL_FILE = "sprites/fixtures/security_camera.png";
+    public static String BACKGROUND_FILE = "sprites/bg/brick_wall_tile.png";
     public static String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
+    public static String SPLATTERER_FILE = "sprites/fixtures/splatterer.png";
 
     public static String ENEMY_ONSIGHT_FILE = "sprites/enemy/enemy_onsight.png";
     public static String ENEMY_INTERVAL_FILE = "sprites/enemy/enemy_interval.png";
@@ -36,5 +37,6 @@ public class Constants {
 
     /** Texture file */
     public static final String PAINTBALL_FILE = "sprites/paintball.png";
+
 
 }
