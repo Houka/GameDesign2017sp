@@ -46,7 +46,7 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
     /** Offset for hitbox for lower part of arm*/
     private static final float BELOW_ARM = 0.1f;
     /** Offset for hitbox for where the poster ends below*/
-    private static final float BELOW_POSTER = 0.25f;
+    private static final float BELOW_POSTER = 0f;
 
     private static final float VERTICAL_OFFSET = 1f;
 
@@ -141,18 +141,6 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
         if (!super.activatePhysics(world)) {
             return false;
         }
-
-        // Ground Fixture
-        Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
-        FixtureDef sensorDef = new FixtureDef();
-        sensorDef.density = ENEMY_DENSITY;
-        sensorDef.isSensor = true;
-        sensorShape = new PolygonShape();
-        sensorShape.setAsBox(SENSOR_WIDTH, SENSOR_HEIGHT, sensorCenter, 0.0f);
-        sensorDef.shape = sensorShape;
-
-        sensorFixture = body.createFixture(sensorDef);
-        sensorFixture.setUserData(getSensorName());
 
         return true;
     }
