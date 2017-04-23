@@ -273,20 +273,18 @@ public class GameMode extends Mode implements Settable {
 				((Settable) obj).applySettings();
 			if(obj instanceof Shooter)
 				updateShooter(obj);
-			if(obj instanceof PaintballModel)  {
-
+			if(obj instanceof SplattererModel)  {
+				if(((SplattererModel)obj).isShot()) {
+					((SplattererModel)obj).setShot(false);
+					PaintballModel pb = paintballFactory.createPaintball(obj.getX()+(((SplattererModel) obj).getWidth()/2),obj.getY(),((SplattererModel)obj).getDir());
+					pb.newSize(pb.getX(),pb.getY(),3);
+					pb.fixX(0f);
+					pb.setTimeToDie(pb.getPaintballToPaintballDuration());
+					addObject(pb);
+				}
 			}
 		}
 		hud.update(dt);
-
-		PooledList<PaintballModel> objs = collisionController.getObjsToAdd();
-		for(PaintballModel pb: objs) {
-			pb.newSize(pb.getX(),pb.getY(),3);
-			addObject(pb);
-			pb.setTimeToDie(pb.getPaintballToPaintballDuration());
-			pb.fixX(0f);
-			objs.remove(pb);
-		}
 
 
 		//if(MainInputController.getInstance().didDebug())

@@ -192,11 +192,11 @@ public class CollisionController implements ContactListener {
             dir = true;
         }
         if(!obj1.isUsed()) {
-            obj1.setUsed(true);
             obj2.instakill();
-            PaintballModel pb = paintballFactory.createPaintball(obj1.getX(), obj1.getY(), dir);
-            pb.setPlayerBullet(true);
-            objectsToAdd.add(pb);
+
+            obj1.setUsed(true);
+            obj1.setShot(true);
+            obj1.setDir(dir);
         }
     }
 

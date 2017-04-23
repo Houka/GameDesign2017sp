@@ -11,6 +11,10 @@ import edu.cornell.gdiac.util.obstacles.CapsuleObstacle;
 public class SplattererModel extends BoxObstacle{
     private boolean used;
     private int usedCooldown;
+    /** Direction to shoot in */
+    private boolean dir;
+    /** Whether the splatterer was shot (used for creating paintballs) */
+    private boolean shot;
 
     private static final int USED_COOLDOWN = 200;
 
@@ -24,7 +28,7 @@ public class SplattererModel extends BoxObstacle{
 
         this.used = false;
         this.usedCooldown = 0;
-
+        this.dir = false;
     }
 
     public boolean isUsed() {
@@ -34,6 +38,14 @@ public class SplattererModel extends BoxObstacle{
     public void setUsed(boolean used) {
         this.used = used;
     }
+
+    public boolean getDir() { return dir; }
+
+    public void setDir(boolean value) { dir = value;}
+
+    public boolean isShot() { return shot; }
+
+    public void setShot(boolean value) { shot = value; }
 
     @Override
     public void update(float dt) {
