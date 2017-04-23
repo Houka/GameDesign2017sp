@@ -64,8 +64,6 @@ public class LevelCreator {
         defaultAmmoDepots.add(new AmmoDepotModel(5.5f, 4f, 1, 1, 3));
         defaultTarget = new GoalModel(29.5f, 15.0f, 1, 1);
         defaultAmmo = 4;
-        // TODO: remove default splatterer?
-        defaultSplatterers.add(new SplattererModel(10.5f, 4f, 1, 1));
     }
 
     /**

@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.ObjectSet;
 import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
 import edu.cornell.gdiac.game.entity.models.*;
+import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 
 /**
@@ -30,13 +31,20 @@ public class CollisionController implements ContactListener {
     private HUDModel hud;
     /** Mark set to handle more sophisticated collision callbacks */
     private ObjectSet<Object> sensorObjects;
+    /** paintball factory for splatterers */
+    private PaintballFactory paintballFactory;
+
+    private PooledList<PaintballModel> objectsToAdd;
+
 
     /**
      *  The contructor
      * @param hud   The HUD to update
      */
-    public CollisionController(HUDModel hud){
+    public CollisionController(HUDModel hud,PaintballFactory paintballFactory){
         this.hud = hud;
+        this.paintballFactory = paintballFactory;
+        this.objectsToAdd = new PooledList<PaintballModel>();
         sensorObjects = new ObjectSet<Object>();
     }
 
@@ -79,6 +87,7 @@ public class CollisionController implements ContactListener {
     // END: helper functions
 
     // BEGIN: Simple Collision handlers
+    private void handleCollision(PlayerModel obj1, SplattererModel obj2) {}
     private void handleCollision(PlayerModel obj1, EnemyModel obj2){
         hud.setLose(true);}
     private void handleCollision(PlayerModel obj1, GoalModel obj2){}
@@ -182,11 +191,13 @@ public class CollisionController implements ContactListener {
         if(obj2.getX() < obj1.getX()) {
             dir = true;
         }
-
-        PaintballFactory pbFact = new PaintballFactory(obj2.getDrawScale());
-        PaintballModel pb = pbFact.createPaintball(obj1.getX()-(obj1.getWidth()/2), obj1.getY(), dir);
-        sensorObjects.add(pb);
-
+        if(!obj1.isUsed()) {
+            obj1.setUsed(true);
+            obj2.instakill();
+            PaintballModel pb = paintballFactory.createPaintball(obj1.getX(), obj1.getY(), dir);
+            pb.setPlayerBullet(true);
+            objectsToAdd.add(pb);
+        }
     }
 
     // Collision end handlers
@@ -226,6 +237,9 @@ public class CollisionController implements ContactListener {
                 handleCollision((PlayerModel)obj1,(PaintballModel) obj2, userData1,fix2);
             else if (obj2.getName().equals("ammoDepot"))
                 handleCollision((PlayerModel)obj1, (AmmoDepotModel) obj2);
+            else if (obj2.getName().equals("splatterer")) {
+                handleCollision((PlayerModel) obj1, (SplattererModel) obj2);
+            }
         }
         else if (obj1.getName().equals("paintball")) {
             if (obj2.getName().equals("enemy"))
@@ -240,12 +254,17 @@ public class CollisionController implements ContactListener {
                 handleCollision((PaintballModel)obj2,(PaintballModel) obj1);
             else if (obj2.getName().equals("splatterer"))
                 handleCollision((SplattererModel)obj2,(PaintballModel) obj1);
-        }else if (obj1.getName().equals("enemy")) {
+        }
+        else if (obj1.getName().equals("enemy")) {
             if (obj2.getName().equals("paintball"))
                 handleCollision((EnemyModel)obj1, (PaintballModel) obj2, userData1);
             else if (obj2.getName().equals("platform"))
                 handleCollision((EnemyModel)obj1, (PlatformModel) obj2, userData1);
         }
+    }
+
+    public PooledList<PaintballModel> getObjsToAdd() {
+        return objectsToAdd;
     }
 
     /**

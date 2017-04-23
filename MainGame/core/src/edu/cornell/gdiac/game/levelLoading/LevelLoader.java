@@ -227,9 +227,8 @@ public class LevelLoader implements AssetUser, Disposable{
      */
     public void addSplatterers(){
         JsonValue splatterers = levelParser.getSplatterers();
-        // TODO: change after texture
-        float dheight = 48;
-        float dwidth = 48;
+        float dheight = splattererTexture.getRegionWidth()/scale.x;
+        float dwidth = splattererTexture.getRegionHeight()/scale.y;
 
         JsonValue dflt = splatterers.get("default");
         JsonValue.JsonIterator iter = dflt.iterator();
@@ -238,7 +237,6 @@ public class LevelLoader implements AssetUser, Disposable{
             splat = iter.next();
             SplattererModel splatterer = new SplattererModel(splat.get("x").asFloat(), splat.get("y").asFloat(), dwidth, dheight);
             splatterer.setDrawScale(scale);
-            // TODO: change from depot texture
             splatterer.setTexture(splattererTexture);
             addQueuedObject(splatterer);
         }

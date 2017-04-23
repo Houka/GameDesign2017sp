@@ -77,6 +77,7 @@ public class PaintballModel extends BoxObstacle {
     private boolean recentCollision;
     private boolean recentCreation;
     private boolean isPlayerBullet;
+    private boolean direction;
 
     /**
      * PaintballModel constructor
@@ -124,9 +125,15 @@ public class PaintballModel extends BoxObstacle {
         recentCollision = false;
         recentCreation = true;
         isPlayerBullet = false;
+        direction = true;
     }
 
     //BEGIN: GETTERS AND SETTERS
+    public boolean getDying() { return dying; }
+    public boolean getGrowing() { return growing;}
+    public void setGrowing(boolean value) { growing = value; }
+    public boolean getDirection() { return direction; }
+    public void setDirection(boolean dir) { direction = dir; }
     public void setTimeToDie(float xd) {
         if(!dying) {
             timeToDie = xd + deathDuration;
