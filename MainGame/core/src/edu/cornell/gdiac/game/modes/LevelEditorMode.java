@@ -125,8 +125,8 @@ public class LevelEditorMode extends Mode {
 
         input = EditorInputController.getInstance();
         textureClicked = false;
-        regions = new TextureRegion[8];
-        startHeights = new int[8];
+        regions = new TextureRegion[9];
+        startHeights = new int[9];
 
         worldCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
         worldCamera.setAutosnap(true);
@@ -353,6 +353,16 @@ public class LevelEditorMode extends Mode {
                 objects.add(newP);
 
             }
+            else if(underMouse.equals(regions[8])) {
+                float offset = .75f;
+                float[] arr = {newPos.x-offset, newPos.y+offset, newPos.x+offset, newPos.y+offset,
+                        newPos.x+offset, newPos.y-offset, newPos.x-offset, newPos.y-offset};
+                PlatformModel newP = new PlatformModel(arr, 1);
+                newP.setDrawScale(scaleVector);
+                newP.setTexture(underMouse);
+                objects.add(newP);
+
+            }
             else if(underMouse.equals(regions[6])) {
                 float offset = .75f;
                 float[] arr = {newPos.x-offset, newPos.y+offset, newPos.x+offset, newPos.y+offset,
@@ -496,6 +506,7 @@ public class LevelEditorMode extends Mode {
         manager.load(Constants.WHITE_PIXEL_FILE,Texture.class);
         manager.load(Constants.WALL_FILE,Texture.class);
         manager.load(Constants.SPLATTERER_FILE,Texture.class);
+        manager.load(Constants.SPIKE_FILE, Texture.class);
         levelLoader.preLoadContent(manager);
     }
 
@@ -513,6 +524,7 @@ public class LevelEditorMode extends Mode {
         regions[5] = AssetRetriever.createTextureRegion(manager, Constants.ENEMY_ONSIGHT_FILE, false);
         regions[6] = AssetRetriever.createTextureRegion(manager, Constants.WALL_FILE, false);
         regions[7] = AssetRetriever.createTextureRegion(manager, Constants.SPLATTERER_FILE, false);
+        regions[8] = AssetRetriever.createTextureRegion(manager, Constants.SPIKE_FILE, false);
     }
 
     @Override
@@ -546,6 +558,9 @@ public class LevelEditorMode extends Mode {
         }
         if(manager.isLoaded(Constants.SPLATTERER_FILE)) {
             manager.unload(Constants.SPLATTERER_FILE);
+        }
+        if(manager.isLoaded(Constants.SPIKE_FILE)) {
+            manager.unload(Constants.SPIKE_FILE);
         }
     }
 
