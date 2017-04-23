@@ -84,7 +84,7 @@ public class CollisionController implements ContactListener {
     private void handleCollision(PlayerModel obj1, GoalModel obj2){}
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
         touchedGround(obj1,obj2,userData1,userData2);
-        if (obj2.getType() == 1 || obj2.getType() == 2) hud.setLose(true);
+        if (obj2.getType() == 1 || obj2.getType() == 2) {hud.setLose(true);}
     }
     private void handleCollision(PlayerModel obj1, WallModel obj2){
         obj1.setKnockedBack(0);

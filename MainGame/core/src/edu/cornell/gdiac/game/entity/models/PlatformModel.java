@@ -46,7 +46,7 @@ public class PlatformModel extends PolygonObstacle {
     }
 
     public int getType() {
-        return this.type;
+        return type;
     }
 
     public void setType(int type) {

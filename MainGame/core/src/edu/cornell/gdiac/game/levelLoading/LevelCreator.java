@@ -87,9 +87,18 @@ public class LevelCreator {
         json.writeObjectStart("platforms");
         json.writeArrayStart("default");
         for (int i = 0; i < platforms.size(); i ++) {
-            json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
+            if (platforms.get(i).getType() == 0)
+                json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
         }
         json.writeArrayEnd();
+
+        json.writeArrayStart("spikes");
+        for (int i = 0; i < platforms.size(); i ++) {
+            if (platforms.get(i).getType() == 1)
+                json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
+        }
+        json.writeArrayEnd();
+
         json.writeObjectEnd();
         //walls
         json.writeObjectStart("walls");
