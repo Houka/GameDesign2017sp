@@ -18,7 +18,8 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
  */
 public class PaintballFactory implements AssetUser, Settable {
     /** Offset for Paintball when firing */
-    private static float x_offset = 1.7f;
+    private static float right_x_offset = 1.5f;
+    private static float left_x_offset = -2.0f;
     private static float y_offset = 0.25f;
     /** The density for a Paintball */
     private static float heavy_density = 100.0f;
@@ -79,7 +80,7 @@ public class PaintballFactory implements AssetUser, Settable {
      *  @param direction    Initial traveling direction of the paintball (true for right, left otherwise)
      */
     public PaintballModel createPaintball(float x, float y, boolean direction, String paintballType){
-        float xOffset = (direction ? x_offset : -x_offset);
+        float xOffset = (direction ? right_x_offset : left_x_offset);
         float width = enemyTexture.getRegionWidth()/(scale.x);
         float height = enemyTexture.getRegionHeight()/(scale.y);
         float speed  = (direction ? initial_speed : -initial_speed);
@@ -120,8 +121,12 @@ public class PaintballFactory implements AssetUser, Settable {
         return heavy_density;
     }
 
-    public static float getX_offset() {
-        return x_offset;
+    public static float getRightX_offset() {
+        return right_x_offset;
+    }
+
+    public static float getLeftX_offset() {
+        return left_x_offset;
     }
 
     public static float getY_offset() {
@@ -156,9 +161,6 @@ public class PaintballFactory implements AssetUser, Settable {
         return yScale;
     }
 
-    public static void setX_offset(float x_offset) {
-        PaintballFactory.x_offset = x_offset;
-    }
 
     public static void setY_offset(float y_offset) {
         PaintballFactory.y_offset = y_offset;
