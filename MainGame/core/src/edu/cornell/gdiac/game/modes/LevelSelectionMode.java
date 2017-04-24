@@ -33,7 +33,7 @@ public class LevelSelectionMode extends Mode {
 
 	/** Textures necessary to support the screen */
 	private static final String BACKGROUND_FILE = "ui/bg/level_selection.png";
-	private static final Color DARK_PURPLE = new Color(123/255f, 118/255f, 131/255f, 1f);
+	private static Color UNSELECTED_COLOR = new Color(36/255f, 39/255f, 18/255f, 1f);
 
 	/** Level file finding vars **/
 	private static String[] NUM_LEVELS = FileReaderWriter.getJsonFiles();
@@ -60,6 +60,7 @@ public class LevelSelectionMode extends Mode {
 		this.gameMode = gameMode;
 		input = SelectionInputController.getInstance();
 		selected = 0;
+		gameMode.setLevel(NUM_LEVELS[selected],selected); // set the default level
 	}
 
 	// BEGIN: Setters and Getters
@@ -103,13 +104,21 @@ public class LevelSelectionMode extends Mode {
 	@Override
 	protected void draw() {
 		super.draw();
+		drawSelectionSingle();
+	}
 
+	private void drawSelectionSingle(){
+		displayFont.setColor(UNSELECTED_COLOR);
+		canvas.drawTextCentered("<[" + (selected+1) +"]>", displayFont, 0);
+	}
+
+	private void drawSelectionMatrix(){
 		for (int i = 0; i < TOTAL_COLUMNS; i++){
 			for (int j = 0; j < TOTAL_ROWS; j++) {
 				if (selected == convertToIndex(i,j))
-					displayFont.setColor(Color.DARK_GRAY);
+					displayFont.setColor(Color.RED);
 				else
-					displayFont.setColor(DARK_PURPLE);
+					displayFont.setColor(UNSELECTED_COLOR);
 
 				if (convertToIndex(i,j) < NUM_LEVELS.length) {
 					canvas.drawText("[" + (convertToIndex(i, j) + 1)+"]", displayFont,
@@ -128,9 +137,9 @@ public class LevelSelectionMode extends Mode {
 
 		// Load the font
 		FreetypeFontLoader.FreeTypeFontLoaderParameter size2Params = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
-		size2Params.fontFileName = Constants.FONT_FILE;
-		size2Params.fontParameters.size = Constants.FONT_SIZE;
-		manager.load(Constants.FONT_FILE, BitmapFont.class, size2Params);
+		size2Params.fontFileName = Constants.SELECTION_FONT_FILE;
+		size2Params.fontParameters.size = Constants.SELECTION_FONT_SIZE;
+		manager.load(Constants.SELECTION_FONT_FILE, BitmapFont.class, size2Params);
 	}
 
 	@Override
@@ -138,10 +147,9 @@ public class LevelSelectionMode extends Mode {
 		background = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true).getTexture();
 
 		// Allocate the font
-		if (manager.isLoaded(Constants.FONT_FILE))
-			displayFont = manager.get(Constants.FONT_FILE, BitmapFont.class);
-		else
-			displayFont = null;
+		if (manager.isLoaded(Constants.SELECTION_FONT_FILE)) {
+			displayFont = manager.get(Constants.SELECTION_FONT_FILE, BitmapFont.class);
+		}
 
 		// load levels
 		NUM_LEVELS = FileReaderWriter.getJsonFiles();

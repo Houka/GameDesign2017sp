@@ -105,7 +105,7 @@ public class CollisionController implements ContactListener {
     }
     private void handleCollision(PlayerModel obj1, PaintballModel obj2, Fixture fix1, Fixture fix2, Object userData1, Object userData2) {
         float sign = obj2.getVX() / Math.abs(obj2.getVX());
-        if(obj1.getY()-obj1.getPlayerHeight()/2>=obj2.getY()+obj2.getHeight()/2 && !obj1.isGhosting()){
+        if(obj1.getY()-obj1.getHeight()/2>=obj2.getY()+obj2.getHeight()/2 && !obj1.isGhosting()){
             touchedGround(obj1, obj2, userData1, fix2);
             obj1.setRidingVX(obj2);
         }
