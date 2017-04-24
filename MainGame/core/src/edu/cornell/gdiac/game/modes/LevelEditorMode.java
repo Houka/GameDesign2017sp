@@ -29,6 +29,7 @@ import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.game.input.EditorInputController;
 import edu.cornell.gdiac.game.levelLoading.LevelCreator;
 import edu.cornell.gdiac.game.levelLoading.LevelLoader;
+import edu.cornell.gdiac.util.Animation;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.util.FileReaderWriter;
 import edu.cornell.gdiac.util.PooledList;
@@ -63,6 +64,7 @@ public class LevelEditorMode extends Mode {
     private TextureRegion sidebarTexture;
     /** Texture for grid*/
     private TextureRegion whitePixelTexture;
+    private Animation spikeAnimation;
 
     /** Input controller */
     private EditorInputController input;
@@ -125,8 +127,8 @@ public class LevelEditorMode extends Mode {
 
         input = EditorInputController.getInstance();
         textureClicked = false;
-        regions = new TextureRegion[8];
-        startHeights = new int[8];
+        regions = new TextureRegion[12];
+        startHeights = new int[12];
 
         worldCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
         worldCamera.setAutosnap(true);
@@ -365,7 +367,6 @@ public class LevelEditorMode extends Mode {
                 newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
                 objects.add(newP);
-
             }
             else if(underMouse.equals(regions[6])) {
                 float offset = .75f;
@@ -384,6 +385,46 @@ public class LevelEditorMode extends Mode {
                 objects.add(newS);
                 underMouse = null;
                 textureClicked = false;
+            }
+            else if(underMouse.equals(regions[8])) {
+                float offset = .75f;
+                float[] arr = {newPos.x-offset, newPos.y+offset, newPos.x+offset, newPos.y+offset,
+                        newPos.x+offset, newPos.y-offset, newPos.x-offset, newPos.y-offset};
+                PlatformModel newP = new PlatformModel(arr, PlatformModel.SPIKE_DOWN_PLATFORM);
+                newP.setDrawScale(scaleVector);
+                newP.setTexture(underMouse);
+                newP.setAnimation(spikeAnimation);
+                objects.add(newP);
+            }
+            else if(underMouse.equals(regions[9])) {
+                float offset = .75f;
+                float[] arr = {newPos.x-offset, newPos.y+offset, newPos.x+offset, newPos.y+offset,
+                        newPos.x+offset, newPos.y-offset, newPos.x-offset, newPos.y-offset};
+                PlatformModel newP = new PlatformModel(arr, PlatformModel.SPIKE_UP_PLATFORM);
+                newP.setDrawScale(scaleVector);
+                newP.setTexture(underMouse);
+                newP.setAnimation(spikeAnimation);
+                objects.add(newP);
+            }
+            else if(underMouse.equals(regions[10])) {
+                float offset = .75f;
+                float[] arr = {newPos.x-offset, newPos.y+offset, newPos.x+offset, newPos.y+offset,
+                        newPos.x+offset, newPos.y-offset, newPos.x-offset, newPos.y-offset};
+                PlatformModel newP = new PlatformModel(arr, PlatformModel.SPIKE_LEFT_PLATFORM);
+                newP.setDrawScale(scaleVector);
+                newP.setTexture(underMouse);
+                newP.setAnimation(spikeAnimation);
+                objects.add(newP);
+            }
+            else if(underMouse.equals(regions[11])) {
+                float offset = .75f;
+                float[] arr = {newPos.x-offset, newPos.y+offset, newPos.x+offset, newPos.y+offset,
+                        newPos.x+offset, newPos.y-offset, newPos.x-offset, newPos.y-offset};
+                PlatformModel newP = new PlatformModel(arr, PlatformModel.SPIKE_RIGHT_PLATFORM);
+                newP.setDrawScale(scaleVector);
+                newP.setTexture(underMouse);
+                newP.setAnimation(spikeAnimation);
+                objects.add(newP);
             }
         }
 
@@ -534,6 +575,11 @@ public class LevelEditorMode extends Mode {
         manager.load(Constants.WHITE_PIXEL_FILE,Texture.class);
         manager.load(Constants.WALL_FILE,Texture.class);
         manager.load(Constants.SPLATTERER_FILE,Texture.class);
+        manager.load(Constants.SPIKES_DOWN_STILL_FILE,Texture.class);
+        manager.load(Constants.SPIKES_UP_STILL_FILE,Texture.class);
+        manager.load(Constants.SPIKES_LEFT_STILL_FILE,Texture.class);
+        manager.load(Constants.SPIKES_RIGHT_STILL_FILE,Texture.class);
+        manager.load(Constants.SPIKES_UP_SPIN_FILE,Texture.class);
         levelLoader.preLoadContent(manager);
     }
 
@@ -543,6 +589,11 @@ public class LevelEditorMode extends Mode {
         sidebarTexture = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true);
         whitePixelTexture = AssetRetriever.createTextureRegion(manager, Constants.WHITE_PIXEL_FILE, true);
 
+        spikeAnimation = new Animation();
+        spikeAnimation.addTexture("spin", AssetRetriever.createTexture(manager, Constants.SPIKES_UP_SPIN_FILE, false), 1 , 8);
+        spikeAnimation.setPlaying(false);
+        spikeAnimation.setPlayingAnimation("spin");
+
         regions[0] = AssetRetriever.createTextureRegion(manager, Constants.PLAYER_FILE, false);
         regions[1] = AssetRetriever.createTextureRegion(manager, Constants.ENEMY_INTERVAL_FILE, false);
         regions[2] = AssetRetriever.createTextureRegion(manager, Constants.PLATFORM_FILE, false);
@@ -551,6 +602,10 @@ public class LevelEditorMode extends Mode {
         regions[5] = AssetRetriever.createTextureRegion(manager, Constants.ENEMY_ONSIGHT_FILE, false);
         regions[6] = AssetRetriever.createTextureRegion(manager, Constants.WALL_FILE, false);
         regions[7] = AssetRetriever.createTextureRegion(manager, Constants.SPLATTERER_FILE, false);
+        regions[8] = AssetRetriever.createTextureRegion(manager, Constants.SPIKES_DOWN_STILL_FILE, false);
+        regions[9] = AssetRetriever.createTextureRegion(manager, Constants.SPIKES_UP_STILL_FILE, false);
+        regions[10] = AssetRetriever.createTextureRegion(manager, Constants.SPIKES_LEFT_STILL_FILE, false);
+        regions[11] = AssetRetriever.createTextureRegion(manager, Constants.SPIKES_RIGHT_STILL_FILE, false);
     }
 
     @Override
@@ -584,6 +639,18 @@ public class LevelEditorMode extends Mode {
         }
         if(manager.isLoaded(Constants.SPLATTERER_FILE)) {
             manager.unload(Constants.SPLATTERER_FILE);
+        }
+        if(manager.isLoaded(Constants.SPIKES_DOWN_STILL_FILE)) {
+            manager.unload(Constants.SPIKES_DOWN_STILL_FILE);
+        }
+        if(manager.isLoaded(Constants.SPIKES_UP_STILL_FILE)) {
+            manager.unload(Constants.SPIKES_UP_STILL_FILE);
+        }
+        if(manager.isLoaded(Constants.SPIKES_LEFT_STILL_FILE)) {
+            manager.unload(Constants.SPIKES_LEFT_STILL_FILE);
+        }
+        if(manager.isLoaded(Constants.SPIKES_RIGHT_STILL_FILE)) {
+            manager.unload(Constants.SPIKES_RIGHT_STILL_FILE);
         }
     }
 
