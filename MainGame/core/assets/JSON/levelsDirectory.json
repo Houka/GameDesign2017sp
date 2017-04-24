@@ -1,1 +1,6 @@
+<<<<<<< HEAD
 {"levels":["JSON/default.json","JSON/level1.json","JSON/level3.json","JSON/level5.json","JSON/test.json","JSON/testtram.json","JSON/null","JSON/test1.json","JSON/demolevel.json"]}
+=======
+{"levels":["JSON/tutorial1.json","JSON/tutorial3.json","JSON/tutorial4.json",
+  "JSON/tutorial5.json","JSON/tutorial6.json"]}
+>>>>>>> 16e062755612ad3425fbaae8ee499ca6fc766909

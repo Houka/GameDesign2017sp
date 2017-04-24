@@ -53,7 +53,7 @@ public class LevelCreator {
 
 
         for (int i = 0; i < DEFAULT_PLATFORMS.length; i++)
-            defaultPlatforms.add(new PlatformModel(DEFAULT_PLATFORMS[i], 0));
+            defaultPlatforms.add(new PlatformModel(DEFAULT_PLATFORMS[i], PlatformModel.NORMAL_PLATFORM));
 
         for (int i = 0; i < DEFAULT_WALLS.length; i++)
             defaultWalls.add(new WallModel(DEFAULT_WALLS[i]));
@@ -64,8 +64,6 @@ public class LevelCreator {
         defaultAmmoDepots.add(new AmmoDepotModel(5.5f, 4f, 1, 1, 3));
         defaultTarget = new GoalModel(29.5f, 15.0f, 1, 1);
         defaultAmmo = 4;
-        // TODO: remove default splatterer?
-        defaultSplatterers.add(new SplattererModel(10.5f, 4f, 1, 1));
     }
 
     /**
@@ -87,14 +85,14 @@ public class LevelCreator {
         json.writeObjectStart("platforms");
         json.writeArrayStart("default");
         for (int i = 0; i < platforms.size(); i ++) {
-            if (platforms.get(i).getType() == 0)
+            if (platforms.get(i).getType() == PlatformModel.NORMAL_PLATFORM)
                 json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
         }
         json.writeArrayEnd();
 
         json.writeArrayStart("spikes");
         for (int i = 0; i < platforms.size(); i ++) {
-            if (platforms.get(i).getType() == 1)
+            if (platforms.get(i).getType() == PlatformModel.SPIKE_PLATFORM)
                 json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
         }
         json.writeArrayEnd();

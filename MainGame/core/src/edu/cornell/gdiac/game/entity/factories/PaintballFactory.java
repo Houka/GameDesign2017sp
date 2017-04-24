@@ -18,12 +18,15 @@ import edu.cornell.gdiac.util.sidebar.Sidebar;
  */
 public class PaintballFactory implements AssetUser, Settable {
     /** Offset for Paintball when firing */
-    private static float x_offset = 1.7f;
+    private static float right_x_offset = 1.5f;
+    private static float left_x_offset = -2.0f;
     private static float y_offset = 0.25f;
     /** The density for a Paintball */
     private static float heavy_density = 100.0f;
     /** The speed of the Paintball after firing */
     private static float initial_speed = 4.0f;
+    /** The speed of the Paintball after firing for player */
+    private static float player_initial_speed = 8.0f;
     /** Duration for paintball to paintball sticking**/
     private static float paintballToPaintballDuration = 5f;
     /** Duration for paintball to wall sticking**/
@@ -41,7 +44,15 @@ public class PaintballFactory implements AssetUser, Settable {
     /** The drawing scale of the Paintball*/
     private Vector2 scale;
     /** Texture of the paintball */
-    private TextureRegion texture;
+    private TextureRegion enemyTexture;
+    private TextureRegion enemyTextureHead;
+    private TextureRegion playerTextureHead;
+    private TextureRegion normalPlatfromTexture;
+    private TextureRegion splatEffectTexture;
+    private TextureRegion trailTexture;
+    private TextureRegion enemyMineHeadTexture;
+    private TextureRegion minePlatformTexture;
+    private TextureRegion mineTrailTexture;
 
     public PaintballFactory(Vector2 scale){
         this.scale = scale;
@@ -56,6 +67,9 @@ public class PaintballFactory implements AssetUser, Settable {
     public PaintballModel createPlayerPaintball(float x, float y, boolean direction, String paintballType) {
         PaintballModel paintball = createPaintball(x,y,direction,paintballType);
         paintball.setPlayerBullet(true);
+        paintball.setHeadTexture(playerTextureHead);
+        float speed  = (direction ? player_initial_speed : -player_initial_speed);
+        paintball.fixX(speed);
         return paintball;
     }
 
@@ -66,14 +80,26 @@ public class PaintballFactory implements AssetUser, Settable {
      *  @param direction    Initial traveling direction of the paintball (true for right, left otherwise)
      */
     public PaintballModel createPaintball(float x, float y, boolean direction, String paintballType){
-        float xOffset = (direction ? x_offset : -x_offset);
-        float width = texture.getRegionWidth()/(scale.x);
-        float height = texture.getRegionHeight()/(scale.y);
+        float xOffset = (direction ? right_x_offset : left_x_offset);
+        float width = enemyTexture.getRegionWidth()/(scale.x);
+        float height = enemyTexture.getRegionHeight()/(scale.y);
         float speed  = (direction ? initial_speed : -initial_speed);
         PaintballModel paintball = new PaintballModel(x+xOffset, y+y_offset, width, height,speed,xScale,yScale,scale,paintballType);
         paintball.setDensity(heavy_density);
         paintball.setDrawScale(scale);
-        paintball.setTexture(texture);
+        paintball.setTexture(enemyTexture);
+        if(paintballType.equals("trampoline")) {
+            paintball.setTrailTexture(mineTrailTexture);
+            paintball.setHeadTexture(enemyMineHeadTexture);
+            paintball.setPlatformTexture(minePlatformTexture);
+        } else if(paintballType.equals("normal")) {
+            paintball.setTrailTexture(trailTexture);
+            paintball.setHeadTexture(enemyTextureHead);
+            paintball.setPlatformTexture(normalPlatfromTexture);
+        } else {
+            assert(false);
+        }
+        paintball.setSplatEffectTexture(splatEffectTexture);
         paintball.setPaintballToPaintballDuration(paintballToPaintballDuration);
         paintball.setPaintballToWallDuration(paintballToWallDuration);
         paintball.setPaintballToPlatformDuration(paintballToPlatformDuration);
@@ -83,17 +109,24 @@ public class PaintballFactory implements AssetUser, Settable {
         paintball.setFixedRotation(true);
         paintball.setVX(speed);
         paintball.setMaxLifeTime(MAX_LIFE_TIME);
+        paintball.setDirection(direction);
         paintball.setPaintballType(paintballType);
         return paintball;
     }
 
     // BEGIN: Setters and Getters
+
+
     public static float getHeavy_density() {
         return heavy_density;
     }
 
-    public static float getX_offset() {
-        return x_offset;
+    public static float getRightX_offset() {
+        return right_x_offset;
+    }
+
+    public static float getLeftX_offset() {
+        return left_x_offset;
     }
 
     public static float getY_offset() {
@@ -128,9 +161,6 @@ public class PaintballFactory implements AssetUser, Settable {
         return yScale;
     }
 
-    public static void setX_offset(float x_offset) {
-        PaintballFactory.x_offset = x_offset;
-    }
 
     public static void setY_offset(float y_offset) {
         PaintballFactory.y_offset = y_offset;
@@ -168,13 +198,13 @@ public class PaintballFactory implements AssetUser, Settable {
         PaintballFactory.yScale = yScale;
     }
 
-
     // END: Setters and Getters
 
     @Override
     public void applySettings() {
         maxXScale = Sidebar.getValue("Paintball Width");
         initial_speed = Sidebar.getValue("Paintball Speed");
+        player_initial_speed = 2*Sidebar.getValue("Paintball Speed");
         yScale = Sidebar.getValue("Paintball Height");
         paintballToPaintballDuration = Sidebar.getValue("Paintball-paintball Stick Time");
         paintballToWallDuration = Sidebar.getValue("Paintball-Wall Stick Time");
@@ -182,18 +212,42 @@ public class PaintballFactory implements AssetUser, Settable {
     }
 
     @Override
-    public void preLoadContent(AssetManager manager) {
+    public void preLoadContent(AssetManager manager)
+    {
         manager.load(Constants.PAINTBALL_FILE,Texture.class);
+        manager.load(Constants.PAINTBALL_STATIONARY_NORMAL_FILE,Texture.class);
+        manager.load(Constants.PAINTBALL_NORMAL_TRAIL_FILE,Texture.class);
+        manager.load(Constants.PAINTBALL_MINE_TRAIL_FILE,Texture.class);
+        manager.load(Constants.PAINTBALL_ENEMY_NORMAL_FILE,Texture.class);
+        manager.load(Constants.PAINTBALL_ENEMY_MINE_FILE,Texture.class);
+        manager.load(Constants.PAINTBALL_CHARACTER_FILE,Texture.class);
+        manager.load(Constants.PAINTBALL_SPLAT_EFFECT_FILE,Texture.class);
     }
 
     @Override
     public void loadContent(AssetManager manager) {
-        texture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_FILE, false);
+        enemyTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_FILE, false);
+        enemyTextureHead = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_ENEMY_NORMAL_FILE, false);
+        enemyMineHeadTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_ENEMY_MINE_FILE, false);
+        minePlatformTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_STATIONARY_MINE_FILE, false);
+        mineTrailTexture =  AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_MINE_TRAIL_FILE, false);
+        playerTextureHead = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_CHARACTER_FILE, false);
+        normalPlatfromTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_STATIONARY_NORMAL_FILE, false);
+        splatEffectTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_SPLAT_EFFECT_FILE, false);
+        trailTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_NORMAL_TRAIL_FILE, false);
     }
 
     @Override
     public void unloadContent(AssetManager manager) {
-        if(manager.isLoaded(Constants.PAINTBALL_FILE))
+        if(manager.isLoaded(Constants.PAINTBALL_FILE)) {
             manager.unload(Constants.PAINTBALL_FILE);
+            manager.unload(Constants.PAINTBALL_STATIONARY_NORMAL_FILE);
+            manager.unload(Constants.PAINTBALL_NORMAL_TRAIL_FILE);
+            manager.unload(Constants.PAINTBALL_MINE_TRAIL_FILE);
+            manager.unload(Constants.PAINTBALL_ENEMY_NORMAL_FILE);
+            manager.unload(Constants.PAINTBALL_ENEMY_MINE_FILE);
+            manager.unload(Constants.PAINTBALL_CHARACTER_FILE);
+            manager.unload(Constants.PAINTBALL_SPLAT_EFFECT_FILE);
+        }
     }
 }

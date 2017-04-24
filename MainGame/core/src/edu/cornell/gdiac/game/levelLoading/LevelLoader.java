@@ -69,7 +69,6 @@ public class LevelLoader implements AssetUser, Disposable{
      * loads the level based on the json file.
      */
     public void loadLevel(String JSONFile){
-        System.out.println(JSONFile);
         // reset queue of objects
         addQueue.clear();
         //sets the new world bounds
@@ -129,7 +128,7 @@ public class LevelLoader implements AssetUser, Disposable{
         JsonValue vertices;
         while (iter.hasNext()){
             vertices = iter.next();
-            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray(), 0);
+            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray(), PlatformModel.NORMAL_PLATFORM);
             obj.setDrawScale(scale);
             obj.setTexture(platformTile);
             addQueuedObject(obj);
@@ -138,7 +137,7 @@ public class LevelLoader implements AssetUser, Disposable{
         iter = spikes.iterator();
         while (iter.hasNext()) {
             vertices = iter.next();
-            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray(), 1);
+            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray(), PlatformModel.SPIKE_PLATFORM);
             obj.setDrawScale(scale);
             obj.setTexture(platformTile);
             addQueuedObject(obj);
@@ -197,9 +196,9 @@ public class LevelLoader implements AssetUser, Disposable{
             obj.setAnimation(enemyIntervalAnimation);
             addQueuedObject(obj);
         }
-
         dwidth  = enemyOnsightTexture.getRegionWidth()/scale.x;
         dheight = enemyOnsightTexture.getRegionHeight()/scale.y;
+
         //add on sight shooters
         JsonValue onSight = enemies.get("on_sight");
         iter = onSight.iterator();
@@ -241,9 +240,8 @@ public class LevelLoader implements AssetUser, Disposable{
      */
     public void addSplatterers(){
         JsonValue splatterers = levelParser.getSplatterers();
-        // TODO: change after texture
-        float dheight = 48;
-        float dwidth = 48;
+        float dheight = splattererTexture.getRegionWidth()/scale.x;
+        float dwidth = splattererTexture.getRegionHeight()/scale.y;
 
         JsonValue dflt = splatterers.get("default");
         JsonValue.JsonIterator iter = dflt.iterator();
@@ -252,7 +250,6 @@ public class LevelLoader implements AssetUser, Disposable{
             splat = iter.next();
             SplattererModel splatterer = new SplattererModel(splat.get("x").asFloat(), splat.get("y").asFloat(), dwidth, dheight);
             splatterer.setDrawScale(scale);
-            // TODO: change from depot texture
             splatterer.setTexture(splattererTexture);
             addQueuedObject(splatterer);
         }
@@ -289,6 +286,16 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(Constants.CHARACTER_TRANSITION_FILE, Texture.class);
         manager.load(Constants.CHARACTER_RUN_FILE, Texture.class);
         manager.load(Constants.CHARACTER_SHOOT_FILE, Texture.class);
+        manager.load(Constants.CHARACTER_CROUCH_FILE, Texture.class);
+        manager.load(Constants.CHARACTER_STUNNED_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_CHARACTER_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_ENEMY_MINE_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_ENEMY_NORMAL_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_MINE_TRAIL_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_NORMAL_TRAIL_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_STATIONARY_MINE_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_STATIONARY_NORMAL_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_SPLAT_EFFECT_FILE, Texture.class);
         manager.load(Constants.AMMO_DEPOT_FILE, Texture.class);
         manager.load(Constants.SPLATTERER_FILE, Texture.class);
         manager.load(Constants.SPIKE_FILE, Texture.class);
@@ -313,10 +320,13 @@ public class LevelLoader implements AssetUser, Disposable{
         playerAnimation.addTexture("idle", AssetRetriever.createTexture(manager, Constants.CHARACTER_IDLE_FILE, false), 1,5);
         playerAnimation.addTexture("run", AssetRetriever.createTexture(manager, Constants.CHARACTER_RUN_FILE, false), 1,4);
         playerAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, Constants.CHARACTER_SHOOT_FILE, false), 1,1);
+        playerAnimation.addTexture("crouch", AssetRetriever.createTexture(manager, Constants.CHARACTER_CROUCH_FILE, false), 1,1);
+        playerAnimation.addTexture("stunned", AssetRetriever.createTexture(manager, Constants.CHARACTER_STUNNED_FILE, false), 1,1);
         playerAnimation.addTexture("rising", AssetRetriever.createTexture(manager, Constants.CHARACTER_RISING_FILE, false), 1,2);
         playerAnimation.addTexture("falling", AssetRetriever.createTexture(manager, Constants.CHARACTER_FALLING_FILE, false), 1,2);
         playerAnimation.addTexture("peak", AssetRetriever.createTexture(manager, Constants.CHARACTER_TRANSITION_FILE, false), 1,2);
         playerAnimation.addTexture("midair shoot", AssetRetriever.createTexture(manager, Constants.CHARACTER_MIDAIR_FILE, false), 1,1);
+        playerAnimation.addTexture("crouch", AssetRetriever.createTexture(manager, Constants.CHARACTER_CROUCH_FILE, false), 1,1);
         playerAnimation.addTexture("still", playerTexture.getTexture(), 1, 1);
         playerAnimation.setPlaying(false);
         playerAnimation.setPlayingAnimation("idle");
@@ -352,6 +362,7 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.unload(Constants.CHARACTER_TRANSITION_FILE);
         manager.unload(Constants.CHARACTER_RUN_FILE);
         manager.unload(Constants.CHARACTER_SHOOT_FILE);
+        manager.unload(Constants.CHARACTER_CROUCH_FILE);
         manager.unload(Constants.SPLATTERER_FILE);
         manager.unload(Constants.SPIKE_FILE);
     }

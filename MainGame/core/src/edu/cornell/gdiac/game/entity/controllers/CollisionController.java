@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.ObjectSet;
 import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
 import edu.cornell.gdiac.game.entity.models.*;
+import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 
 /**
@@ -30,13 +31,20 @@ public class CollisionController implements ContactListener {
     private HUDModel hud;
     /** Mark set to handle more sophisticated collision callbacks */
     private ObjectSet<Object> sensorObjects;
+    /** paintball factory for splatterers */
+    private PaintballFactory paintballFactory;
+
+    private PooledList<PaintballModel> objectsToAdd;
+
 
     /**
      *  The contructor
      * @param hud   The HUD to update
      */
-    public CollisionController(HUDModel hud){
+    public CollisionController(HUDModel hud,PaintballFactory paintballFactory){
         this.hud = hud;
+        this.paintballFactory = paintballFactory;
+        this.objectsToAdd = new PooledList<PaintballModel>();
         sensorObjects = new ObjectSet<Object>();
     }
 
@@ -52,6 +60,11 @@ public class CollisionController implements ContactListener {
     private void touchedGround(PlayerModel obj1, Obstacle obj2, Object userData1, Object userData2){
         if (obj1.getSensorName().equals(userData1)) {
             obj1.setGrounded(true);
+            obj1.setJumpForce(obj1.getPlayerJump());
+            if(!(obj2 instanceof PaintballModel) ||
+                    (obj2 instanceof PaintballModel && !((PaintballModel) obj2).getPaintballType().equals("trampolineComb"))) {
+                obj1.setTrampGrounded(false);
+            }
             if(userData2==null)
                 userData2 = obj2;
             sensorObjects.add(userData2); // Could have more than one ground
@@ -79,33 +92,36 @@ public class CollisionController implements ContactListener {
     // END: helper functions
 
     // BEGIN: Simple Collision handlers
-    private void handleCollision(PlayerModel obj1, EnemyModel obj2){
-        hud.setLose(true);}
+    private void handleCollision(PlayerModel obj1, SplattererModel obj2) {}
+    private void handleCollision(PlayerModel obj1, EnemyModel obj2){ hud.setLose(true);}
     private void handleCollision(PlayerModel obj1, GoalModel obj2){}
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
         touchedGround(obj1,obj2,userData1,userData2);
-        if (obj2.getType() == 1 || obj2.getType() == 2) {hud.setLose(true);}
+        obj1.setTrampGrounded(false);
+        if (obj2.getType() == PlatformModel.SPIKE_PLATFORM) {hud.setLose(true);}
     }
     private void handleCollision(PlayerModel obj1, WallModel obj2){
         obj1.setKnockedBack(0);
     }
-    private void handleCollision(PlayerModel obj1, PaintballModel obj2, Object userData1, Object userData2) {
-
+    private void handleCollision(PlayerModel obj1, PaintballModel obj2, Fixture fix1, Fixture fix2, Object userData1, Object userData2) {
         float sign = obj2.getVX() / Math.abs(obj2.getVX());
-        if(obj1.getY()-obj1.getHeight()/2f>=obj2.getY() && !obj1.isGhosting()){
-            touchedGround(obj1, obj2, userData1, userData2);
+        if(obj1.getY()-obj1.getPlayerHeight()/2>=obj2.getY()+obj2.getHeight()/2 && !obj1.isGhosting()){
+            touchedGround(obj1, obj2, userData1, fix2);
             obj1.setRidingVX(obj2);
         }
         else{
-            obj1.setKnockedBack(0);
-            if(!obj2.isPlayerBullet() && !obj2.isDying() && obj1.getX()*sign>obj2.getX()*sign+obj2.getHeadSize()*-sign+(sign>0?obj2.getWidth()/2f:0))
-                obj1.setKnockedBack(sign);
+            if(obj1.fixtureIsActive(userData1)) {
+                obj1.setKnockedBack(0);
+                if(!obj2.isPlayerBullet() && !obj2.isDying() && obj1.getX()*sign>obj2.getX()*sign+obj2.getHeadSize()*-sign+(sign>0?obj2.getWidth()/2f:0))
+                    obj1.setKnockedBack(sign);
+            }
         }
         if(obj2.getPaintballType().equals("trampolineComb")) {
             if(obj1.isGrounded() && !obj1.isJumping() && !obj1.isDoubleJumping()) {
+                obj1.setMyPlatform(obj2);
                 obj1.setTrampGrounded(true);
+                obj2.setUsed(true);
             }
-
         }
     }
     private void handleCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){
@@ -137,31 +153,41 @@ public class CollisionController implements ContactListener {
         float twoSign = obj2.getVX() / Math.abs(obj2.getVX());
         if(oneSign == twoSign) {
             if(obj1.getPosition().x*oneSign<obj2.getPosition().x*oneSign) {
-                obj2.instakill();
-                obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
-                obj1.setTimeToDie(obj1.getPaintballToPaintballDuration());
+                obj1.pop();
             }
             return;
         }
 
+        PaintballModel survives;
+        PaintballModel dies;
         if(obj2.isDying()) {
-            obj1.instakill();
-            obj2.newSize(midPoint,obj2.getPosition().y,obj1.getWidth()+obj2.getWidth());
-            obj2.setPlayerBullet(true);
+            survives = obj2;
+            dies = obj1;
         }
         else if(obj1.isDying()) {
-            obj2.instakill();
-            obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
-            obj1.setPlayerBullet(true);
+            survives = obj1;
+            dies = obj2;
         } else {
-            if(obj1.getPaintballType().equals("trampoline") || obj2.getPaintballType().equals("trampoline")) {
-                obj1.setPaintballType("trampolineComb");
+            if(obj1.isPlayerBullet()) {
+                survives = obj2;
+                dies = obj1;
+            } else {
+                survives = obj1;
+                dies = obj2;
             }
-            obj2.instakill();
-            obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
-            obj1.setTimeToDie(obj1.getPaintballToPaintballDuration());
-            obj1.setPlayerBullet(true);
+
+            if(obj1.getPaintballType().equals("trampoline") || obj2.getPaintballType().equals("trampoline")) {
+               survives.setPaintballType("trampolineComb");
+            }
+          
+            survives.setTimeToDie(obj1.getPaintballToPaintballDuration());
+            dies.instakill();
         }
+      
+        dies.pop();
+        if(!obj1.isPlayerBullet() && !obj2.isPlayerBullet()&&!obj1.isDying()&&!obj2.isDying())
+            survives.newSize(midPoint,obj2.getPosition().y,obj1.getWidth()+obj2.getWidth());
+        survives.setPassThrough(true);
 
         obj1.fixX(0f);
         obj2.fixX(0f);
@@ -170,14 +196,14 @@ public class CollisionController implements ContactListener {
     }
     private void handleCollision(PlatformModel obj1, PaintballModel obj2){
         if(obj2.recentlyCreated())
-            obj2.instakill();
+            obj2.pop();
 
         obj2.setTimeToDie(obj2.getPaintballToWallDuration());
         obj2.fixX(0f);
     }
     private void handleCollision(WallModel obj1, PaintballModel obj2){
         if(obj2.recentlyCreated())
-            obj2.instakill();
+            obj2.pop();
 
         obj2.setTimeToDie(obj2.getPaintballToPlatformDuration());
         obj2.fixX(0f);
@@ -190,7 +216,7 @@ public class CollisionController implements ContactListener {
     }
     private void handleCollision(SplattererModel obj1, PaintballModel obj2) {
         boolean dir = false;
-        if(obj2.getX() < obj1.getX()) {
+        if(obj2.getVX() > 0) {
             dir = true;
         }
 
@@ -198,6 +224,13 @@ public class CollisionController implements ContactListener {
         PaintballModel pb = pbFact.createPaintball(obj1.getX()-(obj1.getWidth()/2), obj1.getY(), dir, "normal");
         sensorObjects.add(pb);
 
+        if(!obj1.isUsed()) {
+            obj2.instakill();
+            obj1.setUsed(true);
+            obj1.setShot(true);
+            obj1.setDir(dir);
+            obj1.setYCoord(obj2.getY());
+        }
     }
 
     // Collision end handlers
@@ -208,9 +241,6 @@ public class CollisionController implements ContactListener {
     private void handleEndCollision(PlayerModel obj1,PaintballModel obj2, Object userData1, Object userData2){
         leftGround(obj1,obj2,userData1,userData2);
         obj1.setRidingVX(null);
-        if(obj2.getPaintballType().equals("trampolineComb")) {
-            obj2.instakill();
-        }
     }
     private void handleEndCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){}
     private void handleEndCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}
@@ -233,13 +263,16 @@ public class CollisionController implements ContactListener {
             else if (obj2.getName().equals("goal"))
                 handleCollision((PlayerModel)obj1,(GoalModel) obj2);
             else if (obj2.getName().equals("platform"))
-                handleCollision((PlayerModel)obj1,(PlatformModel) obj2, userData1, fix2);
+                handleCollision((PlayerModel)obj1,(PlatformModel) obj2,userData1, fix2);
             else if (obj2.getName().equals("wall"))
                 handleCollision((PlayerModel)obj1,(WallModel) obj2);
             else if (obj2.getName().equals("paintball"))
-                handleCollision((PlayerModel)obj1,(PaintballModel) obj2, userData1,fix2);
+                handleCollision((PlayerModel)obj1,(PaintballModel) obj2, fix1,fix2,userData1,userData2);
             else if (obj2.getName().equals("ammoDepot"))
                 handleCollision((PlayerModel)obj1, (AmmoDepotModel) obj2);
+            else if (obj2.getName().equals("splatterer")) {
+                handleCollision((PlayerModel) obj1, (SplattererModel) obj2);
+            }
         }
         else if (obj1.getName().equals("paintball")) {
             if (obj2.getName().equals("enemy"))
@@ -254,12 +287,17 @@ public class CollisionController implements ContactListener {
                 handleCollision((PaintballModel)obj2,(PaintballModel) obj1);
             else if (obj2.getName().equals("splatterer"))
                 handleCollision((SplattererModel)obj2,(PaintballModel) obj1);
-        }else if (obj1.getName().equals("enemy")) {
+        }
+        else if (obj1.getName().equals("enemy")) {
             if (obj2.getName().equals("paintball"))
                 handleCollision((EnemyModel)obj1, (PaintballModel) obj2, userData1);
             else if (obj2.getName().equals("platform"))
                 handleCollision((EnemyModel)obj1, (PlatformModel) obj2, userData1);
         }
+    }
+
+    public PooledList<PaintballModel> getObjsToAdd() {
+        return objectsToAdd;
     }
 
     /**
@@ -289,6 +327,8 @@ public class CollisionController implements ContactListener {
 
     @Override
     public void beginContact(Contact contact) {
+        if(!contact.isEnabled())
+            return;
         Fixture fix1 = contact.getFixtureA();
         Fixture fix2 = contact.getFixtureB();
 
@@ -339,11 +379,15 @@ public class CollisionController implements ContactListener {
         Body body1 = fix1.getBody();
         Body body2 = fix2.getBody();
 
+        Object fd1 = fix1.getUserData();
+        Object fd2 = fix2.getUserData();
+
         try {
             Obstacle bd1 = (Obstacle) body1.getUserData();
             Obstacle bd2 = (Obstacle) body2.getUserData();
 
             PlayerModel player = null;
+            Object playerFixData = null;
             PaintballModel paintball = null;
 
             if(bd2.getName().equals("paintball")) {
@@ -363,8 +407,15 @@ public class CollisionController implements ContactListener {
 
             if(bd1.getName().equals("player")) {
                 player = (PlayerModel) bd1;
+                playerFixData = fd1;
             } else if (bd2.getName().equals("player")) {
                 player = (PlayerModel) bd2;
+                playerFixData = fd2;
+            }
+
+            if(player!=null && !player.fixtureIsActive(playerFixData)) {
+                contact.setEnabled(false);
+                return;
             }
 
             if (paintball == null ||  player == null){
@@ -377,7 +428,7 @@ public class CollisionController implements ContactListener {
             }
 
 
-            if(player.getVY()>=0 && paintball.isPlayerBullet()) {
+            if(player.getVY()>=0 && paintball.canPassThrough()) {
                 contact.setEnabled(false);
             }
 

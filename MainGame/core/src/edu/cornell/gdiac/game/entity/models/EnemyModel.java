@@ -46,7 +46,7 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
     /** Offset for hitbox for lower part of arm*/
     private static final float BELOW_ARM = 0.1f;
     /** Offset for hitbox for where the poster ends below*/
-    private static final float BELOW_POSTER = 0f;
+    private static final float BELOW_POSTER = 0.3f;
 
     private static final float VERTICAL_OFFSET = 1f;
 
@@ -100,6 +100,7 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
      */
     public EnemyModel(float x, float y, float width, float height, boolean isFacingRight, boolean onSight, int interval, String enemyType) {
         super(
+                isFacingRight ?
                 new float[]{
                         -width/2.0f, -height*BELOW_POSTER,
                         -width/2.0f, height/2.0f,
@@ -109,6 +110,16 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
                         width/2.0f, -height*BELOW_ARM,
                         0, -height*BELOW_ARM,
                         0, -height*BELOW_POSTER,
+                } :
+                new float[]{
+                        0, -height*BELOW_ARM,
+                        -width/2.0f, -height*BELOW_ARM,
+                        -width/2.0f, height*ABOVE_ARM_SHRINK,
+                        0, height*ABOVE_ARM_SHRINK,
+                        0, height/2.0f,
+                        width/2.0f, height/2.0f,
+                        width/2.0f, -height*BELOW_POSTER,
+                        0, -height*BELOW_POSTER
                 },
                 x,y);
         setDensity(ENEMY_DENSITY);
@@ -142,18 +153,6 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
         if (!super.activatePhysics(world)) {
             return false;
         }
-
-        // Ground Fixture
-//        Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
-//        FixtureDef sensorDef = new FixtureDef();
-//        sensorDef.density = ENEMY_DENSITY;
-//        sensorDef.isSensor = true;
-//        sensorShape = new PolygonShape();
-//        sensorShape.setAsBox(SENSOR_WIDTH, SENSOR_HEIGHT, sensorCenter, 0.0f);
-//        sensorDef.shape = sensorShape;
-//
-//        sensorFixture = body.createFixture(sensorDef);
-//        sensorFixture.setUserData(getSensorName());
 
         return true;
     }
