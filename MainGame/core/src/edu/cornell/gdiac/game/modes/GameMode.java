@@ -454,7 +454,7 @@ public class GameMode extends Mode implements Settable {
 	 * @param obj The object to add
 	 */
 	private void addObject(Obstacle obj) {
-		assert inBounds(obj) : "Object is not in bounds";
+		//assert inBounds(obj) : "Object is not in bounds";
 		objects.add(obj);
 		obj.activatePhysics(world);
 
