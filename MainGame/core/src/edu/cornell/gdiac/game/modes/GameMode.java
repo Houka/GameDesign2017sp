@@ -276,7 +276,13 @@ public class GameMode extends Mode implements Settable {
 			if(obj instanceof SplattererModel)  {
 				if(((SplattererModel)obj).isShot()) {
 					((SplattererModel)obj).setShot(false);
-					PaintballModel pb = paintballFactory.createPaintball(obj.getX()+(((SplattererModel) obj).getWidth()/2),obj.getY(),((SplattererModel)obj).getDir(), "normal");
+					PaintballModel pb;
+					if(((SplattererModel) obj).getDir())
+						pb = paintballFactory.createPaintball(obj.getX()+(((SplattererModel) obj).getWidth()*2),
+								((SplattererModel) obj).getYCoord(),!((SplattererModel)obj).getDir(), "normal");
+					else
+						pb = paintballFactory.createPaintball(obj.getX()-(((SplattererModel) obj).getWidth()*2),
+								((SplattererModel) obj).getYCoord(),!((SplattererModel)obj).getDir(), "normal");
 					pb.newSize(pb.getX(),pb.getY(),3);
 					pb.fixX(0f);
 					pb.setTimeToDie(pb.getPaintballToPaintballDuration());

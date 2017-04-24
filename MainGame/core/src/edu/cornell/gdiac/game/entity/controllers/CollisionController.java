@@ -224,6 +224,7 @@ public class CollisionController implements ContactListener {
             obj1.setUsed(true);
             obj1.setShot(true);
             obj1.setDir(dir);
+            obj1.setYCoord(obj2.getY());
         }
     }
 

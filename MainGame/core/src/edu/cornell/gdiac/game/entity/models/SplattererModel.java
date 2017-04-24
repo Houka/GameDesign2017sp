@@ -18,7 +18,10 @@ public class SplattererModel extends BoxObstacle {
      */
     private boolean shot;
 
-    private static final int USED_COOLDOWN = 200;
+    private static final int USED_COOLDOWN = 70;
+
+    /** Where the bullet shot into */
+    private float yCoord;
 
     public SplattererModel(float x, float y, float width, float height) {
         super(x, y, width, height);
@@ -31,6 +34,7 @@ public class SplattererModel extends BoxObstacle {
         this.used = false;
         this.usedCooldown = 0;
         this.dir = false;
+        this.yCoord = y;
     }
 
     public boolean isUsed() {
@@ -55,6 +59,14 @@ public class SplattererModel extends BoxObstacle {
 
     public void setShot(boolean value) {
         shot = value;
+    }
+
+    public void setYCoord(float value) {
+        yCoord = value;
+    }
+
+    public float getYCoord() {
+        return yCoord;
     }
 
     @Override
