@@ -90,9 +90,23 @@ public class PaintballFactory implements AssetUser, Settable {
         float height = enemyTexture.getRegionHeight()/(scale.y);
         float speed  = (direction ? initial_speed : -initial_speed);
         PaintballModel paintball = new PaintballModel(x+xOffset, y+y_offset, width, height,speed,xScale,yScale,scale,paintballType);
+        
+        paintball.setMaxXScale(maxXScale);
+        paintball.setBullet(true);
+        paintball.setGravityScale(0);
+        paintball.setFixedRotation(true);
+        paintball.setVX(speed);
+        paintball.setMaxLifeTime(MAX_LIFE_TIME);
+        paintball.setDirection(direction);
+        paintball.setPaintballType(paintballType);
         paintball.setDensity(heavy_density);
         paintball.setDrawScale(scale);
         paintball.setTexture(enemyTexture);
+        paintball.setSplatEffectTexture(splatEffectTexture);
+        paintball.setPaintballToPaintballDuration(paintballToPaintballDuration);
+        paintball.setPaintballToWallDuration(paintballToWallDuration);
+        paintball.setPaintballToPlatformDuration(paintballToPlatformDuration);
+
         if(paintballType.equals("trampoline")) {
             paintball.setTrailTexture(mineTrailTexture);
             paintball.setHeadTexture(enemyMineHeadTexture);
@@ -103,21 +117,16 @@ public class PaintballFactory implements AssetUser, Settable {
             paintball.setHeadTexture(enemyTextureHead);
             paintball.setPlatformTexture(normalPlatfromTexture);
             paintball.setPlatformSplatEffectTexture(enemySplatEffectTexture);
+        } else if(paintballType.equals("player")){
+            paintball.setPlayerBullet(true);
+            paintball.setHeadTexture(playerTextureHead);
+            paintball.setPlatformSplatEffectTexture(charSplatEffectTexture);
+            paintball.setPlatformTexture(normalPlatfromTexture);
+            float pSpeed  = (direction ? player_initial_speed : -player_initial_speed);
+            paintball.fixX(pSpeed);
         } else {
             assert(false);
         }
-        paintball.setSplatEffectTexture(splatEffectTexture);
-        paintball.setPaintballToPaintballDuration(paintballToPaintballDuration);
-        paintball.setPaintballToWallDuration(paintballToWallDuration);
-        paintball.setPaintballToPlatformDuration(paintballToPlatformDuration);
-        paintball.setMaxXScale(maxXScale);
-        paintball.setBullet(true);
-        paintball.setGravityScale(0);
-        paintball.setFixedRotation(true);
-        paintball.setVX(speed);
-        paintball.setMaxLifeTime(MAX_LIFE_TIME);
-        paintball.setDirection(direction);
-        paintball.setPaintballType(paintballType);
         return paintball;
     }
 
