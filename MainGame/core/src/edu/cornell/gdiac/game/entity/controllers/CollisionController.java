@@ -98,7 +98,7 @@ public class CollisionController implements ContactListener {
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
         touchedGround(obj1,obj2,userData1,userData2);
         obj1.setTrampGrounded(false);
-        if (obj2.getType() == PlatformModel.SPIKE_PLATFORM) {hud.setLose(true);}
+        if (obj2.getType() != PlatformModel.NORMAL_PLATFORM) {hud.setLose(true);}
     }
     private void handleCollision(PlayerModel obj1, WallModel obj2){
         obj1.setKnockedBack(0);

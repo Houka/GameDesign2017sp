@@ -90,9 +90,30 @@ public class LevelCreator {
         }
         json.writeArrayEnd();
 
-        json.writeArrayStart("spikes");
+        json.writeArrayStart("spikes_left");
         for (int i = 0; i < platforms.size(); i ++) {
-            if (platforms.get(i).getType() == PlatformModel.SPIKE_PLATFORM)
+            if (platforms.get(i).getType() == PlatformModel.SPIKE_LEFT_PLATFORM)
+                json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
+        }
+        json.writeArrayEnd();
+
+        json.writeArrayStart("spikes_right");
+        for (int i = 0; i < platforms.size(); i ++) {
+            if (platforms.get(i).getType() == PlatformModel.SPIKE_RIGHT_PLATFORM)
+                json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
+        }
+        json.writeArrayEnd();
+
+        json.writeArrayStart("spikes_up");
+        for (int i = 0; i < platforms.size(); i ++) {
+            if (platforms.get(i).getType() == PlatformModel.SPIKE_UP_PLATFORM)
+                json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
+        }
+        json.writeArrayEnd();
+
+        json.writeArrayStart("spikes_down");
+        for (int i = 0; i < platforms.size(); i ++) {
+            if (platforms.get(i).getType() == PlatformModel.SPIKE_DOWN_PLATFORM)
                 json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
         }
         json.writeArrayEnd();

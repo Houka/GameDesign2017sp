@@ -42,6 +42,7 @@ public class LevelLoader implements AssetUser, Disposable{
     private Animation playerAnimation;
     private Animation enemyOnsightAnimation;
     private Animation enemyIntervalAnimation;
+    private Animation spikeAnimation;
 
     /** Bounds of the window*/
     private Rectangle bounds;
@@ -133,13 +134,50 @@ public class LevelLoader implements AssetUser, Disposable{
             obj.setTexture(platformTile);
             addQueuedObject(obj);
         }
-        JsonValue spikes = platforms.get("spikes");
+
+        JsonValue spikes = platforms.get("spikes_left");
+        iter = spikes.iterator();
+
+        while (iter.hasNext()) {
+            vertices = iter.next();
+            PlatformModel obj = new PlatformModel(vertices.asFloatArray(), PlatformModel.SPIKE_LEFT_PLATFORM);
+            obj.setDrawScale(scale);
+            obj.setTexture(spikeAnimation.getTextureRegion());
+            obj.setAnimation(spikeAnimation);
+            addQueuedObject(obj);
+        }
+
+        spikes = platforms.get("spikes_right");
+        iter = spikes.iterator();
+
+        while (iter.hasNext()) {
+            vertices = iter.next();
+            PlatformModel obj = new PlatformModel(vertices.asFloatArray(), PlatformModel.SPIKE_RIGHT_PLATFORM);
+            obj.setDrawScale(scale);
+            obj.setTexture(spikeAnimation.getTextureRegion());
+            obj.setAnimation(spikeAnimation);
+            addQueuedObject(obj);
+        }
+
+        spikes = platforms.get("spikes_up");
         iter = spikes.iterator();
         while (iter.hasNext()) {
             vertices = iter.next();
-            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray(), PlatformModel.SPIKE_PLATFORM);
+            PlatformModel obj = new PlatformModel(vertices.asFloatArray(), PlatformModel.SPIKE_UP_PLATFORM);
             obj.setDrawScale(scale);
-            obj.setTexture(platformTile);
+            obj.setTexture(spikeAnimation.getTextureRegion());
+            obj.setAnimation(spikeAnimation);
+            addQueuedObject(obj);
+        }
+
+        spikes = platforms.get("spikes_down");
+        iter = spikes.iterator();
+        while (iter.hasNext()) {
+            vertices = iter.next();
+            PlatformModel obj = new PlatformModel(vertices.asFloatArray(), PlatformModel.SPIKE_DOWN_PLATFORM);
+            obj.setDrawScale(scale);
+            obj.setTexture(spikeAnimation.getTextureRegion());
+            obj.setAnimation(spikeAnimation);
             addQueuedObject(obj);
         }
     }
@@ -298,7 +336,14 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(Constants.PAINTBALL_SPLAT_EFFECT_FILE, Texture.class);
         manager.load(Constants.AMMO_DEPOT_FILE, Texture.class);
         manager.load(Constants.SPLATTERER_FILE, Texture.class);
-        manager.load(Constants.SPIKE_FILE, Texture.class);
+        manager.load(Constants.SPIKES_DOWN_SPIN_FILE, Texture.class);
+        manager.load(Constants.SPIKES_UP_SPIN_FILE, Texture.class);
+        manager.load(Constants.SPIKES_LEFT_SPIN_FILE, Texture.class);
+        manager.load(Constants.SPIKES_RIGHT_SPIN_FILE, Texture.class);
+        manager.load(Constants.SPIKES_RIGHT_STILL_FILE, Texture.class);
+        manager.load(Constants.SPIKES_LEFT_STILL_FILE, Texture.class);
+        manager.load(Constants.SPIKES_UP_STILL_FILE, Texture.class);
+        manager.load(Constants.SPIKES_DOWN_STILL_FILE, Texture.class);
     }
 
     @Override
@@ -344,6 +389,11 @@ public class LevelLoader implements AssetUser, Disposable{
         enemyOnsightAnimation.addTexture("still", enemyOnsightTexture.getTexture(), 1, 1);
         enemyOnsightAnimation.setPlaying(false);
         enemyOnsightAnimation.setPlayingAnimation("still");
+
+        spikeAnimation = new Animation();
+        spikeAnimation.addTexture("spin", AssetRetriever.createTexture(manager, Constants.SPIKES_UP_SPIN_FILE, false), 1 , 8);
+        spikeAnimation.setPlaying(false);
+        spikeAnimation.setPlayingAnimation("spin");
     }
 
     @Override

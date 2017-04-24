@@ -52,6 +52,13 @@ public class Constants {
     public static final String PAINTBALL_FILE = "sprites/paintball.png";
     public static final String SPLATTERER_FILE = "sprites/fixtures/splatterer.png";
 
-
+    public static final String SPIKES_DOWN_SPIN_FILE = "sprites/fixtures/spikes/spikes_down_strip8.png";
+    public static final String SPIKES_LEFT_SPIN_FILE = "sprites/fixtures/spikes/spikes_left_strip8.png";
+    public static final String SPIKES_RIGHT_SPIN_FILE = "sprites/fixtures/spikes/spikes_right_strip8.png";
+    public static final String SPIKES_UP_SPIN_FILE = "sprites/fixtures/spikes/spikes_up_strip8.png";
+    public static final String SPIKES_DOWN_STILL_FILE = "sprites/fixtures/spikes/spikes_down.png";
+    public static final String SPIKES_LEFT_STILL_FILE = "sprites/fixtures/spikes/spikes_left.png";
+    public static final String SPIKES_RIGHT_STILL_FILE = "sprites/fixtures/spikes/spikes_right.png";
+    public static final String SPIKES_UP_STILL_FILE = "sprites/fixtures/spikes/spikes_up.png";
 
 }
