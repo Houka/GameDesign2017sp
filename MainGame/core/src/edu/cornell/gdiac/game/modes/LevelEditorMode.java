@@ -391,7 +391,6 @@ public class LevelEditorMode extends Mode {
             Rectangle bounds = new Rectangle();
             for(Obstacle o: objects) {
                 Vector2 scaledMouse = getScaledCoordinates(mousePos);
-                System.out.println(scaledMouse);
                 if(o instanceof PlatformModel) {
                     float[] points = ((PlatformModel)o).getPoints();
                     float newW = points[2]-points[0];
@@ -459,7 +458,6 @@ public class LevelEditorMode extends Mode {
                     }
                     bounds = new Rectangle(o.getX(),o.getY()-(newH), newW, newH);
                 }
-                System.out.println(bounds);
                 if(bounds.contains(scaledMouse)) {
                     objects.remove(o);
                 }
