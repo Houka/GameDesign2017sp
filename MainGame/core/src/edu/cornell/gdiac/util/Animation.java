@@ -139,6 +139,14 @@ public class Animation implements Disposable{
         }
     }
 
+    /**
+     *  Return the current strip's name.
+     *  @return the name of the strip that is currently playing
+     */
+    public String getCurrentStrip(){
+        return currentStrip;
+    }
+
     @Override
     public void dispose(){
         filmStrips.clear();

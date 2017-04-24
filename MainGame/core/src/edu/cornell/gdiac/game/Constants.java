@@ -6,8 +6,12 @@ package edu.cornell.gdiac.game;
 public class Constants {
     public static String GAME_MUSIC_FILE = "music/gameplay_background.mp3";
     /** Retro font for displaying messages */
-    public static String FONT_FILE = "fonts/LightPixel7.ttf";
+    public static String FONT_FILE = "fonts/MineCraft.ttf";
     public static int FONT_SIZE = 64;
+    public static String SELECTION_FONT_FILE = "fonts/LightPixel7.ttf";
+    public static int SELECTION_FONT_SIZE = 200;
+    public static String MENU_FONT_FILE = "fonts/RealGraffiti.ttf";
+    public static int MENU_FONT_SIZE = 44;
 
     /** Textures necessary to support the loading screen */
     public static final String PLAYER_FILE = "sprites/char/char_icon.png";
@@ -43,6 +47,7 @@ public class Constants {
     public static String CHARACTER_TRANSITION_FILE = "sprites/char/char_transition_strip2.png";
     public static String CHARACTER_SHOOT_FILE = "sprites/char/char_shoot.png";
     public static String CHARACTER_CROUCH_FILE = "sprites/char/char_crouch.png";
+    public static String CHARACTER_STUNNED_FILE = "sprites/char/char_stunned.png";
 
     /** Texture column numbers**/
     public static int PAINTBALL_TRAIL_COLUMNS = 5;
@@ -51,6 +56,13 @@ public class Constants {
     public static final String PAINTBALL_FILE = "sprites/paintball.png";
     public static final String SPLATTERER_FILE = "sprites/fixtures/splatterer.png";
 
-
+    public static final String SPIKES_DOWN_SPIN_FILE = "sprites/fixtures/spikes/spikes_down_strip8.png";
+    public static final String SPIKES_LEFT_SPIN_FILE = "sprites/fixtures/spikes/spikes_left_strip8.png";
+    public static final String SPIKES_RIGHT_SPIN_FILE = "sprites/fixtures/spikes/spikes_right_strip8.png";
+    public static final String SPIKES_UP_SPIN_FILE = "sprites/fixtures/spikes/spikes_up_strip8.png";
+    public static final String SPIKES_DOWN_STILL_FILE = "sprites/fixtures/spikes/spikes_down.png";
+    public static final String SPIKES_LEFT_STILL_FILE = "sprites/fixtures/spikes/spikes_left.png";
+    public static final String SPIKES_RIGHT_STILL_FILE = "sprites/fixtures/spikes/spikes_right.png";
+    public static final String SPIKES_UP_STILL_FILE = "sprites/fixtures/spikes/spikes_up.png";
 
 }

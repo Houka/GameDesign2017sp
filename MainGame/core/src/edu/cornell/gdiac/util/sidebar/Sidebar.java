@@ -60,7 +60,7 @@ public class Sidebar {
         Sidebar.addSlider("Knockback Friction",0f,.1f, .06f);
         Sidebar.addSlider("Knockback Duration",0f,80f, 3f);
         Sidebar.addSlider("Knockback Stun Duration",0f,60f, 30f);
-        Sidebar.addSlider("Paintball Height",.1f,.5f,.22f);
+        Sidebar.addSlider("Paintball Height",.1f,.5f,.46f);
         Sidebar.addSlider("Paintball Width",.5f,6.5f,3.5f);
         Sidebar.addSlider("Paintball Speed",1f,7.5f,5.225f);
         Sidebar.addSlider("Paintball-paintball Stick Time",0f,10f,3.6f);
@@ -80,7 +80,7 @@ public class Sidebar {
         Sidebar.setValue("Knockback Friction",.06f);
         Sidebar.setValue("Knockback Duration",3f);
         Sidebar.setValue("Knockback Stun Duration",30f);
-        Sidebar.setValue("Paintball Height",.22f);
+        Sidebar.setValue("Paintball Height",.46f);
         Sidebar.setValue("Paintball Width",3.5f);
         Sidebar.setValue("Paintball Speed",5.225f);
         Sidebar.setValue("Paintball-paintball Stick Time",3.6f);

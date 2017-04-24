@@ -93,27 +93,28 @@ public class CollisionController implements ContactListener {
 
     // BEGIN: Simple Collision handlers
     private void handleCollision(PlayerModel obj1, SplattererModel obj2) {}
-    private void handleCollision(PlayerModel obj1, EnemyModel obj2){
-        hud.setLose(true);}
+    private void handleCollision(PlayerModel obj1, EnemyModel obj2){ hud.setLose(true);}
     private void handleCollision(PlayerModel obj1, GoalModel obj2){}
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
         touchedGround(obj1,obj2,userData1,userData2);
         obj1.setTrampGrounded(false);
-        if (obj2.getType() == PlatformModel.SPIKE_PLATFORM) {hud.setLose(true);}
+        if (obj2.getType() != PlatformModel.NORMAL_PLATFORM) {hud.setLose(true);}
     }
     private void handleCollision(PlayerModel obj1, WallModel obj2){
         obj1.setKnockedBack(0);
     }
-    private void handleCollision(PlayerModel obj1, PaintballModel obj2, Object userData1, Object userData2) {
+    private void handleCollision(PlayerModel obj1, PaintballModel obj2, Fixture fix1, Fixture fix2, Object userData1, Object userData2) {
         float sign = obj2.getVX() / Math.abs(obj2.getVX());
-        if(obj1.getY()-obj1.getHeight()/2f>=obj2.getY() && !obj1.isGhosting()){
-            touchedGround(obj1, obj2, userData1, userData2);
+        if(obj1.getY()-obj1.getHeight()/2>=obj2.getY()+obj2.getHeight()/2 && !obj1.isGhosting()){
+            touchedGround(obj1, obj2, userData1, fix2);
             obj1.setRidingVX(obj2);
         }
         else{
-            obj1.setKnockedBack(0);
-            if(!obj2.isPlayerBullet() && !obj2.isDying() && obj1.getX()*sign>obj2.getX()*sign+obj2.getHeadSize()*-sign+(sign>0?obj2.getWidth()/2f:0))
-                obj1.setKnockedBack(sign);
+            if(obj1.fixtureIsActive(userData1)) {
+                obj1.setKnockedBack(0);
+                if(!obj2.isPlayerBullet() && !obj2.isDying() && obj1.getX()*sign>obj2.getX()*sign+obj2.getHeadSize()*-sign+(sign>0?obj2.getWidth()/2f:0))
+                    obj1.setKnockedBack(sign);
+            }
         }
         if(obj2.getPaintballType().equals("trampolineComb")) {
             if(obj1.isGrounded() && !obj1.isJumping() && !obj1.isDoubleJumping()) {
@@ -215,12 +216,11 @@ public class CollisionController implements ContactListener {
     }
     private void handleCollision(SplattererModel obj1, PaintballModel obj2) {
         boolean dir = false;
-        if(obj2.getX() < obj1.getX()) {
+        if(obj2.getVX() > 0) {
             dir = true;
         }
         if(!obj1.isUsed()) {
             obj2.instakill();
-
             obj1.setUsed(true);
             obj1.setShot(true);
             obj1.setDir(dir);
@@ -258,11 +258,11 @@ public class CollisionController implements ContactListener {
             else if (obj2.getName().equals("goal"))
                 handleCollision((PlayerModel)obj1,(GoalModel) obj2);
             else if (obj2.getName().equals("platform"))
-                handleCollision((PlayerModel)obj1,(PlatformModel) obj2, userData1, fix2);
+                handleCollision((PlayerModel)obj1,(PlatformModel) obj2,userData1, fix2);
             else if (obj2.getName().equals("wall"))
                 handleCollision((PlayerModel)obj1,(WallModel) obj2);
             else if (obj2.getName().equals("paintball"))
-                handleCollision((PlayerModel)obj1,(PaintballModel) obj2, userData1,fix2);
+                handleCollision((PlayerModel)obj1,(PaintballModel) obj2, fix1,fix2,userData1,userData2);
             else if (obj2.getName().equals("ammoDepot"))
                 handleCollision((PlayerModel)obj1, (AmmoDepotModel) obj2);
             else if (obj2.getName().equals("splatterer")) {
@@ -322,6 +322,8 @@ public class CollisionController implements ContactListener {
 
     @Override
     public void beginContact(Contact contact) {
+        if(!contact.isEnabled())
+            return;
         Fixture fix1 = contact.getFixtureA();
         Fixture fix2 = contact.getFixtureB();
 
@@ -372,11 +374,15 @@ public class CollisionController implements ContactListener {
         Body body1 = fix1.getBody();
         Body body2 = fix2.getBody();
 
+        Object fd1 = fix1.getUserData();
+        Object fd2 = fix2.getUserData();
+
         try {
             Obstacle bd1 = (Obstacle) body1.getUserData();
             Obstacle bd2 = (Obstacle) body2.getUserData();
 
             PlayerModel player = null;
+            Object playerFixData = null;
             PaintballModel paintball = null;
 
             if(bd2.getName().equals("paintball")) {
@@ -396,8 +402,15 @@ public class CollisionController implements ContactListener {
 
             if(bd1.getName().equals("player")) {
                 player = (PlayerModel) bd1;
+                playerFixData = fd1;
             } else if (bd2.getName().equals("player")) {
                 player = (PlayerModel) bd2;
+                playerFixData = fd2;
+            }
+
+            if(player!=null && !player.fixtureIsActive(playerFixData)) {
+                contact.setEnabled(false);
+                return;
             }
 
             if (paintball == null ||  player == null){
