@@ -219,9 +219,27 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         return Sidebar.getValue("Jump Height");
     }
 
-    public float getPlayerHeight(){
+    private float getMaxDiff(float a, float b, float c) {
+        return Math.max(Math.max(Math.abs(a-b),Math.abs(b-c)),Math.abs(a-c));
+    }
+
+    @Override
+    public float getHeight(){
+        if(crouchFixture != null && fixtureIsActive(crouchFixture.getUserData()))
+            return getMaxDiff(crouchingBox[1],crouchingBox[3],crouchingBox[5]);
+        if(runningFixture != null && fixtureIsActive(runningFixture.getUserData()))
+            return getMaxDiff(runningBox[1],runningBox[3],runningBox[5]);
         return playerHeight;
     }
+    @Override
+    public float getWidth(){
+        if(crouchFixture != null && fixtureIsActive(crouchFixture.getUserData()))
+            return getMaxDiff(crouchingBox[0],crouchingBox[2],crouchingBox[4]);
+        if(runningFixture != null && fixtureIsActive(runningFixture.getUserData()))
+            return getMaxDiff(runningBox[0],runningBox[2],runningBox[4]);
+        return playerWidth;
+    }
+
     @Override
     public void setTexture(TextureRegion region){
         super.setTexture(region);
