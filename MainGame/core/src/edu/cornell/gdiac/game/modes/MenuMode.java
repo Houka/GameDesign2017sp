@@ -26,18 +26,21 @@ public class MenuMode extends Mode {
 	private static final int MENU_ITEM_START_OFFSET_Y = 150;
 	/** Selection menu items y offset between each menu item*/
 	private static final int MENU_ITEM_GAP_OFFSET_Y = 15;
-	private static Color SELECTED_COLOR = new Color(255/255f, 15/255f, 13/255f, 1f);
+	private static Color SELECTED_COLOR = new Color(163/255f, 61/255f, 26/255f, 1f);
+	private static Color UNSELECTED_COLOR = new Color(36/255f, 39/255f, 18/255f, 1f);
 
 	/** The font for giving messages to the player */
 	protected BitmapFont displayFont;
 
 	/** Player modes that are selectable from menu mode */
-	private String[] modes = {GameModeManager.MENU, GameModeManager.LEVEL_SELECTION, GameModeManager.LEVEL_EDITOR};
+	private String[] modes = {GameModeManager.GAME_MODE, GameModeManager.LEVEL_SELECTION, GameModeManager.LEVEL_EDITOR};
 	private String[] modeNames = {"PLAY", "LEVEL SELECT","Level Editor",  "QUIT"};
 	private int selected = 0;
 
 	/** Input controller for menu selection */
 	private SelectionInputController input;
+
+	private GameMode gameMode;
 
 	/**
 	 * Creates a MenuMode with the default size and position.
@@ -45,10 +48,11 @@ public class MenuMode extends Mode {
 	 * @param canvas The GameCanvas to draw to
 	 * @param manager The AssetManager to load in the background
 	 */
-	public MenuMode(String name, GameCanvas canvas, AssetManager manager) {
+	public MenuMode(String name, GameCanvas canvas, AssetManager manager, GameMode gameMode) {
 		super(name, canvas, manager);
 		onExit = ScreenListener.EXIT_QUIT;
 		input = SelectionInputController.getInstance();
+		this.gameMode = gameMode;
 	}
 
 	// BEGIN: Setters and Getters
@@ -63,6 +67,8 @@ public class MenuMode extends Mode {
 	protected void onComplete(){
 		if (selected < modes.length)
 			listener.switchToScreen(this, modes[selected]);
+		if (selected == 0)
+			gameMode.reset();
 	}
 
 	@Override
@@ -85,6 +91,9 @@ public class MenuMode extends Mode {
 			else
 				setComplete(true);
 		}
+
+		if (gameMode.getLevelNum() != 0)
+			modeNames[0] = "CONTINUE";
 	}
 
 	@Override
@@ -96,7 +105,7 @@ public class MenuMode extends Mode {
 			if (selected == i)
 				displayFont.setColor(SELECTED_COLOR);
 			else
-				displayFont.setColor(Color.DARK_GRAY);
+				displayFont.setColor(UNSELECTED_COLOR);
 			canvas.drawText(modeNames[i], displayFont, canvas.getWidth()/2 + 150,
 					canvas.getHeight()/2 - 50 + (displayFont.getLineHeight()+ MENU_ITEM_GAP_OFFSET_Y)*-i+MENU_ITEM_START_OFFSET_Y);
 		}
@@ -108,9 +117,9 @@ public class MenuMode extends Mode {
 
 		// Load the font
 		FreetypeFontLoader.FreeTypeFontLoaderParameter size2Params = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
-		size2Params.fontFileName = Constants.FONT_FILE;
-		size2Params.fontParameters.size = Constants.FONT_SIZE;
-		manager.load(Constants.FONT_FILE, BitmapFont.class, size2Params);
+		size2Params.fontFileName = Constants.MENU_FONT_FILE;
+		size2Params.fontParameters.size = Constants.MENU_FONT_SIZE;
+		manager.load(Constants.MENU_FONT_FILE, BitmapFont.class, size2Params);
 	}
 
 	@Override
@@ -118,8 +127,8 @@ public class MenuMode extends Mode {
 		background = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true).getTexture();
 
 		// Allocate the font
-		if (manager.isLoaded(Constants.FONT_FILE))
-			displayFont = manager.get(Constants.FONT_FILE, BitmapFont.class);
+		if (manager.isLoaded(Constants.MENU_FONT_FILE))
+			displayFont = manager.get(Constants.MENU_FONT_FILE, BitmapFont.class);
 		else
 			displayFont = null;
 	}
