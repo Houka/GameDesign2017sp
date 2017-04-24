@@ -4,6 +4,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.entity.models.PaintballModel;
 import edu.cornell.gdiac.game.interfaces.AssetUser;
@@ -53,6 +54,9 @@ public class PaintballFactory implements AssetUser, Settable {
     private TextureRegion enemyMineHeadTexture;
     private TextureRegion minePlatformTexture;
     private TextureRegion mineTrailTexture;
+    private TextureRegion charSplatEffectTexture;
+    private TextureRegion enemySplatEffectTexture;
+    private TextureRegion mineSplatEffectTexture;
 
     public PaintballFactory(Vector2 scale){
         this.scale = scale;
@@ -68,6 +72,7 @@ public class PaintballFactory implements AssetUser, Settable {
         PaintballModel paintball = createPaintball(x,y,direction,paintballType);
         paintball.setPlayerBullet(true);
         paintball.setHeadTexture(playerTextureHead);
+        paintball.setPlatformSplatEffectTexture(charSplatEffectTexture);
         float speed  = (direction ? player_initial_speed : -player_initial_speed);
         paintball.fixX(speed);
         return paintball;
@@ -92,10 +97,12 @@ public class PaintballFactory implements AssetUser, Settable {
             paintball.setTrailTexture(mineTrailTexture);
             paintball.setHeadTexture(enemyMineHeadTexture);
             paintball.setPlatformTexture(minePlatformTexture);
+            paintball.setPlatformSplatEffectTexture(mineSplatEffectTexture);
         } else if(paintballType.equals("normal")) {
             paintball.setTrailTexture(trailTexture);
             paintball.setHeadTexture(enemyTextureHead);
             paintball.setPlatformTexture(normalPlatfromTexture);
+            paintball.setPlatformSplatEffectTexture(enemySplatEffectTexture);
         } else {
             assert(false);
         }
@@ -222,6 +229,9 @@ public class PaintballFactory implements AssetUser, Settable {
         manager.load(Constants.PAINTBALL_ENEMY_MINE_FILE,Texture.class);
         manager.load(Constants.PAINTBALL_CHARACTER_FILE,Texture.class);
         manager.load(Constants.PAINTBALL_SPLAT_EFFECT_FILE,Texture.class);
+        manager.load(Constants.PAINTBALL_CHAR_SPLAT_EFFECT_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_ENEMY_SPLAT_EFFECT_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_MINE_ENEMY_SPLAT_EFFECT_FILE, Texture.class);
     }
 
     @Override
@@ -235,6 +245,10 @@ public class PaintballFactory implements AssetUser, Settable {
         normalPlatfromTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_STATIONARY_NORMAL_FILE, false);
         splatEffectTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_SPLAT_EFFECT_FILE, false);
         trailTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_NORMAL_TRAIL_FILE, false);
+        charSplatEffectTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_CHAR_SPLAT_EFFECT_FILE, false);
+        enemySplatEffectTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_ENEMY_SPLAT_EFFECT_FILE, false);
+        mineSplatEffectTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_MINE_ENEMY_SPLAT_EFFECT_FILE, false);
+
     }
 
     @Override
@@ -248,6 +262,9 @@ public class PaintballFactory implements AssetUser, Settable {
             manager.unload(Constants.PAINTBALL_ENEMY_MINE_FILE);
             manager.unload(Constants.PAINTBALL_CHARACTER_FILE);
             manager.unload(Constants.PAINTBALL_SPLAT_EFFECT_FILE);
+            manager.unload(Constants.PAINTBALL_CHAR_SPLAT_EFFECT_FILE);
+            manager.unload(Constants.PAINTBALL_ENEMY_SPLAT_EFFECT_FILE);
+            manager.unload(Constants.PAINTBALL_MINE_ENEMY_SPLAT_EFFECT_FILE);
         }
     }
 }

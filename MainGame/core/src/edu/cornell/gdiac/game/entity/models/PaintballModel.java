@@ -90,11 +90,13 @@ public class PaintballModel extends BoxObstacle {
     private boolean trailEnabled;
     private boolean passThrough;
     private boolean popped;
+    private boolean platformPopped;
 
     private Animation headTexture;
     private Animation splatEffectTexture;
     private Animation trailTexture;
     private TextureRegion platformTexture;
+    private Animation platformSplatEffectTexture;
 
     private int currTrailFrame;
 
@@ -142,6 +144,7 @@ public class PaintballModel extends BoxObstacle {
         growing = true;
         dying = false;
         popped = false;
+        platformPopped = false;
         scale = scl;
         gravity = false;
         maxLifeTime = 20f;
@@ -159,6 +162,7 @@ public class PaintballModel extends BoxObstacle {
         isUsed = false;
         headTexture = new Animation();
         splatEffectTexture = new Animation();
+        platformSplatEffectTexture = new Animation();
         trailTexture = new Animation();
         trailEnabled=true;
         currTrailFrame = 0;
@@ -258,6 +262,10 @@ public class PaintballModel extends BoxObstacle {
 
     public void setSplatEffectTexture(TextureRegion tex) {
        splatEffectTexture.addTexture("splat",tex.getTexture(),1,10);
+    }
+
+    public void setPlatformSplatEffectTexture(TextureRegion tex) {
+        platformSplatEffectTexture.addTexture("platform splat", tex.getTexture(),1, 15);
     }
 
     public void setTrailTexture(TextureRegion tex) {
@@ -382,6 +390,11 @@ public class PaintballModel extends BoxObstacle {
         splatEffectTexture.playOnce("splat");
     }
 
+    public void platformPop() {
+        platformPopped = true;
+        platformSplatEffectTexture.playOnce("platform splat");
+    }
+
     @Override
     public void update(float delta) {
         lastUpdate +=delta;
@@ -419,10 +432,8 @@ public class PaintballModel extends BoxObstacle {
             growing= false;
             timeToDie-=delta;
             if(timeToDie<deathDuration) {
-                snapping=false;
                 this.setMass(0);
-                enableGravity();
-                opacity *= .99;
+                opacity *= .98;
             }
             if(timeToDie<0)
                 markRemoved(true);
@@ -443,6 +454,7 @@ public class PaintballModel extends BoxObstacle {
 
         headTexture.update(delta);
         splatEffectTexture.update(delta);
+        platformSplatEffectTexture.update(delta);
         if((int)(xtransform/maxXScale*Constants.PAINTBALL_TRAIL_COLUMNS)>currTrailFrame && trailTexture.isPlaying()) {
             trailTexture.advanceFrame();
             currTrailFrame++;
@@ -453,9 +465,15 @@ public class PaintballModel extends BoxObstacle {
     @Override
     public void draw(GameCanvas canvas) {
         paintcolor.a = opacity;
+        if (platformSplatEffectTexture.getTextureRegion() != null && platformPopped) {
+            float xPos = (getX() + getWidth()/2f*initDir) * drawScale.x - initDir*platformSplatEffectTexture.getTextureRegion().getRegionWidth()/4f;
+            float yPos = getY()*drawScale.y-platformSplatEffectTexture.getTextureRegion().getRegionHeight()*getScaledY()/2f;
+            canvas.draw(platformSplatEffectTexture.getTextureRegion(), paintcolor, origin.x, origin.y, xPos,yPos, getAngle(), -initDir, 1.0f);
+        }
         if(!popped) {
             if (dying) {
-                canvas.draw(platformTexture, paintcolor, platformOrigin.x, platformOrigin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), getScaledPlatformX(), 1f);
+                float vscale = (texture.getRegionHeight() * getScaledY()) / platformTexture.getRegionHeight();
+                canvas.draw(platformTexture, paintcolor, platformOrigin.x, platformOrigin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), getScaledPlatformX(), 1/vscale);
             } else {
                 if (texture != null && trailEnabled) {
                     float xPos = getX();
@@ -463,7 +481,7 @@ public class PaintballModel extends BoxObstacle {
 
                     if (trailTexture.getTextureRegion() != null && xtransform > 0) {
                         xPos = (initX) * drawScale.x + initDir * trailTexture.getTextureRegion().getRegionWidth() / 2f;
-                        if (xPos * initDir < getX() * drawScale.x)
+                        if (xPos * initDir < getX() * drawScale.x * initDir)
                             xPos = getX() * drawScale.x;
                         float hscale = (texture.getRegionWidth() * getMaxScaledX()) / trailTexture.getTextureRegion().getRegionWidth();
                         float vscale = (texture.getRegionHeight() * getScaledY()) / trailTexture.getTextureRegion().getRegionHeight();

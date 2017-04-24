@@ -94,7 +94,7 @@ public class CollisionController implements ContactListener {
     // BEGIN: Simple Collision handlers
     private void handleCollision(PlayerModel obj1, SplattererModel obj2) {}
     private void handleCollision(PlayerModel obj1, EnemyModel obj2){ hud.setLose(true);}
-    private void handleCollision(PlayerModel obj1, GoalModel obj2){}
+    private void handleCollision(PlayerModel obj1, GoalModel obj2){ hud.setWin(true); }
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
         touchedGround(obj1,obj2,userData1,userData2);
         obj1.setTrampGrounded(false);
@@ -125,8 +125,10 @@ public class CollisionController implements ContactListener {
         }
     }
     private void handleCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){
-        obj2.markRemoved(true);
-        obj1.setStunned(true);
+        if(obj2.isPlayerBullet()) {
+            obj2.markRemoved(true);
+            obj1.setStunned(true);
+        }
     }
     private void handleCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}
     private void handleCollision(GoalModel obj1, PaintballModel obj2){
@@ -181,10 +183,11 @@ public class CollisionController implements ContactListener {
             }
           
             survives.setTimeToDie(obj1.getPaintballToPaintballDuration());
-            dies.instakill();
+
         }
       
         dies.pop();
+        survives.platformPop();
         if(!obj1.isPlayerBullet() && !obj2.isPlayerBullet()&&!obj1.isDying()&&!obj2.isDying())
             survives.newSize(midPoint,obj2.getPosition().y,obj1.getWidth()+obj2.getWidth());
         survives.setPassThrough(true);
@@ -195,15 +198,27 @@ public class CollisionController implements ContactListener {
         obj2.markRecentCollision();
     }
     private void handleCollision(PlatformModel obj1, PaintballModel obj2){
-        if(obj2.recentlyCreated())
-            obj2.pop();
+        if(obj2.recentlyCreated()) {
+            if (obj2.isPlayerBullet()) {
+                obj2.pop();
+            }
+            else {
+                obj2.platformPop();
+            }
+        }
 
         obj2.setTimeToDie(obj2.getPaintballToWallDuration());
         obj2.fixX(0f);
     }
     private void handleCollision(WallModel obj1, PaintballModel obj2){
-        if(obj2.recentlyCreated())
-            obj2.pop();
+        if(obj2.recentlyCreated()) {
+            if (obj2.isPlayerBullet()) {
+                obj2.pop();
+            }
+            else {
+                obj2.platformPop();
+            }
+        }
 
         obj2.setTimeToDie(obj2.getPaintballToPlatformDuration());
         obj2.fixX(0f);
@@ -220,7 +235,8 @@ public class CollisionController implements ContactListener {
             dir = true;
         }
         if(!obj1.isUsed()) {
-            obj2.instakill();
+            obj2.platformPop();
+            obj2.setPassThrough(true);
             obj1.setUsed(true);
             obj1.setShot(true);
             obj1.setDir(dir);
@@ -387,7 +403,7 @@ public class CollisionController implements ContactListener {
 
             if(bd2.getName().equals("paintball")) {
                 paintball = (PaintballModel) bd2;
-                if(paintball.isDead()) {
+                if(paintball.isDead() || bd1.getName().equals("paintball")) {
                     contact.setEnabled(false);
                     return;
                 }

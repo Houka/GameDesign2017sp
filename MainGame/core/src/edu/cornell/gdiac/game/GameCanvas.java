@@ -931,7 +931,9 @@ public class GameCanvas {
 			return;
 		}
 
-		Color color = font.getColor().sub(0,0,0,0.3f);
+		Color color = new Color();
+		color.set(font.getColor());
+		color.sub(0,0,0,0.3f);
 		GlyphLayout layout = new GlyphLayout(font,text,color,0, Align.left, false);
 		font.draw(spriteBatch, layout, x, y);
 		spriteBatch.setColor(1f,1f,1f,1f);
@@ -950,7 +952,9 @@ public class GameCanvas {
 			return;
 		}
 
-		Color color = font.getColor().sub(0,0,0,0.3f);
+		Color color = new Color();
+		color.set(font.getColor());
+		color.sub(0,0,0,0.3f);
 		GlyphLayout layout = new GlyphLayout(font,text,color,0, Align.left, false);
 		float x = (getWidth()  - layout.width) / 2.0f;
 		float y = (getHeight() + layout.height) / 2.0f;
