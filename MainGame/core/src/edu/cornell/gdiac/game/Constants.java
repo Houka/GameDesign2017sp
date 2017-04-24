@@ -6,8 +6,12 @@ package edu.cornell.gdiac.game;
 public class Constants {
     public static String GAME_MUSIC_FILE = "music/gameplay_background.mp3";
     /** Retro font for displaying messages */
-    public static String FONT_FILE = "fonts/LightPixel7.ttf";
+    public static String FONT_FILE = "fonts/MineCraft.ttf";
     public static int FONT_SIZE = 64;
+    public static String SELECTION_FONT_FILE = "fonts/LightPixel7.ttf";
+    public static int SELECTION_FONT_SIZE = 200;
+    public static String MENU_FONT_FILE = "fonts/RealGraffiti.ttf";
+    public static int MENU_FONT_SIZE = 44;
 
     /** Textures necessary to support the loading screen */
     public static final String PLAYER_FILE = "sprites/char/char_icon.png";
