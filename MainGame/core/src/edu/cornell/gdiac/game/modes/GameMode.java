@@ -190,7 +190,6 @@ public class GameMode extends Mode implements Settable {
 	public void setLevel(String levelFile,int levelNumber) {
 		this.levelFile = levelFile;
 		this.levelNumber = levelNumber;
-
 	}
 
 	/**
@@ -349,7 +348,6 @@ public class GameMode extends Mode implements Settable {
 		levelLoader.loadContent(manager);
 		if (manager.isLoaded(Constants.FONT_FILE))
 			hud.setFont(manager.get(Constants.FONT_FILE, BitmapFont.class));
-		//loadLevel(); TODO ask if this is important
 		soundController.play("gameMode", Constants.GAME_MUSIC_FILE, true);
 	}
 
