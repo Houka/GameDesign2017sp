@@ -74,6 +74,8 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
     /** The animation associated with this entity */
     private Animation animation;
 
+    private Color drawColor;
+
     /**
      * Returns the name of the ground sensor
      *
@@ -137,6 +139,8 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
         this.onSight = onSight;
         shootCooldown = onSight? DEFAULT_SHOOT_COOLDOWN : interval;
         stunCooldown = DEFAULT_STUN_COOLDOWN;
+
+        this.drawColor = new Color(255,255,255,1);
     }
 
     /**
@@ -236,12 +240,13 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
      * @param canvas Drawing context
      */
     public void draw(GameCanvas canvas) {
+        drawColor.a = isStunned() ? 0.6f : 1f;
         float xScale = isFacingRight ? 1.0f : -1.0f;
 
         if (animation == null)
-            canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),xScale,1.0f);
+            canvas.draw(texture,drawColor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),xScale,1.0f);
         else
-            canvas.draw(animation.getTextureRegion(),Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),xScale,1.0f);
+            canvas.draw(animation.getTextureRegion(),drawColor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),xScale,1.0f);
     }
 
     /**

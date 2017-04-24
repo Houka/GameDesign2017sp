@@ -339,6 +339,9 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(Constants.SPIKES_LEFT_STILL_FILE, Texture.class);
         manager.load(Constants.SPIKES_UP_STILL_FILE, Texture.class);
         manager.load(Constants.SPIKES_DOWN_STILL_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_CHAR_SPLAT_EFFECT_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_ENEMY_SPLAT_EFFECT_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_MINE_ENEMY_SPLAT_EFFECT_FILE, Texture.class);
     }
 
     @Override
