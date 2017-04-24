@@ -215,7 +215,7 @@ public class CollisionController implements ContactListener {
     }
     private void handleCollision(SplattererModel obj1, PaintballModel obj2) {
         boolean dir = false;
-        if(obj2.getX() < obj1.getX()) {
+        if(obj2.getVX() > 0) {
             dir = true;
         }
         if(!obj1.isUsed()) {
