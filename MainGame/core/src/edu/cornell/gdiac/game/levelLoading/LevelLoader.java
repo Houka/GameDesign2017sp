@@ -194,9 +194,9 @@ public class LevelLoader implements AssetUser, Disposable{
             obj.setAnimation(enemyIntervalAnimation);
             addQueuedObject(obj);
         }
-
         dwidth  = enemyOnsightTexture.getRegionWidth()/scale.x;
         dheight = enemyOnsightTexture.getRegionHeight()/scale.y;
+
         //add on sight shooters
         JsonValue onSight = enemies.get("on_sight");
         iter = onSight.iterator();

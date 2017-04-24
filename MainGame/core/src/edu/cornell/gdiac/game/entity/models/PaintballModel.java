@@ -19,7 +19,10 @@ public class PaintballModel extends BoxObstacle {
     /** Scale of paintball**/
     private float xScale;
     private float yScale;
-
+  
+    /** How much the paintballs snap. The larger the value, the more dramatic the snapping effect */
+    private static final int GRID_SNAP = 4;
+  
     /** Transformation of original scale **/
     private float xtransform = 1f;
     private float ytransform = 1f;
@@ -488,7 +491,7 @@ public class PaintballModel extends BoxObstacle {
     }
 
     private float snapToGrid(float yVal) {
-        yVal =(float) Math.floor(yVal/getHeight()/2f)*getHeight()*2;
+        yVal =(float) Math.floor(yVal/getHeight()/GRID_SNAP)*getHeight()*GRID_SNAP;
         return yVal + getHeight();
     }
 }
