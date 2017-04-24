@@ -466,14 +466,13 @@ public class PaintballModel extends BoxObstacle {
     public void draw(GameCanvas canvas) {
         paintcolor.a = opacity;
         if (platformSplatEffectTexture.getTextureRegion() != null && platformPopped) {
-            float xPos = (getX() + getWidth()/2f*initDir) * drawScale.x - initDir*splatEffectTexture.getTextureRegion().getRegionWidth()/4f;
-            float yPos = getY()*drawScale.y-splatEffectTexture.getTextureRegion().getRegionHeight()*getScaledY()/2f;
+            float xPos = (getX() + getWidth()/2f*initDir) * drawScale.x - initDir*platformSplatEffectTexture.getTextureRegion().getRegionWidth()/4f;
+            float yPos = getY()*drawScale.y-platformSplatEffectTexture.getTextureRegion().getRegionHeight()*getScaledY()/2f;
             canvas.draw(platformSplatEffectTexture.getTextureRegion(), paintcolor, origin.x, origin.y, xPos,yPos, getAngle(), -initDir, 1.0f);
         }
         if(!popped) {
             if (dying) {
                 float vscale = (texture.getRegionHeight() * getScaledY()) / platformTexture.getRegionHeight();
-                System.out.println(vscale);
                 canvas.draw(platformTexture, paintcolor, platformOrigin.x, platformOrigin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), getScaledPlatformX(), 1/vscale);
             } else {
                 if (texture != null && trailEnabled) {
