@@ -15,7 +15,6 @@ import edu.cornell.gdiac.game.GameModeManager;
 import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
-import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 /**
  * Class that provides a menu screen for the state of the game.
@@ -26,15 +25,15 @@ public class MenuMode extends Mode {
 	/** Selection menu items y offset from the center*/
 	private static final int MENU_ITEM_START_OFFSET_Y = 150;
 	/** Selection menu items y offset between each menu item*/
-	private static final int MENU_ITEM_GAP_OFFSET_Y = 20;
-	private static Color DARK_PURPLE = new Color(123/255f, 118/255f, 131/255f, 1f);
+	private static final int MENU_ITEM_GAP_OFFSET_Y = 15;
+	private static Color SELECTED_COLOR = new Color(255/255f, 15/255f, 13/255f, 1f);
 
 	/** The font for giving messages to the player */
 	protected BitmapFont displayFont;
 
 	/** Player modes that are selectable from menu mode */
-	private String[] modes = {GameModeManager.LEVEL_SELECTION, GameModeManager.LEVEL_EDITOR};
-	private String[] modeNames = {"Select Level","Level Editor", "Settings", "Quit"};
+	private String[] modes = {GameModeManager.MENU, GameModeManager.LEVEL_SELECTION, GameModeManager.LEVEL_EDITOR};
+	private String[] modeNames = {"PLAY", "LEVEL SELECT","Level Editor",  "QUIT"};
 	private int selected = 0;
 
 	/** Input controller for menu selection */
@@ -83,9 +82,6 @@ public class MenuMode extends Mode {
 		else if (input.didSelect()) {
 			if (selected == modeNames.length-1)
 				setExit(true);
-			else if (selected == modeNames.length-2)
-				// TODO: remove, for tech demo and testing values
-				Sidebar.defaultBootup();
 			else
 				setComplete(true);
 		}
@@ -98,11 +94,11 @@ public class MenuMode extends Mode {
 		// draw menu items
 		for (int i = 0; i<modeNames.length; i++) {
 			if (selected == i)
-				displayFont.setColor(Color.DARK_GRAY);
+				displayFont.setColor(SELECTED_COLOR);
 			else
-				displayFont.setColor(DARK_PURPLE);
-			canvas.drawTextCentered(modeNames[i], displayFont,
-					(displayFont.getLineHeight()+ MENU_ITEM_GAP_OFFSET_Y)*-i+MENU_ITEM_START_OFFSET_Y);
+				displayFont.setColor(Color.DARK_GRAY);
+			canvas.drawText(modeNames[i], displayFont, canvas.getWidth()/2 + 150,
+					canvas.getHeight()/2 - 50 + (displayFont.getLineHeight()+ MENU_ITEM_GAP_OFFSET_Y)*-i+MENU_ITEM_START_OFFSET_Y);
 		}
 	}
 
