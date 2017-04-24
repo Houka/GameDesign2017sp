@@ -11,7 +11,8 @@
           1,
           0
         ]
-      ]
+      ],
+      "spikes":[]
     },
     "walls": {
       "default": [[
@@ -62,7 +63,7 @@
     "splatterers": {
       "default":[
         {
-          "x": 15.5,
+          "x": 10.5,
           "y": 3.5
         }
       ]

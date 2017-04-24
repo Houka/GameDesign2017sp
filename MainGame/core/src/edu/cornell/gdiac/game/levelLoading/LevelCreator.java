@@ -53,14 +53,14 @@ public class LevelCreator {
 
 
         for (int i = 0; i < DEFAULT_PLATFORMS.length; i++)
-            defaultPlatforms.add(new PlatformModel(DEFAULT_PLATFORMS[i]));
+            defaultPlatforms.add(new PlatformModel(DEFAULT_PLATFORMS[i], PlatformModel.NORMAL_PLATFORM));
 
         for (int i = 0; i < DEFAULT_WALLS.length; i++)
             defaultWalls.add(new WallModel(DEFAULT_WALLS[i]));
 
         defaultPlayer = new PlayerModel(2.5f, 5.0f,38 ,95 );
-        defaultOnSightEnemies.add(new EnemyModel(5.5f, 10f, 1, 1, true, true, 0));
-        defaultIntervalEnemies.add(new EnemyModel(3.5f, 8f, 1, 1, true, false, 200));
+        defaultOnSightEnemies.add(new EnemyModel(5.5f, 10f, 1, 1, true, true, 0, "normal"));
+        defaultIntervalEnemies.add(new EnemyModel(3.5f, 8f, 1, 1, true, false, 200, "normal"));
         defaultAmmoDepots.add(new AmmoDepotModel(5.5f, 4f, 1, 1, 3));
         defaultTarget = new GoalModel(29.5f, 15.0f, 1, 1);
         defaultAmmo = 4;
@@ -85,9 +85,18 @@ public class LevelCreator {
         json.writeObjectStart("platforms");
         json.writeArrayStart("default");
         for (int i = 0; i < platforms.size(); i ++) {
-            json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
+            if (platforms.get(i).getType() == PlatformModel.NORMAL_PLATFORM)
+                json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
         }
         json.writeArrayEnd();
+
+        json.writeArrayStart("spikes");
+        for (int i = 0; i < platforms.size(); i ++) {
+            if (platforms.get(i).getType() == PlatformModel.SPIKE_PLATFORM)
+                json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
+        }
+        json.writeArrayEnd();
+
         json.writeObjectEnd();
         //walls
         json.writeObjectStart("walls");
@@ -113,6 +122,7 @@ public class LevelCreator {
             json.writeValue("y", intervalEnemies.get(i).getY());
             json.writeValue("isFacingRight", intervalEnemies.get(i).isFacingRight());
             json.writeValue("interval", intervalEnemies.get(i).getInterval());
+            json.writeValue("enemyType", intervalEnemies.get(i).getEnemyType());
             json.writeObjectEnd();
         }
         json.writeArrayEnd();
@@ -124,6 +134,7 @@ public class LevelCreator {
             json.writeValue("y", onSightEnemies.get(i).getY());
             json.writeValue("isFacingRight", onSightEnemies.get(i).isFacingRight());
             json.writeValue("interval", onSightEnemies.get(i).getInterval());
+            json.writeValue("enemyType", onSightEnemies.get(i).getEnemyType());
             json.writeObjectEnd();
         }
         json.writeArrayEnd();
@@ -169,7 +180,7 @@ public class LevelCreator {
             writer.close();
         }
         catch (Exception e){
-                System.out.println("Error: Failed to close writer");
+            System.out.println("Error: Failed to close writer");
         }
     }
 
@@ -179,4 +190,5 @@ public class LevelCreator {
         writeLevel(DEFAULT_FILE, defaultPlatforms, defaultWalls, defaultPlayer, defaultIntervalEnemies,
                 defaultOnSightEnemies, defaultAmmoDepots, defaultSplatterers, defaultTarget, defaultAmmo);
     }
+
 }

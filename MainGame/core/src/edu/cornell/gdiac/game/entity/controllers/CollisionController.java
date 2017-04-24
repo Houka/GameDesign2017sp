@@ -60,6 +60,11 @@ public class CollisionController implements ContactListener {
     private void touchedGround(PlayerModel obj1, Obstacle obj2, Object userData1, Object userData2){
         if (obj1.getSensorName().equals(userData1)) {
             obj1.setGrounded(true);
+            obj1.setJumpForce(obj1.getPlayerJump());
+            if(!(obj2 instanceof PaintballModel) ||
+                    (obj2 instanceof PaintballModel && !((PaintballModel) obj2).getPaintballType().equals("trampolineComb"))) {
+                obj1.setTrampGrounded(false);
+            }
             if(userData2==null)
                 userData2 = obj2;
             sensorObjects.add(userData2); // Could have more than one ground
@@ -93,6 +98,8 @@ public class CollisionController implements ContactListener {
     private void handleCollision(PlayerModel obj1, GoalModel obj2){}
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
         touchedGround(obj1,obj2,userData1,userData2);
+        obj1.setTrampGrounded(false);
+        if (obj2.getType() == PlatformModel.SPIKE_PLATFORM) {hud.setLose(true);}
     }
     private void handleCollision(PlayerModel obj1, WallModel obj2){
         obj1.setKnockedBack(0);
@@ -107,6 +114,13 @@ public class CollisionController implements ContactListener {
             obj1.setKnockedBack(0);
             if(!obj2.isPlayerBullet() && !obj2.isDying() && obj1.getX()*sign>obj2.getX()*sign+obj2.getHeadSize()*-sign+(sign>0?obj2.getWidth()/2f:0))
                 obj1.setKnockedBack(sign);
+        }
+        if(obj2.getPaintballType().equals("trampolineComb")) {
+            if(obj1.isGrounded() && !obj1.isJumping() && !obj1.isDoubleJumping()) {
+                obj1.setMyPlatform(obj2);
+                obj1.setTrampGrounded(true);
+                obj2.setUsed(true);
+            }
         }
     }
     private void handleCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){
@@ -138,28 +152,41 @@ public class CollisionController implements ContactListener {
         float twoSign = obj2.getVX() / Math.abs(obj2.getVX());
         if(oneSign == twoSign) {
             if(obj1.getPosition().x*oneSign<obj2.getPosition().x*oneSign) {
-                obj2.instakill();
-                obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
-                obj1.setTimeToDie(obj1.getPaintballToPaintballDuration());
+                obj1.pop();
             }
             return;
         }
 
+        PaintballModel survives;
+        PaintballModel dies;
         if(obj2.isDying()) {
-            obj1.instakill();
-            obj2.newSize(midPoint,obj2.getPosition().y,obj1.getWidth()+obj2.getWidth());
-            obj2.setPlayerBullet(true);
+            survives = obj2;
+            dies = obj1;
         }
         else if(obj1.isDying()) {
-            obj2.instakill();
-            obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
-            obj1.setPlayerBullet(true);
+            survives = obj1;
+            dies = obj2;
         } else {
-            obj2.instakill();
-            obj1.newSize(midPoint,obj1.getPosition().y,obj1.getWidth()+obj2.getWidth());
-            obj1.setTimeToDie(obj1.getPaintballToPaintballDuration());
-            obj1.setPlayerBullet(true);
+            if(obj1.isPlayerBullet()) {
+                survives = obj2;
+                dies = obj1;
+            } else {
+                survives = obj1;
+                dies = obj2;
+            }
+
+            if(obj1.getPaintballType().equals("trampoline") || obj2.getPaintballType().equals("trampoline")) {
+               survives.setPaintballType("trampolineComb");
+            }
+          
+            survives.setTimeToDie(obj1.getPaintballToPaintballDuration());
+            dies.instakill();
         }
+      
+        dies.pop();
+        if(!obj1.isPlayerBullet() && !obj2.isPlayerBullet()&&!obj1.isDying()&&!obj2.isDying())
+            survives.newSize(midPoint,obj2.getPosition().y,obj1.getWidth()+obj2.getWidth());
+        survives.setPassThrough(true);
 
         obj1.fixX(0f);
         obj2.fixX(0f);
@@ -168,14 +195,14 @@ public class CollisionController implements ContactListener {
     }
     private void handleCollision(PlatformModel obj1, PaintballModel obj2){
         if(obj2.recentlyCreated())
-            obj2.instakill();
+            obj2.pop();
 
         obj2.setTimeToDie(obj2.getPaintballToWallDuration());
         obj2.fixX(0f);
     }
     private void handleCollision(WallModel obj1, PaintballModel obj2){
         if(obj2.recentlyCreated())
-            obj2.instakill();
+            obj2.pop();
 
         obj2.setTimeToDie(obj2.getPaintballToPlatformDuration());
         obj2.fixX(0f);
@@ -367,11 +394,11 @@ public class CollisionController implements ContactListener {
 
 
             if(bd1.getName().equals("player")) {
-               player = (PlayerModel) bd1;
+                player = (PlayerModel) bd1;
             } else if (bd2.getName().equals("player")) {
                 player = (PlayerModel) bd2;
             }
-            
+
             if (paintball == null ||  player == null){
                 return;
             }
@@ -382,7 +409,7 @@ public class CollisionController implements ContactListener {
             }
 
 
-            if(player.getVY()>=0 && paintball.isPlayerBullet()) {
+            if(player.getVY()>=0 && paintball.canPassThrough()) {
                 contact.setEnabled(false);
             }
 

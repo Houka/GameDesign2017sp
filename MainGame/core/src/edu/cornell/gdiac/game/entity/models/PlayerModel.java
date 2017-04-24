@@ -92,6 +92,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private int shootCooldown;
     /** Whether our feet are on the ground */
     private boolean isGrounded;
+    /** If we are on player */
+    private boolean isTrampGrounded;
     /** Whether we've used our double jump */
     private boolean canDoubleJump;
     /** Whether we are actively shooting */
@@ -103,11 +105,14 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     /** Fixtures for different hitboxes*/
     private Fixture playerFixture;
     private Fixture crouchFixture;
+    private Fixture runningFixture;
     private PolygonShape playerShape;
     private PolygonShape crouchShape;
+    private PolygonShape runningShape;
 
     private float playerHeight;
     private float playerWidth;
+
     /** Cache for internal force calculations */
     private Vector2 forceCache = new Vector2();
     private Vector2 zeroVector = new Vector2(0,0);
@@ -122,6 +127,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private float[] runningBox;
     private float[] crouchingBox;
 
+    private PaintballModel myPlatform;
+
     /**
      * Creates a new player avatar at the origin.
      *
@@ -135,6 +142,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     public PlayerModel(float width, float height) {
         this(0,0,width,height);
     }
+
 
     /**
      * Creates a new player avatar at the given position.
@@ -179,7 +187,6 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
         playerWidth = width;
         playerHeight = height;
-        setMass(PLAYER_MASS);
 
         setDensity(PLAYER_DENSITY);
         setFriction(PLAYER_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
@@ -203,9 +210,14 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
         knockbackForce = 0;
         knockbackDirection = new Vector2(0,0);
+
+        myPlatform = null;
     }
 
     // BEGIN: Setters and Getters
+    public float getPlayerJump() {
+        return Sidebar.getValue("Jump Height");
+    }
     @Override
     public void setTexture(TextureRegion region){
         super.setTexture(region);
@@ -273,14 +285,14 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     public boolean isJumping() {
         return isJumping && isGrounded && jumpCooldown <= 0;
     }
-  
+
     /**
      * Returns true if the player is actively double jumping.
      *
      * @return true if the player is actively jumping.
      */
-    public boolean isDoubleJumping(){ 
-        return isJumping && !isGrounded && canDoubleJump; 
+    public boolean isDoubleJumping(){
+        return isJumping && !isGrounded && canDoubleJump;
     }
 
     public boolean isKnockedBack() {
@@ -305,7 +317,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         canDoubleJump = false;
         setVY(0.0f);
 
-       isKnockedBack=true;
+        isKnockedBack=true;
         knockbackDuration = defaultKnockbackDuration;
         if(dir>0)
             knockbackDirection.set(1,0);
@@ -405,6 +417,13 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         return isFacingRight;
     }
 
+    public boolean isTrampGrounded() { return isTrampGrounded; }
+    public void setTrampGrounded(boolean value) { isTrampGrounded = value; }
+
+    public void setMyPlatform(PaintballModel p) {
+        myPlatform = p;
+    }
+
     // END: Setters and Getters
 
     /**
@@ -447,7 +466,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         playerDef.density = PLAYER_DENSITY;
         playerDef.isSensor = true;
         playerShape = new PolygonShape();
-        playerShape.setAsBox(PLAYER_HSHRINK*getWidth(), getHeight(), playerCenter, 0.0f);
+        playerShape.set(defaultBox);
         playerDef.shape = playerShape;
 
         playerFixture = body.createFixture(playerDef);
@@ -458,11 +477,23 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         crouchDef.density = PLAYER_DENSITY;
         crouchDef.isSensor = true;
         crouchShape = new PolygonShape();
-        crouchShape.setAsBox(PLAYER_HSHRINK*getWidth(), getHeight()/2, crouchCenter, 0.0f);
+        crouchShape.set(crouchingBox);
         crouchDef.shape = crouchShape;
 
-        crouchFixture = body.createFixture(playerDef);
+        crouchFixture = body.createFixture(crouchDef);
         crouchFixture.setUserData("Crouching hitbox");
+
+        Vector2 runningCenter = new Vector2(0, -getHeight()/2);
+        FixtureDef runningDef = new FixtureDef();
+        runningDef.density = PLAYER_DENSITY;
+        runningDef.isSensor = true;
+        runningShape = new PolygonShape();
+        runningShape.set(runningBox);
+        runningDef.shape = runningShape;
+
+        runningFixture = body.createFixture(runningDef);
+        runningFixture.setUserData("Running hitbox");
+
         return true;
     }
 
@@ -477,7 +508,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         if (!isActive()) {
             return;
         }
-      
+
         boolean stunned = false;
 
         if(isKnockedBack()) {
@@ -490,38 +521,29 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
             if (knockbackDuration < 0) {
                 setVX(getVX() * knockbackFriction);
-              //  if (Math.abs(getVX()) < .01)
-                    //stunned = false;
-
             }
         }
-      
+
         // TODO: find better solution for riding a bullet
         if (ridingBullet!=null) {
             if(!stunned){
-              // Don't want to be moving. Damp out player motion
-              if (getMovement() == 0f ) {
-                  setVX(ridingBullet.getVX());
-              }else{
-                  setVX(Math.signum(getMovement())*getMaxSpeed()+ridingBullet.getVX());
-              }
+                // Don't want to be moving. Damp out player motion
+                if (getMovement() == 0f ) {
+                    setVX(ridingBullet.getVX());
+                }else{
+                    setVX(Math.signum(getMovement())*getMaxSpeed()+ridingBullet.getVX());
+                }
             }
         }else{
-          if(!stunned){
-            if (getMovement() == 0f ) {
-                setVX(0);
-            }else{
-                setVX(Math.signum(getMovement())*getMaxSpeed());
+            if(!stunned){
+                if (getMovement() == 0f ) {
+                    setVX(0);
+                }else{
+                    setVX(Math.signum(getMovement())*getMaxSpeed());
+                }
             }
-          }
         }
 
-        // Jump!
-        if (isJumping() && !stunned) {
-            forceCache.set(0, jumpForce);
-            body.applyLinearImpulse(forceCache,getPosition(),true);
-            setCanDoubleJump(true);
-        }
         if (isDoubleJumping() && !stunned) {
             //dividing by sqrt 2 makes it such that from 0 velocity it goes half the height of a regular jump
             forceCache.set(0, jumpForce/(DOUBLE_JUMP_MULTIPLIER));
@@ -530,6 +552,23 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
             body.applyLinearImpulse(forceCache,getPosition(),true);
             setCanDoubleJump(false);
         }
+
+        // Jump!
+        if (isJumping() && !stunned) {
+            float mod = 1.0f;
+            if(isTrampGrounded) {
+                mod = 2.0f;
+                System.out.println(myPlatform);
+                if(myPlatform!=null) {
+                    myPlatform.instakill();
+                    myPlatform = null;
+                }
+            }
+            forceCache.set(0, mod*jumpForce);
+            body.applyLinearImpulse(forceCache,getPosition(),true);
+            setCanDoubleJump(true);
+        }
+
     }
 
     @Override
@@ -571,7 +610,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
         if(isGhosting())
             passThroughDuration= Math.max(passThroughDuration-dt,0);
-      
+
         if (isCrouching()){
             initShapes(crouchingBox);
             initBounds();
@@ -614,7 +653,11 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
      */
     public void drawDebug(GameCanvas canvas) {
         super.drawDebug(canvas);
-        if (sensorShape != null)
-            canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+        if (sensorShape != null) {
+            canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+            canvas.drawPhysics(crouchShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+            canvas.drawPhysics(playerShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+            canvas.drawPhysics(runningShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+        }
     }
 }
