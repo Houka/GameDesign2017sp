@@ -235,12 +235,13 @@ public class CollisionController implements ContactListener {
             dir = true;
         }
         if(!obj1.isUsed()) {
-            obj2.platformPop();
+            obj2.pop();
             obj2.setPassThrough(true);
             obj1.setUsed(true);
             obj1.setShot(true);
             obj1.setDir(dir);
             obj1.setYCoord(obj2.getY());
+        }else{
         }
     }
 

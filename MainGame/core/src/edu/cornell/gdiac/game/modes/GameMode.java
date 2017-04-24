@@ -285,6 +285,7 @@ public class GameMode extends Mode implements Settable {
 					pb.newSize(pb.getX(),pb.getY(),3);
 					pb.fixX(0f);
 					pb.setTimeToDie(pb.getPaintballToPaintballDuration());
+					pb.platformPop();
 					addObject(pb);
 				}
 			}
