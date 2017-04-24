@@ -32,7 +32,7 @@ public class PauseMode extends Mode {
 	/** Selection menu items y offset from the center*/
 	private static final int MENU_ITEM_START_OFFSET_Y = 150;
 	/** Selection menu items y offset between each menu item*/
-	private static final int MENU_ITEM_GAP_OFFSET_Y = 20;
+	private static final int MENU_ITEM_GAP_OFFSET_Y = 5;
 	private static Color DARK_PURPLE = new Color(123/255f, 118/255f, 131/255f, 1f);
 	private static String[] NUM_LEVELS = FileReaderWriter.getJsonFiles();
 

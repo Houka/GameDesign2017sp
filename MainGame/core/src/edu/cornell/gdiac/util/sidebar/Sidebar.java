@@ -73,8 +73,8 @@ public class Sidebar {
     public static void initDefaultSettings(){
         if (theMap == null)
             theMap = new HashMap<String, Float>();
-        Sidebar.setValue("Gravity",-29.0f);
-        Sidebar.setValue("Jump Height",11.4f);
+        Sidebar.setValue("Gravity",-30.0f);
+        Sidebar.setValue("Jump Height",14f);
         Sidebar.setValue("Player Speed",7.65f);
         Sidebar.setValue("Knockback Force",8f);
         Sidebar.setValue("Knockback Friction",.06f);
@@ -83,7 +83,7 @@ public class Sidebar {
         Sidebar.setValue("Paintball Height",.46f);
         Sidebar.setValue("Paintball Width",3.5f);
         Sidebar.setValue("Paintball Speed",5.225f);
-        Sidebar.setValue("Paintball-paintball Stick Time",3.6f);
+        Sidebar.setValue("Paintball-paintball Stick Time",5f);
         Sidebar.setValue("Paintball-Wall Stick Time",2f);
         Sidebar.setValue("Camera Speed",.1f);
         Sidebar.setValue("Rumble Intensity",0f);
