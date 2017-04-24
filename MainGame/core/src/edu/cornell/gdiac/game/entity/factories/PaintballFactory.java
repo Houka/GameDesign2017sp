@@ -62,21 +62,6 @@ public class PaintballFactory implements AssetUser, Settable {
         this.scale = scale;
     }
 
-    /**
-     *  Creates a player paintball at the given location moving in the given direction
-     *  @param x            Initial x position of the paintball
-     *  @param y            Initial y position of the paintball
-     *  @param direction    Initial traveling direction of the paintball (true for right, left otherwise)
-     */
-    public PaintballModel createPlayerPaintball(float x, float y, boolean direction, String paintballType) {
-        PaintballModel paintball = createPaintball(x,y,direction,paintballType);
-        paintball.setPlayerBullet(true);
-        paintball.setHeadTexture(playerTextureHead);
-        paintball.setPlatformSplatEffectTexture(charSplatEffectTexture);
-        float speed  = (direction ? player_initial_speed : -player_initial_speed);
-        paintball.fixX(speed);
-        return paintball;
-    }
 
     /**
      *  Creates a paintball at the given location moving in the given direction
@@ -90,7 +75,7 @@ public class PaintballFactory implements AssetUser, Settable {
         float height = enemyTexture.getRegionHeight()/(scale.y);
         float speed  = (direction ? initial_speed : -initial_speed);
         PaintballModel paintball = new PaintballModel(x+xOffset, y+y_offset, width, height,speed,xScale,yScale,scale,paintballType);
-        
+
         paintball.setMaxXScale(maxXScale);
         paintball.setBullet(true);
         paintball.setGravityScale(0);

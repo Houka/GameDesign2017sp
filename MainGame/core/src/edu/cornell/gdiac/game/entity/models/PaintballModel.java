@@ -457,7 +457,6 @@ public class PaintballModel extends BoxObstacle {
             trailTexture.advanceFrame();
             currTrailFrame++;
         }
-
     }
 
     @Override

@@ -207,6 +207,9 @@ public class CollisionController implements ContactListener {
             }
         }
 
+        if(obj2.isPlayerBullet())
+            obj2.pop();
+
         obj2.setTimeToDie(obj2.getPaintballToWallDuration());
         obj2.fixX(0f);
     }
@@ -220,6 +223,9 @@ public class CollisionController implements ContactListener {
             }
         }
 
+        if(obj2.isPlayerBullet())
+            obj2.pop();
+        
         obj2.setTimeToDie(obj2.getPaintballToPlatformDuration());
         obj2.fixX(0f);
     }
