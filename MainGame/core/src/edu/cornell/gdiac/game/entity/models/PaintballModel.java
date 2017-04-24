@@ -21,7 +21,7 @@ public class PaintballModel extends BoxObstacle {
     private float yScale;
   
     /** How much the paintballs snap. The larger the value, the more dramatic the snapping effect */
-    private static final int GRID_SNAP = 4;
+    private static final int GRID_SNAP = 2;
   
     /** Transformation of original scale **/
     private float xtransform = 1f;
