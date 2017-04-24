@@ -49,6 +49,9 @@ public class PaintballFactory implements AssetUser, Settable {
     private TextureRegion normalPlatfromTexture;
     private TextureRegion splatEffectTexture;
     private TextureRegion trailTexture;
+    private TextureRegion enemyMineHeadTexture;
+    private TextureRegion minePlatformTexture;
+    private TextureRegion mineTrailTexture;
 
     public PaintballFactory(Vector2 scale){
         this.scale = scale;
@@ -84,7 +87,18 @@ public class PaintballFactory implements AssetUser, Settable {
         paintball.setDensity(heavy_density);
         paintball.setDrawScale(scale);
         paintball.setTexture(enemyTexture);
-        paintball.setHeadTexture(enemyTextureHead);
+        if(paintballType.equals("trampoline")) {
+            paintball.setTrailTexture(mineTrailTexture);
+            paintball.setHeadTexture(enemyMineHeadTexture);
+            paintball.setPlatformTexture(minePlatformTexture);
+        } else if(paintballType.equals("normal")) {
+            paintball.setTrailTexture(trailTexture);
+            paintball.setHeadTexture(enemyTextureHead);
+            paintball.setPlatformTexture(normalPlatfromTexture);
+        } else {
+            assert(false);
+        }
+        paintball.setSplatEffectTexture(splatEffectTexture);
         paintball.setPaintballToPaintballDuration(paintballToPaintballDuration);
         paintball.setPaintballToWallDuration(paintballToWallDuration);
         paintball.setPaintballToPlatformDuration(paintballToPlatformDuration);
@@ -95,9 +109,6 @@ public class PaintballFactory implements AssetUser, Settable {
         paintball.setVX(speed);
         paintball.setMaxLifeTime(MAX_LIFE_TIME);
         paintball.setPaintballType(paintballType);
-        paintball.setPlatformTexture(normalPlatfromTexture);
-        paintball.setTrailTexture(trailTexture);
-        paintball.setSplatEffectTexture(splatEffectTexture);
         return paintball;
     }
 
@@ -212,6 +223,9 @@ public class PaintballFactory implements AssetUser, Settable {
     public void loadContent(AssetManager manager) {
         enemyTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_FILE, false);
         enemyTextureHead = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_ENEMY_NORMAL_FILE, false);
+        enemyMineHeadTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_ENEMY_MINE_FILE, false);
+        minePlatformTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_STATIONARY_MINE_FILE, false);
+        mineTrailTexture =  AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_MINE_TRAIL_FILE, false);
         playerTextureHead = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_CHARACTER_FILE, false);
         normalPlatfromTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_STATIONARY_NORMAL_FILE, false);
         splatEffectTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_SPLAT_EFFECT_FILE, false);

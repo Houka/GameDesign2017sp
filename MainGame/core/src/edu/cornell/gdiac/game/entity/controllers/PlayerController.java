@@ -38,13 +38,6 @@ public class PlayerController extends EntityController {
         player.setCrouching(input.isDownHeld());
         player.applyForce();
 
-        if(player.isTrampGrounded() && input.didJump()) {
-            System.out.println("tramp grounded");
-            player.setVY(Sidebar.getValue("Jump Height")*1.5f);
-            System.out.println(Sidebar.getValue("Jump Height")*1.5);
-            player.setTrampGrounded(false);
-        }
-
         updateAnimation();
     }
 

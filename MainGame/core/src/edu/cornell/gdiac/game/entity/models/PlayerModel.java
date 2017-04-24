@@ -125,6 +125,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private float[] runningBox;
     private float[] crouchingBox;
 
+    private PaintballModel myPlatform;
+
     /**
      * Creates a new player avatar at the origin.
      *
@@ -138,6 +140,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     public PlayerModel(float width, float height) {
         this(0,0,width,height);
     }
+
 
     /**
      * Creates a new player avatar at the given position.
@@ -205,6 +208,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
         knockbackForce = 0;
         knockbackDirection = new Vector2(0,0);
+
+        myPlatform = null;
     }
 
     // BEGIN: Setters and Getters
@@ -413,6 +418,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     public boolean isTrampGrounded() { return isTrampGrounded; }
     public void setTrampGrounded(boolean value) { isTrampGrounded = value; }
 
+    public void setMyPlatform(PaintballModel p) {
+        myPlatform = p;
+    }
+
     // END: Setters and Getters
 
     /**
@@ -522,12 +531,6 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
             }
         }
 
-        // Jump!
-        if (isJumping() && !stunned) {
-            forceCache.set(0, jumpForce);
-            body.applyLinearImpulse(forceCache,getPosition(),true);
-            setCanDoubleJump(true);
-        }
         if (isDoubleJumping() && !stunned) {
             //dividing by sqrt 2 makes it such that from 0 velocity it goes half the height of a regular jump
             forceCache.set(0, jumpForce/(DOUBLE_JUMP_MULTIPLIER));
@@ -536,6 +539,23 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
             body.applyLinearImpulse(forceCache,getPosition(),true);
             setCanDoubleJump(false);
         }
+
+        // Jump!
+        if (isJumping() && !stunned) {
+            float mod = 1.0f;
+            if(isTrampGrounded) {
+                mod = 2.0f;
+                System.out.println(myPlatform);
+                if(myPlatform!=null) {
+                    myPlatform.instakill();
+                    myPlatform = null;
+                }
+            }
+            forceCache.set(0, mod*jumpForce);
+            body.applyLinearImpulse(forceCache,getPosition(),true);
+            setCanDoubleJump(true);
+        }
+
     }
 
     @Override
