@@ -219,9 +219,15 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         return Sidebar.getValue("Jump Height");
     }
 
-    public float getPlayerHeight(){
+    @Override
+    public float getHeight(){
         return playerHeight;
     }
+    @Override
+    public float getWidth(){
+        return playerWidth;
+    }
+    
     @Override
     public void setTexture(TextureRegion region){
         super.setTexture(region);
