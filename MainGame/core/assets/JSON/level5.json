@@ -166,25 +166,29 @@
         "x": 3.0,
         "y": 16,
         "isFacingRight": 1,
-        "interval": 200
+        "interval": 200,
+        "enemyType": "normal"
       },
       {
         "x": 29.0,
         "y": 48,
         "isFacingRight": 0,
-        "interval": 200
+        "interval": 200,
+        "enemyType": "normal"
       }
     ],
     "on_sight": [
       {
         "x": 3.0,
         "y": 34,
-        "isFacingRight": 1
+        "isFacingRight": 1,
+        "enemyType": "normal"
       },
       {
         "x": 29.0,
         "y": 34,
-        "isFacingRight": 0
+        "isFacingRight": 0,
+        "enemyType": "normal"
       }
     ]
   },

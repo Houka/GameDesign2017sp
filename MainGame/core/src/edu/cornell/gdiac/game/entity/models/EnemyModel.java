@@ -69,7 +69,7 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
     /** If the enemy is OnSight or not */
     private boolean onSight;
     /** The type of enemy, i.e. what kind of bullet it shoots*/
-    private int enemyType;
+    private String enemyType;
 
     /** The animation associated with this entity */
     private Animation animation;
@@ -98,7 +98,7 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
      * @param height	The object width in physics units
      * @param isFacingRight Whether or not the enemy is facing right
      */
-    public EnemyModel(float x, float y, float width, float height, boolean isFacingRight, boolean onSight, int interval) {
+    public EnemyModel(float x, float y, float width, float height, boolean isFacingRight, boolean onSight, int interval, String enemyType) {
         super(
                 new float[]{
                         -width/2.0f, -height*BELOW_POSTER,
@@ -115,6 +115,7 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
         setFriction(ENEMY_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
         setFixedRotation(true);
         setName("enemy");
+        setEnemyType(enemyType);
         bodyinfo.type = BodyDef.BodyType.StaticBody;
 
         // Gameplay attributes
@@ -187,6 +188,14 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
 
     @Override
     public void setShooting(boolean value) { isShooting = value; }
+
+    public String getEnemyType() {
+        return enemyType;
+    }
+
+    public void setEnemyType(String type) {
+        enemyType = type;
+    }
 
     // END: Setters and Getters
 

@@ -96,6 +96,12 @@ public class PaintballModel extends BoxObstacle {
 
     private Vector2 platformOrigin;
 
+    /** If the paintball is being stood on*/
+    private boolean isUsed;
+
+    /** Type of paintball */
+    private String paintballType;
+
     /**
      * PaintballModel constructor
      * @param x         Starting x position
@@ -107,7 +113,7 @@ public class PaintballModel extends BoxObstacle {
      * @param yScl      Starting y-scale
      * @param scl       Screen scale
      */
-    public PaintballModel(float x, float y, float w, float h, float s, float xScl, float yScl, Vector2 scl){
+    public PaintballModel(float x, float y, float w, float h, float s, float xScl, float yScl, Vector2 scl, String type){
         super(x,y,w,h);
         setName("paintball");
         if(yScl == 0 || xScl == 0) {
@@ -145,6 +151,8 @@ public class PaintballModel extends BoxObstacle {
         recentCollision = false;
         recentCreation = true;
         isPlayerBullet = false;
+        paintballType = type;
+        isUsed = false;
         headTexture = new Animation();
         splatEffectTexture = new Animation();
         trailTexture = new Animation();
@@ -155,6 +163,13 @@ public class PaintballModel extends BoxObstacle {
     }
 
     //BEGIN: GETTERS AND SETTERS
+    public boolean isUsed() {
+        return isUsed;
+    }
+    public void setUsed(boolean value) {
+        isUsed = value;
+    }
+
     public void setTimeToDie(float xd) {
         splatEffectTexture.playOnce("splat");
         fixX(0);
@@ -294,19 +309,22 @@ public class PaintballModel extends BoxObstacle {
     public boolean isDead() {
         return dying && timeToDie<deathDuration;
     }
+
+    public String getPaintballType() { return paintballType; }
+    public void setPaintballType(String type) { paintballType = type; }
     public boolean canPassThrough() {
         return passThrough;
     }
     public void setPassThrough(boolean val) {
         passThrough = val;
     }
+  
     //END: GETTERS AND SETTERS
 
     /** Enable gravity**/
     public void enableGravity() {
         gravity = true;
         this.setGravityScale(1/3f);
-       // this.setVY(-2); //Uncomment and comment above line for constant falling
     }
 
     /**

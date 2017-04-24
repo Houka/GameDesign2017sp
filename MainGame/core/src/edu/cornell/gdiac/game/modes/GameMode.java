@@ -28,10 +28,7 @@ import edu.cornell.gdiac.game.entity.controllers.EnemyController;
 import edu.cornell.gdiac.game.entity.controllers.EntityController;
 import edu.cornell.gdiac.game.entity.controllers.PlayerController;
 import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
-import edu.cornell.gdiac.game.entity.models.AmmoDepotModel;
-import edu.cornell.gdiac.game.entity.models.EnemyModel;
-import edu.cornell.gdiac.game.entity.models.HUDModel;
-import edu.cornell.gdiac.game.entity.models.PlayerModel;
+import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.game.input.MainInputController;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
 import edu.cornell.gdiac.game.interfaces.Settable;
@@ -203,8 +200,8 @@ public class GameMode extends Mode implements Settable {
 
 	/**
 	 * Trys to set the player in the world if it exists
-     *
-     * @return true if the world has a player, false otherwise
+	 *
+	 * @return true if the world has a player, false otherwise
 	 */
 	private boolean trySetPlayer() {
 		for (Obstacle obj : levelLoader.getAddQueue()) {
@@ -362,16 +359,16 @@ public class GameMode extends Mode implements Settable {
 
 
 	public void nextLevel() {
-	    int nextLevel = (levelNumber+1)%NUM_LEVELS.length;
-	    setLevel(NUM_LEVELS[nextLevel],nextLevel);
-	    reset();
+		int nextLevel = (levelNumber+1)%NUM_LEVELS.length;
+		setLevel(NUM_LEVELS[nextLevel],nextLevel);
+		reset();
 	}
 
 	/**
 	 * Loads the level based on a json file. Will queue up a list of objects to
-     * add to the game world and sets all starting attributes to their initial starting
-     * number.
-     *
+	 * add to the game world and sets all starting attributes to their initial starting
+	 * number.
+	 *
 	 */
 	private void loadLevel() {
 		levelLoader.loadLevel(levelFile);
@@ -382,19 +379,20 @@ public class GameMode extends Mode implements Settable {
 	}
 
 	/**
-	 * Updates any objects that are shooters so that this class can create/add bullets 
-     * to the shooting entity. Special case applies for the player involving the HUD
-     *
-     * @param obj the obstacle that we are checking is a shooter
+	 * Updates any objects that are shooters so that this class can create/add bullets
+	 * to the shooting entity. Special case applies for the player involving the HUD.
+	 * The player will always shoot normal paintballs.
+	 *
+	 * @param obj the obstacle that we are checking is a shooter
 	 */
 	private void updateShooter(Obstacle obj) {
 		if (((Shooter)obj).isShooting()) {
 			if (obj.getName().equals("player") && hud.useAmmo())
-				addObject(paintballFactory.createPlayerPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
+				addObject(paintballFactory.createPlayerPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight(),"normal"));
 			else if (obj.getName().equals("enemy")) {
 				int direction = ((Shooter) obj).isFacingRight() ? 1 : 0;
 				addObject(paintballFactory.createPaintball(obj.getX()+ direction * SHOOT_OFFSET, obj.getY(),
-							((Shooter) obj).isFacingRight()));
+						((Shooter) obj).isFacingRight(),((EnemyModel)obj).getEnemyType()));
 			}
 		}
 	}
@@ -446,8 +444,8 @@ public class GameMode extends Mode implements Settable {
 	}
 
 	/**
-	 * Helper function that adds its corresponding controller class to 
-     * every entity obstacle.
+	 * Helper function that adds its corresponding controller class to
+	 * every entity obstacle.
 	 * If its an enemy or player, add a new entity controller to it.
 	 */
 	private void addEntityController(Obstacle obj) {
