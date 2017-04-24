@@ -108,11 +108,14 @@ public class PaintballFactory implements AssetUser, Settable {
         paintball.setFixedRotation(true);
         paintball.setVX(speed);
         paintball.setMaxLifeTime(MAX_LIFE_TIME);
+        paintball.setDirection(direction);
         paintball.setPaintballType(paintballType);
         return paintball;
     }
 
     // BEGIN: Setters and Getters
+
+
     public static float getHeavy_density() {
         return heavy_density;
     }

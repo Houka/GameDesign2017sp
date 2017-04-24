@@ -112,6 +112,8 @@ public class GameMode extends Mode implements Settable {
 	/** An array to store the levels **/
 	private static final String[] NUM_LEVELS = FileReaderWriter.getJsonFiles();
 
+	private CollisionController collisionController;
+
 	/**
 	 * Creates a new game world with the default values.
 	 * <p>
@@ -163,8 +165,9 @@ public class GameMode extends Mode implements Settable {
 		world = new World(gravity, false);
 		hud = new HUDModel(canvas.getWidth(), canvas.getHeight());
 		hud.setY(hud.getHeight());
-		world.setContactListener(new CollisionController(hud));
 		paintballFactory = new PaintballFactory(scaleVector);
+		collisionController = new CollisionController(hud,paintballFactory);
+		world.setContactListener(collisionController);
 		levelLoader = new LevelLoader(scaleVector);
 		this.bounds = new Rectangle(bounds);
 		hud.setDrawScale(scaleVector);
@@ -270,8 +273,25 @@ public class GameMode extends Mode implements Settable {
 				((Settable) obj).applySettings();
 			if(obj instanceof Shooter)
 				updateShooter(obj);
+			if(obj instanceof SplattererModel)  {
+				if(((SplattererModel)obj).isShot()) {
+					((SplattererModel)obj).setShot(false);
+					PaintballModel pb;
+					if(((SplattererModel) obj).getDir())
+						pb = paintballFactory.createPaintball(obj.getX()+(((SplattererModel) obj).getWidth()*2),
+								((SplattererModel) obj).getYCoord(),!((SplattererModel)obj).getDir(), "normal");
+					else
+						pb = paintballFactory.createPaintball(obj.getX()-(((SplattererModel) obj).getWidth()*2),
+								((SplattererModel) obj).getYCoord(),!((SplattererModel)obj).getDir(), "normal");
+					pb.newSize(pb.getX(),pb.getY(),3);
+					pb.fixX(0f);
+					pb.setTimeToDie(pb.getPaintballToPaintballDuration());
+					addObject(pb);
+				}
+			}
 		}
 		hud.update(dt);
+
 
 		//if(MainInputController.getInstance().didDebug())
 		if (player.getY() < -player.getHeight())

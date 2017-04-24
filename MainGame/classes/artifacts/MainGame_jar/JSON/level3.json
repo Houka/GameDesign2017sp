@@ -71,6 +71,11 @@
   "target": {
     "x": 29.5,
     "y": 50
+  },
+  "splatterers": {
+    "default":[
+
+    ]
   }
 ,
   "starting ammo": 200

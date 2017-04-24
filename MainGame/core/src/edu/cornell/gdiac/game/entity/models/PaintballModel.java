@@ -83,6 +83,7 @@ public class PaintballModel extends BoxObstacle {
     private boolean recentCollision;
     private boolean recentCreation;
     private boolean isPlayerBullet;
+    private boolean direction;
     private boolean trailEnabled;
     private boolean passThrough;
     private boolean popped;
@@ -160,16 +161,21 @@ public class PaintballModel extends BoxObstacle {
         currTrailFrame = 0;
         passThrough = false;
         platformOrigin=new Vector2();
+        direction = true;
     }
 
     //BEGIN: GETTERS AND SETTERS
+    public boolean getDying() { return dying; }
+    public boolean getGrowing() { return growing;}
+    public void setGrowing(boolean value) { growing = value; }
+    public boolean getDirection() { return direction; }
+    public void setDirection(boolean dir) { direction = dir; }
     public boolean isUsed() {
         return isUsed;
     }
     public void setUsed(boolean value) {
         isUsed = value;
     }
-
     public void setTimeToDie(float xd) {
         splatEffectTexture.playOnce("splat");
         fixX(0);

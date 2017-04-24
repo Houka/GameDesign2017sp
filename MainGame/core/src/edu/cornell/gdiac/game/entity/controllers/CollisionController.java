@@ -1,8 +1,11 @@
 package edu.cornell.gdiac.game.entity.controllers;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.ObjectSet;
+import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
 import edu.cornell.gdiac.game.entity.models.*;
+import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 
 /**
@@ -28,13 +31,20 @@ public class CollisionController implements ContactListener {
     private HUDModel hud;
     /** Mark set to handle more sophisticated collision callbacks */
     private ObjectSet<Object> sensorObjects;
+    /** paintball factory for splatterers */
+    private PaintballFactory paintballFactory;
+
+    private PooledList<PaintballModel> objectsToAdd;
+
 
     /**
      *  The contructor
      * @param hud   The HUD to update
      */
-    public CollisionController(HUDModel hud){
+    public CollisionController(HUDModel hud,PaintballFactory paintballFactory){
         this.hud = hud;
+        this.paintballFactory = paintballFactory;
+        this.objectsToAdd = new PooledList<PaintballModel>();
         sensorObjects = new ObjectSet<Object>();
     }
 
@@ -82,7 +92,9 @@ public class CollisionController implements ContactListener {
     // END: helper functions
 
     // BEGIN: Simple Collision handlers
-    private void handleCollision(PlayerModel obj1, EnemyModel obj2){hud.setLose(true);}
+    private void handleCollision(PlayerModel obj1, SplattererModel obj2) {}
+    private void handleCollision(PlayerModel obj1, EnemyModel obj2){
+        hud.setLose(true);}
     private void handleCollision(PlayerModel obj1, GoalModel obj2){}
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
         touchedGround(obj1,obj2,userData1,userData2);
@@ -201,6 +213,20 @@ public class CollisionController implements ContactListener {
             hud.addAmmo(obj2.getAmmoAmount());
         }
     }
+    private void handleCollision(SplattererModel obj1, PaintballModel obj2) {
+        boolean dir = false;
+        if(obj2.getX() < obj1.getX()) {
+            dir = true;
+        }
+        if(!obj1.isUsed()) {
+            obj2.instakill();
+
+            obj1.setUsed(true);
+            obj1.setShot(true);
+            obj1.setDir(dir);
+            obj1.setYCoord(obj2.getY());
+        }
+    }
 
     // Collision end handlers
     private void handleEndCollision(PlayerModel obj1,WallModel obj2){ }
@@ -213,6 +239,7 @@ public class CollisionController implements ContactListener {
     }
     private void handleEndCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){}
     private void handleEndCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}
+
     // END: Simple Collision handlers
 
     /**
@@ -238,6 +265,9 @@ public class CollisionController implements ContactListener {
                 handleCollision((PlayerModel)obj1,(PaintballModel) obj2, userData1,fix2);
             else if (obj2.getName().equals("ammoDepot"))
                 handleCollision((PlayerModel)obj1, (AmmoDepotModel) obj2);
+            else if (obj2.getName().equals("splatterer")) {
+                handleCollision((PlayerModel) obj1, (SplattererModel) obj2);
+            }
         }
         else if (obj1.getName().equals("paintball")) {
             if (obj2.getName().equals("enemy"))
@@ -250,12 +280,19 @@ public class CollisionController implements ContactListener {
                 handleCollision((WallModel)obj2,(PaintballModel) obj1);
             else if (obj2.getName().equals("paintball"))
                 handleCollision((PaintballModel)obj2,(PaintballModel) obj1);
-        }else if (obj1.getName().equals("enemy")) {
+            else if (obj2.getName().equals("splatterer"))
+                handleCollision((SplattererModel)obj2,(PaintballModel) obj1);
+        }
+        else if (obj1.getName().equals("enemy")) {
             if (obj2.getName().equals("paintball"))
                 handleCollision((EnemyModel)obj1, (PaintballModel) obj2, userData1);
             else if (obj2.getName().equals("platform"))
                 handleCollision((EnemyModel)obj1, (PlatformModel) obj2, userData1);
         }
+    }
+
+    public PooledList<PaintballModel> getObjsToAdd() {
+        return objectsToAdd;
     }
 
     /**

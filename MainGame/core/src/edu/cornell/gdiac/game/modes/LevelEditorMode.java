@@ -125,8 +125,8 @@ public class LevelEditorMode extends Mode {
 
         input = EditorInputController.getInstance();
         textureClicked = false;
-        regions = new TextureRegion[7];
-        startHeights = new int[7];
+        regions = new TextureRegion[8];
+        startHeights = new int[8];
 
         worldCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
         worldCamera.setAutosnap(true);
@@ -376,6 +376,15 @@ public class LevelEditorMode extends Mode {
                 newW.setTexture(underMouse);
                 objects.add(newW);
             }
+            else if(underMouse.equals(regions[7])) {
+                SplattererModel newS = new SplattererModel(newPos.x, newPos.y,
+                        underMouse.getRegionWidth(), underMouse.getRegionHeight());
+                newS.setDrawScale(scaleVector);
+                newS.setTexture(underMouse);
+                objects.add(newS);
+                underMouse = null;
+                textureClicked = false;
+            }
         }
 
         if(input.didRightClick()) {
@@ -438,6 +447,11 @@ public class LevelEditorMode extends Mode {
                     }
                     bounds = new Rectangle(o.getX(),o.getY()-(newH), newW, newH+(newH/2));
                 }
+                else if(o instanceof SplattererModel) {
+                    float newW = ((SplattererModel) o).getWidth()/scaleVector.x;
+                    float newH = ((SplattererModel) o).getHeight()/scaleVector.y;
+                    bounds = new Rectangle(o.getX(),o.getY()-(newH), newW, newH);
+                }
                 if(bounds.contains(scaledMouse)) {
                     objects.remove(o);
                 }
@@ -481,6 +495,7 @@ public class LevelEditorMode extends Mode {
             startHeights[i] = startHeight;
             startHeight += regions[i].getRegionHeight() + 20;
         }
+
         if(textureClicked) {
             canvas.draw(underMouse, Gdx.input.getX()-(underMouse.getRegionWidth()/2),
                     canvas.getHeight()-Gdx.input.getY()-(underMouse.getRegionHeight()/2));
@@ -518,6 +533,7 @@ public class LevelEditorMode extends Mode {
         manager.load(Constants.CAMERA_FILE,Texture.class);
         manager.load(Constants.WHITE_PIXEL_FILE,Texture.class);
         manager.load(Constants.WALL_FILE,Texture.class);
+        manager.load(Constants.SPLATTERER_FILE,Texture.class);
         levelLoader.preLoadContent(manager);
     }
 
@@ -534,6 +550,7 @@ public class LevelEditorMode extends Mode {
         regions[4] = AssetRetriever.createTextureRegion(manager, Constants.CAMERA_FILE, false);
         regions[5] = AssetRetriever.createTextureRegion(manager, Constants.ENEMY_ONSIGHT_FILE, false);
         regions[6] = AssetRetriever.createTextureRegion(manager, Constants.WALL_FILE, false);
+        regions[7] = AssetRetriever.createTextureRegion(manager, Constants.SPLATTERER_FILE, false);
     }
 
     @Override
@@ -565,6 +582,9 @@ public class LevelEditorMode extends Mode {
         if (manager.isLoaded(Constants.WHITE_PIXEL_FILE)) {
             manager.unload(Constants.WHITE_PIXEL_FILE);
         }
+        if(manager.isLoaded(Constants.SPLATTERER_FILE)) {
+            manager.unload(Constants.SPLATTERER_FILE);
+        }
     }
 
     private void saveLevel() {
@@ -576,6 +596,7 @@ public class LevelEditorMode extends Mode {
         ArrayList<EnemyModel> onSightEnemies = new ArrayList<EnemyModel>();
         ArrayList<AmmoDepotModel> ammoDepots = new ArrayList<AmmoDepotModel>();
         GoalModel target = null;
+        ArrayList<SplattererModel> splatterers = new ArrayList<SplattererModel>();
 
         for (Obstacle obj: objects){
             if (obj instanceof PlatformModel)
@@ -592,10 +613,11 @@ public class LevelEditorMode extends Mode {
                 player = (PlayerModel) obj;
             else if (obj instanceof GoalModel)
                 target = (GoalModel) obj;
+            else if (obj instanceof SplattererModel)
+                splatterers.add((SplattererModel) obj);
         }
-
         if (player != null && target != null) {
-            levelCreator.writeLevel(saveFileName, platforms, walls, player, intervalEnemies, onSightEnemies, ammoDepots, target, ammo);
+            levelCreator.writeLevel(saveFileName, platforms, walls, player, intervalEnemies, onSightEnemies, ammoDepots, splatterers, target, ammo);
             FileReaderWriter.addJsonFile(saveFileName);
         }
         else{

@@ -38,6 +38,7 @@ public class LevelCreator {
     private ArrayList<AmmoDepotModel> defaultAmmoDepots;
     private GoalModel defaultTarget;
     private int defaultAmmo;
+    private ArrayList<SplattererModel> defaultSplatterers;
 
     /**
      * Fills in defaults (for testing purposes)
@@ -48,6 +49,7 @@ public class LevelCreator {
         defaultOnSightEnemies = new ArrayList<EnemyModel>();
         defaultIntervalEnemies = new ArrayList<EnemyModel>();
         defaultAmmoDepots = new ArrayList<AmmoDepotModel>();
+        defaultSplatterers = new ArrayList<SplattererModel>();
 
 
         for (int i = 0; i < DEFAULT_PLATFORMS.length; i++)
@@ -69,7 +71,8 @@ public class LevelCreator {
      */
     public void writeLevel(String JsonFile, ArrayList<PlatformModel> platforms, ArrayList<WallModel> walls,
                            PlayerModel player, ArrayList<EnemyModel> intervalEnemies, ArrayList<EnemyModel> onSightEnemies,
-                           ArrayList<AmmoDepotModel> ammoDepots, GoalModel target, int ammo) {
+                           ArrayList<AmmoDepotModel> ammoDepots, ArrayList<SplattererModel> splatterers,
+                           GoalModel target, int ammo) {
         FileHandle f = new FileHandle(new File(JsonFile));
         JsonWriter writer = new JsonWriter(f.writer(false));
         Json json = new Json();
@@ -150,11 +153,23 @@ public class LevelCreator {
         json.writeArrayEnd();
         json.writeObjectEnd();
 
+        //splatterers
+        json.writeObjectStart("splatterers");
+        json.writeArrayStart("default");
+        for (int i=0; i<splatterers.size(); i++) {
+            json.writeObjectStart();
+            json.writeValue("x", splatterers.get(i).getX());
+            json.writeValue("y", splatterers.get(i).getY());
+            json.writeObjectEnd();
+        }
+        json.writeArrayEnd();
+        json.writeObjectEnd();
+
         //target
         json.writeObjectStart("target");
         json.writeValue("x", target.getX());
         json.writeValue("y", target.getY());
-        json.writeObjectEnd();;
+        json.writeObjectEnd();
 
         //ammo
         json.writeValue("starting ammo", ammo);
@@ -173,7 +188,7 @@ public class LevelCreator {
     public void writeDemoJson(){
         setDefaults();
         writeLevel(DEFAULT_FILE, defaultPlatforms, defaultWalls, defaultPlayer, defaultIntervalEnemies,
-                defaultOnSightEnemies, defaultAmmoDepots, defaultTarget, defaultAmmo);
+                defaultOnSightEnemies, defaultAmmoDepots, defaultSplatterers, defaultTarget, defaultAmmo);
     }
 
 }
