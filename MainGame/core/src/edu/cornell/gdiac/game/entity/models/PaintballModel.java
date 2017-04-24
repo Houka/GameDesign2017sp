@@ -184,10 +184,7 @@ public class PaintballModel extends BoxObstacle {
         isUsed = value;
     }
     public void setTimeToDie(float xd) {
-        splatEffectTexture.playOnce("splat");
         fixX(0);
-        if(!trailEnabled)
-            pop();
         if(!dying) {
             timeToDie = xd + deathDuration;
             dying = true;
@@ -392,6 +389,7 @@ public class PaintballModel extends BoxObstacle {
 
     public void platformPop() {
         platformPopped = true;
+        fixX(0);
         platformSplatEffectTexture.playOnce("platform splat");
     }
 
@@ -459,7 +457,6 @@ public class PaintballModel extends BoxObstacle {
             trailTexture.advanceFrame();
             currTrailFrame++;
         }
-
     }
 
     @Override
@@ -490,7 +487,7 @@ public class PaintballModel extends BoxObstacle {
                     }
                 }
 
-                if (headTexture != null && !dying) {
+                if (headTexture != null && !dying && !platformPopped) {
                     float xPos = (getX() + initDir * getScaledX() / 2f) * drawScale.x + initDir * headTexture.getTextureRegion().getRegionWidth() / 4.0f;
                     canvas.draw(headTexture.getTextureRegion(), paintcolor, headTexture.getTextureRegion().getRegionWidth() / 2f,
                             headTexture.getTextureRegion().getRegionHeight() / 2f,

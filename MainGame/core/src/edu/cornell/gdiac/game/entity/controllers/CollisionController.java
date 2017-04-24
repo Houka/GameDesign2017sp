@@ -207,6 +207,9 @@ public class CollisionController implements ContactListener {
             }
         }
 
+        if(obj2.isPlayerBullet())
+            obj2.pop();
+
         obj2.setTimeToDie(obj2.getPaintballToWallDuration());
         obj2.fixX(0f);
     }
@@ -220,6 +223,9 @@ public class CollisionController implements ContactListener {
             }
         }
 
+        if(obj2.isPlayerBullet())
+            obj2.pop();
+        
         obj2.setTimeToDie(obj2.getPaintballToPlatformDuration());
         obj2.fixX(0f);
     }
@@ -235,12 +241,13 @@ public class CollisionController implements ContactListener {
             dir = true;
         }
         if(!obj1.isUsed()) {
-            obj2.platformPop();
+            obj2.pop();
             obj2.setPassThrough(true);
             obj1.setUsed(true);
             obj1.setShot(true);
             obj1.setDir(dir);
             obj1.setYCoord(obj2.getY());
+        }else{
         }
     }
 
