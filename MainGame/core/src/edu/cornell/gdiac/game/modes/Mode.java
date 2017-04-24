@@ -182,7 +182,7 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable, 
 			draw();
 			canvas.end();
 
-			if (debug) {
+			if (debug || true) {
 				canvas.beginDebug();
 				drawDebug();
 				canvas.endDebug();
