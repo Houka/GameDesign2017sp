@@ -60,6 +60,8 @@ public class PlayerController extends EntityController {
         else if (!player.isGrounded() &&
                 player.getVY() <= OFF_GROUND_THRESHOLD + 1 && player.getVY() >= OFF_GROUND_THRESHOLD-1)
             player.getAnimation().playOnce("peak");
+        else if (!player.isGrounded() && player.isKnockedBack())
+            player.getAnimation().playOnce("stunned");
         else if (player.isGrounded() && input.getHorizontal() != 0)
             player.getAnimation().play("run", true);
         else if (player.isGrounded())
