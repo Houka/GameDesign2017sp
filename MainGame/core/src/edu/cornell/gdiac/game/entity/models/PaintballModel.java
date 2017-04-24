@@ -463,7 +463,7 @@ public class PaintballModel extends BoxObstacle {
 
                     if (trailTexture.getTextureRegion() != null && xtransform > 0) {
                         xPos = (initX) * drawScale.x + initDir * trailTexture.getTextureRegion().getRegionWidth() / 2f;
-                        if (xPos * initDir < getX() * drawScale.x)
+                        if (xPos * initDir < getX() * drawScale.x * initDir)
                             xPos = getX() * drawScale.x;
                         float hscale = (texture.getRegionWidth() * getMaxScaledX()) / trailTexture.getTextureRegion().getRegionWidth();
                         float vscale = (texture.getRegionHeight() * getScaledY()) / trailTexture.getTextureRegion().getRegionHeight();
