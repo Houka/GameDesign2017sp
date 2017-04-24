@@ -314,7 +314,7 @@ public class GameMode extends Mode implements Settable {
 	public void draw() {
 		canvas.end();
 		canvas.begin(gameCamera);
-		canvas.setCamera(canvas.getWidth()/2,player.getY() * scaleVector.y, canvas.getHeight()/2);
+		canvas.setCamera(player.getX()*scaleVector.x,player.getY() * scaleVector.y, canvas.getHeight()/2);
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
