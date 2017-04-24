@@ -105,8 +105,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     /** Fixtures for different hitboxes*/
     private Fixture playerFixture;
     private Fixture crouchFixture;
+    private Fixture runningFixture;
     private PolygonShape playerShape;
     private PolygonShape crouchShape;
+    private PolygonShape runningShape;
 
     private float playerHeight;
     private float playerWidth;
@@ -464,7 +466,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         playerDef.density = PLAYER_DENSITY;
         playerDef.isSensor = true;
         playerShape = new PolygonShape();
-        playerShape.setAsBox(PLAYER_HSHRINK*getWidth(), getHeight(), playerCenter, 0.0f);
+        playerShape.set(defaultBox);
         playerDef.shape = playerShape;
 
         playerFixture = body.createFixture(playerDef);
@@ -475,11 +477,22 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         crouchDef.density = PLAYER_DENSITY;
         crouchDef.isSensor = true;
         crouchShape = new PolygonShape();
-        crouchShape.setAsBox(PLAYER_HSHRINK*getWidth(), getHeight()/2, crouchCenter, 0.0f);
+        crouchShape.set(crouchingBox);
         crouchDef.shape = crouchShape;
 
-        crouchFixture = body.createFixture(playerDef);
+        crouchFixture = body.createFixture(crouchDef);
         crouchFixture.setUserData("Crouching hitbox");
+
+        Vector2 runningCenter = new Vector2(0, -getHeight()/2);
+        FixtureDef runningDef = new FixtureDef();
+        runningDef.density = PLAYER_DENSITY;
+        runningDef.isSensor = true;
+        runningShape = new PolygonShape();
+        runningShape.set(runningBox);
+        runningDef.shape = runningShape;
+
+        runningFixture = body.createFixture(runningDef);
+        runningFixture.setUserData("Running hitbox");
 
         return true;
     }
@@ -644,6 +657,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
             canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
             canvas.drawPhysics(crouchShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
             canvas.drawPhysics(playerShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+            canvas.drawPhysics(runningShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
         }
     }
 }
