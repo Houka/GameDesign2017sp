@@ -430,8 +430,10 @@ public class PaintballModel extends BoxObstacle {
             growing= false;
             timeToDie-=delta;
             if(timeToDie<deathDuration) {
+                if(opacity==1)
+                    opacity = .6f;
                 this.setMass(0);
-                opacity *= .98;
+                opacity *= .97;
             }
             if(timeToDie<0)
                 markRemoved(true);
