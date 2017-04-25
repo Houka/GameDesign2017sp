@@ -506,7 +506,8 @@ public class PaintballModel extends BoxObstacle {
     }
 
     private float snapToGrid(float yVal) {
-        yVal =(float) Math.floor(yVal/getHeight()/GRID_SNAP)*getHeight()*GRID_SNAP;
-        return yVal + getHeight();
+        float size = 48/drawScale.y;
+        yVal =(float) Math.floor((size/2+yVal)/size);
+        return size*yVal;
     }
 }
