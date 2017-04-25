@@ -94,7 +94,7 @@ public class GameModeManager implements Disposable, AssetUser{
     private void initModes(){
 
         GameMode gameMode = new GameMode(GAME_MODE, canvas,manager);
-        modes.put(MENU, new MenuMode(MENU, canvas, manager));
+        modes.put(MENU, new MenuMode(MENU, canvas, manager,gameMode));
         modes.put(PAUSE, new PauseMode(PAUSE, canvas, manager,gameMode));
         modes.put(WIN, new WinMode(WIN, canvas, manager,gameMode));
         modes.put(LOSS, new LossMode(LOSS, canvas, manager,gameMode));

@@ -28,10 +28,7 @@ import edu.cornell.gdiac.game.entity.controllers.EnemyController;
 import edu.cornell.gdiac.game.entity.controllers.EntityController;
 import edu.cornell.gdiac.game.entity.controllers.PlayerController;
 import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
-import edu.cornell.gdiac.game.entity.models.AmmoDepotModel;
-import edu.cornell.gdiac.game.entity.models.EnemyModel;
-import edu.cornell.gdiac.game.entity.models.HUDModel;
-import edu.cornell.gdiac.game.entity.models.PlayerModel;
+import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.game.input.MainInputController;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
 import edu.cornell.gdiac.game.interfaces.Settable;
@@ -115,6 +112,8 @@ public class GameMode extends Mode implements Settable {
 	/** An array to store the levels **/
 	private static final String[] NUM_LEVELS = FileReaderWriter.getJsonFiles();
 
+	private CollisionController collisionController;
+
 	/**
 	 * Creates a new game world with the default values.
 	 * <p>
@@ -166,8 +165,9 @@ public class GameMode extends Mode implements Settable {
 		world = new World(gravity, false);
 		hud = new HUDModel(canvas.getWidth(), canvas.getHeight());
 		hud.setY(hud.getHeight());
-		world.setContactListener(new CollisionController(hud));
 		paintballFactory = new PaintballFactory(scaleVector);
+		collisionController = new CollisionController(hud,paintballFactory);
+		world.setContactListener(collisionController);
 		levelLoader = new LevelLoader(scaleVector);
 		this.bounds = new Rectangle(bounds);
 		hud.setDrawScale(scaleVector);
@@ -190,7 +190,6 @@ public class GameMode extends Mode implements Settable {
 	public void setLevel(String levelFile,int levelNumber) {
 		this.levelFile = levelFile;
 		this.levelNumber = levelNumber;
-
 	}
 
 	/**
@@ -203,8 +202,8 @@ public class GameMode extends Mode implements Settable {
 
 	/**
 	 * Trys to set the player in the world if it exists
-     *
-     * @return true if the world has a player, false otherwise
+	 *
+	 * @return true if the world has a player, false otherwise
 	 */
 	private boolean trySetPlayer() {
 		for (Obstacle obj : levelLoader.getAddQueue()) {
@@ -263,8 +262,10 @@ public class GameMode extends Mode implements Settable {
 	@Override
 	public void update(float dt) {
 		soundController.update();
-		for (EntityController e : entityControllers)
-			e.update(dt);
+
+		if (!hud.isLose() && !hud.isWin())
+			for (EntityController e : entityControllers)
+				e.update(dt);
 
 		applySettings();
 		paintballFactory.applySettings();
@@ -273,8 +274,26 @@ public class GameMode extends Mode implements Settable {
 				((Settable) obj).applySettings();
 			if(obj instanceof Shooter)
 				updateShooter(obj);
+			if(obj instanceof SplattererModel)  {
+				if(((SplattererModel)obj).isShot()) {
+					((SplattererModel)obj).setShot(false);
+					PaintballModel pb;
+					if(((SplattererModel) obj).getDir())
+						pb = paintballFactory.createPaintball(obj.getX()+(((SplattererModel) obj).getWidth()*2),
+								((SplattererModel) obj).getYCoord(),!((SplattererModel)obj).getDir(), "player");
+					else
+						pb = paintballFactory.createPaintball(obj.getX()-(((SplattererModel) obj).getWidth()*2),
+								((SplattererModel) obj).getYCoord(),!((SplattererModel)obj).getDir(), "player");
+					pb.newSize(pb.getX(),pb.getY(),3);
+					pb.fixX(0f);
+					pb.setTimeToDie(pb.getPaintballToPaintballDuration());
+					pb.platformPop();
+					addObject(pb);
+				}
+			}
 		}
 		hud.update(dt);
+
 
 		//if(MainInputController.getInstance().didDebug())
 		if (player.getY() < -player.getHeight())
@@ -298,7 +317,7 @@ public class GameMode extends Mode implements Settable {
 	public void draw() {
 		canvas.end();
 		canvas.begin(gameCamera);
-		canvas.setCamera(canvas.getWidth()/2,player.getY() * scaleVector.y, canvas.getHeight()/2);
+		canvas.setCamera(player.getX()*scaleVector.x,player.getY() * scaleVector.y, canvas.getHeight()/2);
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
@@ -332,7 +351,6 @@ public class GameMode extends Mode implements Settable {
 		levelLoader.loadContent(manager);
 		if (manager.isLoaded(Constants.FONT_FILE))
 			hud.setFont(manager.get(Constants.FONT_FILE, BitmapFont.class));
-		//loadLevel(); TODO ask if this is important
 		soundController.play("gameMode", Constants.GAME_MUSIC_FILE, true);
 	}
 
@@ -362,16 +380,16 @@ public class GameMode extends Mode implements Settable {
 
 
 	public void nextLevel() {
-	    int nextLevel = (levelNumber+1)%NUM_LEVELS.length;
-	    setLevel(NUM_LEVELS[nextLevel],nextLevel);
-	    reset();
+		int nextLevel = (levelNumber+1)%NUM_LEVELS.length;
+		setLevel(NUM_LEVELS[nextLevel],nextLevel);
+		reset();
 	}
 
 	/**
 	 * Loads the level based on a json file. Will queue up a list of objects to
-     * add to the game world and sets all starting attributes to their initial starting
-     * number.
-     *
+	 * add to the game world and sets all starting attributes to their initial starting
+	 * number.
+	 *
 	 */
 	private void loadLevel() {
 		levelLoader.loadLevel(levelFile);
@@ -382,19 +400,20 @@ public class GameMode extends Mode implements Settable {
 	}
 
 	/**
-	 * Updates any objects that are shooters so that this class can create/add bullets 
-     * to the shooting entity. Special case applies for the player involving the HUD
-     *
-     * @param obj the obstacle that we are checking is a shooter
+	 * Updates any objects that are shooters so that this class can create/add bullets
+	 * to the shooting entity. Special case applies for the player involving the HUD.
+	 * The player will always shoot normal paintballs.
+	 *
+	 * @param obj the obstacle that we are checking is a shooter
 	 */
 	private void updateShooter(Obstacle obj) {
 		if (((Shooter)obj).isShooting()) {
 			if (obj.getName().equals("player") && hud.useAmmo())
-				addObject(paintballFactory.createPlayerPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight()));
+				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight(),"player"));
 			else if (obj.getName().equals("enemy")) {
 				int direction = ((Shooter) obj).isFacingRight() ? 1 : 0;
 				addObject(paintballFactory.createPaintball(obj.getX()+ direction * SHOOT_OFFSET, obj.getY(),
-							((Shooter) obj).isFacingRight()));
+						((Shooter) obj).isFacingRight(),((EnemyModel)obj).getEnemyType()));
 			}
 		}
 	}
@@ -414,7 +433,8 @@ public class GameMode extends Mode implements Settable {
 			addObject(levelLoader.getAddQueue().poll());
 
 		// Turn the physics engine crank.
-		world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
+		if (!hud.isLose() && !hud.isWin())
+			world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
 
 		// Garbage collect the deleted objects.
 		// Note how we use the linked list nodes to delete O(1) in place.
@@ -438,7 +458,7 @@ public class GameMode extends Mode implements Settable {
 	 * @param obj The object to add
 	 */
 	private void addObject(Obstacle obj) {
-		assert inBounds(obj) : "Object is not in bounds";
+		//assert inBounds(obj) : "Object is not in bounds";
 		objects.add(obj);
 		obj.activatePhysics(world);
 
@@ -446,8 +466,8 @@ public class GameMode extends Mode implements Settable {
 	}
 
 	/**
-	 * Helper function that adds its corresponding controller class to 
-     * every entity obstacle.
+	 * Helper function that adds its corresponding controller class to
+	 * every entity obstacle.
 	 * If its an enemy or player, add a new entity controller to it.
 	 */
 	private void addEntityController(Obstacle obj) {

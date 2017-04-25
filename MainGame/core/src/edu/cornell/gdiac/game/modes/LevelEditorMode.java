@@ -29,6 +29,7 @@ import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.game.input.EditorInputController;
 import edu.cornell.gdiac.game.levelLoading.LevelCreator;
 import edu.cornell.gdiac.game.levelLoading.LevelLoader;
+import edu.cornell.gdiac.util.Animation;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.util.FileReaderWriter;
 import edu.cornell.gdiac.util.PooledList;
@@ -63,6 +64,7 @@ public class LevelEditorMode extends Mode {
     private TextureRegion sidebarTexture;
     /** Texture for grid*/
     private TextureRegion whitePixelTexture;
+    private Animation spikeAnimation;
 
     /** Input controller */
     private EditorInputController input;
@@ -125,8 +127,8 @@ public class LevelEditorMode extends Mode {
 
         input = EditorInputController.getInstance();
         textureClicked = false;
-        regions = new TextureRegion[7];
-        startHeights = new int[7];
+        regions = new TextureRegion[12];
+        startHeights = new int[12];
 
         worldCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
         worldCamera.setAutosnap(true);
@@ -224,7 +226,7 @@ public class LevelEditorMode extends Mode {
     private String setInterval() {
         String result = JOptionPane.showInputDialog("Enter an interval time in seconds.");
         if(result != null) {
-            return result;
+            return Integer.toString(Integer.parseInt(result)*60);
         }
         else {
             return null;
@@ -234,6 +236,18 @@ public class LevelEditorMode extends Mode {
     private String setDir() {
         String[] values = {"left", "right"};
         String result = (String) JOptionPane.showInputDialog(null, "Choose a direction for your enemy to face", "Input",
+                JOptionPane.INFORMATION_MESSAGE, null, values, values[0]);
+        if(result != null) {
+            return result;
+        }
+        else {
+            return null;
+        }
+    }
+
+    private String setEnemyType() {
+        String[] values = {"normal", "trampoline"};
+        String result = (String) JOptionPane.showInputDialog(null, "Choose a type of paintball you want your enemy to shoot", "Input",
                 JOptionPane.INFORMATION_MESSAGE, null, values, values[0]);
         if(result != null) {
             return result;
@@ -298,10 +312,11 @@ public class LevelEditorMode extends Mode {
                 try {
                     int interval = 3;
                     String dir = setDir();
+                    String type = setEnemyType();
                     boolean right = false;
                     if(dir.equals("right")) { right = true; }
                     EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
-                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, true, interval);
+                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, true, interval, type);
                     newE.setDrawScale(scaleVector);
                     newE.setTexture(underMouse);
                     objects.add(newE);
@@ -313,10 +328,11 @@ public class LevelEditorMode extends Mode {
                 try {
                     int interval = Math.max(0, Integer.parseInt(setInterval()));
                     String dir = setDir();
+                    String type = setEnemyType();
                     boolean right = false;
                     if(dir.equals("right")) { right = true; }
                     EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
-                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, false, interval);
+                            underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, false, interval, type);
                     newE.setDrawScale(scaleVector);
                     newE.setTexture(underMouse);
                     objects.add(newE);
@@ -347,11 +363,10 @@ public class LevelEditorMode extends Mode {
                 float offset = .75f;
                 float[] arr = {newPos.x-offset, newPos.y+offset, newPos.x+offset, newPos.y+offset,
                         newPos.x+offset, newPos.y-offset, newPos.x-offset, newPos.y-offset};
-                PlatformModel newP = new PlatformModel(arr);
+                PlatformModel newP = new PlatformModel(arr, PlatformModel.NORMAL_PLATFORM);
                 newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
                 objects.add(newP);
-
             }
             else if(underMouse.equals(regions[6])) {
                 float offset = .75f;
@@ -362,12 +377,61 @@ public class LevelEditorMode extends Mode {
                 newW.setTexture(underMouse);
                 objects.add(newW);
             }
+            else if(underMouse.equals(regions[7])) {
+                SplattererModel newS = new SplattererModel(newPos.x, newPos.y,
+                        underMouse.getRegionWidth(), underMouse.getRegionHeight());
+                newS.setDrawScale(scaleVector);
+                newS.setTexture(underMouse);
+                objects.add(newS);
+                underMouse = null;
+                textureClicked = false;
+            }
+            else if(underMouse.equals(regions[8])) {
+                float offset = .75f;
+                float[] arr = {newPos.x-offset, newPos.y+offset, newPos.x+offset, newPos.y+offset,
+                        newPos.x+offset, newPos.y-offset, newPos.x-offset, newPos.y-offset};
+                PlatformModel newP = new PlatformModel(arr, PlatformModel.SPIKE_DOWN_PLATFORM);
+                newP.setDrawScale(scaleVector);
+                newP.setTexture(underMouse);
+                newP.setAnimation(spikeAnimation);
+                objects.add(newP);
+            }
+            else if(underMouse.equals(regions[9])) {
+                float offset = .75f;
+                float[] arr = {newPos.x-offset, newPos.y+offset, newPos.x+offset, newPos.y+offset,
+                        newPos.x+offset, newPos.y-offset, newPos.x-offset, newPos.y-offset};
+                PlatformModel newP = new PlatformModel(arr, PlatformModel.SPIKE_UP_PLATFORM);
+                newP.setDrawScale(scaleVector);
+                newP.setTexture(underMouse);
+                newP.setAnimation(spikeAnimation);
+                objects.add(newP);
+            }
+            else if(underMouse.equals(regions[10])) {
+                float offset = .75f;
+                float[] arr = {newPos.x-offset, newPos.y+offset, newPos.x+offset, newPos.y+offset,
+                        newPos.x+offset, newPos.y-offset, newPos.x-offset, newPos.y-offset};
+                PlatformModel newP = new PlatformModel(arr, PlatformModel.SPIKE_LEFT_PLATFORM);
+                newP.setDrawScale(scaleVector);
+                newP.setTexture(underMouse);
+                newP.setAnimation(spikeAnimation);
+                objects.add(newP);
+            }
+            else if(underMouse.equals(regions[11])) {
+                float offset = .75f;
+                float[] arr = {newPos.x-offset, newPos.y+offset, newPos.x+offset, newPos.y+offset,
+                        newPos.x+offset, newPos.y-offset, newPos.x-offset, newPos.y-offset};
+                PlatformModel newP = new PlatformModel(arr, PlatformModel.SPIKE_RIGHT_PLATFORM);
+                newP.setDrawScale(scaleVector);
+                newP.setTexture(underMouse);
+                newP.setAnimation(spikeAnimation);
+                objects.add(newP);
+            }
         }
 
         if(input.didRightClick()) {
             Rectangle bounds = new Rectangle();
             for(Obstacle o: objects) {
-                Vector2 scaledMouse = getScaledCoordinates(getWorldCoordinates(new Vector2(mouseX,canvas.getHeight()-mouseY)));
+                Vector2 scaledMouse = getScaledCoordinates(mousePos);
                 if(o instanceof PlatformModel) {
                     float[] points = ((PlatformModel)o).getPoints();
                     float newW = points[2]-points[0];
@@ -378,27 +442,62 @@ public class LevelEditorMode extends Mode {
                     float[] points = ((WallModel)o).getPoints();
                     float newW = points[2]-points[0];
                     float newH = points[3]-points[7];
-                    bounds = new Rectangle(points[6]+(newW/2), points[5], newW, newH);
+                    bounds = new Rectangle(points[6]+(newW/2), points[5]-(newH/2), newW, newH);
                 }
                 else if(o instanceof GoalModel) {
-                    float newW = ((GoalModel) o).getWidth()/scaleVector.x;
-                    float newH = ((GoalModel) o).getHeight()/scaleVector.y;
-                    bounds = new Rectangle(o.getX(),o.getY()-(newH/2), newW, newH);
+                    float newW = ((GoalModel) o).getWidth();
+                    if(newW/scaleVector.x > .5) {
+                        newW /= scaleVector.x;
+                    }
+                    float newH = ((GoalModel) o).getHeight();
+                    if(newH/scaleVector.y > .5) {
+                        newH /= scaleVector.y;
+                    }
+                    bounds = new Rectangle(o.getX(),o.getY()-newH, newW, newH);
                 }
                 else if(o instanceof AmmoDepotModel) {
-                    float newW = ((AmmoDepotModel) o).getWidth()/scaleVector.x;
-                    float newH = ((AmmoDepotModel) o).getHeight()/scaleVector.y;
-                    bounds = new Rectangle(o.getX(),o.getY()-(newH/2), newW, newH);
+                    float newW = ((AmmoDepotModel) o).getWidth();
+                    if(newW/scaleVector.x > .5) {
+                        newW /= scaleVector.x;
+                    }
+                    float newH = ((AmmoDepotModel) o).getHeight();
+                    if(newH/scaleVector.y > .5) {
+                        newH /= scaleVector.y;
+                    }
+                    bounds = new Rectangle(o.getX(),o.getY()-(newH), newW+(newW/2), newH);
                 }
                 else if(o instanceof EnemyModel) {
-                    float newW = ((EnemyModel) o).getWidth()/scaleVector.x;
-                    float newH = ((EnemyModel) o).getHeight()/scaleVector.y;
+                    float newW = ((EnemyModel) o).getWidth();
+                    if(newW/scaleVector.x > .5) {
+                        newW /= scaleVector.x;
+                    }
+                    float newH = ((EnemyModel) o).getHeight();
+                    if(newH/scaleVector.y > .5) {
+                        newH /= scaleVector.y;
+                    }
                     bounds = new Rectangle(o.getX()-(newW/2),o.getY()-(newH/2), newW+(newW/2), newH);
                 }
                 else if(o instanceof PlayerModel) {
-                    float newW = ((PlayerModel) o).getWidth()/scaleVector.x;
-                    float newH = ((PlayerModel) o).getHeight()/scaleVector.y;
-                    bounds = new Rectangle(o.getX(),o.getY()-(newH/2), newW, newH);
+                    float newW = ((PlayerModel) o).getWidth();
+                    if(newW/scaleVector.x > .5) {
+                        newW /= scaleVector.x;
+                    }
+                    float newH = ((PlayerModel) o).getHeight();
+                    if(newH/scaleVector.y > .5) {
+                        newH /= scaleVector.y;
+                    }
+                    bounds = new Rectangle(o.getX(),o.getY()-(newH), newW, newH+(newH/2));
+                }
+                else if(o instanceof SplattererModel) {
+                    float newW = ((SplattererModel) o).getWidth();
+                    float newH = ((SplattererModel) o).getHeight();
+                    if(newW/scaleVector.x > .5) {
+                        newW /= scaleVector.x;
+                    }
+                    if(newH/scaleVector.y > .5) {
+                        newH /= scaleVector.y;
+                    }
+                    bounds = new Rectangle(o.getX(),o.getY()-(newH), newW, newH);
                 }
                 if(bounds.contains(scaledMouse)) {
                     objects.remove(o);
@@ -443,6 +542,7 @@ public class LevelEditorMode extends Mode {
             startHeights[i] = startHeight;
             startHeight += regions[i].getRegionHeight() + 20;
         }
+
         if(textureClicked) {
             canvas.draw(underMouse, Gdx.input.getX()-(underMouse.getRegionWidth()/2),
                     canvas.getHeight()-Gdx.input.getY()-(underMouse.getRegionHeight()/2));
@@ -480,6 +580,12 @@ public class LevelEditorMode extends Mode {
         manager.load(Constants.CAMERA_FILE,Texture.class);
         manager.load(Constants.WHITE_PIXEL_FILE,Texture.class);
         manager.load(Constants.WALL_FILE,Texture.class);
+        manager.load(Constants.SPLATTERER_FILE,Texture.class);
+        manager.load(Constants.SPIKES_DOWN_STILL_FILE,Texture.class);
+        manager.load(Constants.SPIKES_UP_STILL_FILE,Texture.class);
+        manager.load(Constants.SPIKES_LEFT_STILL_FILE,Texture.class);
+        manager.load(Constants.SPIKES_RIGHT_STILL_FILE,Texture.class);
+        manager.load(Constants.SPIKES_UP_SPIN_FILE,Texture.class);
         levelLoader.preLoadContent(manager);
     }
 
@@ -489,6 +595,11 @@ public class LevelEditorMode extends Mode {
         sidebarTexture = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true);
         whitePixelTexture = AssetRetriever.createTextureRegion(manager, Constants.WHITE_PIXEL_FILE, true);
 
+        spikeAnimation = new Animation();
+        spikeAnimation.addTexture("spin", AssetRetriever.createTexture(manager, Constants.SPIKES_UP_SPIN_FILE, false), 1 , 8);
+        spikeAnimation.setPlaying(false);
+        spikeAnimation.setPlayingAnimation("spin");
+
         regions[0] = AssetRetriever.createTextureRegion(manager, Constants.PLAYER_FILE, false);
         regions[1] = AssetRetriever.createTextureRegion(manager, Constants.ENEMY_INTERVAL_FILE, false);
         regions[2] = AssetRetriever.createTextureRegion(manager, Constants.PLATFORM_FILE, false);
@@ -496,6 +607,11 @@ public class LevelEditorMode extends Mode {
         regions[4] = AssetRetriever.createTextureRegion(manager, Constants.CAMERA_FILE, false);
         regions[5] = AssetRetriever.createTextureRegion(manager, Constants.ENEMY_ONSIGHT_FILE, false);
         regions[6] = AssetRetriever.createTextureRegion(manager, Constants.WALL_FILE, false);
+        regions[7] = AssetRetriever.createTextureRegion(manager, Constants.SPLATTERER_FILE, false);
+        regions[8] = AssetRetriever.createTextureRegion(manager, Constants.SPIKES_DOWN_STILL_FILE, false);
+        regions[9] = AssetRetriever.createTextureRegion(manager, Constants.SPIKES_UP_STILL_FILE, false);
+        regions[10] = AssetRetriever.createTextureRegion(manager, Constants.SPIKES_LEFT_STILL_FILE, false);
+        regions[11] = AssetRetriever.createTextureRegion(manager, Constants.SPIKES_RIGHT_STILL_FILE, false);
     }
 
     @Override
@@ -527,6 +643,21 @@ public class LevelEditorMode extends Mode {
         if (manager.isLoaded(Constants.WHITE_PIXEL_FILE)) {
             manager.unload(Constants.WHITE_PIXEL_FILE);
         }
+        if(manager.isLoaded(Constants.SPLATTERER_FILE)) {
+            manager.unload(Constants.SPLATTERER_FILE);
+        }
+        if(manager.isLoaded(Constants.SPIKES_DOWN_STILL_FILE)) {
+            manager.unload(Constants.SPIKES_DOWN_STILL_FILE);
+        }
+        if(manager.isLoaded(Constants.SPIKES_UP_STILL_FILE)) {
+            manager.unload(Constants.SPIKES_UP_STILL_FILE);
+        }
+        if(manager.isLoaded(Constants.SPIKES_LEFT_STILL_FILE)) {
+            manager.unload(Constants.SPIKES_LEFT_STILL_FILE);
+        }
+        if(manager.isLoaded(Constants.SPIKES_RIGHT_STILL_FILE)) {
+            manager.unload(Constants.SPIKES_RIGHT_STILL_FILE);
+        }
     }
 
     private void saveLevel() {
@@ -538,6 +669,7 @@ public class LevelEditorMode extends Mode {
         ArrayList<EnemyModel> onSightEnemies = new ArrayList<EnemyModel>();
         ArrayList<AmmoDepotModel> ammoDepots = new ArrayList<AmmoDepotModel>();
         GoalModel target = null;
+        ArrayList<SplattererModel> splatterers = new ArrayList<SplattererModel>();
 
         for (Obstacle obj: objects){
             if (obj instanceof PlatformModel)
@@ -554,10 +686,11 @@ public class LevelEditorMode extends Mode {
                 player = (PlayerModel) obj;
             else if (obj instanceof GoalModel)
                 target = (GoalModel) obj;
+            else if (obj instanceof SplattererModel)
+                splatterers.add((SplattererModel) obj);
         }
-
         if (player != null && target != null) {
-            levelCreator.writeLevel(saveFileName, platforms, walls, player, intervalEnemies, onSightEnemies, ammoDepots, target, ammo);
+            levelCreator.writeLevel(saveFileName, platforms, walls, player, intervalEnemies, onSightEnemies, ammoDepots, splatterers, target, ammo);
             FileReaderWriter.addJsonFile(saveFileName);
         }
         else{
