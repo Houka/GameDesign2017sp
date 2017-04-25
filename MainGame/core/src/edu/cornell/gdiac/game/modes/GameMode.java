@@ -262,8 +262,10 @@ public class GameMode extends Mode implements Settable {
 	@Override
 	public void update(float dt) {
 		soundController.update();
-		for (EntityController e : entityControllers)
-			e.update(dt);
+
+		if (!hud.isLose() && !hud.isWin())
+			for (EntityController e : entityControllers)
+				e.update(dt);
 
 		applySettings();
 		paintballFactory.applySettings();
@@ -431,7 +433,8 @@ public class GameMode extends Mode implements Settable {
 			addObject(levelLoader.getAddQueue().poll());
 
 		// Turn the physics engine crank.
-		world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
+		if (!hud.isLose() && !hud.isWin())
+			world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
 
 		// Garbage collect the deleted objects.
 		// Note how we use the linked list nodes to delete O(1) in place.
