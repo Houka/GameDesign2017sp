@@ -149,7 +149,7 @@ public class PaintballModel extends BoxObstacle {
         gravity = false;
         maxLifeTime = 20f;
         snapping = true;
-        updateTime = .1f;
+        updateTime = .25f;
         lastUpdate = 0f;
         updateReady=false;
         initY = y;
