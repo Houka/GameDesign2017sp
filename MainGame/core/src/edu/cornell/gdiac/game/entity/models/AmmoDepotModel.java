@@ -52,6 +52,7 @@ public class AmmoDepotModel extends BoxObstacle {
         super(x,y,width* AMMO_DEPOT_HSHRINK,height*AMMO_DEPOT_VSHRINK);
         setDensity(0);
         setSensor(true);
+        setBodyType(BodyDef.BodyType.StaticBody);
         setGravityScale(0);
         setFixedRotation(true);
         setName("ammoDepot");
