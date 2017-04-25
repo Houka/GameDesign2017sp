@@ -54,16 +54,16 @@ public class Sidebar {
 
         //Below fields are just samples
         Sidebar.addSlider("Gravity",-30f,0f,-29.0f);
-        Sidebar.addSlider("Jump Height",1f,70f, 14f);
-        Sidebar.addSlider("Player Speed",1f,20f,10.0f);
+        Sidebar.addSlider("Jump Height",1f,70f, 11.4f);
+        Sidebar.addSlider("Player Speed",1f,20f,7.65f);
         Sidebar.addSlider("Knockback Force",0f,30f, 8f);
         Sidebar.addSlider("Knockback Friction",0f,.1f, .06f);
         Sidebar.addSlider("Knockback Duration",0f,80f, 3f);
         Sidebar.addSlider("Knockback Stun Duration",0f,60f, 30f);
-        Sidebar.addSlider("Paintball Height",.1f,.5f,.22f);
+        Sidebar.addSlider("Paintball Height",.1f,.5f,.46f);
         Sidebar.addSlider("Paintball Width",.5f,6.5f,3.5f);
-        Sidebar.addSlider("Paintball Speed",1f,7.5f,3.6f);
-        Sidebar.addSlider("Paintball-paintball Stick Time",0f,10f,3.6f);
+        Sidebar.addSlider("Paintball Speed",1f,7.5f,5.225f);
+        Sidebar.addSlider("Paintball-paintball Stick Time",0f,10f,8f);
         Sidebar.addSlider("Paintball-Wall Stick Time",0f,10f,2f);
         Sidebar.addSlider("Camera Speed",0f,.3f,.1f);
         Sidebar.addSlider("Rumble Intensity",0f,100f,0f);
@@ -73,17 +73,17 @@ public class Sidebar {
     public static void initDefaultSettings(){
         if (theMap == null)
             theMap = new HashMap<String, Float>();
-        Sidebar.setValue("Gravity",-29.0f);
+        Sidebar.setValue("Gravity",-30.0f);
         Sidebar.setValue("Jump Height",14f);
-        Sidebar.setValue("Player Speed",10.0f);
+        Sidebar.setValue("Player Speed",7.65f);
         Sidebar.setValue("Knockback Force",8f);
         Sidebar.setValue("Knockback Friction",.06f);
         Sidebar.setValue("Knockback Duration",3f);
         Sidebar.setValue("Knockback Stun Duration",30f);
-        Sidebar.setValue("Paintball Height",.22f);
+        Sidebar.setValue("Paintball Height",.46f);
         Sidebar.setValue("Paintball Width",3.5f);
-        Sidebar.setValue("Paintball Speed",3.6f);
-        Sidebar.setValue("Paintball-paintball Stick Time",3.6f);
+        Sidebar.setValue("Paintball Speed",5.225f);
+        Sidebar.setValue("Paintball-paintball Stick Time",8f);
         Sidebar.setValue("Paintball-Wall Stick Time",2f);
         Sidebar.setValue("Camera Speed",.1f);
         Sidebar.setValue("Rumble Intensity",0f);

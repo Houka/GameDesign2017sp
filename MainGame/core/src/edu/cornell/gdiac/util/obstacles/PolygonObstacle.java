@@ -327,6 +327,7 @@ public class PolygonObstacle extends SimpleObstacle {
 	 */
 	public void setTexture(TextureRegion value) {
 		texture = value;
+		origin.set(texture.getRegionWidth()/2.0f, texture.getRegionHeight()/2.0f);
 		region = new PolygonRegion(texture,scaled,tridx);
 	}
 	

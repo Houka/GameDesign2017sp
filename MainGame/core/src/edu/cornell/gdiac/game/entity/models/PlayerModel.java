@@ -92,6 +92,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private int shootCooldown;
     /** Whether our feet are on the ground */
     private boolean isGrounded;
+    /** If we are on player */
+    private boolean isTrampGrounded;
     /** Whether we've used our double jump */
     private boolean canDoubleJump;
     /** Whether we are actively shooting */
@@ -103,11 +105,14 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     /** Fixtures for different hitboxes*/
     private Fixture playerFixture;
     private Fixture crouchFixture;
+    private Fixture runningFixture;
     private PolygonShape playerShape;
     private PolygonShape crouchShape;
+    private PolygonShape runningShape;
 
     private float playerHeight;
     private float playerWidth;
+
     /** Cache for internal force calculations */
     private Vector2 forceCache = new Vector2();
     private Vector2 zeroVector = new Vector2(0,0);
@@ -122,6 +127,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private float[] runningBox;
     private float[] crouchingBox;
 
+    private PaintballModel myPlatform;
+
     /**
      * Creates a new player avatar at the origin.
      *
@@ -135,6 +142,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     public PlayerModel(float width, float height) {
         this(0,0,width,height);
     }
+
 
     /**
      * Creates a new player avatar at the given position.
@@ -152,8 +160,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         super(
                 new float[]{
                         -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
-                        -width/2.0f*PLAYER_HSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
-                        width/2.0f*PLAYER_HSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
+                        -width/2.0f*PLAYER_HSHRINK, height/2.0f - 2.5f*height*PLAYER_HEAD_SPACE,
+                        width/2.0f*PLAYER_HSHRINK, height/2.0f - 2.5f*height*PLAYER_HEAD_SPACE,
                         width/2.0f*PLAYER_HSHRINK, -height/2.0f
                 },
                 x,y);
@@ -171,15 +179,14 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         };
         crouchingBox = new float[]{
                 -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
-                -width/2.0f*PLAYER_HSHRINK, height/2.0f - 2*height*PLAYER_HEAD_SPACE,
-                width/2.0f*PLAYER_HSHRINK, height/2.0f - 2*height*PLAYER_HEAD_SPACE,
+                -width/2.0f*PLAYER_HSHRINK, height/2.0f - 2.5f*height*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, height/2.0f - 2.5f*height*PLAYER_HEAD_SPACE,
                 width/2.0f*PLAYER_HSHRINK, -height/2.0f
         };
         drawColor = new Color(256f,256f,256f,1f);
 
         playerWidth = width;
         playerHeight = height;
-        setMass(PLAYER_MASS);
 
         setDensity(PLAYER_DENSITY);
         setFriction(PLAYER_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
@@ -203,9 +210,36 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
         knockbackForce = 0;
         knockbackDirection = new Vector2(0,0);
+
+        myPlatform = null;
     }
 
     // BEGIN: Setters and Getters
+    public float getPlayerJump() {
+        return Sidebar.getValue("Jump Height");
+    }
+
+    private float getMaxDiff(float a, float b, float c) {
+        return Math.max(Math.max(Math.abs(a-b),Math.abs(b-c)),Math.abs(a-c));
+    }
+
+    @Override
+    public float getHeight(){
+        if(crouchFixture != null && fixtureIsActive(crouchFixture.getUserData()))
+            return getMaxDiff(crouchingBox[1],crouchingBox[3],crouchingBox[5]);
+        if(runningFixture != null && fixtureIsActive(runningFixture.getUserData()))
+            return getMaxDiff(runningBox[1],runningBox[3],runningBox[5]);
+        return playerHeight;
+    }
+    @Override
+    public float getWidth(){
+        if(crouchFixture != null && fixtureIsActive(crouchFixture.getUserData()))
+            return getMaxDiff(crouchingBox[0],crouchingBox[2],crouchingBox[4]);
+        if(runningFixture != null && fixtureIsActive(runningFixture.getUserData()))
+            return getMaxDiff(runningBox[0],runningBox[2],runningBox[4]);
+        return playerWidth;
+    }
+
     @Override
     public void setTexture(TextureRegion region){
         super.setTexture(region);
@@ -273,14 +307,14 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     public boolean isJumping() {
         return isJumping && isGrounded && jumpCooldown <= 0;
     }
-  
+
     /**
      * Returns true if the player is actively double jumping.
      *
      * @return true if the player is actively jumping.
      */
-    public boolean isDoubleJumping(){ 
-        return isJumping && !isGrounded && canDoubleJump; 
+    public boolean isDoubleJumping(){
+        return isJumping && !isGrounded && canDoubleJump;
     }
 
     public boolean isKnockedBack() {
@@ -305,7 +339,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         canDoubleJump = false;
         setVY(0.0f);
 
-       isKnockedBack=true;
+        isKnockedBack=true;
         knockbackDuration = defaultKnockbackDuration;
         if(dir>0)
             knockbackDirection.set(1,0);
@@ -405,6 +439,29 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         return isFacingRight;
     }
 
+    public boolean isTrampGrounded() { return isTrampGrounded; }
+    public void setTrampGrounded(boolean value) { isTrampGrounded = value; }
+
+    public void setMyPlatform(PaintballModel p) {
+        myPlatform = p;
+    }
+
+    public boolean fixtureIsActive(Object fixData) {
+        if(fixData == null)
+            return false;
+
+        if(isGrounded() && isCrouching()) {
+            if(fixData.equals(crouchFixture.getUserData()))
+                return true;
+        } else if (isGrounded() && animation.getCurrentStrip().equals("run")){
+            if(fixData.equals(runningFixture.getUserData()))
+                return true;
+        } else if (fixData.equals(playerFixture.getUserData())) {
+            return true;
+        }
+        return false;
+    }
+
     // END: Setters and Getters
 
     /**
@@ -435,34 +492,43 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         sensorDef.density = PLAYER_DENSITY;
         sensorDef.isSensor = true;
         sensorShape = new PolygonShape();
-        sensorShape.setAsBox(PLAYER_SSHRINK*getWidth()/2.0f, SENSOR_HEIGHT, sensorCenter, 0.0f);
+        sensorShape.setAsBox(PLAYER_SSHRINK*super.getWidth()/2.0f, SENSOR_HEIGHT, sensorCenter, 0.0f);
         sensorDef.shape = sensorShape;
 
         sensorFixture = body.createFixture(sensorDef);
         sensorFixture.setUserData(getSensorName());
 
         //player default and crouching hitboxes
-        Vector2 playerCenter = new Vector2(0, 0);
         FixtureDef playerDef = new FixtureDef();
         playerDef.density = PLAYER_DENSITY;
-        playerDef.isSensor = true;
+        playerDef.friction = PLAYER_FRICTION;
         playerShape = new PolygonShape();
-        playerShape.setAsBox(PLAYER_HSHRINK*getWidth(), getHeight(), playerCenter, 0.0f);
+        playerShape.set(defaultBox);
         playerDef.shape = playerShape;
 
         playerFixture = body.createFixture(playerDef);
         playerFixture.setUserData("Default hitbox");
 
-        Vector2 crouchCenter = new Vector2(0, -getHeight()/2);
         FixtureDef crouchDef = new FixtureDef();
         crouchDef.density = PLAYER_DENSITY;
-        crouchDef.isSensor = true;
+        crouchDef.friction = PLAYER_FRICTION;
         crouchShape = new PolygonShape();
-        crouchShape.setAsBox(PLAYER_HSHRINK*getWidth(), getHeight()/2, crouchCenter, 0.0f);
+        crouchShape.set(crouchingBox);
         crouchDef.shape = crouchShape;
 
-        crouchFixture = body.createFixture(playerDef);
+        crouchFixture = body.createFixture(crouchDef);
         crouchFixture.setUserData("Crouching hitbox");
+
+        FixtureDef runningDef = new FixtureDef();
+        runningDef.density = PLAYER_DENSITY;
+        runningDef.friction = PLAYER_FRICTION;
+        runningShape = new PolygonShape();
+        runningShape.set(runningBox);
+        runningDef.shape = runningShape;
+
+        runningFixture = body.createFixture(runningDef);
+        runningFixture.setUserData("Running hitbox");
+
         return true;
     }
 
@@ -477,7 +543,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         if (!isActive()) {
             return;
         }
-      
+
         boolean stunned = false;
 
         if(isKnockedBack()) {
@@ -490,38 +556,29 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
             if (knockbackDuration < 0) {
                 setVX(getVX() * knockbackFriction);
-              //  if (Math.abs(getVX()) < .01)
-                    //stunned = false;
-
             }
         }
-      
+
         // TODO: find better solution for riding a bullet
         if (ridingBullet!=null) {
             if(!stunned){
-              // Don't want to be moving. Damp out player motion
-              if (getMovement() == 0f ) {
-                  setVX(ridingBullet.getVX());
-              }else{
-                  setVX(Math.signum(getMovement())*getMaxSpeed()+ridingBullet.getVX());
-              }
+                // Don't want to be moving. Damp out player motion
+                if (getMovement() == 0f ) {
+                    setVX(ridingBullet.getVX());
+                }else{
+                    setVX(Math.signum(getMovement())*getMaxSpeed()+ridingBullet.getVX());
+                }
             }
         }else{
-          if(!stunned){
-            if (getMovement() == 0f ) {
-                setVX(0);
-            }else{
-                setVX(Math.signum(getMovement())*getMaxSpeed());
+            if(!stunned){
+                if (getMovement() == 0f ) {
+                    setVX(0);
+                }else{
+                    setVX(Math.signum(getMovement())*getMaxSpeed());
+                }
             }
-          }
         }
 
-        // Jump!
-        if (isJumping() && !stunned) {
-            forceCache.set(0, jumpForce);
-            body.applyLinearImpulse(forceCache,getPosition(),true);
-            setCanDoubleJump(true);
-        }
         if (isDoubleJumping() && !stunned) {
             //dividing by sqrt 2 makes it such that from 0 velocity it goes half the height of a regular jump
             forceCache.set(0, jumpForce/(DOUBLE_JUMP_MULTIPLIER));
@@ -530,6 +587,22 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
             body.applyLinearImpulse(forceCache,getPosition(),true);
             setCanDoubleJump(false);
         }
+
+        // Jump!
+        if (isJumping() && !stunned) {
+            float mod = 1.0f;
+            if(isTrampGrounded) {
+                mod = 2.0f;
+                if(myPlatform!=null) {
+                    myPlatform.instakill();
+                    myPlatform = null;
+                }
+            }
+            forceCache.set(0, mod*jumpForce);
+            body.applyLinearImpulse(forceCache,getPosition(),true);
+            setCanDoubleJump(true);
+        }
+
     }
 
     @Override
@@ -571,19 +644,6 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
         if(isGhosting())
             passThroughDuration= Math.max(passThroughDuration-dt,0);
-      
-        if (isCrouching()){
-            initShapes(crouchingBox);
-            initBounds();
-        }
-        else if (getMovement() != 0){
-            initShapes(runningBox);
-            initBounds();
-        }
-        else{
-            initShapes(defaultBox);
-            initBounds();
-        }
 
         super.update(dt);
         animation.update(dt);
@@ -614,7 +674,14 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
      */
     public void drawDebug(GameCanvas canvas) {
         super.drawDebug(canvas);
-        if (sensorShape != null)
-            canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+        if (sensorShape != null) {
+            canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+            if(fixtureIsActive(crouchFixture.getUserData()))
+                canvas.drawPhysics(crouchShape, Color.PINK, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+            if(fixtureIsActive(playerFixture.getUserData()))
+                canvas.drawPhysics(playerShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+            if(fixtureIsActive(runningFixture.getUserData()))
+                canvas.drawPhysics(runningShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+        }
     }
 }

@@ -4,7 +4,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
+import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.util.Animation;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 
 /**
@@ -16,7 +19,10 @@ public class PaintballModel extends BoxObstacle {
     /** Scale of paintball**/
     private float xScale;
     private float yScale;
-
+  
+    /** How much the paintballs snap. The larger the value, the more dramatic the snapping effect */
+    private static final int GRID_SNAP = 2;
+  
     /** Transformation of original scale **/
     private float xtransform = 1f;
     private float ytransform = 1f;
@@ -42,6 +48,8 @@ public class PaintballModel extends BoxObstacle {
     /** Starting width and height**/
     private float initWidth;
     private float initHeight;
+
+    private float initDir;
 
     /** Starting speed**/
     private float speed;
@@ -74,9 +82,31 @@ public class PaintballModel extends BoxObstacle {
     private boolean updateReady;
 
     private float initY;
+    private float initX;
     private boolean recentCollision;
     private boolean recentCreation;
     private boolean isPlayerBullet;
+    private boolean direction;
+    private boolean trailEnabled;
+    private boolean passThrough;
+    private boolean popped;
+    private boolean platformPopped;
+
+    private Animation headTexture;
+    private Animation splatEffectTexture;
+    private Animation trailTexture;
+    private TextureRegion platformTexture;
+    private Animation platformSplatEffectTexture;
+
+    private int currTrailFrame;
+
+    private Vector2 platformOrigin;
+
+    /** If the paintball is being stood on*/
+    private boolean isUsed;
+
+    /** Type of paintball */
+    private String paintballType;
 
     /**
      * PaintballModel constructor
@@ -89,7 +119,7 @@ public class PaintballModel extends BoxObstacle {
      * @param yScl      Starting y-scale
      * @param scl       Screen scale
      */
-    public PaintballModel(float x, float y, float w, float h, float s, float xScl, float yScl, Vector2 scl){
+    public PaintballModel(float x, float y, float w, float h, float s, float xScl, float yScl, Vector2 scl, String type){
         super(x,y,w,h);
         setName("paintball");
         if(yScl == 0 || xScl == 0) {
@@ -113,6 +143,8 @@ public class PaintballModel extends BoxObstacle {
         speed = s;
         growing = true;
         dying = false;
+        popped = false;
+        platformPopped = false;
         scale = scl;
         gravity = false;
         maxLifeTime = 20f;
@@ -121,17 +153,44 @@ public class PaintballModel extends BoxObstacle {
         lastUpdate = 0f;
         updateReady=false;
         initY = y;
+        initX = x;
+        initDir = speed>0 ? 1f : -1f;
         recentCollision = false;
         recentCreation = true;
         isPlayerBullet = false;
+        paintballType = type;
+        isUsed = false;
+        headTexture = new Animation();
+        splatEffectTexture = new Animation();
+        platformSplatEffectTexture = new Animation();
+        trailTexture = new Animation();
+        trailEnabled=true;
+        currTrailFrame = 0;
+        passThrough = false;
+        platformOrigin=new Vector2();
+        direction = true;
     }
 
     //BEGIN: GETTERS AND SETTERS
+    public boolean getDying() { return dying; }
+    public boolean getGrowing() { return growing;}
+    public void setGrowing(boolean value) { growing = value; }
+    public boolean getDirection() { return direction; }
+    public void setDirection(boolean dir) { direction = dir; }
+    public boolean isUsed() {
+        return isUsed;
+    }
+    public void setUsed(boolean value) {
+        isUsed = value;
+    }
     public void setTimeToDie(float xd) {
+        fixX(0);
         if(!dying) {
             timeToDie = xd + deathDuration;
             dying = true;
             growing = false;
+            platformOrigin.x=origin.x-texture.getRegionWidth()/2f + platformTexture.getRegionWidth()/2f;
+            platformOrigin.y=origin.y;
         }
     }
 
@@ -141,6 +200,10 @@ public class PaintballModel extends BoxObstacle {
 
     public void setPlayerBullet(boolean truth){
         isPlayerBullet = truth;
+        trailEnabled=false;
+        growing=false;
+        passThrough = true;
+        xtransform*=-1; //TODO maybe add actual fixture
     }
 
     public float getScaledX() {
@@ -151,6 +214,9 @@ public class PaintballModel extends BoxObstacle {
         return yScale*ytransform;
     }
 
+    public float getScaledPlatformX() {
+        return xScale*xtransform*texture.getRegionWidth() / platformTexture.getRegionWidth()*(176f/127f);
+    }
 
     public float getHeadSize() {
         return headSize;
@@ -182,6 +248,28 @@ public class PaintballModel extends BoxObstacle {
         this.paintballToPaintballDuration = paintballToPaintballDuration;
     }
 
+    public void setHeadTexture(TextureRegion tex) {
+        headTexture.addTexture("head",tex.getTexture(),1, Constants.PAINTBALL_TRAIL_COLUMNS);
+        headTexture.play("head",true);
+    }
+
+    public void setPlatformTexture(TextureRegion tex) {
+        platformTexture = tex;
+    }
+
+    public void setSplatEffectTexture(TextureRegion tex) {
+       splatEffectTexture.addTexture("splat",tex.getTexture(),1,10);
+    }
+
+    public void setPlatformSplatEffectTexture(TextureRegion tex) {
+        platformSplatEffectTexture.addTexture("platform splat", tex.getTexture(),1, 15);
+    }
+
+    public void setTrailTexture(TextureRegion tex) {
+        trailTexture.addTexture("trail",tex.getTexture(),1,5);
+        trailTexture.playOnce("trail");
+    }
+
     public float getMaxLifeTime() {
         return maxLifeTime;
     }
@@ -194,6 +282,9 @@ public class PaintballModel extends BoxObstacle {
     }
     public float getMaxXScale() {
         return maxXScale;
+    }
+    public float getMaxScaledX() {
+        return maxXScale*xScale;
     }
     public float getSpeed() {
         return speed;
@@ -232,13 +323,22 @@ public class PaintballModel extends BoxObstacle {
     public boolean isDead() {
         return dying && timeToDie<deathDuration;
     }
+
+    public String getPaintballType() { return paintballType; }
+    public void setPaintballType(String type) { paintballType = type; }
+    public boolean canPassThrough() {
+        return passThrough;
+    }
+    public void setPassThrough(boolean val) {
+        passThrough = val;
+    }
+  
     //END: GETTERS AND SETTERS
 
     /** Enable gravity**/
     public void enableGravity() {
         gravity = true;
         this.setGravityScale(1/3f);
-       // this.setVY(-2); //Uncomment and comment above line for constant falling
     }
 
     /**
@@ -280,11 +380,30 @@ public class PaintballModel extends BoxObstacle {
         markRemoved(true);
     }
 
+    public void pop() {
+        popped = true;
+        timeToDie = 0;
+        fixX(0);
+        splatEffectTexture.playOnce("splat");
+    }
+
+    public void platformPop() {
+        platformPopped = true;
+        fixX(0);
+        platformSplatEffectTexture.playOnce("platform splat");
+    }
+
     @Override
     public void update(float delta) {
         lastUpdate +=delta;
         recentCollision = false;
         recentCreation = false;
+
+        if(popped){
+            releaseFixtures();
+            if(!splatEffectTexture.isPlaying())
+                markRemoved(true);
+        }
 
         if(updateReady) {
             newWidth(newW);
@@ -294,13 +413,13 @@ public class PaintballModel extends BoxObstacle {
         }
 
         if(xtransform<maxXScale && growing) {
-            xtransform += delta*Math.abs(speed)*1.5f;
+            xtransform = initDir*2*(getX()-initX)-initWidth; //The right way is +initWidth but I like how this looks
             if(lastUpdate>updateTime) {
                 newWidth(initWidth*xtransform);
                 lastUpdate = 0;
             }
         } else if(growing){
-            //setVX(speed);
+            xtransform = maxXScale;
             newWidth(initWidth*maxXScale);
             growing = false;
         }
@@ -311,10 +430,10 @@ public class PaintballModel extends BoxObstacle {
             growing= false;
             timeToDie-=delta;
             if(timeToDie<deathDuration) {
-                snapping=false;
+                if(opacity==1)
+                    opacity = .6f;
                 this.setMass(0);
-                enableGravity();
-                opacity *= .99;
+                opacity *= .97;
             }
             if(timeToDie<0)
                 markRemoved(true);
@@ -324,27 +443,72 @@ public class PaintballModel extends BoxObstacle {
             this.setVY(0.0f);
         }
 
-        this.setVX(speed);
+        if(growing)
+            setVX(speed/1.5f);
+        else
+            setVX(speed);
+
         maxLifeTime-=delta;
         if(snapping)
             setPosition(getPosition().x,snapToGrid(getPosition().y));
 
+        headTexture.update(delta);
+        splatEffectTexture.update(delta);
+        platformSplatEffectTexture.update(delta);
+        if((int)(xtransform/maxXScale*Constants.PAINTBALL_TRAIL_COLUMNS)>currTrailFrame && trailTexture.isPlaying()) {
+            trailTexture.advanceFrame();
+            currTrailFrame++;
+        }
     }
 
     @Override
     public void draw(GameCanvas canvas) {
         paintcolor.a = opacity;
-        if (texture != null) {
-            canvas.draw(texture, paintcolor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),getScaledX(),getScaledY());
+        if (platformSplatEffectTexture.getTextureRegion() != null && platformPopped) {
+            float xPos = (getX() + getWidth()/2f*initDir) * drawScale.x - initDir*platformSplatEffectTexture.getTextureRegion().getRegionWidth()/4f;
+            float yPos = getY()*drawScale.y-platformSplatEffectTexture.getTextureRegion().getRegionHeight()*getScaledY()/2f;
+            canvas.draw(platformSplatEffectTexture.getTextureRegion(), paintcolor, origin.x, origin.y, xPos,yPos, getAngle(), -initDir, 1.0f);
+        }
+        if(!popped) {
+            if (dying) {
+                float vscale = (texture.getRegionHeight() * getScaledY()) / platformTexture.getRegionHeight();
+                canvas.draw(platformTexture, paintcolor, platformOrigin.x, platformOrigin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), getScaledPlatformX(), 1/vscale);
+            } else {
+                if (texture != null && trailEnabled) {
+                    float xPos = getX();
+                    // canvas.draw(texture, paintcolor, origin.x, origin.y, xPos * drawScale.x, getY() * drawScale.y, getAngle(), getScaledX(), getScaledY());
+
+                    if (trailTexture.getTextureRegion() != null && xtransform > 0) {
+                        xPos = (initX) * drawScale.x + initDir * trailTexture.getTextureRegion().getRegionWidth() / 2f;
+                        if (xPos * initDir < getX() * drawScale.x * initDir)
+                            xPos = getX() * drawScale.x;
+                        float hscale = (texture.getRegionWidth() * getMaxScaledX()) / trailTexture.getTextureRegion().getRegionWidth();
+                        float vscale = (texture.getRegionHeight() * getScaledY()) / trailTexture.getTextureRegion().getRegionHeight();
+                        canvas.draw(trailTexture.getTextureRegion(), paintcolor, trailTexture.getTextureRegion().getRegionWidth() / 2f,
+                                trailTexture.getTextureRegion().getRegionHeight() / 2f, xPos, getY() * drawScale.y, getAngle(), -initDir * hscale, vscale);
+                    }
+                }
+
+                if (headTexture != null && !dying && !platformPopped) {
+                    float xPos = (getX() + initDir * getScaledX() / 2f) * drawScale.x + initDir * headTexture.getTextureRegion().getRegionWidth() / 4.0f;
+                    canvas.draw(headTexture.getTextureRegion(), paintcolor, headTexture.getTextureRegion().getRegionWidth() / 2f,
+                            headTexture.getTextureRegion().getRegionHeight() / 2f,
+                            xPos, getY() * drawScale.y, getAngle(), initDir, 1.0f);
+
+                }
+            }
         }
 
-        //TODO Find better solution later
-        paintcolor.a = 1;
-        canvas.draw(texture, paintcolor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),0,0);
+        if (splatEffectTexture.getTextureRegion() != null && splatEffectTexture.isPlaying()) {
+            float xPos = (getX() + getWidth()/2f*initDir) * drawScale.x - initDir*splatEffectTexture.getTextureRegion().getRegionWidth()/4f;
+            float yPos = getY()*drawScale.y-splatEffectTexture.getTextureRegion().getRegionHeight()*getScaledY()/2f;
+            canvas.draw(splatEffectTexture.getTextureRegion(), paintcolor, origin.x, origin.y, xPos,yPos, getAngle(), initDir, 1.0f);
+
+        }
     }
 
     private float snapToGrid(float yVal) {
-        yVal =(float) Math.floor(yVal/getHeight()/2f)*getHeight()*2;
+        yVal =(float) Math.floor(yVal/getHeight()/GRID_SNAP)*getHeight()*GRID_SNAP;
         return yVal + getHeight();
     }
 }

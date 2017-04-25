@@ -29,6 +29,7 @@ public class LevelParser {
     private JsonValue resources;
     private JsonValue target;
     private int startingAmmo;
+    private JsonValue splatterers;
 
 
     /** Creates a level parser object*/
@@ -48,6 +49,7 @@ public class LevelParser {
             target = objects.get("target");
             resources = objects.get("resources");
             startingAmmo = objects.get("starting ammo").asInt();
+            splatterers = objects.get("splatterers");
         }
         catch (Exception e){
             Gdx.app.error("LevelParser", "Improper Json", new IllegalStateException());
@@ -78,4 +80,6 @@ public class LevelParser {
     /** Returns the starting ammo*/
     public int getStartingAmmo() { return startingAmmo; }
 
+    /** Returns the splatterers*/
+    public JsonValue getSplatterers() { return splatterers; }
 }

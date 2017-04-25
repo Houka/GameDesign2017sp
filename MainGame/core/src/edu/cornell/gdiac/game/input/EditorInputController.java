@@ -107,7 +107,7 @@ public class EditorInputController implements InputProcessor{
         savePressed = ctrlPressed&& (Gdx.input.isKeyPressed(Input.Keys.S));
         loadPressed = ctrlPressed&& (Gdx.input.isKeyPressed(Input.Keys.O));
         resetPressed = (Gdx.input.isKeyPressed(Input.Keys.R));
-        ammoPressed = ctrlPressed&& (Gdx.input.isKeyPressed(Input.Keys.A));
+        ammoPressed = ctrlPressed&& (Gdx.input.isKeyPressed(Input.Keys.P));
         upPressed  = !ctrlPressed && (Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W));
         downPressed  = !ctrlPressed && (Gdx.input.isKeyPressed(Input.Keys.DOWN)|| Gdx.input.isKeyPressed(Input.Keys.S));
         leftPressed  = !ctrlPressed && (Gdx.input.isKeyPressed(Input.Keys.LEFT)|| Gdx.input.isKeyPressed(Input.Keys.A));

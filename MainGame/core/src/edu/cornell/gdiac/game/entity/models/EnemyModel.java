@@ -46,7 +46,7 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
     /** Offset for hitbox for lower part of arm*/
     private static final float BELOW_ARM = 0.1f;
     /** Offset for hitbox for where the poster ends below*/
-    private static final float BELOW_POSTER = 0.25f;
+    private static final float BELOW_POSTER = 0.3f;
 
     private static final float VERTICAL_OFFSET = 1f;
 
@@ -69,10 +69,12 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
     /** If the enemy is OnSight or not */
     private boolean onSight;
     /** The type of enemy, i.e. what kind of bullet it shoots*/
-    private int enemyType;
+    private String enemyType;
 
     /** The animation associated with this entity */
     private Animation animation;
+
+    private Color drawColor;
 
     /**
      * Returns the name of the ground sensor
@@ -98,8 +100,9 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
      * @param height	The object width in physics units
      * @param isFacingRight Whether or not the enemy is facing right
      */
-    public EnemyModel(float x, float y, float width, float height, boolean isFacingRight, boolean onSight, int interval) {
+    public EnemyModel(float x, float y, float width, float height, boolean isFacingRight, boolean onSight, int interval, String enemyType) {
         super(
+                isFacingRight ?
                 new float[]{
                         -width/2.0f, -height*BELOW_POSTER,
                         -width/2.0f, height/2.0f,
@@ -109,12 +112,23 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
                         width/2.0f, -height*BELOW_ARM,
                         0, -height*BELOW_ARM,
                         0, -height*BELOW_POSTER,
+                } :
+                new float[]{
+                        0, -height*BELOW_ARM,
+                        -width/2.0f, -height*BELOW_ARM,
+                        -width/2.0f, height*ABOVE_ARM_SHRINK,
+                        0, height*ABOVE_ARM_SHRINK,
+                        0, height/2.0f,
+                        width/2.0f, height/2.0f,
+                        width/2.0f, -height*BELOW_POSTER,
+                        0, -height*BELOW_POSTER
                 },
                 x,y);
         setDensity(ENEMY_DENSITY);
         setFriction(ENEMY_FRICTION);  /// HE WILL STICK TO WALLS IF YOU FORGET
         setFixedRotation(true);
         setName("enemy");
+        setEnemyType(enemyType);
         bodyinfo.type = BodyDef.BodyType.StaticBody;
 
         // Gameplay attributes
@@ -125,6 +139,8 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
         this.onSight = onSight;
         shootCooldown = onSight? DEFAULT_SHOOT_COOLDOWN : interval;
         stunCooldown = DEFAULT_STUN_COOLDOWN;
+
+        this.drawColor = new Color(255,255,255,1);
     }
 
     /**
@@ -141,18 +157,6 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
         if (!super.activatePhysics(world)) {
             return false;
         }
-
-        // Ground Fixture
-        Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
-        FixtureDef sensorDef = new FixtureDef();
-        sensorDef.density = ENEMY_DENSITY;
-        sensorDef.isSensor = true;
-        sensorShape = new PolygonShape();
-        sensorShape.setAsBox(SENSOR_WIDTH, SENSOR_HEIGHT, sensorCenter, 0.0f);
-        sensorDef.shape = sensorShape;
-
-        sensorFixture = body.createFixture(sensorDef);
-        sensorFixture.setUserData(getSensorName());
 
         return true;
     }
@@ -200,6 +204,14 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
     @Override
     public void setShooting(boolean value) { isShooting = value; }
 
+    public String getEnemyType() {
+        return enemyType;
+    }
+
+    public void setEnemyType(String type) {
+        enemyType = type;
+    }
+
     // END: Setters and Getters
 
     /**
@@ -228,12 +240,13 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
      * @param canvas Drawing context
      */
     public void draw(GameCanvas canvas) {
+        drawColor.a = isStunned() ? 0.6f : 1f;
         float xScale = isFacingRight ? 1.0f : -1.0f;
 
         if (animation == null)
-            canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),xScale,1.0f);
+            canvas.draw(texture,drawColor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),xScale,1.0f);
         else
-            canvas.draw(animation.getTextureRegion(),Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),xScale,1.0f);
+            canvas.draw(animation.getTextureRegion(),drawColor,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),xScale,1.0f);
     }
 
     /**

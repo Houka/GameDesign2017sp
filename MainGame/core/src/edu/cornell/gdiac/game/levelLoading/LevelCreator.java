@@ -38,6 +38,7 @@ public class LevelCreator {
     private ArrayList<AmmoDepotModel> defaultAmmoDepots;
     private GoalModel defaultTarget;
     private int defaultAmmo;
+    private ArrayList<SplattererModel> defaultSplatterers;
 
     /**
      * Fills in defaults (for testing purposes)
@@ -48,17 +49,18 @@ public class LevelCreator {
         defaultOnSightEnemies = new ArrayList<EnemyModel>();
         defaultIntervalEnemies = new ArrayList<EnemyModel>();
         defaultAmmoDepots = new ArrayList<AmmoDepotModel>();
+        defaultSplatterers = new ArrayList<SplattererModel>();
 
 
         for (int i = 0; i < DEFAULT_PLATFORMS.length; i++)
-            defaultPlatforms.add(new PlatformModel(DEFAULT_PLATFORMS[i]));
+            defaultPlatforms.add(new PlatformModel(DEFAULT_PLATFORMS[i], PlatformModel.NORMAL_PLATFORM));
 
         for (int i = 0; i < DEFAULT_WALLS.length; i++)
             defaultWalls.add(new WallModel(DEFAULT_WALLS[i]));
 
         defaultPlayer = new PlayerModel(2.5f, 5.0f,38 ,95 );
-        defaultOnSightEnemies.add(new EnemyModel(5.5f, 10f, 1, 1, true, true, 0));
-        defaultIntervalEnemies.add(new EnemyModel(3.5f, 8f, 1, 1, true, false, 200));
+        defaultOnSightEnemies.add(new EnemyModel(5.5f, 10f, 1, 1, true, true, 0, "normal"));
+        defaultIntervalEnemies.add(new EnemyModel(3.5f, 8f, 1, 1, true, false, 200, "normal"));
         defaultAmmoDepots.add(new AmmoDepotModel(5.5f, 4f, 1, 1, 3));
         defaultTarget = new GoalModel(29.5f, 15.0f, 1, 1);
         defaultAmmo = 4;
@@ -69,7 +71,8 @@ public class LevelCreator {
      */
     public void writeLevel(String JsonFile, ArrayList<PlatformModel> platforms, ArrayList<WallModel> walls,
                            PlayerModel player, ArrayList<EnemyModel> intervalEnemies, ArrayList<EnemyModel> onSightEnemies,
-                           ArrayList<AmmoDepotModel> ammoDepots, GoalModel target, int ammo) {
+                           ArrayList<AmmoDepotModel> ammoDepots, ArrayList<SplattererModel> splatterers,
+                           GoalModel target, int ammo) {
         FileHandle f = new FileHandle(new File(JsonFile));
         JsonWriter writer = new JsonWriter(f.writer(false));
         Json json = new Json();
@@ -82,9 +85,39 @@ public class LevelCreator {
         json.writeObjectStart("platforms");
         json.writeArrayStart("default");
         for (int i = 0; i < platforms.size(); i ++) {
-            json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
+            if (platforms.get(i).getType() == PlatformModel.NORMAL_PLATFORM)
+                json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
         }
         json.writeArrayEnd();
+
+        json.writeArrayStart("spikes_left");
+        for (int i = 0; i < platforms.size(); i ++) {
+            if (platforms.get(i).getType() == PlatformModel.SPIKE_LEFT_PLATFORM)
+                json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
+        }
+        json.writeArrayEnd();
+
+        json.writeArrayStart("spikes_right");
+        for (int i = 0; i < platforms.size(); i ++) {
+            if (platforms.get(i).getType() == PlatformModel.SPIKE_RIGHT_PLATFORM)
+                json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
+        }
+        json.writeArrayEnd();
+
+        json.writeArrayStart("spikes_up");
+        for (int i = 0; i < platforms.size(); i ++) {
+            if (platforms.get(i).getType() == PlatformModel.SPIKE_UP_PLATFORM)
+                json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
+        }
+        json.writeArrayEnd();
+
+        json.writeArrayStart("spikes_down");
+        for (int i = 0; i < platforms.size(); i ++) {
+            if (platforms.get(i).getType() == PlatformModel.SPIKE_DOWN_PLATFORM)
+                json.writeValue(platforms.get(i).getPoints(), FloatArray.class, Float.class);
+        }
+        json.writeArrayEnd();
+
         json.writeObjectEnd();
         //walls
         json.writeObjectStart("walls");
@@ -110,6 +143,7 @@ public class LevelCreator {
             json.writeValue("y", intervalEnemies.get(i).getY());
             json.writeValue("isFacingRight", intervalEnemies.get(i).isFacingRight());
             json.writeValue("interval", intervalEnemies.get(i).getInterval());
+            json.writeValue("enemyType", intervalEnemies.get(i).getEnemyType());
             json.writeObjectEnd();
         }
         json.writeArrayEnd();
@@ -121,6 +155,7 @@ public class LevelCreator {
             json.writeValue("y", onSightEnemies.get(i).getY());
             json.writeValue("isFacingRight", onSightEnemies.get(i).isFacingRight());
             json.writeValue("interval", onSightEnemies.get(i).getInterval());
+            json.writeValue("enemyType", onSightEnemies.get(i).getEnemyType());
             json.writeObjectEnd();
         }
         json.writeArrayEnd();
@@ -139,11 +174,23 @@ public class LevelCreator {
         json.writeArrayEnd();
         json.writeObjectEnd();
 
+        //splatterers
+        json.writeObjectStart("splatterers");
+        json.writeArrayStart("default");
+        for (int i=0; i<splatterers.size(); i++) {
+            json.writeObjectStart();
+            json.writeValue("x", splatterers.get(i).getX());
+            json.writeValue("y", splatterers.get(i).getY());
+            json.writeObjectEnd();
+        }
+        json.writeArrayEnd();
+        json.writeObjectEnd();
+
         //target
         json.writeObjectStart("target");
         json.writeValue("x", target.getX());
         json.writeValue("y", target.getY());
-        json.writeObjectEnd();;
+        json.writeObjectEnd();
 
         //ammo
         json.writeValue("starting ammo", ammo);
@@ -154,7 +201,7 @@ public class LevelCreator {
             writer.close();
         }
         catch (Exception e){
-                System.out.println("Error: Failed to close writer");
+            System.out.println("Error: Failed to close writer");
         }
     }
 
@@ -162,6 +209,7 @@ public class LevelCreator {
     public void writeDemoJson(){
         setDefaults();
         writeLevel(DEFAULT_FILE, defaultPlatforms, defaultWalls, defaultPlayer, defaultIntervalEnemies,
-                defaultOnSightEnemies, defaultAmmoDepots, defaultTarget, defaultAmmo);
+                defaultOnSightEnemies, defaultAmmoDepots, defaultSplatterers, defaultTarget, defaultAmmo);
     }
+
 }
