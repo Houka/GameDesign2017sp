@@ -143,10 +143,6 @@ public class CollisionController implements ContactListener {
         obj2.markRemoved(true);
     }
     private void handleCollision(PaintballModel obj1, PaintballModel obj2){
-        if(obj1.recentlyCreated())
-            obj1.instakill();
-        if(obj2.recentlyCreated())
-            obj2.instakill();
 
         if(obj1.isDead() || obj2.isDead() || obj1.getRecentCollision() || obj2.getRecentCollision())
             return;

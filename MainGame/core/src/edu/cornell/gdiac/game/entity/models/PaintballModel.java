@@ -393,6 +393,10 @@ public class PaintballModel extends BoxObstacle {
         platformSplatEffectTexture.playOnce("platform splat");
     }
 
+    public void snap(){
+        setPosition(getPosition().x,snapToGrid(getPosition().y));
+    }
+
     @Override
     public void update(float delta) {
         lastUpdate +=delta;
@@ -450,7 +454,7 @@ public class PaintballModel extends BoxObstacle {
 
         maxLifeTime-=delta;
         if(snapping)
-            setPosition(getPosition().x,snapToGrid(getPosition().y));
+            snap();
 
         headTexture.update(delta);
         splatEffectTexture.update(delta);
