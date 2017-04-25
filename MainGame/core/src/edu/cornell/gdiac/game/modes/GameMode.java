@@ -262,8 +262,10 @@ public class GameMode extends Mode implements Settable {
 	@Override
 	public void update(float dt) {
 		soundController.update();
-		for (EntityController e : entityControllers)
-			e.update(dt);
+
+		if (!hud.isLose() && !hud.isWin())
+			for (EntityController e : entityControllers)
+				e.update(dt);
 
 		applySettings();
 		paintballFactory.applySettings();
@@ -278,13 +280,14 @@ public class GameMode extends Mode implements Settable {
 					PaintballModel pb;
 					if(((SplattererModel) obj).getDir())
 						pb = paintballFactory.createPaintball(obj.getX()+(((SplattererModel) obj).getWidth()*2),
-								((SplattererModel) obj).getYCoord(),!((SplattererModel)obj).getDir(), "normal");
+								((SplattererModel) obj).getYCoord(),!((SplattererModel)obj).getDir(), "player");
 					else
 						pb = paintballFactory.createPaintball(obj.getX()-(((SplattererModel) obj).getWidth()*2),
-								((SplattererModel) obj).getYCoord(),!((SplattererModel)obj).getDir(), "normal");
+								((SplattererModel) obj).getYCoord(),!((SplattererModel)obj).getDir(), "player");
 					pb.newSize(pb.getX(),pb.getY(),3);
 					pb.fixX(0f);
 					pb.setTimeToDie(pb.getPaintballToPaintballDuration());
+					pb.platformPop();
 					addObject(pb);
 				}
 			}
@@ -406,7 +409,7 @@ public class GameMode extends Mode implements Settable {
 	private void updateShooter(Obstacle obj) {
 		if (((Shooter)obj).isShooting()) {
 			if (obj.getName().equals("player") && hud.useAmmo())
-				addObject(paintballFactory.createPlayerPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight(),"normal"));
+				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight(),"player"));
 			else if (obj.getName().equals("enemy")) {
 				int direction = ((Shooter) obj).isFacingRight() ? 1 : 0;
 				addObject(paintballFactory.createPaintball(obj.getX()+ direction * SHOOT_OFFSET, obj.getY(),
@@ -430,7 +433,8 @@ public class GameMode extends Mode implements Settable {
 			addObject(levelLoader.getAddQueue().poll());
 
 		// Turn the physics engine crank.
-		world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
+		if (!hud.isLose() && !hud.isWin())
+			world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
 
 		// Garbage collect the deleted objects.
 		// Note how we use the linked list nodes to delete O(1) in place.

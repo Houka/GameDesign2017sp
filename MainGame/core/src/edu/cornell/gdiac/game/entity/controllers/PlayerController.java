@@ -51,7 +51,7 @@ public class PlayerController extends EntityController {
         else if(player.isGrounded() && player.isCrouching())
             player.getAnimation().play("crouch",false);
         else if (!player.isGrounded() && player.getVY() < -OFF_GROUND_THRESHOLD)
-            player.getAnimation().play("falling", false);
+            player.getAnimation().play("falling", true);
         else if (!player.isGrounded() && player.getVY() > OFF_GROUND_THRESHOLD) {
             if (player.isDoubleJumping())
                 player.getAnimation().setPlayingAnimation("still");
