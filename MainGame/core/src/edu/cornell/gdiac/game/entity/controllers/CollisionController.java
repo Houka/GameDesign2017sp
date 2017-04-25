@@ -348,8 +348,6 @@ public class CollisionController implements ContactListener {
 
     @Override
     public void beginContact(Contact contact) {
-        if(!contact.isEnabled())
-            return;
         Fixture fix1 = contact.getFixtureA();
         Fixture fix2 = contact.getFixtureB();
 
@@ -362,6 +360,20 @@ public class CollisionController implements ContactListener {
         try {
             Obstacle bd1 = (Obstacle) body1.getUserData();
             Obstacle bd2 = (Obstacle) body2.getUserData();
+
+            PlayerModel player = null;
+            Object playerFixData = null;
+            if(bd1.getName().equals("player")) {
+                player = (PlayerModel) bd1;
+                playerFixData = fd1;
+            } else if (bd2.getName().equals("player")) {
+                player = (PlayerModel) bd2;
+                playerFixData = fd2;
+            }
+
+            if(player!=null && !player.fixtureIsActive(playerFixData)) {
+                return;
+            }
 
             processCollision(bd1, bd2, fd1, fd2,fix1,fix2);
             processCollision(bd2, bd1, fd2, fd1,fix2,fix1);

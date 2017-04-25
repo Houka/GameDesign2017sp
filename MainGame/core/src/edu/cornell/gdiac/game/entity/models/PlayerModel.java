@@ -450,6 +450,9 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         if(fixData == null)
             return false;
 
+        if(fixData.equals(sensorFixture.getUserData()))
+            return true;
+
         if(isGrounded() && isCrouching()) {
             if(fixData.equals(crouchFixture.getUserData()))
                 return true;
