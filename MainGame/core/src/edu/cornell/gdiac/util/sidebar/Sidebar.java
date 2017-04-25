@@ -63,7 +63,7 @@ public class Sidebar {
         Sidebar.addSlider("Paintball Height",.1f,.5f,.46f);
         Sidebar.addSlider("Paintball Width",.5f,6.5f,3.5f);
         Sidebar.addSlider("Paintball Speed",1f,7.5f,5.225f);
-        Sidebar.addSlider("Paintball-paintball Stick Time",0f,10f,3.6f);
+        Sidebar.addSlider("Paintball-paintball Stick Time",0f,10f,8f);
         Sidebar.addSlider("Paintball-Wall Stick Time",0f,10f,2f);
         Sidebar.addSlider("Camera Speed",0f,.3f,.1f);
         Sidebar.addSlider("Rumble Intensity",0f,100f,0f);
@@ -83,7 +83,7 @@ public class Sidebar {
         Sidebar.setValue("Paintball Height",.46f);
         Sidebar.setValue("Paintball Width",3.5f);
         Sidebar.setValue("Paintball Speed",5.225f);
-        Sidebar.setValue("Paintball-paintball Stick Time",5f);
+        Sidebar.setValue("Paintball-paintball Stick Time",8f);
         Sidebar.setValue("Paintball-Wall Stick Time",2f);
         Sidebar.setValue("Camera Speed",.1f);
         Sidebar.setValue("Rumble Intensity",0f);

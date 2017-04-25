@@ -93,7 +93,10 @@ public class CollisionController implements ContactListener {
 
     // BEGIN: Simple Collision handlers
     private void handleCollision(PlayerModel obj1, SplattererModel obj2) {}
-    private void handleCollision(PlayerModel obj1, EnemyModel obj2){ hud.setLose(true);}
+    private void handleCollision(PlayerModel obj1, EnemyModel obj2){
+        if (!obj2.isStunned())
+            hud.setLose(true);
+    }
     private void handleCollision(PlayerModel obj1, GoalModel obj2){ hud.setWin(true); }
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
         touchedGround(obj1,obj2,userData1,userData2);
@@ -207,6 +210,9 @@ public class CollisionController implements ContactListener {
             }
         }
 
+        if(obj2.isPlayerBullet())
+            obj2.pop();
+
         obj2.setTimeToDie(obj2.getPaintballToWallDuration());
         obj2.fixX(0f);
     }
@@ -220,6 +226,9 @@ public class CollisionController implements ContactListener {
             }
         }
 
+        if(obj2.isPlayerBullet())
+            obj2.pop();
+        
         obj2.setTimeToDie(obj2.getPaintballToPlatformDuration());
         obj2.fixX(0f);
     }
@@ -235,12 +244,13 @@ public class CollisionController implements ContactListener {
             dir = true;
         }
         if(!obj1.isUsed()) {
-            obj2.platformPop();
+            obj2.pop();
             obj2.setPassThrough(true);
             obj1.setUsed(true);
             obj1.setShot(true);
             obj1.setDir(dir);
             obj1.setYCoord(obj2.getY());
+        }else{
         }
     }
 
