@@ -1,5 +1,6 @@
 package edu.cornell.gdiac.game.entity.models;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 
@@ -27,7 +28,7 @@ public class SplattererModel extends BoxObstacle {
         super(x, y, width, height);
         setDensity(0);
         setSensor(true);
-        setGravityScale(0);
+        setBodyType(BodyDef.BodyType.StaticBody);
         setFixedRotation(true);
         setName("splatterer");
 
