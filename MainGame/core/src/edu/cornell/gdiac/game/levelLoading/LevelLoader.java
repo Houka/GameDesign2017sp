@@ -328,6 +328,7 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(Constants.PAINTBALL_NORMAL_TRAIL_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_STATIONARY_MINE_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_STATIONARY_NORMAL_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_STATIONARY_CHAR_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_SPLAT_EFFECT_FILE, Texture.class);
         manager.load(Constants.AMMO_DEPOT_FILE, Texture.class);
         manager.load(Constants.SPLATTERER_FILE, Texture.class);
