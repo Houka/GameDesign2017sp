@@ -449,7 +449,6 @@ public class LevelEditorMode extends Mode {
                 newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
                 newP.setAnimation(spikeAnimation);
-                System.out.println();
                 float width = arr[2]-arr[0];
                 float height = arr[3]-arr[7];
                 Vector2 pos = new Vector2(arr[6]+(width/2), arr[5]-(height/2));
