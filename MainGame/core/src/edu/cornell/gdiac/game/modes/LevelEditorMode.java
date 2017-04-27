@@ -38,7 +38,7 @@ import edu.cornell.gdiac.util.obstacles.Obstacle;
 import javax.swing.*;
 import java.io.File;
 import java.text.NumberFormat;
-import java.util.ArrayList;
+import java.util.*;
 
 
 /**
@@ -94,7 +94,7 @@ public class LevelEditorMode extends Mode {
     private JFrame dummyFrame;
 
     /** All the objects in the world.	 */
-    private PooledList<Obstacle> objects = new PooledList<Obstacle>();
+    private HashMap<Obstacle,Vector2> objects = new HashMap<Obstacle, Vector2>();
 
     /** Camera's used in-game**/
     private Camera2 worldCamera;
@@ -304,7 +304,7 @@ public class LevelEditorMode extends Mode {
                         underMouse.getRegionWidth(), underMouse.getRegionHeight());
                 newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
-                objects.add(newP);
+                objects.put(newP, newP.getPosition());
                 underMouse = null;
                 textureClicked = false;
             }
@@ -319,7 +319,7 @@ public class LevelEditorMode extends Mode {
                             underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, true, interval, type);
                     newE.setDrawScale(scaleVector);
                     newE.setTexture(underMouse);
-                    objects.add(newE);
+                    objects.put(newE, newE.getPosition());
                 }
                 catch (NullPointerException e) {
                 }
@@ -335,7 +335,7 @@ public class LevelEditorMode extends Mode {
                             underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, false, interval, type);
                     newE.setDrawScale(scaleVector);
                     newE.setTexture(underMouse);
-                    objects.add(newE);
+                    objects.put(newE, newE.getPosition());
                 }
                 catch (NumberFormatException e) {
                 }
@@ -348,14 +348,14 @@ public class LevelEditorMode extends Mode {
                         underMouse.getRegionWidth(), underMouse.getRegionHeight(), ammoAmount);
                 newA.setDrawScale(scaleVector);
                 newA.setTexture(underMouse);
-                objects.add(newA);
+                objects.put(newA, newA.getPosition());
             }
             else if(underMouse.equals(regions[4])) {
                 GoalModel newG = new GoalModel(newPos.x, newPos.y,
                         underMouse.getRegionWidth(), underMouse.getRegionHeight());
                 newG.setDrawScale(scaleVector);
                 newG.setTexture(underMouse);
-                objects.add(newG);
+                objects.put(newG, newG.getPosition());
                 underMouse = null;
                 textureClicked = false;
             }
@@ -366,7 +366,12 @@ public class LevelEditorMode extends Mode {
                 PlatformModel newP = new PlatformModel(arr, PlatformModel.NORMAL_PLATFORM);
                 newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
-                objects.add(newP);
+                float width = arr[2]-arr[0];
+                float height = arr[3]-arr[7];
+                Vector2 pos = new Vector2(arr[6]+(width/2), arr[5]-(height/2));
+                if(!objects.containsValue(pos)) {
+                    objects.put(newP, pos);
+                }
             }
             else if(underMouse.equals(regions[6])) {
                 float offset = .75f;
@@ -375,14 +380,19 @@ public class LevelEditorMode extends Mode {
                 WallModel newW = new WallModel(arr);
                 newW.setDrawScale(scaleVector);
                 newW.setTexture(underMouse);
-                objects.add(newW);
+                float width = arr[2]-arr[0];
+                float height = arr[3]-arr[7];
+                Vector2 pos = new Vector2(arr[6]+(width/2), arr[5]-(height/2));
+                if(!objects.containsValue(pos)) {
+                    objects.put(newW, pos);
+                }
             }
             else if(underMouse.equals(regions[7])) {
                 SplattererModel newS = new SplattererModel(newPos.x, newPos.y,
                         underMouse.getRegionWidth(), underMouse.getRegionHeight());
                 newS.setDrawScale(scaleVector);
                 newS.setTexture(underMouse);
-                objects.add(newS);
+                objects.put(newS, newS.getPosition());
                 underMouse = null;
                 textureClicked = false;
             }
@@ -394,7 +404,12 @@ public class LevelEditorMode extends Mode {
                 newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
                 newP.setAnimation(spikeAnimation);
-                objects.add(newP);
+                float width = arr[2]-arr[0];
+                float height = arr[3]-arr[7];
+                Vector2 pos = new Vector2(arr[6]+(width/2), arr[5]-(height/2));
+                if(!objects.containsValue(pos)) {
+                    objects.put(newP, pos);
+                }
             }
             else if(underMouse.equals(regions[9])) {
                 float offset = .75f;
@@ -404,7 +419,12 @@ public class LevelEditorMode extends Mode {
                 newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
                 newP.setAnimation(spikeAnimation);
-                objects.add(newP);
+                float width = arr[2]-arr[0];
+                float height = arr[3]-arr[7];
+                Vector2 pos = new Vector2(arr[6]+(width/2), arr[5]-(height/2));
+                if(!objects.containsValue(pos)) {
+                    objects.put(newP, pos);
+                }
             }
             else if(underMouse.equals(regions[10])) {
                 float offset = .75f;
@@ -414,7 +434,12 @@ public class LevelEditorMode extends Mode {
                 newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
                 newP.setAnimation(spikeAnimation);
-                objects.add(newP);
+                float width = arr[2]-arr[0];
+                float height = arr[3]-arr[7];
+                Vector2 pos = new Vector2(arr[6]+(width/2), arr[5]-(height/2));
+                if(!objects.containsValue(pos)) {
+                    objects.put(newP, pos);
+                }
             }
             else if(underMouse.equals(regions[11])) {
                 float offset = .75f;
@@ -424,13 +449,21 @@ public class LevelEditorMode extends Mode {
                 newP.setDrawScale(scaleVector);
                 newP.setTexture(underMouse);
                 newP.setAnimation(spikeAnimation);
-                objects.add(newP);
+                System.out.println();
+                float width = arr[2]-arr[0];
+                float height = arr[3]-arr[7];
+                Vector2 pos = new Vector2(arr[6]+(width/2), arr[5]-(height/2));
+                if(!objects.containsValue(pos)) {
+                    objects.put(newP, pos);
+                }
             }
         }
 
         if(input.didRightClick()) {
             Rectangle bounds = new Rectangle();
-            for(Obstacle o: objects) {
+            Iterator it = objects.keySet().iterator();
+            while(it.hasNext()) {
+                Obstacle o = (Obstacle) it.next();
                 Vector2 scaledMouse = getScaledCoordinates(mousePos);
                 if(o instanceof PlatformModel) {
                     float[] points = ((PlatformModel)o).getPoints();
@@ -500,7 +533,7 @@ public class LevelEditorMode extends Mode {
                     bounds = new Rectangle(o.getX(),o.getY()-(newH), newW, newH);
                 }
                 if(bounds.contains(scaledMouse)) {
-                    objects.remove(o);
+                    it.remove();
                 }
             }
         }
@@ -512,6 +545,7 @@ public class LevelEditorMode extends Mode {
             else if(input.didScrolledDown())
                 startHeight-=10;
         }
+
     }
 
     @Override
@@ -522,7 +556,9 @@ public class LevelEditorMode extends Mode {
         super.draw();
 
         // Draw the objects from the loaded level
-        for (Obstacle obj : objects) {
+        Iterator it = objects.keySet().iterator();
+        while(it.hasNext()) {
+            Obstacle obj = (Obstacle) it.next();
             obj.draw(canvas);
         }
 
@@ -671,7 +707,9 @@ public class LevelEditorMode extends Mode {
         GoalModel target = null;
         ArrayList<SplattererModel> splatterers = new ArrayList<SplattererModel>();
 
-        for (Obstacle obj: objects){
+        Iterator it = objects.keySet().iterator();
+        while(it.hasNext()) {
+            Obstacle obj = (Obstacle) it.next();
             if (obj instanceof PlatformModel)
                 platforms.add((PlatformModel) obj);
             else if (obj instanceof WallModel)
@@ -705,7 +743,7 @@ public class LevelEditorMode extends Mode {
             while (!levelLoader.getAddQueue().isEmpty()) {
                 Obstacle obj = levelLoader.getAddQueue().poll();
                 obj.setDrawScale(scaleVector);
-                objects.add(obj);
+                objects.put(obj, obj.getPosition());
             }
         }else{
             System.out.println("ERROR: invalid file path");
