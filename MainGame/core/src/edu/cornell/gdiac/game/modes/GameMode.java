@@ -416,12 +416,12 @@ public class GameMode extends Mode implements Settable {
 	private void updateShooter(Obstacle obj) {
 		if (((Shooter)obj).isShooting()) {
 			if (obj.getName().equals("player") && hud.useAmmo()) {
-				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY()+player.getHeight()/8, ((Shooter) obj).isFacingRight(), "player"));
+				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY()+player.getHeight()/12, ((Shooter) obj).isFacingRight(), "player"));
 			}
 			else if (obj.getName().equals("enemy")) {
 				int direction = ((Shooter) obj).isFacingRight() ? 1 : 0;
 				EnemyModel enemy = (EnemyModel) obj;
-				addObject(paintballFactory.createPaintball(enemy.getX()+ direction * SHOOT_OFFSET, enemy.getY()-enemy.getHeight()/4,
+				addObject(paintballFactory.createPaintball(enemy.getX()+ direction * SHOOT_OFFSET, enemy.getY()-enemy.getHeight()/16,
 						enemy.isFacingRight(),enemy.getEnemyType()));
 			}
 		}
