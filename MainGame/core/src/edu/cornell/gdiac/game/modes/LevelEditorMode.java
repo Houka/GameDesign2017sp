@@ -315,7 +315,7 @@ public class LevelEditorMode extends Mode {
                     String type = setEnemyType();
                     boolean right = false;
                     if(dir.equals("right")) { right = true; }
-                    EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
+                    EnemyModel newE = new EnemyModel(newPos.x+(underMouse.getRegionWidth()/4)/scaleVector.x, newPos.y,
                             underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, true, interval, type);
                     newE.setDrawScale(scaleVector);
                     newE.setTexture(underMouse);
@@ -331,7 +331,7 @@ public class LevelEditorMode extends Mode {
                     String type = setEnemyType();
                     boolean right = false;
                     if(dir.equals("right")) { right = true; }
-                    EnemyModel newE = new EnemyModel(newPos.x, newPos.y,
+                    EnemyModel newE = new EnemyModel(newPos.x+(underMouse.getRegionWidth()/4)/scaleVector.x, newPos.y,
                             underMouse.getRegionWidth(), underMouse.getRegionHeight(), right, false, interval, type);
                     newE.setDrawScale(scaleVector);
                     newE.setTexture(underMouse);
