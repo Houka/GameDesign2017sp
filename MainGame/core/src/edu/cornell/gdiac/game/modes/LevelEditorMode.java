@@ -469,13 +469,13 @@ public class LevelEditorMode extends Mode {
                     float[] points = ((PlatformModel)o).getPoints();
                     float newW = points[2]-points[0];
                     float newH = points[3]-points[7];
-                    bounds = new Rectangle(points[6]+(newW/2), points[5]-(newH/2), newW, newH);
+                    bounds = new Rectangle(points[6], points[5], newW, newH);
                 }
                 else if(o instanceof WallModel) {
                     float[] points = ((WallModel)o).getPoints();
                     float newW = points[2]-points[0];
                     float newH = points[3]-points[7];
-                    bounds = new Rectangle(points[6]+(newW/2), points[5]-(newH/2), newW, newH);
+                    bounds = new Rectangle(points[6], points[5], newW, newH);
                 }
                 else if(o instanceof GoalModel) {
                     float newW = ((GoalModel) o).getWidth();
