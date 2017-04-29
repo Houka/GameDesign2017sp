@@ -7,6 +7,7 @@ import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
 import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
+import javafx.util.Pair;
 
 /**
  * Created by Lu on 3/17/2017.
@@ -29,8 +30,6 @@ import edu.cornell.gdiac.util.obstacles.Obstacle;
 public class CollisionController implements ContactListener {
     /** the hud*/
     private HUDModel hud;
-    /** Mark set to handle more sophisticated collision callbacks */
-    private ObjectSet<Object> sensorObjects;
     /** paintball factory for splatterers */
     private PaintballFactory paintballFactory;
 
@@ -45,7 +44,6 @@ public class CollisionController implements ContactListener {
         this.hud = hud;
         this.paintballFactory = paintballFactory;
         this.objectsToAdd = new PooledList<PaintballModel>();
-        sensorObjects = new ObjectSet<Object>();
     }
 
     // BEGIN: helper functions
@@ -59,11 +57,12 @@ public class CollisionController implements ContactListener {
      */
     private void touchedGround(PlayerModel obj1, Obstacle obj2, Object userData1, Object userData2){
         if (obj1.isGroundSensor(userData1)) {
-            obj1.setGrounded(true);
             obj1.setJumpForce(obj1.getPlayerJump());
             if(userData2==null)
                 userData2 = obj2;
-            sensorObjects.add(userData2); // Could have more than one ground
+            obj1.addSensorCollision(userData1,userData2);
+            if(obj1.isColliding())
+                obj1.setGrounded(true);
         }
     }
 
@@ -78,10 +77,12 @@ public class CollisionController implements ContactListener {
         if (obj1.isGroundSensor(userData1)) {
             if(userData2==null)
                 userData2 = obj2;
-            sensorObjects.remove(userData2);
-            if (sensorObjects.size == 0) {
-                if(obj1.isGrounded())
+            boolean wasColliding = obj1.isColliding();
+            obj1.removeSensorCollision(userData1,userData2); // Creating pairs might be slow
+            if (!obj1.isColliding()) {
+                if(wasColliding) {
                     obj1.setCanDoubleJump(true);
+                }
                 obj1.setGrounded(false);
             }
         }
@@ -89,6 +90,10 @@ public class CollisionController implements ContactListener {
 
     public boolean aboveGround(PlayerModel obj1, PaintballModel obj2) {
         float buffer = obj2.getHeight()/4f;
+        return obj1.getY()-obj1.getHeight()/2>=obj2.getY()+obj2.getHeight()/2-buffer;
+    }
+
+    public boolean aboveGround(PlayerModel obj1, PaintballModel obj2, float buffer) {
         return obj1.getY()-obj1.getHeight()/2>=obj2.getY()+obj2.getHeight()/2-buffer;
     }
     // END: helper functions
@@ -251,8 +256,8 @@ public class CollisionController implements ContactListener {
     private void handleEndCollision(PlayerModel obj1,PaintballModel obj2, Object userData1, Object userData2){
         leftGround(obj1,obj2,userData1,userData2);
         if(userData1!=null) {
-            sensorObjects.remove(userData1);
-            if(sensorObjects.size == 0)
+            obj1.removeSensorCollision(userData1,userData2);
+            if(!obj1.isColliding())
                 obj1.setGrounded(false);
         }
         if(obj1.fixtureIsActive(userData1)) {
@@ -369,7 +374,7 @@ public class CollisionController implements ContactListener {
                 playerFixData = fd2;
             }
 
-            if(player!=null && !player.fixtureIsActive(playerFixData)) {
+            if(player!=null && !player.fixtureIsActive(playerFixData) && !player.isGroundSensor(playerFixData)) {
                 return;
             }
 
@@ -477,15 +482,18 @@ public class CollisionController implements ContactListener {
 
 
             if(paintball.canPassThrough()) {
-                if(player.getVY()>0 || !aboveGround(player,paintball)) {
+                if(player.getVY()>0 || !aboveGround(player,paintball,.0f) || (player.getX()-player.getWidth()+.1>paintball.getX()+paintball.getWidth() || player.getX()+player.getWidth()-.1<paintball.getX()-paintball.getWidth())) {
                     if(player.getRidingBullet()==paintball)
                         player.setRidingVX(null);
                     contact.setEnabled(false);
+                    player.removeSensorCollision(player.getSensorName(),paintballFix);
+                    player.removeSensorCollision(player.getRunningSensorName(),paintballFix);
                 }
                 else {
                     if(aboveGround(player,paintball)) {
                         player.setGrounded(true);
-                        sensorObjects.add(playerFixData);
+                        player.addSensorCollision(player.getSensorName(),paintballFix);
+                        player.addSensorCollision(player.getRunningSensorName(),paintballFix);
                         if (paintball.getPaintballType().equals("trampolineComb"))
                             player.setTrampGrounded(true);
                         player.setRidingVX(paintball);

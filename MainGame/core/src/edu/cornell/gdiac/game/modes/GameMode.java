@@ -324,8 +324,6 @@ public class GameMode extends Mode implements Settable {
 		canvas.end();
 		canvas.begin(gameCamera);
 		float cameraBufferWidth = gameCamera.viewportWidth/scaleVector.x/30f;
-		System.out.println(gameCamera.position.x/scaleVector.x);
-		System.out.println(player.getX());
 		canvas.setCamera(Math.max(Math.min(player.getX()+cameraBufferWidth,gameCamera.position.x/scaleVector.x),player.getX()-cameraBufferWidth)*scaleVector.x,
 				player.getY() * scaleVector.y, canvas.getHeight()/2);
 		for (Obstacle obj : objects) {

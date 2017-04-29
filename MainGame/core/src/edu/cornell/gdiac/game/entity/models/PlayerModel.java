@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.ObjectSet;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
 import edu.cornell.gdiac.game.interfaces.Animatable;
@@ -56,13 +57,12 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     /** The amount to shrink the body fixture (horizontally) relative to the image */
     private static final float PLAYER_HSHRINK_RUNNING = 0.7f;
     /** The amount to shrink the sensor fixture (horizontally) relative to the image */
-    private static final float PLAYER_SSHRINK = 0.85f;
+    private static final float PLAYER_SSHRINK = 0.75f;
     private static final float PLAYER_RUNNING_SSHRINK = 0.95f;
     /** The amount to shrink the feet relative to the top */
-    private static final float PLAYER_FOOTSHRINK = .85f;
+    private static final float PLAYER_FOOTSHRINK = .75f;
     private static final float PLAYER_RUNNING_FOOTSHRINK = .95f;
     private static final float PLAYER_HEELSHRINK = .97f;
-    private static final float PLAYER_BELLY_WIDTH = 1.1f;
     /** The position in physics units where the sensor ground should be at*/
     private float sensorX = 0f;
     /** The maximum Y velocity we let the player jump at (in case of some slight bouncing)*/
@@ -144,6 +144,9 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private float[] crouchingBox;
 
     private PaintballModel myPlatform;
+
+    private ObjectSet sensorObjects;
+    private ObjectSet runningSensorObjects;
 
     /**
      * Creates a new player avatar at the origin.
@@ -238,6 +241,9 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
         myPlatform = null;
         lastGrounding=0;
+
+        sensorObjects = new ObjectSet();
+        runningSensorObjects = new ObjectSet();
     }
 
     // BEGIN: Setters and Getters
@@ -459,6 +465,9 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     public String getSensorName() {
         return SENSOR_NAME;
     }
+    public String getRunningSensorName() {
+        return RUNNING_SENSOR_NAME;
+    }
     public boolean isGroundSensor(Object s) { return SENSOR_NAME.equals(s) || RUNNING_SENSOR_NAME.equals(s);}
 
     public boolean isGhosting() {
@@ -510,6 +519,36 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     }
 
     // END: Setters and Getters
+
+    public boolean addSensorCollision(Object a, Object b) {
+        if(a.equals(sensorFixture.getUserData())) {
+            sensorObjects.add(b);
+            return true;
+        }
+        if(a.equals(runningSensorFixture.getUserData())) {
+            runningSensorObjects.add(b);
+            return true;
+        }
+        return false;
+
+    }
+
+    public boolean removeSensorCollision(Object a, Object b) {
+        if(a.equals(sensorFixture.getUserData())) {
+            sensorObjects.remove(b);
+            return true;
+        }
+        if(a.equals(runningSensorFixture.getUserData())) {
+            runningSensorObjects.remove(b);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isColliding() {
+        return (sensorObjects.size!=0 && fixtureIsActive(sensorFixture.getUserData())) ||
+                (runningSensorObjects.size!=0 && fixtureIsActive(runningSensorFixture.getUserData()));
+    }
 
     /**
      * Creates the physics Body(s) for this object, adding them to the world.
