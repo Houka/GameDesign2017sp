@@ -760,7 +760,15 @@ public class LevelEditorMode extends Mode {
             while (!levelLoader.getAddQueue().isEmpty()) {
                 Obstacle obj = levelLoader.getAddQueue().poll();
                 obj.setDrawScale(scaleVector);
-                objects.put(obj.getPosition(), obj);
+                if(obj instanceof PlatformModel || obj instanceof WallModel) {
+                    float[] arr = (((PlatformModel)obj).getPoints());
+                    Vector2 objPos = new Vector2(arr[6], arr[5]);
+                    System.out.println(objPos);
+                    objects.put(objPos, obj);
+                }
+                else {
+                    objects.put(obj.getPosition(), obj);
+                }
             }
         }else{
             System.out.println("ERROR: invalid file path");
