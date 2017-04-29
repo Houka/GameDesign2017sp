@@ -81,6 +81,7 @@ public class LevelSelectionMode extends Mode {
 	protected void update(float delta) {
 		input.readInput();
 
+		canvas.getCamera().setAutosnap(true);
 		if (input.didDown())
 			selected = (selected+TOTAL_COLUMNS >= NUM_LEVELS.length)?	selected : selected+TOTAL_COLUMNS;
 		else if (input.didUp())

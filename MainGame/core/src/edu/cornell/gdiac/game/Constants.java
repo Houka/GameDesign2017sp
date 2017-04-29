@@ -6,7 +6,7 @@ package edu.cornell.gdiac.game;
 public class Constants {
     public static String GAME_MUSIC_FILE = "music/gameplay_background.mp3";
     /** Retro font for displaying messages */
-    public static String FONT_FILE = "fonts/MineCraft.ttf";
+    public static String FONT_FILE = "fonts/RetroGame.ttf";
     public static int FONT_SIZE = 64;
     public static String SELECTION_FONT_FILE = "fonts/LightPixel7.ttf";
     public static int SELECTION_FONT_SIZE = 200;
@@ -38,8 +38,9 @@ public class Constants {
     public static String PAINTBALL_CHAR_SPLAT_EFFECT_FILE = "sprites/paint/effects/char_splatter_strip15.png";
     public static String PAINTBALL_MINE_ENEMY_SPLAT_EFFECT_FILE = "sprites/paint/effects/enemy_mine_splatter_strip15.png";
     public static String PAINTBALL_ENEMY_SPLAT_EFFECT_FILE = "sprites/paint/effects/enemy_normal_splatter_strip15.png";
-    public static String PAINTBALL_STATIONARY_MINE_FILE = "sprites/trails/stationary_mine.png";
-    public static String PAINTBALL_STATIONARY_NORMAL_FILE = "sprites/trails/stationary_normal.png";
+    public static String PAINTBALL_STATIONARY_MINE_FILE = "sprites/paint/trails/stationary_mine.png";
+    public static String PAINTBALL_STATIONARY_NORMAL_FILE = "sprites/paint/trails/stationary_normal.png";
+    public static String PAINTBALL_STATIONARY_CHAR_FILE = "sprites/paint/trails/stationary_char.png";
 
     public static String CHARACTER_STILL_FILE = "sprites/char/char_icon.png";
     public static String CHARACTER_RUN_FILE = "sprites/char/char_run_strip4.png";
