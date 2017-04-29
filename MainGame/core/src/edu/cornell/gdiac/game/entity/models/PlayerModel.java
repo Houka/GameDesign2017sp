@@ -61,6 +61,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     /** The amount to shrink the feet relative to the top */
     private static final float PLAYER_FOOTSHRINK = .85f;
     private static final float PLAYER_RUNNING_FOOTSHRINK = .95f;
+    private static final float PLAYER_HEELSHRINK = .97f;
+    private static final float PLAYER_BELLY_WIDTH = 1.1f;
     /** The position in physics units where the sensor ground should be at*/
     private float sensorX = 0f;
     /** The maximum Y velocity we let the player jump at (in case of some slight bouncing)*/
@@ -181,15 +183,23 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
                 x,y);
         defaultBox = new float[]{
                 -width/2.0f*PLAYER_HSHRINK*PLAYER_FOOTSHRINK, -height/2.0f,
-                -width/2.0f*PLAYER_HSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
-                width/2.0f*PLAYER_HSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
-                width/2.0f*PLAYER_HSHRINK*PLAYER_FOOTSHRINK, -height/2.0f
+                width/2.0f*PLAYER_HSHRINK*PLAYER_FOOTSHRINK, -height/2.0f,
+                -width/2.0f*PLAYER_HSHRINK,0,
+                width/2.0f*PLAYER_HSHRINK, 0,
+                width/2.0f*PLAYER_HSHRINK*PLAYER_FOOTSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
+                -width/2.0f*PLAYER_HSHRINK*PLAYER_FOOTSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
+                -width/2.0f*PLAYER_HSHRINK*PLAYER_HEELSHRINK, -height/2.0f+SENSOR_HEIGHT,
+                width/2.0f*PLAYER_HSHRINK*PLAYER_HEELSHRINK, -height/2.0f+SENSOR_HEIGHT
         };
         runningBox = new float[]{
                 -width/2.0f*PLAYER_HSHRINK_RUNNING*PLAYER_RUNNING_FOOTSHRINK, -height/2.0f,
-                -width/2.0f*PLAYER_HSHRINK_RUNNING, height/2.0f - 2f*height*PLAYER_HEAD_SPACE,
-                width/2.0f*PLAYER_HSHRINK_RUNNING, height/2.0f - 2f*height*PLAYER_HEAD_SPACE,
-                width/2.0f*PLAYER_HSHRINK_RUNNING*PLAYER_RUNNING_FOOTSHRINK, -height/2.0f
+                width/2.0f*PLAYER_HSHRINK_RUNNING*PLAYER_RUNNING_FOOTSHRINK, -height/2.0f,
+                -width/2.0f*PLAYER_HSHRINK_RUNNING,0,
+                width/2.0f*PLAYER_HSHRINK_RUNNING, 0,
+                width/2.0f*PLAYER_HSHRINK_RUNNING*PLAYER_RUNNING_FOOTSHRINK, height/2.0f - 2f*height*PLAYER_HEAD_SPACE,
+                -width/2.0f*PLAYER_HSHRINK_RUNNING*PLAYER_RUNNING_FOOTSHRINK, height/2.0f - 2f*height*PLAYER_HEAD_SPACE,
+                -width/2.0f*PLAYER_HSHRINK_RUNNING*PLAYER_RUNNING_FOOTSHRINK, -height/2.0f+SENSOR_HEIGHT,
+                width/2.0f*PLAYER_HSHRINK_RUNNING*PLAYER_RUNNING_FOOTSHRINK, -height/2.0f+SENSOR_HEIGHT
         };
         crouchingBox = new float[]{
                 -width/2.0f*PLAYER_HSHRINK*PLAYER_FOOTSHRINK, -height/2.0f,
