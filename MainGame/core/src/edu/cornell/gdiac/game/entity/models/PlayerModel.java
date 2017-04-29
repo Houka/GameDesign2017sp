@@ -84,7 +84,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
     /** Duration that player will pass through bullets**/
     private float passThroughDuration;
-    private final float GO_THROUGH_TIME = 2;
+    private final float GO_THROUGH_TIME = 0.5f;
 
     /** Whether we getting knockedBack jumping */
     public boolean isJumping;

@@ -32,13 +32,19 @@ public class PlayerController extends EntityController {
     public void update(float dt) {
         input.readInput();
 
-        player.setMovement(input.getHorizontal());
-        player.setJumping(input.didJump());
-        player.setShooting(input.didShoot());
-        player.setCrouching(input.isDownHeld());
-        player.applyForce();
+        if (!player.isGhosting()) {
+            player.setMovement(input.getHorizontal());
+            player.setJumping(input.didJump());
+            player.setShooting(input.didShoot());
+            player.setCrouching(input.isDownHeld());
 
-        updateAnimation();
+        }
+        else {
+            player.setMovement(0f);
+        }
+        player.applyForce();
+            updateAnimation();
+
     }
 
     public void superJumpEnabled(boolean value) {
@@ -62,7 +68,7 @@ public class PlayerController extends EntityController {
             player.getAnimation().playOnce("peak");
         else if (!player.isGrounded() && player.isKnockedBack())
             player.getAnimation().playOnce("stunned");
-        else if (player.isGrounded() && input.getHorizontal() != 0)
+        else if (player.isGrounded() && input.getHorizontal() != 0 && !player.isGhosting())
             player.getAnimation().play("run", true);
         else if (player.isGrounded())
             player.getAnimation().play("idle", true);

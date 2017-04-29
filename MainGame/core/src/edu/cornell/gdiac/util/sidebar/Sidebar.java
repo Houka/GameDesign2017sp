@@ -76,10 +76,10 @@ public class Sidebar {
         Sidebar.setValue("Gravity",-30.0f);
         Sidebar.setValue("Jump Height",14f);
         Sidebar.setValue("Player Speed",7.65f);
-        Sidebar.setValue("Knockback Force",8f);
+        Sidebar.setValue("Knockback Force",10f);
         Sidebar.setValue("Knockback Friction",.06f);
         Sidebar.setValue("Knockback Duration",3f);
-        Sidebar.setValue("Knockback Stun Duration",30f);
+        Sidebar.setValue("Knockback Stun Duration",20f);
         Sidebar.setValue("Paintball Height",.46f);
         Sidebar.setValue("Paintball Width",3.5f);
         Sidebar.setValue("Paintball Speed",5.225f);
