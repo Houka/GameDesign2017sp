@@ -78,7 +78,7 @@ public class CollisionController implements ContactListener {
             if(userData2==null)
                 userData2 = obj2;
             boolean wasColliding = obj1.isColliding();
-            obj1.removeSensorCollision(userData1,userData2); // Creating pairs might be slow
+            obj1.removeSensorCollision(userData1,userData2);
             if (!obj1.isColliding()) {
                 if(wasColliding) {
                     obj1.setCanDoubleJump(true);
@@ -255,6 +255,7 @@ public class CollisionController implements ContactListener {
     }
     private void handleEndCollision(PlayerModel obj1,PaintballModel obj2, Object userData1, Object userData2){
         leftGround(obj1,obj2,userData1,userData2);
+
         if(userData1!=null) {
             obj1.removeSensorCollision(userData1,userData2);
             if(!obj1.isColliding())
@@ -262,6 +263,8 @@ public class CollisionController implements ContactListener {
         }
         if(obj1.fixtureIsActive(userData1)) {
             obj1.setRidingVX(null);
+            obj1.removeSensorCollision(obj1.getSensorName(),userData2);
+            obj1.removeSensorCollision(obj1.getRunningSensorName(),userData2);
             if(obj2.getPaintballType().equals("trampolineComb"))
                 obj1.setTrampGrounded(false);
         }
@@ -464,7 +467,7 @@ public class CollisionController implements ContactListener {
             }
 
 
-            if(player!=null && !player.fixtureIsActive(playerFixData)) {
+            if(player!=null && !player.fixtureIsActive(playerFixData) && !player.isGroundSensor(playerFixData)) {
                 if(paintball!=null && player.getRidingBullet()==paintball && ! aboveGround(player,paintball))
                     player.setRidingVX(null);
                 contact.setEnabled(false);
@@ -488,16 +491,15 @@ public class CollisionController implements ContactListener {
                     contact.setEnabled(false);
                     player.removeSensorCollision(player.getSensorName(),paintballFix);
                     player.removeSensorCollision(player.getRunningSensorName(),paintballFix);
+                    if(!player.isColliding())
+                        player.setGrounded(false);
                 }
-                else {
-                    if(aboveGround(player,paintball)) {
+                else if(aboveGround(player,paintball)) {
                         player.setGrounded(true);
                         player.addSensorCollision(player.getSensorName(),paintballFix);
                         player.addSensorCollision(player.getRunningSensorName(),paintballFix);
                         if (paintball.getPaintballType().equals("trampolineComb"))
                             player.setTrampGrounded(true);
-                        player.setRidingVX(paintball);
-                    }
                 }
             }
 
