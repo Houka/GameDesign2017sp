@@ -53,9 +53,9 @@ public class Sidebar {
         created = true;
 
         //Below fields are just samples
-        Sidebar.addSlider("Gravity",-30f,0f,-30.0f);
-        Sidebar.addSlider("Jump Height",1f,70f, 11.8f);
-        Sidebar.addSlider("Player Speed",1f,20f,10f);
+        Sidebar.addSlider("Gravity",-30f,0f,-29.0f);
+        Sidebar.addSlider("Jump Height",1f,70f, 11.4f);
+        Sidebar.addSlider("Player Speed",1f,20f,7.65f);
         Sidebar.addSlider("Knockback Force",0f,30f, 8f);
         Sidebar.addSlider("Knockback Friction",0f,.1f, .06f);
         Sidebar.addSlider("Knockback Duration",0f,80f, 3f);
@@ -74,12 +74,12 @@ public class Sidebar {
         if (theMap == null)
             theMap = new HashMap<String, Float>();
         Sidebar.setValue("Gravity",-30.0f);
-        Sidebar.setValue("Jump Height",11.8f);
-        Sidebar.setValue("Player Speed",10f);
-        Sidebar.setValue("Knockback Force",8f);
+        Sidebar.setValue("Jump Height",14f);
+        Sidebar.setValue("Player Speed",7.65f);
+        Sidebar.setValue("Knockback Force",12f);
         Sidebar.setValue("Knockback Friction",.06f);
         Sidebar.setValue("Knockback Duration",3f);
-        Sidebar.setValue("Knockback Stun Duration",30f);
+        Sidebar.setValue("Knockback Stun Duration",20f);
         Sidebar.setValue("Paintball Height",.46f);
         Sidebar.setValue("Paintball Width",3.5f);
         Sidebar.setValue("Paintball Speed",5.225f);
