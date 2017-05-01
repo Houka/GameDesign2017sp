@@ -16,6 +16,7 @@ import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
+import java.util.ArrayList;
 
 
 /**
@@ -35,6 +36,8 @@ public class LevelLoader implements AssetUser, Disposable{
     private TextureRegion depotTexture;
     private TextureRegion splattererTexture;
 
+    /**holds background images*/
+    private ArrayList<TextureRegion> backgroundRegions;
     /** Animations */
     private Animation playerAnimation;
     private Animation enemyOnsightAnimation;
@@ -55,6 +58,7 @@ public class LevelLoader implements AssetUser, Disposable{
     public LevelLoader(Vector2 scale){
         this.scale = scale;
         levelParser = new LevelParser();
+        backgroundRegions = new ArrayList<TextureRegion>();
     }
 
     // BEGIN: Setters and Getters
@@ -87,6 +91,7 @@ public class LevelLoader implements AssetUser, Disposable{
         addResources();
         addTarget();
         addSplatterers();
+        addBackgroundObjects();
     }
 
     /**
@@ -269,7 +274,7 @@ public class LevelLoader implements AssetUser, Disposable{
     }
 
     /**
-     * Adds the resources to the insertion queue. Currently only handles ammo depots.
+     * Adds the splatterers to the insertion queue.
      */
     public void addSplatterers(){
         JsonValue splatterers = levelParser.getSplatterers();
@@ -285,6 +290,28 @@ public class LevelLoader implements AssetUser, Disposable{
             splatterer.setDrawScale(scale);
             splatterer.setTexture(splattererTexture);
             addQueuedObject(splatterer);
+        }
+    }
+
+    /**
+     * Adds the background objects to the insertion queue.
+     */
+    public void addBackgroundObjects(){
+        if (levelParser.backgroundObjectsExist()) {
+            JsonValue bgObjects = levelParser.getBackgroundObjects();
+
+            JsonValue.JsonIterator iter = bgObjects.iterator();
+            JsonValue bgObject;
+            while (iter.hasNext()){
+                bgObject = iter.next();
+                int id = bgObject.get("id").asInt();
+                TextureRegion current = backgroundRegions.get(id);
+                BackgroundObjectModel bg = new BackgroundObjectModel(bgObject.get("x").asFloat(), bgObject.get("y").asFloat(),
+                        current.getRegionWidth()/scale.x, current.getRegionHeight()/scale.y);
+                bg.setDrawScale(scale);
+                bg.setTexture(current);
+                addQueuedObject(bg);
+            }
         }
     }
 
