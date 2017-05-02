@@ -291,7 +291,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
     @Override
     public boolean isShooting() {
-        return isShooting && shootCooldown <= 0 && !isCrouching();
+        return (isShooting && shootCooldown <= 0 );
     }
 
     @Override
