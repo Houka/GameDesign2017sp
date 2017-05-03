@@ -89,23 +89,30 @@ public class CollisionController implements ContactListener {
             }
         }
     }
+
+    public boolean aboveGround(PlayerModel obj1, PaintballModel obj2) {
+        return obj1.getY()-obj1.getHeight()/2>=obj2.getY()+obj2.getHeight()/2-1;
+    }
     // END: helper functions
 
     // BEGIN: Simple Collision handlers
     private void handleCollision(PlayerModel obj1, SplattererModel obj2) {}
-    private void handleCollision(PlayerModel obj1, EnemyModel obj2){ hud.setLose(true);}
+    private void handleCollision(PlayerModel obj1, EnemyModel obj2){
+        if (!obj2.isStunned())
+            hud.setLose(true);
+    }
     private void handleCollision(PlayerModel obj1, GoalModel obj2){ hud.setWin(true); }
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
         touchedGround(obj1,obj2,userData1,userData2);
         obj1.setTrampGrounded(false);
-        if (obj2.getType() != PlatformModel.NORMAL_PLATFORM) {hud.setLose(true);}
+        if (obj2.getType() != PlatformModel.NORMAL_PLATFORM && obj1.fixtureIsActive(userData1)) {hud.setLose(true);}
     }
     private void handleCollision(PlayerModel obj1, WallModel obj2){
         obj1.setKnockedBack(0);
     }
     private void handleCollision(PlayerModel obj1, PaintballModel obj2, Fixture fix1, Fixture fix2, Object userData1, Object userData2) {
         float sign = obj2.getVX() / Math.abs(obj2.getVX());
-        if(obj1.getY()-obj1.getHeight()/2>=obj2.getY()+obj2.getHeight()/2 && !obj1.isGhosting()){
+        if(aboveGround(obj1,obj2) && ! obj1.isGhosting()){
             touchedGround(obj1, obj2, userData1, fix2);
             obj1.setRidingVX(obj2);
         }
@@ -136,10 +143,6 @@ public class CollisionController implements ContactListener {
         obj2.markRemoved(true);
     }
     private void handleCollision(PaintballModel obj1, PaintballModel obj2){
-        if(obj1.recentlyCreated())
-            obj1.instakill();
-        if(obj2.recentlyCreated())
-            obj2.instakill();
 
         if(obj1.isDead() || obj2.isDead() || obj1.getRecentCollision() || obj2.getRecentCollision())
             return;
@@ -207,6 +210,9 @@ public class CollisionController implements ContactListener {
             }
         }
 
+        if(obj2.isPlayerBullet())
+            obj2.pop();
+
         obj2.setTimeToDie(obj2.getPaintballToWallDuration());
         obj2.fixX(0f);
     }
@@ -220,6 +226,9 @@ public class CollisionController implements ContactListener {
             }
         }
 
+        if(obj2.isPlayerBullet())
+            obj2.pop();
+        
         obj2.setTimeToDie(obj2.getPaintballToPlatformDuration());
         obj2.fixX(0f);
     }
@@ -235,12 +244,13 @@ public class CollisionController implements ContactListener {
             dir = true;
         }
         if(!obj1.isUsed()) {
-            obj2.platformPop();
+            obj2.pop();
             obj2.setPassThrough(true);
             obj1.setUsed(true);
             obj1.setShot(true);
             obj1.setDir(dir);
             obj1.setYCoord(obj2.getY());
+        }else{
         }
     }
 
@@ -338,8 +348,6 @@ public class CollisionController implements ContactListener {
 
     @Override
     public void beginContact(Contact contact) {
-        if(!contact.isEnabled())
-            return;
         Fixture fix1 = contact.getFixtureA();
         Fixture fix2 = contact.getFixtureB();
 
@@ -352,6 +360,20 @@ public class CollisionController implements ContactListener {
         try {
             Obstacle bd1 = (Obstacle) body1.getUserData();
             Obstacle bd2 = (Obstacle) body2.getUserData();
+
+            PlayerModel player = null;
+            Object playerFixData = null;
+            if(bd1.getName().equals("player")) {
+                player = (PlayerModel) bd1;
+                playerFixData = fd1;
+            } else if (bd2.getName().equals("player")) {
+                player = (PlayerModel) bd2;
+                playerFixData = fd2;
+            }
+
+            if(player!=null && !player.fixtureIsActive(playerFixData)) {
+                return;
+            }
 
             processCollision(bd1, bd2, fd1, fd2,fix1,fix2);
             processCollision(bd2, bd1, fd2, fd1,fix2,fix1);
@@ -439,8 +461,9 @@ public class CollisionController implements ContactListener {
             }
 
 
-            if(player.getVY()>=0 && paintball.canPassThrough()) {
-                contact.setEnabled(false);
+            if(paintball.canPassThrough()) {
+                if(player.getVY()>=0 || !aboveGround(player,paintball))
+                    contact.setEnabled(false);
             }
 
         }catch (Exception e) {

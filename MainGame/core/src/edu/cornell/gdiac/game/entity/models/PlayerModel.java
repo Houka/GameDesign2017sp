@@ -84,7 +84,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
     /** Duration that player will pass through bullets**/
     private float passThroughDuration;
-    private final float GO_THROUGH_TIME = 2;
+    private final float GO_THROUGH_TIME = 0.5f;
 
     /** Whether we getting knockedBack jumping */
     public boolean isJumping;
@@ -179,8 +179,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         };
         crouchingBox = new float[]{
                 -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
-                -width/2.0f*PLAYER_HSHRINK, height/2.0f - 2.5f*height*PLAYER_HEAD_SPACE,
-                width/2.0f*PLAYER_HSHRINK, height/2.0f - 2.5f*height*PLAYER_HEAD_SPACE,
+                -width/2.0f*PLAYER_HSHRINK, height/2.0f - 2.6f*height*PLAYER_HEAD_SPACE,
+                width/2.0f*PLAYER_HSHRINK, height/2.0f - 2.6f*height*PLAYER_HEAD_SPACE,
                 width/2.0f*PLAYER_HSHRINK, -height/2.0f
         };
         drawColor = new Color(256f,256f,256f,1f);
@@ -449,6 +449,9 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     public boolean fixtureIsActive(Object fixData) {
         if(fixData == null)
             return false;
+
+        if(fixData.equals(sensorFixture.getUserData()))
+            return true;
 
         if(isGrounded() && isCrouching()) {
             if(fixData.equals(crouchFixture.getUserData()))

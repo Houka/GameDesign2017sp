@@ -112,6 +112,9 @@ public class GameMode extends Mode implements Settable {
 	/** An array to store the levels **/
 	private static final String[] NUM_LEVELS = FileReaderWriter.getJsonFiles();
 
+	private float accumulator;
+	private static final float FRAME_CAP = .25f;
+
 	private CollisionController collisionController;
 
 	/**
@@ -172,7 +175,7 @@ public class GameMode extends Mode implements Settable {
 		this.bounds = new Rectangle(bounds);
 		hud.setDrawScale(scaleVector);
 		gameCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
-		gameCamera.setAutosnap(true);
+		gameCamera.setAutosnap(false);
 		hudCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
 		hudCamera.setAutosnap(true);
 
@@ -255,15 +258,20 @@ public class GameMode extends Mode implements Settable {
 			loadLevel();
 
 		canvas.getCamera().setRumble(50,10,2);
-		canvas.setDefaultCamera();
+		canvas.begin(gameCamera);
+		canvas.setCamera(player.getX()*scaleVector.x,player.getY() * scaleVector.y, canvas.getHeight()/2);
+		gameCamera.snap();
+		canvas.end();
 		hud.reset();
 	}
 
 	@Override
 	public void update(float dt) {
 		soundController.update();
-		for (EntityController e : entityControllers)
-			e.update(dt);
+
+		if (!hud.isLose() && !hud.isWin())
+			for (EntityController e : entityControllers)
+				e.update(dt);
 
 		applySettings();
 		paintballFactory.applySettings();
@@ -278,13 +286,14 @@ public class GameMode extends Mode implements Settable {
 					PaintballModel pb;
 					if(((SplattererModel) obj).getDir())
 						pb = paintballFactory.createPaintball(obj.getX()+(((SplattererModel) obj).getWidth()*2),
-								((SplattererModel) obj).getYCoord(),!((SplattererModel)obj).getDir(), "normal");
+								((SplattererModel) obj).getYCoord(),!((SplattererModel)obj).getDir(), "player");
 					else
 						pb = paintballFactory.createPaintball(obj.getX()-(((SplattererModel) obj).getWidth()*2),
-								((SplattererModel) obj).getYCoord(),!((SplattererModel)obj).getDir(), "normal");
+								((SplattererModel) obj).getYCoord(),!((SplattererModel)obj).getDir(), "player");
 					pb.newSize(pb.getX(),pb.getY(),3);
 					pb.fixX(0f);
 					pb.setTimeToDie(pb.getPaintballToPaintballDuration());
+					pb.platformPop();
 					addObject(pb);
 				}
 			}
@@ -392,6 +401,7 @@ public class GameMode extends Mode implements Settable {
 		levelLoader.loadLevel(levelFile);
 		bounds = levelLoader.getBounds();
 		hud.setStartingAmmo(levelLoader.getStartingAmmo());
+		gameCamera.snap();
 		if (!trySetPlayer())
 			System.out.println("Error: level file (" + levelFile + ") does not have a player");
 	}
@@ -405,12 +415,14 @@ public class GameMode extends Mode implements Settable {
 	 */
 	private void updateShooter(Obstacle obj) {
 		if (((Shooter)obj).isShooting()) {
-			if (obj.getName().equals("player") && hud.useAmmo())
-				addObject(paintballFactory.createPlayerPaintball(obj.getX(), obj.getY(), ((Shooter) obj).isFacingRight(),"normal"));
+			if (obj.getName().equals("player") && hud.useAmmo()) {
+				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY()+player.getHeight()/8, ((Shooter) obj).isFacingRight(), "player"));
+			}
 			else if (obj.getName().equals("enemy")) {
 				int direction = ((Shooter) obj).isFacingRight() ? 1 : 0;
-				addObject(paintballFactory.createPaintball(obj.getX()+ direction * SHOOT_OFFSET, obj.getY(),
-						((Shooter) obj).isFacingRight(),((EnemyModel)obj).getEnemyType()));
+				EnemyModel enemy = (EnemyModel) obj;
+				addObject(paintballFactory.createPaintball(enemy.getX()+ direction * SHOOT_OFFSET, enemy.getY()-enemy.getHeight()/4,
+						enemy.isFacingRight(),enemy.getEnemyType()));
 			}
 		}
 	}
@@ -429,8 +441,12 @@ public class GameMode extends Mode implements Settable {
 		while (!levelLoader.getAddQueue().isEmpty())
 			addObject(levelLoader.getAddQueue().poll());
 
+		accumulator += (float) Math.min(dt,FRAME_CAP);
 		// Turn the physics engine crank.
-		world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
+		if (!hud.isLose() && !hud.isWin() && accumulator >=WORLD_STEP) {
+			world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
+			accumulator-=WORLD_STEP;
+		}
 
 		// Garbage collect the deleted objects.
 		// Note how we use the linked list nodes to delete O(1) in place.

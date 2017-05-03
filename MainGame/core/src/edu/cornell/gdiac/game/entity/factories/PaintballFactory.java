@@ -48,7 +48,8 @@ public class PaintballFactory implements AssetUser, Settable {
     private TextureRegion enemyTexture;
     private TextureRegion enemyTextureHead;
     private TextureRegion playerTextureHead;
-    private TextureRegion normalPlatfromTexture;
+    private TextureRegion normalPlatformTexture;
+    private TextureRegion charPlatformTexture;
     private TextureRegion splatEffectTexture;
     private TextureRegion trailTexture;
     private TextureRegion enemyMineHeadTexture;
@@ -62,21 +63,6 @@ public class PaintballFactory implements AssetUser, Settable {
         this.scale = scale;
     }
 
-    /**
-     *  Creates a player paintball at the given location moving in the given direction
-     *  @param x            Initial x position of the paintball
-     *  @param y            Initial y position of the paintball
-     *  @param direction    Initial traveling direction of the paintball (true for right, left otherwise)
-     */
-    public PaintballModel createPlayerPaintball(float x, float y, boolean direction, String paintballType) {
-        PaintballModel paintball = createPaintball(x,y,direction,paintballType);
-        paintball.setPlayerBullet(true);
-        paintball.setHeadTexture(playerTextureHead);
-        paintball.setPlatformSplatEffectTexture(charSplatEffectTexture);
-        float speed  = (direction ? player_initial_speed : -player_initial_speed);
-        paintball.fixX(speed);
-        return paintball;
-    }
 
     /**
      *  Creates a paintball at the given location moving in the given direction
@@ -90,26 +76,7 @@ public class PaintballFactory implements AssetUser, Settable {
         float height = enemyTexture.getRegionHeight()/(scale.y);
         float speed  = (direction ? initial_speed : -initial_speed);
         PaintballModel paintball = new PaintballModel(x+xOffset, y+y_offset, width, height,speed,xScale,yScale,scale,paintballType);
-        paintball.setDensity(heavy_density);
-        paintball.setDrawScale(scale);
-        paintball.setTexture(enemyTexture);
-        if(paintballType.equals("trampoline")) {
-            paintball.setTrailTexture(mineTrailTexture);
-            paintball.setHeadTexture(enemyMineHeadTexture);
-            paintball.setPlatformTexture(minePlatformTexture);
-            paintball.setPlatformSplatEffectTexture(mineSplatEffectTexture);
-        } else if(paintballType.equals("normal")) {
-            paintball.setTrailTexture(trailTexture);
-            paintball.setHeadTexture(enemyTextureHead);
-            paintball.setPlatformTexture(normalPlatfromTexture);
-            paintball.setPlatformSplatEffectTexture(enemySplatEffectTexture);
-        } else {
-            assert(false);
-        }
-        paintball.setSplatEffectTexture(splatEffectTexture);
-        paintball.setPaintballToPaintballDuration(paintballToPaintballDuration);
-        paintball.setPaintballToWallDuration(paintballToWallDuration);
-        paintball.setPaintballToPlatformDuration(paintballToPlatformDuration);
+
         paintball.setMaxXScale(maxXScale);
         paintball.setBullet(true);
         paintball.setGravityScale(0);
@@ -118,6 +85,35 @@ public class PaintballFactory implements AssetUser, Settable {
         paintball.setMaxLifeTime(MAX_LIFE_TIME);
         paintball.setDirection(direction);
         paintball.setPaintballType(paintballType);
+        paintball.setDensity(heavy_density);
+        paintball.setDrawScale(scale);
+        paintball.setTexture(enemyTexture);
+        paintball.setSplatEffectTexture(splatEffectTexture);
+        paintball.setPaintballToPaintballDuration(paintballToPaintballDuration);
+        paintball.setPaintballToWallDuration(paintballToWallDuration);
+        paintball.setPaintballToPlatformDuration(paintballToPlatformDuration);
+
+        if(paintballType.equals("trampoline")) {
+            paintball.setTrailTexture(mineTrailTexture);
+            paintball.setHeadTexture(enemyMineHeadTexture);
+            paintball.setPlatformTexture(minePlatformTexture);
+            paintball.setPlatformSplatEffectTexture(mineSplatEffectTexture);
+        } else if(paintballType.equals("normal")) {
+            paintball.setTrailTexture(trailTexture);
+            paintball.setHeadTexture(enemyTextureHead);
+            paintball.setPlatformTexture(normalPlatformTexture);
+            paintball.setPlatformSplatEffectTexture(enemySplatEffectTexture);
+        } else if(paintballType.equals("player")){
+            paintball.setPlayerBullet(true);
+            paintball.setHeadTexture(playerTextureHead);
+            paintball.setPlatformSplatEffectTexture(charSplatEffectTexture);
+            paintball.setPlatformTexture(charPlatformTexture);
+            float pSpeed  = (direction ? player_initial_speed : -player_initial_speed);
+            paintball.fixX(pSpeed);
+        } else {
+            assert(false);
+        }
+        paintball.snap();
         return paintball;
     }
 
@@ -223,6 +219,7 @@ public class PaintballFactory implements AssetUser, Settable {
     {
         manager.load(Constants.PAINTBALL_FILE,Texture.class);
         manager.load(Constants.PAINTBALL_STATIONARY_NORMAL_FILE,Texture.class);
+        manager.load(Constants.PAINTBALL_STATIONARY_CHAR_FILE,Texture.class);
         manager.load(Constants.PAINTBALL_NORMAL_TRAIL_FILE,Texture.class);
         manager.load(Constants.PAINTBALL_MINE_TRAIL_FILE,Texture.class);
         manager.load(Constants.PAINTBALL_ENEMY_NORMAL_FILE,Texture.class);
@@ -240,9 +237,10 @@ public class PaintballFactory implements AssetUser, Settable {
         enemyTextureHead = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_ENEMY_NORMAL_FILE, false);
         enemyMineHeadTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_ENEMY_MINE_FILE, false);
         minePlatformTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_STATIONARY_MINE_FILE, false);
+        charPlatformTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_STATIONARY_CHAR_FILE, false);
         mineTrailTexture =  AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_MINE_TRAIL_FILE, false);
         playerTextureHead = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_CHARACTER_FILE, false);
-        normalPlatfromTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_STATIONARY_NORMAL_FILE, false);
+        normalPlatformTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_STATIONARY_NORMAL_FILE, false);
         splatEffectTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_SPLAT_EFFECT_FILE, false);
         trailTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_NORMAL_TRAIL_FILE, false);
         charSplatEffectTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_CHAR_SPLAT_EFFECT_FILE, false);
@@ -256,6 +254,7 @@ public class PaintballFactory implements AssetUser, Settable {
         if(manager.isLoaded(Constants.PAINTBALL_FILE)) {
             manager.unload(Constants.PAINTBALL_FILE);
             manager.unload(Constants.PAINTBALL_STATIONARY_NORMAL_FILE);
+            manager.unload(Constants.PAINTBALL_STATIONARY_CHAR_FILE);
             manager.unload(Constants.PAINTBALL_NORMAL_TRAIL_FILE);
             manager.unload(Constants.PAINTBALL_MINE_TRAIL_FILE);
             manager.unload(Constants.PAINTBALL_ENEMY_NORMAL_FILE);
