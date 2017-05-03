@@ -419,7 +419,7 @@ public class GameMode extends Mode implements Settable {
 				if (!((PlayerModel)obj).isCrouching())
 					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY()+player.getHeight()/8, ((Shooter) obj).isFacingRight(), "player"));
 				else
-					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY()-player.getHeight()/8, ((Shooter) obj).isFacingRight(), "player"));
+					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY()-player.getHeight()/4, ((Shooter) obj).isFacingRight(), "player"));
 			}
 			else if (obj.getName().equals("enemy")) {
 				int direction = ((Shooter) obj).isFacingRight() ? 1 : 0;
