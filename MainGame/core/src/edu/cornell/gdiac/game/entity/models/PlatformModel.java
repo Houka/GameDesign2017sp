@@ -19,6 +19,8 @@ public class PlatformModel extends PolygonObstacle {
     public static final int SPIKE_LEFT_PLATFORM = 3;
     public static final int SPIKE_RIGHT_PLATFORM = 4;
 
+    /** how much we are shrinking for spikes*/
+    public static final float SPIKE_SHRINK = 0.375f;
     /** Density of the platforms*/
     private static final float  BASIC_DENSITY = 0.0f;
     /** Friction of the platforms*/
@@ -41,7 +43,7 @@ public class PlatformModel extends PolygonObstacle {
      * @param points    Vertices outlining the platform. In form [x1, y1, x2, y2 ...]
      */
     public PlatformModel(float[] points, int type) {
-        super(points);
+        super(type== NORMAL_PLATFORM ? points : halveHitbox(points));
         pointArray = points;
         setBodyType(BodyDef.BodyType.StaticBody);
         setDensity(BASIC_DENSITY);
@@ -77,6 +79,20 @@ public class PlatformModel extends PolygonObstacle {
     }
     // END: Setters and GEtters
 
+    public static float[] halveHitbox(float[] f){
+        float[] g = f;
+        g[0] += SPIKE_SHRINK;
+        g[1] -= SPIKE_SHRINK;
+        g[2] -= SPIKE_SHRINK;
+        g[3] -= SPIKE_SHRINK;
+        g[4] -= SPIKE_SHRINK;
+        g[5] += SPIKE_SHRINK;
+        g[6] += SPIKE_SHRINK;
+        g[7] += SPIKE_SHRINK;
+        return g;
+    }
+
+
     @Override
     public void update(float dt){
         super.update(dt);
@@ -90,7 +106,8 @@ public class PlatformModel extends PolygonObstacle {
             if (animation == null)
                 canvas.draw(region,Color.WHITE,0,0,getX()*drawScale.x,getY()*drawScale.y,getAngle(),1,1);
             else
-                canvas.draw(animation.getTextureRegion(),Color.WHITE,origin.x,origin.y,pointArray[6]*drawScale.x+origin.x,pointArray[7]*drawScale.y+origin.y,angle,1,1.0f);
+                canvas.draw(animation.getTextureRegion(),Color.WHITE,origin.x,origin.y,(pointArray[6]-SPIKE_SHRINK)*
+                        drawScale.x+origin.x,(pointArray[7]-SPIKE_SHRINK)*drawScale.y+origin.y,angle,1,1.0f);
 
 
         }
