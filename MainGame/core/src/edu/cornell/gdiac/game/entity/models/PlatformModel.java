@@ -48,6 +48,8 @@ public class PlatformModel extends PolygonObstacle {
         setFriction(BASIC_FRICTION);
         setRestitution(BASIC_RESTITUTION);
         setName("platform");
+        if(type != NORMAL_PLATFORM)
+            setSensor(true);
         this.type = type;
         animation = null;
     }
