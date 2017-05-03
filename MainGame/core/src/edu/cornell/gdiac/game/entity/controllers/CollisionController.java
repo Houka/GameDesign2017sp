@@ -478,7 +478,7 @@ public class CollisionController implements ContactListener {
                 return;
             }
 
-            if (player.isGhosting()) {
+            if (player.isGhosting() && !paintball.isPlatformPopped()) {
                 contact.setEnabled(false);
                 return;
             }
