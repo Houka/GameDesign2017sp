@@ -314,7 +314,7 @@ public class LevelEditorMode extends Mode {
             }
             else if(underMouse.equals(regions[5])) {
                 try {
-                    int interval = 3;
+                    int interval = 180;
                     String dir = setDir();
                     String type = setEnemyType();
                     boolean right = false;
@@ -763,7 +763,6 @@ public class LevelEditorMode extends Mode {
                 if(obj instanceof PlatformModel || obj instanceof WallModel) {
                     float[] arr = (((PlatformModel)obj).getPoints());
                     Vector2 objPos = new Vector2(arr[6], arr[5]);
-                    System.out.println(objPos);
                     objects.put(objPos, obj);
                 }
                 else {
