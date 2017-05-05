@@ -760,8 +760,13 @@ public class LevelEditorMode extends Mode {
             while (!levelLoader.getAddQueue().isEmpty()) {
                 Obstacle obj = levelLoader.getAddQueue().poll();
                 obj.setDrawScale(scaleVector);
-                if(obj instanceof PlatformModel || obj instanceof WallModel) {
+                if(obj instanceof PlatformModel) {
                     float[] arr = (((PlatformModel)obj).getPoints());
+                    Vector2 objPos = new Vector2(arr[6], arr[5]);
+                    objects.put(objPos, obj);
+                }
+                else if(obj instanceof WallModel) {
+                    float[] arr = (((WallModel)obj).getPoints());
                     Vector2 objPos = new Vector2(arr[6], arr[5]);
                     objects.put(objPos, obj);
                 }
