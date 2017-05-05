@@ -321,6 +321,7 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(Constants.CHARACTER_SHOOT_FILE, Texture.class);
         manager.load(Constants.CHARACTER_CROUCH_FILE, Texture.class);
         manager.load(Constants.CHARACTER_STUNNED_FILE, Texture.class);
+        manager.load(Constants.CHARACTER_CROUCH_SHOOT_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_CHARACTER_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_ENEMY_MINE_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_ENEMY_NORMAL_FILE, Texture.class);
@@ -370,6 +371,7 @@ public class LevelLoader implements AssetUser, Disposable{
         playerAnimation.addTexture("peak", AssetRetriever.createTexture(manager, Constants.CHARACTER_TRANSITION_FILE, false), 1,2);
         playerAnimation.addTexture("midair shoot", AssetRetriever.createTexture(manager, Constants.CHARACTER_MIDAIR_FILE, false), 1,1);
         playerAnimation.addTexture("crouch", AssetRetriever.createTexture(manager, Constants.CHARACTER_CROUCH_FILE, false), 1,1);
+        playerAnimation.addTexture("crouch_shoot", AssetRetriever.createTexture(manager, Constants.CHARACTER_CROUCH_SHOOT_FILE, false), 1,1);
         playerAnimation.addTexture("still", playerTexture.getTexture(), 1, 1);
         playerAnimation.setPlaying(false);
         playerAnimation.setPlayingAnimation("idle");

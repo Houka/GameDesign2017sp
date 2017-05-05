@@ -52,8 +52,10 @@ public class PlayerController extends EntityController {
     }
 
     private void updateAnimation(){
-        if (player.isShooting())
+        if (player.isShooting() && !player.isCrouching())
             player.getAnimation().playOnce("shoot");
+        else if (player.isShooting() && player.isCrouching())
+            player.getAnimation().playOnce("crouch_shoot");
         else if(player.isGrounded() && player.isCrouching())
             player.getAnimation().play("crouch",false);
         else if (!player.isGrounded() && (player.getVY() < -OFF_GROUND_THRESHOLD || player.getRidingBullet()!=null ||  (player.getVY()==0 && player.semirecentlyUngrounded())))
