@@ -16,7 +16,7 @@ import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 
 /**
@@ -37,7 +37,7 @@ public class LevelLoader implements AssetUser, Disposable{
     private TextureRegion splattererTexture;
 
     /**holds background images*/
-    private ArrayList<TextureRegion> backgroundRegions;
+    private HashMap<String, TextureRegion> backgroundRegions;
     /** Animations */
     private Animation playerAnimation;
     private Animation enemyOnsightAnimation;
@@ -58,7 +58,7 @@ public class LevelLoader implements AssetUser, Disposable{
     public LevelLoader(Vector2 scale){
         this.scale = scale;
         levelParser = new LevelParser();
-        backgroundRegions = new ArrayList<TextureRegion>();
+        backgroundRegions = new HashMap<String, TextureRegion>();
     }
 
     // BEGIN: Setters and Getters
@@ -304,7 +304,7 @@ public class LevelLoader implements AssetUser, Disposable{
             JsonValue bgObject;
             while (iter.hasNext()){
                 bgObject = iter.next();
-                int id = bgObject.get("id").asInt();
+                String id = bgObject.get("id").asString();
                 TextureRegion current = backgroundRegions.get(id);
                 BackgroundObjectModel bg = new BackgroundObjectModel(bgObject.get("x").asFloat(), bgObject.get("y").asFloat(),
                         current.getRegionWidth()/scale.x, current.getRegionHeight()/scale.y);
