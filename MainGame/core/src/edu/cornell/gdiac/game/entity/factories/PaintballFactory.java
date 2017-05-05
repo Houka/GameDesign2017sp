@@ -113,7 +113,7 @@ public class PaintballFactory implements AssetUser, Settable {
         } else {
             assert(false);
         }
-        paintball.snap();
+        //paintball.snap();
         return paintball;
     }
 
