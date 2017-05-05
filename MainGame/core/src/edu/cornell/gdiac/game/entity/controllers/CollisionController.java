@@ -58,11 +58,14 @@ public class CollisionController implements ContactListener {
     private void touchedGround(PlayerModel obj1, Obstacle obj2, Object userData1, Object userData2){
         if (obj1.isGroundSensor(userData1)) {
             obj1.setJumpForce(obj1.getPlayerJump());
-            if(userData2==null)
+            if (userData2 == null)
                 userData2 = obj2;
-            obj1.addSensorCollision(userData1,userData2);
-            if(obj1.isColliding())
+            obj1.addSensorCollision(userData1, userData2);
+            if (obj1.isColliding())
+            {
                 obj1.setGrounded(true);
+                obj1.setCanDoubleJump(true);
+            }
         }
     }
 
@@ -77,12 +80,8 @@ public class CollisionController implements ContactListener {
         if (obj1.isGroundSensor(userData1)) {
             if(userData2==null)
                 userData2 = obj2;
-            boolean wasColliding = obj1.isColliding();
             obj1.removeSensorCollision(userData1,userData2);
             if (!obj1.isColliding()) {
-                if(wasColliding) {
-                    obj1.setCanDoubleJump(true);
-                }
                 obj1.setGrounded(false);
             }
         }
