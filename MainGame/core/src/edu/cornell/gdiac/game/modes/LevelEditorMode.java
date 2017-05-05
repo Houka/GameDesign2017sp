@@ -314,7 +314,7 @@ public class LevelEditorMode extends Mode {
             }
             else if(underMouse.equals(regions[5])) {
                 try {
-                    int interval = 3;
+                    int interval = 180;
                     String dir = setDir();
                     String type = setEnemyType();
                     boolean right = false;
