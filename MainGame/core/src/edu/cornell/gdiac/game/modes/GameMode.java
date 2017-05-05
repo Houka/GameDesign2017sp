@@ -323,7 +323,9 @@ public class GameMode extends Mode implements Settable {
 	public void draw() {
 		canvas.end();
 		canvas.begin(gameCamera);
-		canvas.setCamera(player.getX()*scaleVector.x,player.getY() * scaleVector.y, canvas.getHeight()/2);
+		float cameraBufferWidth = gameCamera.viewportWidth/scaleVector.x/30f;
+		canvas.setCamera(Math.max(Math.min(player.getX()+cameraBufferWidth,gameCamera.position.x/scaleVector.x),player.getX()-cameraBufferWidth)*scaleVector.x,
+				player.getY() * scaleVector.y, canvas.getHeight()/2);
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
@@ -424,7 +426,7 @@ public class GameMode extends Mode implements Settable {
 			else if (obj.getName().equals("enemy")) {
 				int direction = ((Shooter) obj).isFacingRight() ? 1 : 0;
 				EnemyModel enemy = (EnemyModel) obj;
-				addObject(paintballFactory.createPaintball(enemy.getX()+ direction * SHOOT_OFFSET, enemy.getY()-enemy.getHeight()/4,
+				addObject(paintballFactory.createPaintball(enemy.getX()+ direction * SHOOT_OFFSET, enemy.getY()-enemy.getHeight()/16,
 						enemy.isFacingRight(),enemy.getEnemyType()));
 			}
 		}

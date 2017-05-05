@@ -148,8 +148,9 @@ public class PaintballModel extends BoxObstacle {
         scale = scl;
         gravity = false;
         maxLifeTime = 20f;
-        snapping = true;
+//        snapping = false;
         updateTime = .25f;
+
         lastUpdate = 0f;
         updateReady=false;
         initY = y;
@@ -379,6 +380,9 @@ public class PaintballModel extends BoxObstacle {
         timeToDie = 0;
         markRemoved(true);
     }
+
+    public boolean isPopped(){return popped;}
+    public boolean isPlatformPopped(){return platformPopped;}
 
     public void pop() {
         popped = true;
