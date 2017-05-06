@@ -106,7 +106,7 @@ public class MenuMode extends Mode {
 				displayFont.setColor(SELECTED_COLOR);
 			else
 				displayFont.setColor(UNSELECTED_COLOR);
-			canvas.drawText(modeNames[i], displayFont, canvas.getWidth()/2 + 150,
+			canvas.drawText(modeNames[i], displayFont, canvas.getWidth()/3*2,
 					canvas.getHeight()/2 - 50 + (displayFont.getLineHeight()+ MENU_ITEM_GAP_OFFSET_Y)*-i+MENU_ITEM_START_OFFSET_Y);
 		}
 	}
