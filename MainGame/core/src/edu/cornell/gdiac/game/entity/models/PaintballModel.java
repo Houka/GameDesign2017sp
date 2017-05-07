@@ -108,6 +108,9 @@ public class PaintballModel extends BoxObstacle {
     /** Type of paintball */
     private String paintballType;
 
+    private static final float FLASHING_RATE = .2f;
+    private static final float FLASHING_TIME = 1.5f;
+
     /**
      * PaintballModel constructor
      * @param x         Starting x position
@@ -442,7 +445,13 @@ public class PaintballModel extends BoxObstacle {
                     opacity = .6f;
                 this.setMass(0);
                 opacity *= .97;
+            } else if (timeToDie<deathDuration+FLASHING_TIME){
+                if(((int)(timeToDie/FLASHING_RATE))%2 == 0)
+                    opacity = .5f;
+                else
+                    opacity = 1;
             }
+
             if(timeToDie<0)
                 markRemoved(true);
         }
