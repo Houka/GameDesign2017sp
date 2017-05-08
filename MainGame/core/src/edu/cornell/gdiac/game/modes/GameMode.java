@@ -10,6 +10,7 @@
  */
 package edu.cornell.gdiac.game.modes;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -75,6 +76,10 @@ public class GameMode extends Mode implements Settable {
 	private static final float SHOOT_OFFSET = 0.4f;
 	/** The time until reset after loss*/
 	private final float TIME_TO_RESET = 2f;
+	private final float START_TIME = 2f;
+
+	/** Timer for a race the clock situation (in seconds) **/
+	private float time = 0;
 
 	/** All the objects in the world.	 */
 	private PooledList<Obstacle> objects = new PooledList<Obstacle>();
@@ -281,13 +286,15 @@ public class GameMode extends Mode implements Settable {
 		gameCamera.snap();
 		canvas.end();
 		hud.reset();
+		time = 0;
 	}
 
 	@Override
 	public void update(float dt) {
+		time+=dt;
 		soundController.update();
 
-		if (!hud.isLose() && !hud.isWin())
+		if (!hud.isLose() && !hud.isWin() || time > START_TIME)
 			for (EntityController e : entityControllers)
 				e.update(dt);
 
@@ -343,7 +350,7 @@ public class GameMode extends Mode implements Settable {
 		canvas.begin(gameCamera);
 		float cameraBufferWidth = gameCamera.viewportWidth/scaleVector.x/30f;
 
-		if (hud.isWin())
+		if (hud.isWin() || time <= START_TIME)
 			canvas.setCamera(Math.max(Math.min(goal.getX()+cameraBufferWidth,gameCamera.position.x/scaleVector.x),goal.getX()-cameraBufferWidth)*scaleVector.x,
 					goal.getY() * scaleVector.y, gameCamera.viewportHeight/2);
 		else
@@ -491,6 +498,10 @@ public class GameMode extends Mode implements Settable {
 
 				// make infinite background
 				if (obj instanceof BackgroundModel){
+					if(goal.getX()*scaleVector.x >= ((BackgroundModel) obj).getMaxWidth())
+						((BackgroundModel) obj).incBgWidth(1);
+					if(goal.getY()*scaleVector.y >= ((BackgroundModel) obj).getMaxHeight())
+						((BackgroundModel) obj).incBgHeight(1);
 					if (player.getX()*scaleVector.x <= -((BackgroundModel) obj).getMaxWidth()||
 							player.getX()*scaleVector.x >= ((BackgroundModel) obj).getMaxWidth())
 						((BackgroundModel) obj).incBgWidth(1);
