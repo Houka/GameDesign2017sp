@@ -1,17 +1,26 @@
 package edu.cornell.gdiac.game;
 
+import com.badlogic.gdx.graphics.Color;
+
 /**
  * Created by Lu on 4/14/2017.
  */
 public class Constants {
     public static String GAME_MUSIC_FILE = "music/gameplay_background.mp3";
+    public static String MENU_MUSIC_FILE = "music/gameplay_background.mp3";
     /** Retro font for displaying messages */
-    public static String FONT_FILE = "fonts/RetroGame.ttf";
-    public static int FONT_SIZE = 64;
     public static String SELECTION_FONT_FILE = "fonts/LightPixel7.ttf";
-    public static int SELECTION_FONT_SIZE = 200;
+    public static int SELECTION_FONT_SIZE = 64;
     public static String MENU_FONT_FILE = "fonts/RealGraffiti.ttf";
-    public static int MENU_FONT_SIZE = 44;
+    public static int MENU_FONT_SIZE = 64;
+    public static String FONT_FILE = SELECTION_FONT_FILE;
+    public static int FONT_SIZE = SELECTION_FONT_SIZE;
+
+    public static Color SELECTED_COLOR = new Color(183/255f, 81/255f, 46/255f, 1f);
+    public static Color SELECTED_COLOR_LIGHT = new Color(236/255f, 239/255f, 218/255f, 1f);
+    public static Color UNSELECTED_COLOR = new Color(36/255f, 39/255f, 18/255f, 1f);
+    public static Color ALPHA = new Color(1f,1f,1f,0.5f);
+    public static Color WHITE = new Color(1f,1f,1f,1f);
 
     /** Textures necessary to support the loading screen */
     public static final String PLAYER_FILE = "sprites/char/char_icon.png";
@@ -51,7 +60,20 @@ public class Constants {
     public static String CHARACTER_TRANSITION_FILE = "sprites/char/char_transition_strip2.png";
     public static String CHARACTER_SHOOT_FILE = "sprites/char/char_shoot.png";
     public static String CHARACTER_CROUCH_FILE = "sprites/char/char_crouch.png";
+    public static String CHARACTER_CROUCH_SHOOT_FILE = "sprites/char/char_crouch_shoot.png";
     public static String CHARACTER_STUNNED_FILE = "sprites/char/char_stunned.png";
+
+    public static String TUTORIAL_JUMP_FILE = "sprites/tutorials/tutor_jump.png";
+    public static String TUTORIAL_CROUCH_FILE = "sprites/tutorials/tutor_crouch.png";
+    public static String TUTORIAL_MOVE_FILE = "sprites/tutorials/tutor_move.png";
+    public static String TUTORIAL_FORM_PLATFORM_FILE = "sprites/tutorials/tutor_form_platform.png";
+    public static String TUTORIAL_RIDE_FILE = "sprites/tutorials/tutor_ride.png";
+    public static String TUTORIAL_SHOOT_FILE = "sprites/tutorials/tutor_shoot.png";
+    public static String TUTORIAL_SHOOT_TARGET_FILE = "sprites/tutorials/tutor_shoot_target.png";
+    public static String TUTORIAL_TRAMPOLINE_FILE = "sprites/tutorials/tutor_trampoline.png";
+
+    public static String[] TUTORIAL_FILES = {TUTORIAL_CROUCH_FILE, TUTORIAL_JUMP_FILE, TUTORIAL_FORM_PLATFORM_FILE,
+            TUTORIAL_MOVE_FILE, TUTORIAL_RIDE_FILE, TUTORIAL_SHOOT_FILE, TUTORIAL_SHOOT_TARGET_FILE, TUTORIAL_TRAMPOLINE_FILE};
 
     /** Texture column numbers**/
     public static int PAINTBALL_TRAIL_COLUMNS = 5;

@@ -32,13 +32,19 @@ public class PlayerController extends EntityController {
     public void update(float dt) {
         input.readInput();
 
-        player.setMovement(input.getHorizontal());
-        player.setJumping(input.didJump());
-        player.setShooting(input.didShoot());
-        player.setCrouching(input.isDownHeld());
-        player.applyForce();
+        if (!player.isGhosting()) {
+            player.setMovement(input.getHorizontal());
+            player.setJumping(input.didJump());
+            player.setShooting(input.didShoot());
+            player.setCrouching(input.isDownHeld());
 
-        updateAnimation();
+        }
+        else {
+            player.setMovement(0f);
+        }
+        player.applyForce();
+            updateAnimation();
+
     }
 
     public void superJumpEnabled(boolean value) {
@@ -46,11 +52,13 @@ public class PlayerController extends EntityController {
     }
 
     private void updateAnimation(){
-        if (player.isShooting())
+        if (player.isShooting() && !player.isCrouching())
             player.getAnimation().playOnce("shoot");
+        else if (player.isShooting() && player.isCrouching())
+            player.getAnimation().playOnce("crouch_shoot");
         else if(player.isGrounded() && player.isCrouching())
             player.getAnimation().play("crouch",false);
-        else if (!player.isGrounded() && player.getVY() < -OFF_GROUND_THRESHOLD)
+        else if (!player.isGrounded() && (player.getVY() < -OFF_GROUND_THRESHOLD || player.getRidingBullet()!=null ||  (player.getVY()==0 && player.semirecentlyUngrounded())))
             player.getAnimation().play("falling", true);
         else if (!player.isGrounded() && player.getVY() > OFF_GROUND_THRESHOLD) {
             if (player.isDoubleJumping())
@@ -62,9 +70,9 @@ public class PlayerController extends EntityController {
             player.getAnimation().playOnce("peak");
         else if (!player.isGrounded() && player.isKnockedBack())
             player.getAnimation().playOnce("stunned");
-        else if (player.isGrounded() && input.getHorizontal() != 0)
+        else if (player.isGrounded() && input.getHorizontal() != 0 && !player.isGhosting())
             player.getAnimation().play("run", true);
-        else if (player.isGrounded())
+        else if (player.isGrounded() || player.recentlyGrounded())
             player.getAnimation().play("idle", true);
     }
 }

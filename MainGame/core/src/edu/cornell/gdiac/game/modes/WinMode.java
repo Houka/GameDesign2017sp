@@ -27,19 +27,17 @@ import java.util.ArrayList;
  */
 public class WinMode extends Mode {
 	/** Background texture */
-	private static final String BACKGROUND_FILE = "ui/bg/menu.png";
+	private static final String BACKGROUND_FILE = "ui/bg/pause.png";
 	/** Selection menu items y offset from the center*/
-	private static final int MENU_ITEM_START_OFFSET_Y = 150;
+	private static final int MENU_ITEM_START_OFFSET_Y = 50;
 	/** Selection menu items y offset between each menu item*/
 	private static final int MENU_ITEM_GAP_OFFSET_Y = 20;
-	private static Color DARK_PURPLE = new Color(123/255f, 118/255f, 131/255f, 1f);
-	private static final String[] NUM_LEVELS = FileReaderWriter.getJsonFiles();
 
 	/** The font for giving messages to the player */
 	protected BitmapFont displayFont;
 
 	/** Player modes that are selectable from menu mode */
-	private String[] modeNames = {"Next Level","Retry Level", "Settings", "Quit"};
+	private String[] modeNames = {"Next Level","Retry Level", "Main Menu", "Level Select"};
 	private int selected = 0;
 
 	/** Input controller for menu selection */
@@ -60,7 +58,6 @@ public class WinMode extends Mode {
 	public WinMode(String name, GameCanvas canvas, AssetManager manager, GameMode gameMode) {
 		super(name, canvas, manager);
 		this.gameMode = gameMode;
-		onExit = ScreenListener.EXIT_QUIT;
 		input = SelectionInputController.getInstance();
 		camera = new Camera2(canvas.getWidth(),canvas.getHeight());
 		camera.position.set(canvas.getWidth()/2, 0, 0);
@@ -78,12 +75,6 @@ public class WinMode extends Mode {
 	}
 
 	@Override
-	protected void onComplete(){
-		listener.switchToScreen(this, GameModeManager.GAME_MODE);
-		gameMode.resume();
-	}
-
-	@Override
 	public void dispose() {
 		super.dispose();
 		input = null;
@@ -98,16 +89,17 @@ public class WinMode extends Mode {
 		else if (input.didUp())
 			selected=(selected-1 < 0)? modeNames.length-1 : selected-1;
 		else if (input.didSelect()) {
-			if (selected == modeNames.length-1)
-				setExit(true);
-			else if (selected == modeNames.length-2)
-				// TODO: remove, for tech demo and testing values
-				Sidebar.defaultBootup();
-			else if (selected == modeNames.length-3) {
+			if (selected == 3) {
+				listener.switchToScreen(this, GameModeManager.LEVEL_SELECTION);
+			}
+			else if (selected == 2) {
+				listener.switchToScreen(this, GameModeManager.MENU);
+			}
+			else if (selected == 1) {
 			    listener.switchToScreen(this, gameMode.getName());
 			    gameMode.reset();
 			}
-			else if (selected == modeNames.length-4) {
+			else if (selected == 0) {
 				listener.switchToScreen(this, gameMode.getName());
 				gameMode.nextLevel();
 			}
@@ -118,13 +110,18 @@ public class WinMode extends Mode {
 
 	@Override
 	protected void draw() {
-
+		if (background != null)
+			canvas.draw(background, Constants.ALPHA, 0, 0, 0,0, 0f, scale.x, scale.y);
+		canvas.setColor(Constants.WHITE);
+		// draw lose text
+		displayFont.setColor(Color.WHITE);
+		canvas.drawTextCentered("Victory", displayFont, canvas.getHeight()/2-100);
 		// draw menu items
 		for (int i = 0; i<modeNames.length; i++) {
 			if (selected == i)
-				displayFont.setColor(Color.DARK_GRAY);
+				displayFont.setColor(Constants.SELECTED_COLOR_LIGHT);
 			else
-				displayFont.setColor(DARK_PURPLE);
+				displayFont.setColor(Constants.SELECTED_COLOR);
 			canvas.drawTextCentered(modeNames[i], displayFont,
 					(displayFont.getLineHeight()+ MENU_ITEM_GAP_OFFSET_Y)*-i+MENU_ITEM_START_OFFSET_Y);
 		}

@@ -104,7 +104,7 @@ public class GameModeManager implements Disposable, AssetUser{
 
         modeExitMapping.put(MENU, ""); // if menu exits we want to exit the game
         modeExitMapping.put(PAUSE, GAME_MODE);
-        modeExitMapping.put(WIN, GAME_MODE);
+        modeExitMapping.put(WIN, LEVEL_SELECTION);
         modeExitMapping.put(LOSS, LEVEL_SELECTION);
         modeExitMapping.put(LOADING, MENU);
         modeExitMapping.put(LEVEL_SELECTION, MENU);

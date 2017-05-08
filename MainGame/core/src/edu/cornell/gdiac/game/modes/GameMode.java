@@ -10,6 +10,7 @@
  */
 package edu.cornell.gdiac.game.modes;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -59,6 +60,10 @@ public class GameMode extends Mode implements Settable {
 	public static final int WORLD_VELOC = 6;
 	/** Number of position iterations for the constrain solvers	 */
 	public static final int WORLD_POSIT = 2;
+	/** World default sizes */
+	public static final int WORLD_WIDTH = 1024;
+	public static final int WORLD_HEIGHT = 576;
+
 
 	/** Width of the game world in Box2d units	 */
 	private static final float DEFAULT_WIDTH = 32.0f;
@@ -70,7 +75,11 @@ public class GameMode extends Mode implements Settable {
 	/** offset for enemies to shoot without hitting themselves in the arm*/
 	private static final float SHOOT_OFFSET = 0.4f;
 	/** The time until reset after loss*/
-	private final float TIME_TO_RESET = 3f;
+	private final float TIME_TO_RESET = 2f;
+	private final float START_TIME = 2f;
+
+	/** Timer for a race the clock situation (in seconds) **/
+	private float time = 0;
 
 	/** All the objects in the world.	 */
 	private PooledList<Obstacle> objects = new PooledList<Obstacle>();
@@ -83,6 +92,7 @@ public class GameMode extends Mode implements Settable {
 	private Rectangle bounds;
 	/** The player	 */
 	private PlayerModel player;
+	private GoalModel goal;
 	/** The factory that creates projectiles	 */
 	private PaintballFactory paintballFactory;
 	/** The hud of this world	 */
@@ -163,7 +173,7 @@ public class GameMode extends Mode implements Settable {
 	 */
 	public GameMode(String name, GameCanvas canvas, AssetManager manager, Rectangle bounds, Vector2 gravity) {
 		super(name, canvas, manager);
-		scaleVector = new Vector2(canvas.getWidth() / bounds.getWidth(), canvas.getHeight() / bounds.getHeight());
+		scaleVector = new Vector2(WORLD_WIDTH / bounds.getWidth(), WORLD_HEIGHT / bounds.getHeight());
 
 		world = new World(gravity, false);
 		hud = new HUDModel(canvas.getWidth(), canvas.getHeight());
@@ -174,7 +184,7 @@ public class GameMode extends Mode implements Settable {
 		levelLoader = new LevelLoader(scaleVector);
 		this.bounds = new Rectangle(bounds);
 		hud.setDrawScale(scaleVector);
-		gameCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
+		gameCamera = new Camera2(WORLD_WIDTH,(int)((float)WORLD_WIDTH/canvas.getWidth()*canvas.getHeight()));
 		gameCamera.setAutosnap(false);
 		hudCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
 		hudCamera.setAutosnap(true);
@@ -218,6 +228,19 @@ public class GameMode extends Mode implements Settable {
 
 		return false;
 	}
+
+	/**
+	 * trys to set the goal of the world
+	 */
+	private boolean trySetGoal(){
+		for (Obstacle obj : levelLoader.getAddQueue()) {
+			if (obj.getName().equals("goal")) {
+				goal = (GoalModel) obj;
+				return true;
+			}
+		}
+		return false;
+	}
 	// END: Setters and Getters
 
 	@Override
@@ -259,17 +282,19 @@ public class GameMode extends Mode implements Settable {
 
 		canvas.getCamera().setRumble(50,10,2);
 		canvas.begin(gameCamera);
-		canvas.setCamera(player.getX()*scaleVector.x,player.getY() * scaleVector.y, canvas.getHeight()/2);
+		canvas.setCamera(player.getX()*scaleVector.x,player.getY() * scaleVector.y, gameCamera.viewportHeight/2);
 		gameCamera.snap();
 		canvas.end();
 		hud.reset();
+		time = 0;
 	}
 
 	@Override
 	public void update(float dt) {
+		time+=dt;
 		soundController.update();
 
-		if (!hud.isLose() && !hud.isWin())
+		if (!hud.isLose() && !hud.isWin() && time > START_TIME)
 			for (EntityController e : entityControllers)
 				e.update(dt);
 
@@ -305,7 +330,7 @@ public class GameMode extends Mode implements Settable {
 		if (player.getY() < -player.getHeight())
 			hud.setLose(true);
 
-		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isLose()) {
+		if(hud.isLose()) {
 			hud.reset();
 			listener.switchToScreen(this, GameModeManager.LOSS);
 		}
@@ -323,7 +348,14 @@ public class GameMode extends Mode implements Settable {
 	public void draw() {
 		canvas.end();
 		canvas.begin(gameCamera);
-		canvas.setCamera(player.getX()*scaleVector.x,player.getY() * scaleVector.y, canvas.getHeight()/2);
+		float cameraBufferWidth = gameCamera.viewportWidth/scaleVector.x/30f;
+
+		if (hud.isWin() || time <= START_TIME)
+			canvas.setCamera(Math.max(Math.min(goal.getX()+cameraBufferWidth,gameCamera.position.x/scaleVector.x),goal.getX()-cameraBufferWidth)*scaleVector.x,
+					goal.getY() * scaleVector.y, gameCamera.viewportHeight/2);
+		else
+			canvas.setCamera(Math.max(Math.min(player.getX()+cameraBufferWidth,gameCamera.position.x/scaleVector.x),player.getX()-cameraBufferWidth)*scaleVector.x,
+					player.getY() * scaleVector.y, gameCamera.viewportHeight/2);
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
@@ -357,7 +389,10 @@ public class GameMode extends Mode implements Settable {
 		levelLoader.loadContent(manager);
 		if (manager.isLoaded(Constants.FONT_FILE))
 			hud.setFont(manager.get(Constants.FONT_FILE, BitmapFont.class));
-		soundController.play("gameMode", Constants.GAME_MUSIC_FILE, true);
+		if (!soundController.isActive("game mode")){
+			soundController.stopAll();
+			soundController.play("gameMode", Constants.GAME_MUSIC_FILE, true);
+		}
 	}
 
 	@Override
@@ -379,11 +414,6 @@ public class GameMode extends Mode implements Settable {
 
 	}
 
-	@Override
-	public void hide(){
-		soundController.stop("gameMode");
-	}
-
 
 	public void nextLevel() {
 		int nextLevel = (levelNumber+1)%NUM_LEVELS.length;
@@ -402,7 +432,7 @@ public class GameMode extends Mode implements Settable {
 		bounds = levelLoader.getBounds();
 		hud.setStartingAmmo(levelLoader.getStartingAmmo());
 		gameCamera.snap();
-		if (!trySetPlayer())
+		if (!trySetPlayer() || !trySetGoal())
 			System.out.println("Error: level file (" + levelFile + ") does not have a player");
 	}
 
@@ -416,12 +446,15 @@ public class GameMode extends Mode implements Settable {
 	private void updateShooter(Obstacle obj) {
 		if (((Shooter)obj).isShooting()) {
 			if (obj.getName().equals("player") && hud.useAmmo()) {
-				addObject(paintballFactory.createPaintball(obj.getX(), obj.getY()+player.getHeight()/8, ((Shooter) obj).isFacingRight(), "player"));
+				if (!((PlayerModel)obj).isCrouching())
+					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY()+player.getHeight()/8, ((Shooter) obj).isFacingRight(), "player"));
+				else
+					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY()-player.getHeight()/4, ((Shooter) obj).isFacingRight(), "player"));
 			}
 			else if (obj.getName().equals("enemy")) {
 				int direction = ((Shooter) obj).isFacingRight() ? 1 : 0;
 				EnemyModel enemy = (EnemyModel) obj;
-				addObject(paintballFactory.createPaintball(enemy.getX()+ direction * SHOOT_OFFSET, enemy.getY()-enemy.getHeight()/4,
+				addObject(paintballFactory.createPaintball(enemy.getX()+ direction * SHOOT_OFFSET, enemy.getY()-enemy.getHeight()/16,
 						enemy.isFacingRight(),enemy.getEnemyType()));
 			}
 		}
@@ -443,7 +476,7 @@ public class GameMode extends Mode implements Settable {
 
 		accumulator += (float) Math.min(dt,FRAME_CAP);
 		// Turn the physics engine crank.
-		if (!hud.isLose() && !hud.isWin() && accumulator >=WORLD_STEP) {
+		if (!hud.isWin() && accumulator >=WORLD_STEP) {
 			world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
 			accumulator-=WORLD_STEP;
 		}
@@ -460,6 +493,19 @@ public class GameMode extends Mode implements Settable {
 				entry.remove();
 			} else {
 				obj.update(dt);
+
+				// make infinite background
+				if (obj instanceof BackgroundModel){
+					if(goal.getX()*scaleVector.x >= ((BackgroundModel) obj).getMaxWidth())
+						((BackgroundModel) obj).incBgWidth(1);
+					if(goal.getY()*scaleVector.y >= ((BackgroundModel) obj).getMaxHeight())
+						((BackgroundModel) obj).incBgHeight(1);
+					if (player.getX()*scaleVector.x <= -((BackgroundModel) obj).getMaxWidth()||
+							player.getX()*scaleVector.x >= ((BackgroundModel) obj).getMaxWidth())
+						((BackgroundModel) obj).incBgWidth(1);
+					if (player.getY()*scaleVector.y >= ((BackgroundModel) obj).getMaxHeight())
+						((BackgroundModel) obj).incBgHeight(1);
+				}
 			}
 		}
 	}
