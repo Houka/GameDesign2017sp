@@ -5,6 +5,7 @@ package edu.cornell.gdiac.game;
  */
 public class Constants {
     public static String GAME_MUSIC_FILE = "music/gameplay_background.mp3";
+    public static String MENU_MUSIC_FILE = "music/gameplay_background.mp3";
     /** Retro font for displaying messages */
     public static String FONT_FILE = "fonts/RetroGame.ttf";
     public static int FONT_SIZE = 64;

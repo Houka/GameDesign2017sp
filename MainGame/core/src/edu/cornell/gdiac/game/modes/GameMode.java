@@ -363,7 +363,10 @@ public class GameMode extends Mode implements Settable {
 		levelLoader.loadContent(manager);
 		if (manager.isLoaded(Constants.FONT_FILE))
 			hud.setFont(manager.get(Constants.FONT_FILE, BitmapFont.class));
-		soundController.play("gameMode", Constants.GAME_MUSIC_FILE, true);
+		if (!soundController.isActive("game mode")){
+			soundController.stopAll();
+			soundController.play("gameMode", Constants.GAME_MUSIC_FILE, true);
+		}
 	}
 
 	@Override
@@ -383,11 +386,6 @@ public class GameMode extends Mode implements Settable {
 		else
 			gameCamera.enableRumble();
 
-	}
-
-	@Override
-	public void hide(){
-		soundController.stop("gameMode");
 	}
 
 
