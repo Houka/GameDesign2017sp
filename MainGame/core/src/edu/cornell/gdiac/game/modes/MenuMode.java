@@ -15,6 +15,7 @@ import edu.cornell.gdiac.game.GameModeManager;
 import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
+import edu.cornell.gdiac.util.SoundController;
 
 /**
  * Class that provides a menu screen for the state of the game.
@@ -42,6 +43,8 @@ public class MenuMode extends Mode {
 
 	private GameMode gameMode;
 
+	private SoundController soundController;
+
 	/**
 	 * Creates a MenuMode with the default size and position.
 	 *
@@ -53,6 +56,7 @@ public class MenuMode extends Mode {
 		onExit = ScreenListener.EXIT_QUIT;
 		input = SelectionInputController.getInstance();
 		this.gameMode = gameMode;
+		soundController = SoundController.getInstance();
 	}
 
 	// BEGIN: Setters and Getters
@@ -80,7 +84,7 @@ public class MenuMode extends Mode {
 	@Override
 	protected void update(float delta) {
 		input.readInput();
-
+		soundController.update();
 		if (input.didDown())
 			selected=(selected+1) % modeNames.length;
 		else if (input.didUp())
@@ -106,7 +110,7 @@ public class MenuMode extends Mode {
 				displayFont.setColor(SELECTED_COLOR);
 			else
 				displayFont.setColor(UNSELECTED_COLOR);
-			canvas.drawText(modeNames[i], displayFont, canvas.getWidth()/2 + 150,
+			canvas.drawText(modeNames[i], displayFont, canvas.getWidth()/3*2,
 					canvas.getHeight()/2 - 50 + (displayFont.getLineHeight()+ MENU_ITEM_GAP_OFFSET_Y)*-i+MENU_ITEM_START_OFFSET_Y);
 		}
 	}
@@ -131,6 +135,11 @@ public class MenuMode extends Mode {
 			displayFont = manager.get(Constants.MENU_FONT_FILE, BitmapFont.class);
 		else
 			displayFont = null;
+
+		if(!soundController.isActive("menu mode")) {
+			soundController.stopAll();
+			soundController.play("menu mode", Constants.MENU_MUSIC_FILE, true);
+		}
 	}
 
 	@Override

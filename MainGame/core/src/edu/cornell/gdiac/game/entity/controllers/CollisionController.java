@@ -7,6 +7,7 @@ import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
 import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
+import javafx.util.Pair;
 
 /**
  * Created by Lu on 3/17/2017.
@@ -29,8 +30,6 @@ import edu.cornell.gdiac.util.obstacles.Obstacle;
 public class CollisionController implements ContactListener {
     /** the hud*/
     private HUDModel hud;
-    /** Mark set to handle more sophisticated collision callbacks */
-    private ObjectSet<Object> sensorObjects;
     /** paintball factory for splatterers */
     private PaintballFactory paintballFactory;
 
@@ -45,7 +44,6 @@ public class CollisionController implements ContactListener {
         this.hud = hud;
         this.paintballFactory = paintballFactory;
         this.objectsToAdd = new PooledList<PaintballModel>();
-        sensorObjects = new ObjectSet<Object>();
     }
 
     // BEGIN: helper functions
@@ -58,16 +56,16 @@ public class CollisionController implements ContactListener {
      * @param userData2     Information about the obstacle being collided with
      */
     private void touchedGround(PlayerModel obj1, Obstacle obj2, Object userData1, Object userData2){
-        if (obj1.getSensorName().equals(userData1)) {
-            obj1.setGrounded(true);
+        if (obj1.isGroundSensor(userData1)) {
             obj1.setJumpForce(obj1.getPlayerJump());
-            if(!(obj2 instanceof PaintballModel) ||
-                    (obj2 instanceof PaintballModel && !((PaintballModel) obj2).getPaintballType().equals("trampolineComb"))) {
-                obj1.setTrampGrounded(false);
-            }
-            if(userData2==null)
+            if (userData2 == null)
                 userData2 = obj2;
-            sensorObjects.add(userData2); // Could have more than one ground
+            obj1.addSensorCollision(userData1, userData2);
+            if (obj1.isColliding())
+            {
+                obj1.setGrounded(true);
+                obj1.setCanDoubleJump(true);
+            }
         }
     }
 
@@ -79,15 +77,23 @@ public class CollisionController implements ContactListener {
      * @param userData2     Information about the obstacle that had been collided with
      */
     private void leftGround(PlayerModel obj1, Obstacle obj2, Object userData1, Object userData2){
-        if (obj1.getSensorName().equals(userData1)) {
+        if (obj1.isGroundSensor(userData1)) {
             if(userData2==null)
                 userData2 = obj2;
-            sensorObjects.remove(userData2);
-            if (sensorObjects.size == 0) {
+            obj1.removeSensorCollision(userData1,userData2);
+            if (!obj1.isColliding()) {
                 obj1.setGrounded(false);
-                obj1.setCanDoubleJump(true);
             }
         }
+    }
+
+    public boolean aboveGround(PlayerModel obj1, PaintballModel obj2) {
+        float buffer = obj2.getHeight()/4f;
+        return obj1.getY()-obj1.getHeight()/2>=obj2.getY()+obj2.getHeight()/2-buffer;
+    }
+
+    public boolean aboveGround(PlayerModel obj1, PaintballModel obj2, float buffer) {
+        return obj1.getY()-obj1.getHeight()/2>=obj2.getY()+obj2.getHeight()/2-buffer;
     }
     // END: helper functions
 
@@ -100,15 +106,14 @@ public class CollisionController implements ContactListener {
     private void handleCollision(PlayerModel obj1, GoalModel obj2){ hud.setWin(true); }
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
         touchedGround(obj1,obj2,userData1,userData2);
-        obj1.setTrampGrounded(false);
-        if (obj2.getType() != PlatformModel.NORMAL_PLATFORM) {hud.setLose(true);}
+        if (obj2.getType() != PlatformModel.NORMAL_PLATFORM && obj1.fixtureIsActive(userData1)) {hud.setLose(true);}
     }
     private void handleCollision(PlayerModel obj1, WallModel obj2){
         obj1.setKnockedBack(0);
     }
     private void handleCollision(PlayerModel obj1, PaintballModel obj2, Fixture fix1, Fixture fix2, Object userData1, Object userData2) {
         float sign = obj2.getVX() / Math.abs(obj2.getVX());
-        if(obj1.getY()-obj1.getHeight()/2>=obj2.getY()+obj2.getHeight()/2 && !obj1.isGhosting()){
+        if(aboveGround(obj1,obj2) && ! obj1.isGhosting()){
             touchedGround(obj1, obj2, userData1, fix2);
             obj1.setRidingVX(obj2);
         }
@@ -120,7 +125,7 @@ public class CollisionController implements ContactListener {
             }
         }
         if(obj2.getPaintballType().equals("trampolineComb")) {
-            if(obj1.isGrounded() && !obj1.isJumping() && !obj1.isDoubleJumping()) {
+            if(obj1.isGrounded() && !obj1.isJumping() && !obj1.isDoubleJumping() && aboveGround(obj1,obj2)) {
                 obj1.setMyPlatform(obj2);
                 obj1.setTrampGrounded(true);
                 obj2.setUsed(true);
@@ -129,20 +134,16 @@ public class CollisionController implements ContactListener {
     }
     private void handleCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){
         if(obj2.isPlayerBullet()) {
-            obj2.markRemoved(true);
+            obj2.pop();
             obj1.setStunned(true);
         }
     }
     private void handleCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}
     private void handleCollision(GoalModel obj1, PaintballModel obj2){
         hud.setWin(true);
-        obj2.markRemoved(true);
+        obj2.pop();
     }
     private void handleCollision(PaintballModel obj1, PaintballModel obj2){
-        if(obj1.recentlyCreated())
-            obj1.instakill();
-        if(obj2.recentlyCreated())
-            obj2.instakill();
 
         if(obj1.isDead() || obj2.isDead() || obj1.getRecentCollision() || obj2.getRecentCollision())
             return;
@@ -201,35 +202,27 @@ public class CollisionController implements ContactListener {
         obj2.markRecentCollision();
     }
     private void handleCollision(PlatformModel obj1, PaintballModel obj2){
-        if(obj2.recentlyCreated()) {
-            if (obj2.isPlayerBullet()) {
+
+        if(obj2.isPlayerBullet()) {
+            if(!obj2.isPlatformPopped())
                 obj2.pop();
-            }
-            else {
-                obj2.platformPop();
-            }
+        }
+        else {
+            obj2.platformPop();
+            obj2.setTimeToDie(obj2.getPaintballToPlatformDuration());
         }
 
-        if(obj2.isPlayerBullet())
-            obj2.pop();
-
-        obj2.setTimeToDie(obj2.getPaintballToWallDuration());
         obj2.fixX(0f);
     }
     private void handleCollision(WallModel obj1, PaintballModel obj2){
-        if(obj2.recentlyCreated()) {
-            if (obj2.isPlayerBullet()) {
-                obj2.pop();
-            }
-            else {
-                obj2.platformPop();
-            }
-        }
 
-        if(obj2.isPlayerBullet())
-            obj2.pop();
-        
-        obj2.setTimeToDie(obj2.getPaintballToPlatformDuration());
+        if(obj2.isPlayerBullet()) {
+                obj2.pop();
+        }
+        else {
+            obj2.platformPop();
+            obj2.setTimeToDie(obj2.getPaintballToWallDuration());
+        }
         obj2.fixX(0f);
     }
     private void handleCollision(PlayerModel obj1, AmmoDepotModel obj2) {
@@ -249,7 +242,7 @@ public class CollisionController implements ContactListener {
             obj1.setUsed(true);
             obj1.setShot(true);
             obj1.setDir(dir);
-            obj1.setYCoord(obj2.getY());
+            obj1.setYCoord(obj2.getY()-obj2.getHeight()/3);
         }else{
         }
     }
@@ -261,7 +254,19 @@ public class CollisionController implements ContactListener {
     }
     private void handleEndCollision(PlayerModel obj1,PaintballModel obj2, Object userData1, Object userData2){
         leftGround(obj1,obj2,userData1,userData2);
-        obj1.setRidingVX(null);
+
+        if(userData1!=null) {
+            obj1.removeSensorCollision(userData1,userData2);
+            if(!obj1.isColliding())
+                obj1.setGrounded(false);
+        }
+        if(obj1.fixtureIsActive(userData1)) {
+            obj1.setRidingVX(null);
+            obj1.removeSensorCollision(obj1.getSensorName(),userData2);
+            obj1.removeSensorCollision(obj1.getRunningSensorName(),userData2);
+            if(obj2.getPaintballType().equals("trampolineComb"))
+                obj1.setTrampGrounded(false);
+        }
     }
     private void handleEndCollision(EnemyModel obj1, PaintballModel obj2, Object userData1){}
     private void handleEndCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}
@@ -348,8 +353,6 @@ public class CollisionController implements ContactListener {
 
     @Override
     public void beginContact(Contact contact) {
-        if(!contact.isEnabled())
-            return;
         Fixture fix1 = contact.getFixtureA();
         Fixture fix2 = contact.getFixtureB();
 
@@ -362,6 +365,20 @@ public class CollisionController implements ContactListener {
         try {
             Obstacle bd1 = (Obstacle) body1.getUserData();
             Obstacle bd2 = (Obstacle) body2.getUserData();
+
+            PlayerModel player = null;
+            Object playerFixData = null;
+            if(bd1.getName().equals("player")) {
+                player = (PlayerModel) bd1;
+                playerFixData = fd1;
+            } else if (bd2.getName().equals("player")) {
+                player = (PlayerModel) bd2;
+                playerFixData = fd2;
+            }
+
+            if(player!=null && !player.fixtureIsActive(playerFixData) && !player.isGroundSensor(playerFixData)) {
+                return;
+            }
 
             processCollision(bd1, bd2, fd1, fd2,fix1,fix2);
             processCollision(bd2, bd1, fd2, fd1,fix2,fix1);
@@ -384,6 +401,17 @@ public class CollisionController implements ContactListener {
         try {
             Obstacle bd1 = (Obstacle) body1.getUserData();
             Obstacle bd2 = (Obstacle) body2.getUserData();
+
+            PlayerModel player = null;
+            Object playerFixData = null;
+            if(bd1.getName().equals("player")) {
+                player = (PlayerModel) bd1;
+                playerFixData = fd1;
+            } else if (bd2.getName().equals("player")) {
+                player = (PlayerModel) bd2;
+                playerFixData = fd2;
+            }
+
 
             processEndCollision(bd1, bd2, fd1, fd2,fix1,fix2);
             processEndCollision(bd2, bd1, fd2, fd1,fix2,fix1);
@@ -410,15 +438,18 @@ public class CollisionController implements ContactListener {
             PlayerModel player = null;
             Object playerFixData = null;
             PaintballModel paintball = null;
+            Fixture paintballFix = null;
 
             if(bd2.getName().equals("paintball")) {
                 paintball = (PaintballModel) bd2;
+                paintballFix = fix2;
                 if(paintball.isDead() || bd1.getName().equals("paintball")) {
                     contact.setEnabled(false);
                     return;
                 }
             } else if (bd1.getName().equals("paintball")) {
                 paintball = (PaintballModel) bd1;
+                paintballFix = fix1;
                 if(paintball.isDead()) {
                     contact.setEnabled(false);
                     return;
@@ -434,7 +465,10 @@ public class CollisionController implements ContactListener {
                 playerFixData = fd2;
             }
 
-            if(player!=null && !player.fixtureIsActive(playerFixData)) {
+
+            if(player!=null && !player.fixtureIsActive(playerFixData) && !player.isGroundSensor(playerFixData)) {
+                if(paintball!=null && player.getRidingBullet()==paintball && ! aboveGround(player,paintball))
+                    player.setRidingVX(null);
                 contact.setEnabled(false);
                 return;
             }
@@ -443,14 +477,29 @@ public class CollisionController implements ContactListener {
                 return;
             }
 
-            if (player.isGhosting()) {
+            if (player.isGhosting() && !paintball.isPlatformPopped()) {
                 contact.setEnabled(false);
                 return;
             }
 
 
-            if(player.getVY()>=0 && paintball.canPassThrough()) {
-                contact.setEnabled(false);
+            if(paintball.canPassThrough()) {
+                if(player.getVY()>0 || !aboveGround(player,paintball,.0f) || (player.getX()-player.getWidth()+.1>paintball.getX()+paintball.getWidth() || player.getX()+player.getWidth()-.1<paintball.getX()-paintball.getWidth())) {
+                    if(player.getRidingBullet()==paintball)
+                        player.setRidingVX(null);
+                    contact.setEnabled(false);
+                    player.removeSensorCollision(player.getSensorName(),paintballFix);
+                    player.removeSensorCollision(player.getRunningSensorName(),paintballFix);
+                    if(!player.isColliding())
+                        player.setGrounded(false);
+                }
+                else if(aboveGround(player,paintball)) {
+                        player.setGrounded(true);
+                        player.addSensorCollision(player.getSensorName(),paintballFix);
+                        player.addSensorCollision(player.getRunningSensorName(),paintballFix);
+                        if (paintball.getPaintballType().equals("trampolineComb"))
+                            player.setTrampGrounded(true);
+                }
             }
 
         }catch (Exception e) {
@@ -459,43 +508,6 @@ public class CollisionController implements ContactListener {
     }
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {
-
-        Fixture fix1 = contact.getFixtureA();
-        Fixture fix2 = contact.getFixtureB();
-
-        Body body1 = fix1.getBody();
-        Body body2 = fix2.getBody();
-
-        try {
-            Obstacle bd1 = (Obstacle) body1.getUserData();
-            Obstacle bd2 = (Obstacle) body2.getUserData();
-
-            PlayerModel player;
-            PaintballModel paintball;
-
-            if(bd1.getName().equals("player") && bd2.getName().equals("paintball")) {
-                player = (PlayerModel) bd1;
-                paintball = (PaintballModel) bd2;
-            } else if (bd2.getName().equals("player") && bd1.getName().equals("paintball")) {
-                player = (PlayerModel) bd2;
-                paintball = (PaintballModel) bd1;
-            } else {
-                return;
-            }
-
-            if (player.isGhosting()) {
-                contact.setEnabled(false);
-                return;
-            }
-
-            if(player.getVY()>=0 && paintball.isPlayerBullet()) {
-                contact.setEnabled(false);
-            }
-
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-
     }
 
 }

@@ -10,6 +10,7 @@
  */
 package edu.cornell.gdiac.game.modes;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
@@ -173,6 +174,7 @@ public abstract class Mode implements Screen, Completable, AssetUser, Exitable, 
 	 */
 	@Override
 	public void render(float delta) {
+	    delta = Gdx.graphics.getRawDeltaTime();
 		if (active) {
 			if (preUpdate(delta))
 				update(delta);

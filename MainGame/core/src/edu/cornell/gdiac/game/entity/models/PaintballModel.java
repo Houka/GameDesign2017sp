@@ -148,8 +148,9 @@ public class PaintballModel extends BoxObstacle {
         scale = scl;
         gravity = false;
         maxLifeTime = 20f;
-        snapping = true;
-        updateTime = .1f;
+//        snapping = false;
+        updateTime = .25f;
+
         lastUpdate = 0f;
         updateReady=false;
         initY = y;
@@ -380,6 +381,9 @@ public class PaintballModel extends BoxObstacle {
         markRemoved(true);
     }
 
+    public boolean isPopped(){return popped;}
+    public boolean isPlatformPopped(){return platformPopped;}
+
     public void pop() {
         popped = true;
         timeToDie = 0;
@@ -391,6 +395,10 @@ public class PaintballModel extends BoxObstacle {
         platformPopped = true;
         fixX(0);
         platformSplatEffectTexture.playOnce("platform splat");
+    }
+
+    public void snap(){
+        setPosition(getPosition().x,snapToGrid(getPosition().y));
     }
 
     @Override
@@ -450,7 +458,7 @@ public class PaintballModel extends BoxObstacle {
 
         maxLifeTime-=delta;
         if(snapping)
-            setPosition(getPosition().x,snapToGrid(getPosition().y));
+            snap();
 
         headTexture.update(delta);
         splatEffectTexture.update(delta);
@@ -508,7 +516,8 @@ public class PaintballModel extends BoxObstacle {
     }
 
     private float snapToGrid(float yVal) {
-        yVal =(float) Math.floor(yVal/getHeight()/GRID_SNAP)*getHeight()*GRID_SNAP;
-        return yVal + getHeight();
+        float size = 48/drawScale.y;
+        yVal =(float) Math.floor((size/2+yVal)/size);
+        return size*yVal;
     }
 }
