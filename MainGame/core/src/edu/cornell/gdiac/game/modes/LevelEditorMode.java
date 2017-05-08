@@ -314,7 +314,7 @@ public class LevelEditorMode extends Mode {
             }
             else if(underMouse.equals(regions[5])) {
                 try {
-                    int interval = 3;
+                    int interval = 180;
                     String dir = setDir();
                     String type = setEnemyType();
                     boolean right = false;
@@ -326,7 +326,6 @@ public class LevelEditorMode extends Mode {
                     Vector2 pos1 = new Vector2(newE.getX()-newE.getWidth()/4/scaleVector.x,newE.getY());
                     Vector2 pos2 = new Vector2(newE.getX()+newE.getWidth()/4/scaleVector.x,newE.getY());
                     if(!objects.containsKey(pos1) && !objects.containsKey(pos2)) {
-                        System.out.println(pos1 + " " + pos2);
                         objects.put(pos1, newE);
                     }
                 }
@@ -347,7 +346,6 @@ public class LevelEditorMode extends Mode {
                     Vector2 pos1 = new Vector2(newE.getX()-newE.getWidth()/4/scaleVector.x,newE.getY());
                     Vector2 pos2 = new Vector2(newE.getX()+newE.getWidth()/4/scaleVector.x,newE.getY());
                     if(!objects.containsKey(pos1) && !objects.containsKey(pos2)) {
-                        System.out.println(pos1 + " " + pos2);
                         objects.put(pos1, newE);
                     }
                 }
@@ -372,7 +370,6 @@ public class LevelEditorMode extends Mode {
                 newG.setDrawScale(scaleVector);
                 newG.setTexture(underMouse);
                 if(!objects.containsKey(newG.getPosition())) {
-                    System.out.println(newG.getPosition());
                     objects.put(newG.getPosition(), newG);
                 }
                 underMouse = null;
@@ -389,7 +386,6 @@ public class LevelEditorMode extends Mode {
                 float height = arr[3]-arr[7];
                 Vector2 pos = new Vector2(arr[6]+(width/2), arr[5]+(height/2));
                 if(!objects.containsKey(pos)) {
-                    System.out.println(pos);
                     objects.put(pos, newP);
                 }
             }
@@ -404,7 +400,6 @@ public class LevelEditorMode extends Mode {
                 float height = arr[3]-arr[7];
                 Vector2 pos = new Vector2(arr[6]+(width/2), arr[5]+(height/2));
                 if(!objects.containsKey(pos)) {
-                    System.out.println(pos);
                     objects.put(pos, newW);
                 }
             }
@@ -414,7 +409,6 @@ public class LevelEditorMode extends Mode {
                 newS.setDrawScale(scaleVector);
                 newS.setTexture(underMouse);
                 if(!objects.containsKey(newS.getPosition())) {
-                    System.out.println(newS.getPosition());
                     objects.put(newS.getPosition(), newS);
                 }
                 underMouse = null;
@@ -432,7 +426,6 @@ public class LevelEditorMode extends Mode {
                 float height = arr[3]-arr[7];
                 Vector2 pos = new Vector2(arr[6]+(width/2), arr[5]+(height/2));
                 if(!objects.containsKey(pos)) {
-                    System.out.println(pos);
                     objects.put(pos, newP);
                 }
             }
@@ -767,7 +760,19 @@ public class LevelEditorMode extends Mode {
             while (!levelLoader.getAddQueue().isEmpty()) {
                 Obstacle obj = levelLoader.getAddQueue().poll();
                 obj.setDrawScale(scaleVector);
-                objects.put(obj.getPosition(), obj);
+                if(obj instanceof PlatformModel) {
+                    float[] arr = (((PlatformModel)obj).getPoints());
+                    Vector2 objPos = new Vector2(arr[6], arr[5]);
+                    objects.put(objPos, obj);
+                }
+                else if(obj instanceof WallModel) {
+                    float[] arr = (((WallModel)obj).getPoints());
+                    Vector2 objPos = new Vector2(arr[6], arr[5]);
+                    objects.put(objPos, obj);
+                }
+                else {
+                    objects.put(obj.getPosition(), obj);
+                }
             }
         }else{
             System.out.println("ERROR: invalid file path");

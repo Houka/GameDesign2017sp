@@ -11,7 +11,7 @@ public class Constants {
     public static String SELECTION_FONT_FILE = "fonts/LightPixel7.ttf";
     public static int SELECTION_FONT_SIZE = 200;
     public static String MENU_FONT_FILE = "fonts/RealGraffiti.ttf";
-    public static int MENU_FONT_SIZE = 44;
+    public static int MENU_FONT_SIZE = 64;
 
     /** Textures necessary to support the loading screen */
     public static final String PLAYER_FILE = "sprites/char/char_icon.png";
@@ -51,6 +51,7 @@ public class Constants {
     public static String CHARACTER_TRANSITION_FILE = "sprites/char/char_transition_strip2.png";
     public static String CHARACTER_SHOOT_FILE = "sprites/char/char_shoot.png";
     public static String CHARACTER_CROUCH_FILE = "sprites/char/char_crouch.png";
+    public static String CHARACTER_CROUCH_SHOOT_FILE = "sprites/char/char_crouch_shoot.png";
     public static String CHARACTER_STUNNED_FILE = "sprites/char/char_stunned.png";
 
     /** Texture column numbers**/

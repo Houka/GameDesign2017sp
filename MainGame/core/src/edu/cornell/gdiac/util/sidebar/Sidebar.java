@@ -74,7 +74,7 @@ public class Sidebar {
         if (theMap == null)
             theMap = new HashMap<String, Float>();
         Sidebar.setValue("Gravity",-30.0f);
-        Sidebar.setValue("Jump Height",14f);
+        Sidebar.setValue("Jump Height",14.25f);
         Sidebar.setValue("Player Speed",7.65f);
         Sidebar.setValue("Knockback Force",12f);
         Sidebar.setValue("Knockback Friction",.06f);

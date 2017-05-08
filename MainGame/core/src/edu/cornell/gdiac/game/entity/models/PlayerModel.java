@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.ObjectSet;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
 import edu.cornell.gdiac.game.interfaces.Animatable;
@@ -37,11 +38,12 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     /** Cooldown (in animation frames) for jumping */
     private static final int JUMP_COOLDOWN = 10;
     /** Cooldown (in animation frames) for shooting */
-    private static final int SHOOT_COOLDOWN = 40;
+    private static final int SHOOT_COOLDOWN = 30;
     /** Height of the sensor attached to the player's feet */
     private static final float SENSOR_HEIGHT = 0.05f;
     /** Identifier to allow us to track the sensor in ContactListener */
     private static final String SENSOR_NAME = "PlayerGroundSensor";
+    private static final String RUNNING_SENSOR_NAME = "PlayerGroundRunningSensor";
     /** Ratio of jump force to double jump force */
     private static final float DOUBLE_JUMP_MULTIPLIER = 1.2f;
     /** Mass of the player */
@@ -51,13 +53,19 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     /** The amount to shrink  head space of the texture to remove*/
     private static final float PLAYER_HEAD_SPACE= .15f;
     /** The amount to shrink the body fixture (horizontally) relative to the image */
-    private static final float PLAYER_HSHRINK = 0.3f;
+    private static final float PLAYER_HSHRINK = 0.325f;
     /** The amount to shrink the body fixture (horizontally) relative to the image */
     private static final float PLAYER_HSHRINK_RUNNING = 0.7f;
     /** The amount to shrink the sensor fixture (horizontally) relative to the image */
-    private static final float PLAYER_SSHRINK = 0.6f;
+    private static final float PLAYER_SSHRINK = 0.75f;
+    private static final float PLAYER_RUNNING_SSHRINK = 0.95f;
+    /** The amount to shrink the feet relative to the top */
+    private static final float PLAYER_FOOTSHRINK = .75f;
+    private static final float PLAYER_RUNNING_FOOTSHRINK = .95f;
+    private static final float PLAYER_HEELSHRINK = .97f;
     /** The position in physics units where the sensor ground should be at*/
     private float sensorX = 0f;
+    /** The maximum Y velocity we let the player jump at (in case of some slight bouncing)*/
 
     /** The current max speed of the player */
     private float maxSpeed;
@@ -82,6 +90,9 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private float knockbackStunDuration = 5;
     private float defaultKnockbackDuration = 60;
 
+    private static final float FREE_JUMP_FRAMES = 9;
+    private float freeJumpFrame;
+
     /** Duration that player will pass through bullets**/
     private float passThroughDuration;
     private final float GO_THROUGH_TIME = 0.5f;
@@ -100,7 +111,9 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private boolean isShooting;
     /** Ground sensor to represent our feet */
     private Fixture sensorFixture;
+    private Fixture runningSensorFixture;
     private PolygonShape sensorShape;
+    private PolygonShape runningSensorShape;
 
     /** Fixtures for different hitboxes*/
     private Fixture playerFixture;
@@ -112,6 +125,9 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
     private float playerHeight;
     private float playerWidth;
+
+    /**How many frames ago was the last grounding*/
+    private float lastGrounding;
 
     /** Cache for internal force calculations */
     private Vector2 forceCache = new Vector2();
@@ -128,6 +144,9 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private float[] crouchingBox;
 
     private PaintballModel myPlatform;
+
+    private ObjectSet sensorObjects;
+    private ObjectSet runningSensorObjects;
 
     /**
      * Creates a new player avatar at the origin.
@@ -159,29 +178,37 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     public PlayerModel(float x, float y, float width, float height) {
         super(
                 new float[]{
-                        -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
+                        -width/2.0f*PLAYER_HSHRINK*PLAYER_FOOTSHRINK, -height/2.0f,
                         -width/2.0f*PLAYER_HSHRINK, height/2.0f - 2.5f*height*PLAYER_HEAD_SPACE,
                         width/2.0f*PLAYER_HSHRINK, height/2.0f - 2.5f*height*PLAYER_HEAD_SPACE,
-                        width/2.0f*PLAYER_HSHRINK, -height/2.0f
+                        width/2.0f*PLAYER_HSHRINK*PLAYER_FOOTSHRINK, -height/2.0f
                 },
                 x,y);
         defaultBox = new float[]{
-                -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
-                -width/2.0f*PLAYER_HSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
-                width/2.0f*PLAYER_HSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
-                width/2.0f*PLAYER_HSHRINK, -height/2.0f
+                -width/2.0f*PLAYER_HSHRINK*PLAYER_FOOTSHRINK, -height/2.0f,
+                width/2.0f*PLAYER_HSHRINK*PLAYER_FOOTSHRINK, -height/2.0f,
+                -width/2.0f*PLAYER_HSHRINK,0,
+                width/2.0f*PLAYER_HSHRINK, 0,
+                width/2.0f*PLAYER_HSHRINK*PLAYER_FOOTSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
+                -width/2.0f*PLAYER_HSHRINK*PLAYER_FOOTSHRINK, height/2.0f - height*PLAYER_HEAD_SPACE,
+                -width/2.0f*PLAYER_HSHRINK*PLAYER_HEELSHRINK, -height/2.0f+SENSOR_HEIGHT,
+                width/2.0f*PLAYER_HSHRINK*PLAYER_HEELSHRINK, -height/2.0f+SENSOR_HEIGHT
         };
         runningBox = new float[]{
-                -width/2.0f*PLAYER_HSHRINK_RUNNING, -height/2.0f,
-                -width/2.0f*PLAYER_HSHRINK_RUNNING, height/2.0f - 2f*height*PLAYER_HEAD_SPACE,
-                width/2.0f*PLAYER_HSHRINK_RUNNING, height/2.0f - 2f*height*PLAYER_HEAD_SPACE,
-                width/2.0f*PLAYER_HSHRINK_RUNNING, -height/2.0f
+                -width/2.0f*PLAYER_HSHRINK_RUNNING*PLAYER_RUNNING_FOOTSHRINK, -height/2.0f,
+                width/2.0f*PLAYER_HSHRINK_RUNNING*PLAYER_RUNNING_FOOTSHRINK, -height/2.0f,
+                -width/2.0f*PLAYER_HSHRINK_RUNNING,0,
+                width/2.0f*PLAYER_HSHRINK_RUNNING, 0,
+                width/2.0f*PLAYER_HSHRINK_RUNNING*PLAYER_RUNNING_FOOTSHRINK, height/2.0f - 2f*height*PLAYER_HEAD_SPACE,
+                -width/2.0f*PLAYER_HSHRINK_RUNNING*PLAYER_RUNNING_FOOTSHRINK, height/2.0f - 2f*height*PLAYER_HEAD_SPACE,
+                -width/2.0f*PLAYER_HSHRINK_RUNNING*PLAYER_RUNNING_FOOTSHRINK, -height/2.0f+SENSOR_HEIGHT,
+                width/2.0f*PLAYER_HSHRINK_RUNNING*PLAYER_RUNNING_FOOTSHRINK, -height/2.0f+SENSOR_HEIGHT
         };
         crouchingBox = new float[]{
-                -width/2.0f*PLAYER_HSHRINK, -height/2.0f,
+                -width/2.0f*PLAYER_HSHRINK*PLAYER_FOOTSHRINK, -height/2.0f,
                 -width/2.0f*PLAYER_HSHRINK, height/2.0f - 2.6f*height*PLAYER_HEAD_SPACE,
                 width/2.0f*PLAYER_HSHRINK, height/2.0f - 2.6f*height*PLAYER_HEAD_SPACE,
-                width/2.0f*PLAYER_HSHRINK, -height/2.0f
+                width/2.0f*PLAYER_HSHRINK*PLAYER_FOOTSHRINK, -height/2.0f
         };
         drawColor = new Color(256f,256f,256f,1f);
 
@@ -207,11 +234,16 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         jumpCooldown = 0;
         jumpForce = PLAYER_JUMP;
         maxSpeed = PLAYER_MAXSPEED;
+        freeJumpFrame = 0;
 
         knockbackForce = 0;
         knockbackDirection = new Vector2(0,0);
 
         myPlatform = null;
+        lastGrounding=0;
+
+        sensorObjects = new ObjectSet();
+        runningSensorObjects = new ObjectSet();
     }
 
     // BEGIN: Setters and Getters
@@ -291,7 +323,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
     @Override
     public boolean isShooting() {
-        return isShooting && shootCooldown <= 0 && !isCrouching();
+        return (isShooting && shootCooldown <= 0 );
     }
 
     @Override
@@ -305,7 +337,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
      * @return true if the player is actively jumping.
      */
     public boolean isJumping() {
-        return isJumping && isGrounded && jumpCooldown <= 0;
+        return isJumping && (isGrounded || freeJumpFrame>0) && jumpCooldown <= 0;
     }
 
     /**
@@ -392,6 +424,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
      * @param value whether the player is on the ground.
      */
     public void setGrounded(boolean value) {
+        if(isGrounded() && value == false)
+            freeJumpFrame = FREE_JUMP_FRAMES;
+        if(value == true)
+            lastGrounding = 0;
         isGrounded = value;
     }
 
@@ -429,11 +465,17 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     public String getSensorName() {
         return SENSOR_NAME;
     }
+    public String getRunningSensorName() {
+        return RUNNING_SENSOR_NAME;
+    }
+    public boolean isGroundSensor(Object s) { return SENSOR_NAME.equals(s) || RUNNING_SENSOR_NAME.equals(s);}
 
     public boolean isGhosting() {
         return passThroughDuration>0;
     }
 
+    public boolean recentlyGrounded(){return lastGrounding<1;}
+    public boolean semirecentlyUngrounded(){return freeJumpFrame>0;}
     @Override
     public boolean isFacingRight() {
         return isFacingRight;
@@ -450,13 +492,24 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         if(fixData == null)
             return false;
 
-        if(fixData.equals(sensorFixture.getUserData()))
-            return true;
+        if(fixData.equals(sensorFixture.getUserData())) {
+            if (animation.getCurrentStrip().equals("run"))
+                return false;
+            else
+                return true;
+        }
 
-        if(isGrounded() && isCrouching()) {
+        if(fixData.equals(runningSensorFixture.getUserData())) {
+            if (animation.getCurrentStrip().equals("run"))
+                return true;
+            else
+                return false;
+        }
+
+        if(animation.getCurrentStrip().equals("crouch")) {
             if(fixData.equals(crouchFixture.getUserData()))
                 return true;
-        } else if (isGrounded() && animation.getCurrentStrip().equals("run")){
+        } else if (animation.getCurrentStrip().equals("run")){
             if(fixData.equals(runningFixture.getUserData()))
                 return true;
         } else if (fixData.equals(playerFixture.getUserData())) {
@@ -466,6 +519,36 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     }
 
     // END: Setters and Getters
+
+    public boolean addSensorCollision(Object a, Object b) {
+        if(a.equals(sensorFixture.getUserData())) {
+            sensorObjects.add(b);
+            return true;
+        }
+        if(a.equals(runningSensorFixture.getUserData())) {
+            runningSensorObjects.add(b);
+            return true;
+        }
+        return false;
+
+    }
+
+    public boolean removeSensorCollision(Object a, Object b) {
+        if(a.equals(sensorFixture.getUserData())) {
+            sensorObjects.remove(b);
+            return true;
+        }
+        if(a.equals(runningSensorFixture.getUserData())) {
+            runningSensorObjects.remove(b);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isColliding() {
+        return (sensorObjects.size!=0 && fixtureIsActive(sensorFixture.getUserData())) ||
+                (runningSensorObjects.size!=0 && fixtureIsActive(runningSensorFixture.getUserData()));
+    }
 
     /**
      * Creates the physics Body(s) for this object, adding them to the world.
@@ -500,6 +583,13 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
         sensorFixture = body.createFixture(sensorDef);
         sensorFixture.setUserData(getSensorName());
+
+        runningSensorShape = new PolygonShape();
+        runningSensorShape.setAsBox(PLAYER_RUNNING_SSHRINK*playerWidth/2.0f*PLAYER_HSHRINK_RUNNING, SENSOR_HEIGHT, sensorCenter, 0.0f);
+        sensorDef.shape = runningSensorShape;
+
+        runningSensorFixture = body.createFixture(sensorDef);
+        runningSensorFixture.setUserData(RUNNING_SENSOR_NAME);
 
         //player default and crouching hitboxes
         FixtureDef playerDef = new FixtureDef();
@@ -540,6 +630,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     public void setRidingVX(PaintballModel b){
         ridingBullet = b;
     }
+    public PaintballModel getRidingBullet(){return ridingBullet;}
 
     /** Applies forces to the player*/
     public void applyForce() {
@@ -601,10 +692,16 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
                     myPlatform = null;
                 }
             }
+            if(freeJumpFrame>0)
+                mod*=.2;
             forceCache.set(0, mod*jumpForce);
             body.applyLinearImpulse(forceCache,getPosition(),true);
             setCanDoubleJump(true);
+            freeJumpFrame = 0;
+            jumpCooldown = JUMP_COOLDOWN;
         }
+
+        lastGrounding=Math.min(lastGrounding,Float.MAX_VALUE-1)+1;
 
     }
 
@@ -629,8 +726,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         // Apply cooldowns
         if (isJumping()) {
             jumpCooldown = JUMP_COOLDOWN;
+            freeJumpFrame = 0;
         } else {
             jumpCooldown = Math.max(0, jumpCooldown - 1);
+            freeJumpFrame=Math.max(0,freeJumpFrame-1);
         }
 
         if (isShooting()) {
@@ -647,6 +746,9 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
         if(isGhosting())
             passThroughDuration= Math.max(passThroughDuration-dt,0);
+
+        if(!isGrounded)
+            ridingBullet=null;
 
         super.update(dt);
         animation.update(dt);
@@ -678,13 +780,17 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     public void drawDebug(GameCanvas canvas) {
         super.drawDebug(canvas);
         if (sensorShape != null) {
-            canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
             if(fixtureIsActive(crouchFixture.getUserData()))
                 canvas.drawPhysics(crouchShape, Color.PINK, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
             if(fixtureIsActive(playerFixture.getUserData()))
                 canvas.drawPhysics(playerShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
-            if(fixtureIsActive(runningFixture.getUserData()))
+            if(fixtureIsActive(runningFixture.getUserData())) {
                 canvas.drawPhysics(runningShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+                canvas.drawPhysics(runningSensorShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+            } else {
+                canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+
+            }
         }
     }
 }
