@@ -294,7 +294,7 @@ public class GameMode extends Mode implements Settable {
 		time+=dt;
 		soundController.update();
 
-		if (!hud.isLose() && !hud.isWin() || time > START_TIME)
+		if (!hud.isLose() && !hud.isWin() && time > START_TIME)
 			for (EntityController e : entityControllers)
 				e.update(dt);
 
