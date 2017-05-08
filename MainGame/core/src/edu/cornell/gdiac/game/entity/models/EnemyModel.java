@@ -129,6 +129,7 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
         setFixedRotation(true);
         setName("enemy");
         setEnemyType(enemyType);
+        setSensor(true);
         bodyinfo.type = BodyDef.BodyType.StaticBody;
 
         // Gameplay attributes

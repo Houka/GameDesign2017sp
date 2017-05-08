@@ -59,6 +59,10 @@ public class GameMode extends Mode implements Settable {
 	public static final int WORLD_VELOC = 6;
 	/** Number of position iterations for the constrain solvers	 */
 	public static final int WORLD_POSIT = 2;
+	/** World default sizes */
+	public static final int WORLD_WIDTH = 1024;
+	public static final int WORLD_HEIGHT = 576;
+
 
 	/** Width of the game world in Box2d units	 */
 	private static final float DEFAULT_WIDTH = 32.0f;
@@ -163,7 +167,7 @@ public class GameMode extends Mode implements Settable {
 	 */
 	public GameMode(String name, GameCanvas canvas, AssetManager manager, Rectangle bounds, Vector2 gravity) {
 		super(name, canvas, manager);
-		scaleVector = new Vector2(canvas.getWidth() / bounds.getWidth(), canvas.getHeight() / bounds.getHeight());
+		scaleVector = new Vector2(WORLD_WIDTH / bounds.getWidth(), WORLD_HEIGHT / bounds.getHeight());
 
 		world = new World(gravity, false);
 		hud = new HUDModel(canvas.getWidth(), canvas.getHeight());
@@ -174,7 +178,7 @@ public class GameMode extends Mode implements Settable {
 		levelLoader = new LevelLoader(scaleVector);
 		this.bounds = new Rectangle(bounds);
 		hud.setDrawScale(scaleVector);
-		gameCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
+		gameCamera = new Camera2(WORLD_WIDTH,(int)((float)WORLD_WIDTH/canvas.getWidth()*canvas.getHeight()));
 		gameCamera.setAutosnap(false);
 		hudCamera = new Camera2(canvas.getWidth(),canvas.getHeight());
 		hudCamera.setAutosnap(true);
@@ -259,7 +263,7 @@ public class GameMode extends Mode implements Settable {
 
 		canvas.getCamera().setRumble(50,10,2);
 		canvas.begin(gameCamera);
-		canvas.setCamera(player.getX()*scaleVector.x,player.getY() * scaleVector.y, canvas.getHeight()/2);
+		canvas.setCamera(player.getX()*scaleVector.x,player.getY() * scaleVector.y, gameCamera.viewportHeight/2);
 		gameCamera.snap();
 		canvas.end();
 		hud.reset();
@@ -325,7 +329,7 @@ public class GameMode extends Mode implements Settable {
 		canvas.begin(gameCamera);
 		float cameraBufferWidth = gameCamera.viewportWidth/scaleVector.x/30f;
 		canvas.setCamera(Math.max(Math.min(player.getX()+cameraBufferWidth,gameCamera.position.x/scaleVector.x),player.getX()-cameraBufferWidth)*scaleVector.x,
-				player.getY() * scaleVector.y, canvas.getHeight()/2);
+				player.getY() * scaleVector.y, gameCamera.viewportHeight/2);
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
