@@ -469,6 +469,15 @@ public class GameMode extends Mode implements Settable {
 				entry.remove();
 			} else {
 				obj.update(dt);
+
+				// make infinite background
+				if (obj instanceof BackgroundModel){
+					if (player.getX()*scaleVector.x <= -((BackgroundModel) obj).getMaxWidth()||
+							player.getX()*scaleVector.x >= ((BackgroundModel) obj).getMaxWidth())
+						((BackgroundModel) obj).incBgWidth(1);
+					if (player.getY()*scaleVector.y >= ((BackgroundModel) obj).getMaxHeight())
+						((BackgroundModel) obj).incBgHeight(1);
+				}
 			}
 		}
 	}
