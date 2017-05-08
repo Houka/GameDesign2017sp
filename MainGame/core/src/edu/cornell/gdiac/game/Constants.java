@@ -1,17 +1,25 @@
 package edu.cornell.gdiac.game;
 
+import com.badlogic.gdx.graphics.Color;
+
 /**
  * Created by Lu on 4/14/2017.
  */
 public class Constants {
     public static String GAME_MUSIC_FILE = "music/gameplay_background.mp3";
     /** Retro font for displaying messages */
-    public static String FONT_FILE = "fonts/RetroGame.ttf";
-    public static int FONT_SIZE = 64;
     public static String SELECTION_FONT_FILE = "fonts/LightPixel7.ttf";
     public static int SELECTION_FONT_SIZE = 64;
     public static String MENU_FONT_FILE = "fonts/RealGraffiti.ttf";
     public static int MENU_FONT_SIZE = 64;
+    public static String FONT_FILE = SELECTION_FONT_FILE;
+    public static int FONT_SIZE = SELECTION_FONT_SIZE;
+
+    public static Color SELECTED_COLOR = new Color(183/255f, 81/255f, 46/255f, 1f);
+    public static Color SELECTED_COLOR_LIGHT = new Color(236/255f, 239/255f, 218/255f, 1f);
+    public static Color UNSELECTED_COLOR = new Color(36/255f, 39/255f, 18/255f, 1f);
+    public static Color ALPHA = new Color(1f,1f,1f,0.5f);
+    public static Color WHITE = new Color(1f,1f,1f,1f);
 
     /** Textures necessary to support the loading screen */
     public static final String PLAYER_FILE = "sprites/char/char_icon.png";

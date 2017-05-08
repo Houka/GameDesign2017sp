@@ -74,7 +74,7 @@ public class GameMode extends Mode implements Settable {
 	/** offset for enemies to shoot without hitting themselves in the arm*/
 	private static final float SHOOT_OFFSET = 0.4f;
 	/** The time until reset after loss*/
-	private final float TIME_TO_RESET = 3f;
+	private final float TIME_TO_RESET = 2f;
 
 	/** All the objects in the world.	 */
 	private PooledList<Obstacle> objects = new PooledList<Obstacle>();
@@ -87,6 +87,7 @@ public class GameMode extends Mode implements Settable {
 	private Rectangle bounds;
 	/** The player	 */
 	private PlayerModel player;
+	private GoalModel goal;
 	/** The factory that creates projectiles	 */
 	private PaintballFactory paintballFactory;
 	/** The hud of this world	 */
@@ -222,6 +223,19 @@ public class GameMode extends Mode implements Settable {
 
 		return false;
 	}
+
+	/**
+	 * trys to set the goal of the world
+	 */
+	private boolean trySetGoal(){
+		for (Obstacle obj : levelLoader.getAddQueue()) {
+			if (obj.getName().equals("goal")) {
+				goal = (GoalModel) obj;
+				return true;
+			}
+		}
+		return false;
+	}
 	// END: Setters and Getters
 
 	@Override
@@ -309,7 +323,7 @@ public class GameMode extends Mode implements Settable {
 		if (player.getY() < -player.getHeight())
 			hud.setLose(true);
 
-		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isLose()) {
+		if(hud.isLose()) {
 			hud.reset();
 			listener.switchToScreen(this, GameModeManager.LOSS);
 		}
@@ -328,8 +342,13 @@ public class GameMode extends Mode implements Settable {
 		canvas.end();
 		canvas.begin(gameCamera);
 		float cameraBufferWidth = gameCamera.viewportWidth/scaleVector.x/30f;
-		canvas.setCamera(Math.max(Math.min(player.getX()+cameraBufferWidth,gameCamera.position.x/scaleVector.x),player.getX()-cameraBufferWidth)*scaleVector.x,
-				player.getY() * scaleVector.y, gameCamera.viewportHeight/2);
+
+		if (hud.isWin())
+			canvas.setCamera(Math.max(Math.min(goal.getX()+cameraBufferWidth,gameCamera.position.x/scaleVector.x),goal.getX()-cameraBufferWidth)*scaleVector.x,
+					goal.getY() * scaleVector.y, gameCamera.viewportHeight/2);
+		else
+			canvas.setCamera(Math.max(Math.min(player.getX()+cameraBufferWidth,gameCamera.position.x/scaleVector.x),player.getX()-cameraBufferWidth)*scaleVector.x,
+					player.getY() * scaleVector.y, gameCamera.viewportHeight/2);
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
@@ -408,7 +427,7 @@ public class GameMode extends Mode implements Settable {
 		bounds = levelLoader.getBounds();
 		hud.setStartingAmmo(levelLoader.getStartingAmmo());
 		gameCamera.snap();
-		if (!trySetPlayer())
+		if (!trySetPlayer() || !trySetGoal())
 			System.out.println("Error: level file (" + levelFile + ") does not have a player");
 	}
 
@@ -452,7 +471,7 @@ public class GameMode extends Mode implements Settable {
 
 		accumulator += (float) Math.min(dt,FRAME_CAP);
 		// Turn the physics engine crank.
-		if (!hud.isLose() && !hud.isWin() && accumulator >=WORLD_STEP) {
+		if (!hud.isWin() && accumulator >=WORLD_STEP) {
 			world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
 			accumulator-=WORLD_STEP;
 		}

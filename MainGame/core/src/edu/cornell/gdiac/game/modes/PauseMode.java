@@ -28,19 +28,18 @@ import java.util.ArrayList;
  */
 public class PauseMode extends Mode {
 	/** Background texture */
-	private static final String BACKGROUND_FILE = "ui/bg/menu.png";
+	private static final String BACKGROUND_FILE = "ui/bg/pause.png";
 	/** Selection menu items y offset from the center*/
-	private static final int MENU_ITEM_START_OFFSET_Y = 100;
+	private static final int MENU_ITEM_START_OFFSET_Y = 150;
 	/** Selection menu items y offset between each menu item*/
 	private static final int MENU_ITEM_GAP_OFFSET_Y = 5;
-	private static Color DARK_PURPLE = new Color(123/255f, 118/255f, 131/255f, 1f);
 	private static String[] NUM_LEVELS = FileReaderWriter.getJsonFiles();
 
 	/** The font for giving messages to the player */
 	protected BitmapFont displayFont;
 
 	/** Player modes that are selectable from menu mode */
-	private String[] modeNames = {"Resume","Previous Level","Next Level"};
+	private String[] modeNames = {"Resume","Previous Level","Next Level", "Main Menu", "Level Select"};
 	private int selected = 0;
 
 	/** Input controller for menu selection */
@@ -108,6 +107,14 @@ public class PauseMode extends Mode {
 				listener.switchToScreen(this, gameMode.getName());
 				gameMode.nextLevel();
 			}
+			else if (selected == 3) {
+				listener.switchToScreen(this, GameModeManager.MENU);
+				gameMode.nextLevel();
+			}
+			else if (selected == 4) {
+				listener.switchToScreen(this, GameModeManager.LEVEL_SELECTION);
+				gameMode.nextLevel();
+			}
 			else
 				setComplete(true);
 		}
@@ -115,13 +122,15 @@ public class PauseMode extends Mode {
 
 	@Override
 	protected void draw() {
-
+		if (background != null)
+			canvas.draw(background, Constants.ALPHA, 0, 0, 0,0, 0f, scale.x, scale.y);
+		canvas.setColor(Constants.WHITE);
 		// draw menu items
 		for (int i = 0; i<modeNames.length; i++) {
 			if (selected == i)
-				displayFont.setColor(Color.DARK_GRAY);
+				displayFont.setColor(Constants.SELECTED_COLOR_LIGHT);
 			else
-				displayFont.setColor(DARK_PURPLE);
+				displayFont.setColor(Constants.SELECTED_COLOR);
 			canvas.drawTextCentered(modeNames[i], displayFont,
 					(displayFont.getLineHeight()+ MENU_ITEM_GAP_OFFSET_Y)*-i+MENU_ITEM_START_OFFSET_Y);
 		}
@@ -175,9 +184,9 @@ public class PauseMode extends Mode {
 
 		// Load the font
 		FreetypeFontLoader.FreeTypeFontLoaderParameter size2Params = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
-		size2Params.fontFileName = Constants.FONT_FILE;
-		size2Params.fontParameters.size = Constants.FONT_SIZE;
-		manager.load(Constants.FONT_FILE, BitmapFont.class, size2Params);
+		size2Params.fontFileName = Constants.MENU_FONT_FILE;
+		size2Params.fontParameters.size = Constants.MENU_FONT_SIZE;
+		manager.load(Constants.MENU_FONT_FILE, BitmapFont.class, size2Params);
 	}
 
 	@Override
@@ -186,7 +195,7 @@ public class PauseMode extends Mode {
 
 		// Allocate the font
 		if (manager.isLoaded(Constants.FONT_FILE))
-			displayFont = manager.get(Constants.FONT_FILE, BitmapFont.class);
+			displayFont = manager.get(Constants.MENU_FONT_FILE, BitmapFont.class);
 		else
 			displayFont = null;
 
