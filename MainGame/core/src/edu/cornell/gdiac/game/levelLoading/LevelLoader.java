@@ -426,7 +426,7 @@ public class LevelLoader implements AssetUser, Disposable{
         enemyOnsightAnimation.setPlayingAnimation("still");
 
         spikeAnimation = new Animation();
-        spikeAnimation.addTexture("spin", AssetRetriever.createTexture(manager, Constants.SPIKES_UP_SPIN_FILE, false), 1 , 8);
+        spikeAnimation.addTexture("spin", AssetRetriever.createTexture(manager, Constants.SPIKES_UP_STILL_FILE, false), 1 , 1);
         spikeAnimation.setPlaying(false);
         spikeAnimation.setPlayingAnimation("spin");
     }

@@ -9,6 +9,7 @@ import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.game.GameModeManager;
@@ -27,8 +28,6 @@ public class MenuMode extends Mode {
 	private static final int MENU_ITEM_START_OFFSET_Y = 150;
 	/** Selection menu items y offset between each menu item*/
 	private static final int MENU_ITEM_GAP_OFFSET_Y = 15;
-	private static Color SELECTED_COLOR = new Color(163/255f, 61/255f, 26/255f, 1f);
-	private static Color UNSELECTED_COLOR = new Color(36/255f, 39/255f, 18/255f, 1f);
 
 	/** The font for giving messages to the player */
 	protected BitmapFont displayFont;
@@ -107,9 +106,9 @@ public class MenuMode extends Mode {
 		// draw menu items
 		for (int i = 0; i<modeNames.length; i++) {
 			if (selected == i)
-				displayFont.setColor(SELECTED_COLOR);
+				displayFont.setColor(Constants.SELECTED_COLOR);
 			else
-				displayFont.setColor(UNSELECTED_COLOR);
+				displayFont.setColor(Constants.UNSELECTED_COLOR);
 			canvas.drawText(modeNames[i], displayFont, canvas.getWidth()/3*2,
 					canvas.getHeight()/2 - 50 + (displayFont.getLineHeight()+ MENU_ITEM_GAP_OFFSET_Y)*-i+MENU_ITEM_START_OFFSET_Y);
 		}
