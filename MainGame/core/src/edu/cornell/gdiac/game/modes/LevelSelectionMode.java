@@ -105,7 +105,7 @@ public class LevelSelectionMode extends Mode {
 	@Override
 	protected void draw() {
 		super.draw();
-		drawSelectionSingle();
+		drawSelectionMatrix();
 	}
 
 	private void drawSelectionSingle(){
@@ -155,6 +155,7 @@ public class LevelSelectionMode extends Mode {
 		// load levels
 		NUM_LEVELS = FileReaderWriter.getJsonFiles();
 		TOTAL_ROWS = (int)Math.ceil((float)NUM_LEVELS.length/TOTAL_COLUMNS);
+		selected = gameMode.getLevelNum();
 	}
 
 	@Override
