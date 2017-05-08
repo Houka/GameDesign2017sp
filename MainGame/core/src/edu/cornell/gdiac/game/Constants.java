@@ -18,7 +18,7 @@ public class Constants {
 
     /** Retro font for displaying messages */
     public static String SELECTION_FONT_FILE = "fonts/LightPixel7.ttf";
-    public static int SELECTION_FONT_SIZE = 64;
+    public static int SELECTION_FONT_SIZE = 104;
     public static String MENU_FONT_FILE = "fonts/RealGraffiti.ttf";
     public static int MENU_FONT_SIZE = 64;
     public static String FONT_FILE = SELECTION_FONT_FILE;
