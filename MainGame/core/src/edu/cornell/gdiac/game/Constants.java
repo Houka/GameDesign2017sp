@@ -54,6 +54,18 @@ public class Constants {
     public static String CHARACTER_CROUCH_SHOOT_FILE = "sprites/char/char_crouch_shoot.png";
     public static String CHARACTER_STUNNED_FILE = "sprites/char/char_stunned.png";
 
+    public static String TUTORIAL_JUMP_FILE = "sprites/tutorials/tutor_jump.png";
+    public static String TUTORIAL_CROUCH_FILE = "sprites/tutorials/tutor_crouch.png";
+    public static String TUTORIAL_MOVE_FILE = "sprites/tutorials/tutor_move.png";
+    public static String TUTORIAL_FORM_PLATFORM_FILE = "sprites/tutorials/tutor_form_platform.png";
+    public static String TUTORIAL_RIDE_FILE = "sprites/tutorials/tutor_ride.png";
+    public static String TUTORIAL_SHOOT_FILE = "sprites/tutorials/tutor_shoot.png";
+    public static String TUTORIAL_SHOOT_TARGET_FILE = "sprites/tutorials/tutor_shoot_target.png";
+    public static String TUTORIAL_TRAMPOLINE_FILE = "sprites/tutorials/tutor_trampoline.png";
+
+    public static String[] TUTORIAL_FILES = {TUTORIAL_CROUCH_FILE, TUTORIAL_JUMP_FILE, TUTORIAL_FORM_PLATFORM_FILE,
+            TUTORIAL_MOVE_FILE, TUTORIAL_RIDE_FILE, TUTORIAL_SHOOT_FILE, TUTORIAL_SHOOT_TARGET_FILE, TUTORIAL_TRAMPOLINE_FILE};
+
     /** Texture column numbers**/
     public static int PAINTBALL_TRAIL_COLUMNS = 5;
 

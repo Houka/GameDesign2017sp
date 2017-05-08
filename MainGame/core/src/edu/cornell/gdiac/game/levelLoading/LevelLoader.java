@@ -84,6 +84,7 @@ public class LevelLoader implements AssetUser, Disposable{
      */
     private void populateLevel() {
         addBackground();
+        addBackgroundObjects();
         addPlatforms();
         addWalls();
         addPlayer();
@@ -91,7 +92,7 @@ public class LevelLoader implements AssetUser, Disposable{
         addResources();
         addTarget();
         addSplatterers();
-        addBackgroundObjects();
+
     }
 
     /**
@@ -304,7 +305,7 @@ public class LevelLoader implements AssetUser, Disposable{
             JsonValue bgObject;
             while (iter.hasNext()){
                 bgObject = iter.next();
-                String id = bgObject.get("id").asString();
+                String id = bgObject.get("path").asString();
                 TextureRegion current = backgroundRegions.get(id);
                 BackgroundObjectModel bg = new BackgroundObjectModel(bgObject.get("x").asFloat(), bgObject.get("y").asFloat(),
                         current.getRegionWidth()/scale.x, current.getRegionHeight()/scale.y);
@@ -371,6 +372,10 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(Constants.PAINTBALL_CHAR_SPLAT_EFFECT_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_ENEMY_SPLAT_EFFECT_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_MINE_ENEMY_SPLAT_EFFECT_FILE, Texture.class);
+
+        for (String s: Constants.TUTORIAL_FILES) {
+            manager.load(s, Texture.class);
+        }
     }
 
     @Override
@@ -386,6 +391,9 @@ public class LevelLoader implements AssetUser, Disposable{
         depotTexture = AssetRetriever.createTextureRegion(manager, Constants.AMMO_DEPOT_FILE, false);
         splattererTexture = AssetRetriever.createTextureRegion(manager, Constants.SPLATTERER_FILE, false);
 
+        for (String s: Constants.TUTORIAL_FILES) {
+            backgroundRegions.put(s, AssetRetriever.createTextureRegion(manager, s, false));
+        }
         // animation spritesheet loading
         playerAnimation = new Animation();
         playerAnimation.addTexture("idle", AssetRetriever.createTexture(manager, Constants.CHARACTER_IDLE_FILE, false), 1,5);
