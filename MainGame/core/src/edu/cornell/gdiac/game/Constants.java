@@ -6,8 +6,16 @@ import com.badlogic.gdx.graphics.Color;
  * Created by Lu on 4/14/2017.
  */
 public class Constants {
+    /** Game music*/
     public static String GAME_MUSIC_FILE = "music/gameplay_background.mp3";
-    public static String MENU_MUSIC_FILE = "music/gameplay_background.mp3";
+    public static String MENU_MUSIC_FILE = "music/menu_background.mp3";
+
+    /** Sound effects*/
+    public static String SFX_ENEMY_SHOT = "sfx/enemy_shot.wav";
+    public static String SFX_PAINT_HIT_PAINT = "sfx/paint_hit_paint.wav";
+    public static String SFX_PAINT_RELOAD = "sfx/paint_reload.wav";
+    public static String SFX_PLAYER_SHOT = "sfx/player_shot.wav";
+
     /** Retro font for displaying messages */
     public static String SELECTION_FONT_FILE = "fonts/LightPixel7.ttf";
     public static int SELECTION_FONT_SIZE = 64;

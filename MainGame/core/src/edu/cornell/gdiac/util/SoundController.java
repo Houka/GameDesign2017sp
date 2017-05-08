@@ -94,7 +94,8 @@ public class SoundController {
 	
 	/** The singleton Sound controller instance */
 	private static SoundController controller;
-	
+	private static SoundController sfxController;
+
 	/** Keeps track of all of the allocated sound resources */
 	private IdentityMap<String,Sound> soundbank;
 	/** Keeps track of all of the "active" sounds */
@@ -137,6 +138,20 @@ public class SoundController {
 			controller = new SoundController();
 		}
 		return controller;
+	}
+
+	/**
+	 * Returns the single instance for the SoundController
+	 *
+	 * The first time this is called, it will construct the SoundController.
+	 *
+	 * @return the single instance for the SoundController
+	 */
+	public static SoundController getSFXInstance() {
+		if (sfxController == null) {
+			sfxController = new SoundController();
+		}
+		return sfxController;
 	}
 	
 	/// Properties
@@ -317,6 +332,26 @@ public class SoundController {
 		
 		actives.put(key,new ActiveSound(sound,id,loop));
 		current++;
+		return true;
+	}
+
+	public boolean pause(String key, String filename){
+		// Get the sound for the file
+		if (!soundbank.containsKey(filename) || current >= frameLimit) {
+			return false;
+		}
+		Sound sound = soundbank.get(filename);
+		sound.pause();
+		return true;
+	}
+
+	public boolean resume(String key, String filename){
+		// Get the sound for the file
+		if (!soundbank.containsKey(filename) || current >= frameLimit) {
+			return false;
+		}
+		Sound sound = soundbank.get(filename);
+		sound.resume();
 		return true;
 	}
 	
