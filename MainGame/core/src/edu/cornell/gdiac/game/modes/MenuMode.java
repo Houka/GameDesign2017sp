@@ -6,6 +6,7 @@
 package edu.cornell.gdiac.game.modes;
 
 import com.badlogic.gdx.assets.*;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
@@ -85,10 +86,15 @@ public class MenuMode extends Mode {
 	protected void update(float delta) {
 		input.readInput();
 		soundController.update();
-		if (input.didDown())
-			selected=(selected+1) % modeNames.length;
-		else if (input.didUp())
-			selected=(selected-1 < 0)? modeNames.length-1 : selected-1;
+		SoundController.getSFXInstance().update();
+		if (input.didDown()) {
+			selected = (selected + 1) % modeNames.length;
+			SoundController.getSFXInstance().play("menuMenu",Constants.SFX_ENEMY_SHOT,false);
+		}
+		else if (input.didUp()) {
+			selected = (selected - 1 < 0) ? modeNames.length - 1 : selected - 1;
+			SoundController.getSFXInstance().play("menuMenu",Constants.SFX_ENEMY_SHOT,false);
+		}
 		else if (input.didSelect()) {
 			if (selected == modeNames.length-1)
 				setExit(true);
@@ -124,10 +130,14 @@ public class MenuMode extends Mode {
 		size2Params.fontFileName = Constants.MENU_FONT_FILE;
 		size2Params.fontParameters.size = Constants.MENU_FONT_SIZE;
 		manager.load(Constants.MENU_FONT_FILE, BitmapFont.class, size2Params);
+		manager.load(Constants.MENU_MUSIC_FILE, Sound.class);
+		manager.load(Constants.SFX_ENEMY_SHOT, Sound.class);
 	}
 
 	@Override
 	public void loadContent(AssetManager manager) {
+		soundController.allocate(manager, Constants.MENU_MUSIC_FILE);
+		SoundController.getSFXInstance().allocate(manager, Constants.SFX_ENEMY_SHOT);
 		background = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true).getTexture();
 
 		// Allocate the font
@@ -136,9 +146,9 @@ public class MenuMode extends Mode {
 		else
 			displayFont = null;
 
-		if(!soundController.isActive("menu mode")) {
+		if(!soundController.isActive("menuMode")) {
 			soundController.stopAll();
-			soundController.play("menu mode", Constants.MENU_MUSIC_FILE, true);
+			soundController.play("menuMode", Constants.MENU_MUSIC_FILE, true);
 		}
 	}
 

@@ -112,6 +112,7 @@ public class GameMode extends Mode implements Settable {
 
 	/** Sound controller */
 	private SoundController soundController;
+	private SoundController sfxSoundController;
 
 	/** An array to store the levels **/
 	private static final String[] NUM_LEVELS = FileReaderWriter.getJsonFiles();
@@ -184,6 +185,7 @@ public class GameMode extends Mode implements Settable {
 		hudCamera.setAutosnap(true);
 
 		soundController = SoundController.getInstance();
+		sfxSoundController = SoundController.getSFXInstance();
 		soundController.setTimeLimit(20000);
 
 		succeeded = false;
@@ -272,6 +274,7 @@ public class GameMode extends Mode implements Settable {
 	@Override
 	public void update(float dt) {
 		soundController.update();
+		sfxSoundController.update();
 
 		if (!hud.isLose() && !hud.isWin())
 			for (EntityController e : entityControllers)
@@ -354,16 +357,24 @@ public class GameMode extends Mode implements Settable {
 		paintballFactory.preLoadContent(manager);
 		levelLoader.preLoadContent(manager);
 		manager.load(Constants.GAME_MUSIC_FILE, Sound.class);
+		manager.load(Constants.SFX_PLAYER_SHOT, Sound.class);
+		manager.load(Constants.SFX_ENEMY_SHOT, Sound.class);
+		manager.load(Constants.SFX_PAINT_HIT_PAINT, Sound.class);
+		manager.load(Constants.SFX_PAINT_RELOAD, Sound.class);
 	}
 
 	@Override
 	public void loadContent(AssetManager manager) {
 		soundController.allocate(manager, Constants.GAME_MUSIC_FILE);
+		sfxSoundController.allocate(manager, Constants.SFX_PLAYER_SHOT);
+		sfxSoundController.allocate(manager, Constants.SFX_ENEMY_SHOT);
+		sfxSoundController.allocate(manager, Constants.SFX_PAINT_HIT_PAINT);
+		sfxSoundController.allocate(manager, Constants.SFX_PAINT_RELOAD);
 		paintballFactory.loadContent(manager);
 		levelLoader.loadContent(manager);
 		if (manager.isLoaded(Constants.FONT_FILE))
 			hud.setFont(manager.get(Constants.FONT_FILE, BitmapFont.class));
-		if (!soundController.isActive("game mode")){
+		if (!soundController.isActive("gameMode")){
 			soundController.stopAll();
 			soundController.play("gameMode", Constants.GAME_MUSIC_FILE, true);
 		}
@@ -424,6 +435,7 @@ public class GameMode extends Mode implements Settable {
 					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY()+player.getHeight()/8, ((Shooter) obj).isFacingRight(), "player"));
 				else
 					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY()-player.getHeight()/4, ((Shooter) obj).isFacingRight(), "player"));
+				sfxSoundController.play("gameMode",Constants.SFX_PLAYER_SHOT,false);
 			}
 			else if (obj.getName().equals("enemy")) {
 				int direction = ((Shooter) obj).isFacingRight() ? 1 : 0;

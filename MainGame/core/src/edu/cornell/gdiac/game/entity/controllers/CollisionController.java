@@ -3,9 +3,11 @@ package edu.cornell.gdiac.game.entity.controllers;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.ObjectSet;
+import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
 import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.util.PooledList;
+import edu.cornell.gdiac.util.SoundController;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 import javafx.util.Pair;
 
@@ -181,6 +183,7 @@ public class CollisionController implements ContactListener {
                 survives = obj1;
                 dies = obj2;
             }
+            SoundController.getSFXInstance().play("gameMode", Constants.SFX_PAINT_HIT_PAINT, false);
 
             if(obj1.getPaintballType().equals("trampoline") || obj2.getPaintballType().equals("trampoline")) {
                survives.setPaintballType("trampolineComb");
@@ -229,6 +232,7 @@ public class CollisionController implements ContactListener {
         if (!obj2.isUsed()) {
             obj2.setUsed(true);
             hud.addAmmo(obj2.getAmmoAmount());
+            SoundController.getSFXInstance().play("gameMode", Constants.SFX_PAINT_RELOAD,false);
         }
     }
     private void handleCollision(SplattererModel obj1, PaintballModel obj2) {
