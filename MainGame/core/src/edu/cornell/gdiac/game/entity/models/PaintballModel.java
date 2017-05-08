@@ -447,7 +447,7 @@ public class PaintballModel extends BoxObstacle {
                 opacity *= .97;
             } else if (timeToDie<deathDuration+FLASHING_TIME){
                 if(((int)(timeToDie/FLASHING_RATE))%2 == 0)
-                    opacity = .5f;
+                    opacity = .75f;
                 else
                     opacity = 1;
             }
