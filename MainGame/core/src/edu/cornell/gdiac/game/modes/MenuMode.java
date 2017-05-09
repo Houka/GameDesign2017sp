@@ -6,6 +6,7 @@
 package edu.cornell.gdiac.game.modes;
 
 import com.badlogic.gdx.assets.*;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
@@ -15,6 +16,7 @@ import edu.cornell.gdiac.game.GameModeManager;
 import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
+import edu.cornell.gdiac.util.SoundController;
 
 /**
  * Class that provides a menu screen for the state of the game.
@@ -42,6 +44,8 @@ public class MenuMode extends Mode {
 
 	private GameMode gameMode;
 
+	private SoundController soundController;
+
 	/**
 	 * Creates a MenuMode with the default size and position.
 	 *
@@ -53,6 +57,7 @@ public class MenuMode extends Mode {
 		onExit = ScreenListener.EXIT_QUIT;
 		input = SelectionInputController.getInstance();
 		this.gameMode = gameMode;
+		soundController = SoundController.getInstance();
 	}
 
 	// BEGIN: Setters and Getters
@@ -80,11 +85,16 @@ public class MenuMode extends Mode {
 	@Override
 	protected void update(float delta) {
 		input.readInput();
-
-		if (input.didDown())
-			selected=(selected+1) % modeNames.length;
-		else if (input.didUp())
-			selected=(selected-1 < 0)? modeNames.length-1 : selected-1;
+		soundController.update();
+		SoundController.getSFXInstance().update();
+		if (input.didDown()) {
+			selected = (selected + 1) % modeNames.length;
+			SoundController.getSFXInstance().play("menuMenu",Constants.SFX_ENEMY_SHOT,false);
+		}
+		else if (input.didUp()) {
+			selected = (selected - 1 < 0) ? modeNames.length - 1 : selected - 1;
+			SoundController.getSFXInstance().play("menuMenu",Constants.SFX_ENEMY_SHOT,false);
+		}
 		else if (input.didSelect()) {
 			if (selected == modeNames.length-1)
 				setExit(true);
@@ -106,7 +116,7 @@ public class MenuMode extends Mode {
 				displayFont.setColor(SELECTED_COLOR);
 			else
 				displayFont.setColor(UNSELECTED_COLOR);
-			canvas.drawText(modeNames[i], displayFont, canvas.getWidth()/2 + 150,
+			canvas.drawText(modeNames[i], displayFont, canvas.getWidth()/3*2,
 					canvas.getHeight()/2 - 50 + (displayFont.getLineHeight()+ MENU_ITEM_GAP_OFFSET_Y)*-i+MENU_ITEM_START_OFFSET_Y);
 		}
 	}
@@ -120,10 +130,14 @@ public class MenuMode extends Mode {
 		size2Params.fontFileName = Constants.MENU_FONT_FILE;
 		size2Params.fontParameters.size = Constants.MENU_FONT_SIZE;
 		manager.load(Constants.MENU_FONT_FILE, BitmapFont.class, size2Params);
+		manager.load(Constants.MENU_MUSIC_FILE, Sound.class);
+		manager.load(Constants.SFX_ENEMY_SHOT, Sound.class);
 	}
 
 	@Override
 	public void loadContent(AssetManager manager) {
+		soundController.allocate(manager, Constants.MENU_MUSIC_FILE);
+		SoundController.getSFXInstance().allocate(manager, Constants.SFX_ENEMY_SHOT);
 		background = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true).getTexture();
 
 		// Allocate the font
@@ -131,6 +145,11 @@ public class MenuMode extends Mode {
 			displayFont = manager.get(Constants.MENU_FONT_FILE, BitmapFont.class);
 		else
 			displayFont = null;
+
+		if(!soundController.isActive("menuMode")) {
+			soundController.stopAll();
+			soundController.play("menuMode", Constants.MENU_MUSIC_FILE, true);
+		}
 	}
 
 	@Override

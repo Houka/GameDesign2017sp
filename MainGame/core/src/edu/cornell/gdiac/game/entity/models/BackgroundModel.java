@@ -20,6 +20,8 @@ import java.awt.geom.RectangularShape;
  * Model class for the background. Is used to draw out the background.
  */
 public class BackgroundModel extends BoxObstacle {
+    private float scaleX, scaleY;
+    private int addonX = 0, addonY = 0;
 
     /**
      * Creates a new BackgroundModel at the given position.
@@ -41,15 +43,35 @@ public class BackgroundModel extends BoxObstacle {
         setRestitution(0.0f);
         setSensor(true);
         setName("background");
+    }
 
+    // BEGIN: Setter and getter
+    public void incBgWidth(int value){
+        addonX+=value;
+    }
+    public void incBgHeight(int value){
+        addonY+=value;
+    }
+    public float getMaxWidth(){
+        return getX()*drawScale.x + texture.getRegionWidth()*(scaleX+addonX-1);
+    }
+    public float getMaxHeight(){
+        return getY()*drawScale.y + texture.getRegionHeight()*(scaleY+addonY-1);
+    }
+    // END: Setter and getter
+
+    @Override
+    public void setTexture(TextureRegion texture){
+        super.setTexture(texture);
+        scaleX = texture.getRegionWidth()/getWidth();
+        scaleY = texture.getRegionHeight()/getHeight();
     }
 
     @Override
     public void draw(GameCanvas canvas){
         if (texture != null) {
-            float scaleX = texture.getRegionWidth()/getWidth(), scaleY = texture.getRegionHeight()/getHeight();
-            for (int i = (int)-scaleX; i < scaleX; i++){
-                for(int j = (int)-scaleY; j < scaleY; j++){
+            for (int i = (int)-(scaleX+addonX); i < scaleX+addonX; i++){
+                for(int j = 0; j < scaleY+addonY; j++){
                     canvas.draw(texture,Color.WHITE,origin.x,origin.y,
                             getX()*drawScale.x + texture.getRegionWidth()*i,
                             getY()*drawScale.y + texture.getRegionHeight()*j,

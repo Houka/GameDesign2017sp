@@ -30,7 +30,9 @@ public class LevelParser {
     private JsonValue target;
     private int startingAmmo;
     private JsonValue splatterers;
-
+    private JsonValue backgroundObjects;
+    /** whether or not there are background objects*/
+    private boolean backgroundObjectsExist;
 
     /** Creates a level parser object*/
     public LevelParser(){}
@@ -50,6 +52,12 @@ public class LevelParser {
             resources = objects.get("resources");
             startingAmmo = objects.get("starting ammo").asInt();
             splatterers = objects.get("splatterers");
+            if (objects.has("background objects")){
+                backgroundObjectsExist = true;
+                backgroundObjects = objects.get("background objects");
+            }
+            else
+                backgroundObjectsExist = false;
         }
         catch (Exception e){
             Gdx.app.error("LevelParser", "Improper Json", new IllegalStateException());
@@ -82,4 +90,8 @@ public class LevelParser {
 
     /** Returns the splatterers*/
     public JsonValue getSplatterers() { return splatterers; }
+
+    public JsonValue getBackgroundObjects() { return backgroundObjects; }
+
+    public boolean backgroundObjectsExist() { return backgroundObjectsExist; }
 }

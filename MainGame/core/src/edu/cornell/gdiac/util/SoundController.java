@@ -94,7 +94,8 @@ public class SoundController {
 	
 	/** The singleton Sound controller instance */
 	private static SoundController controller;
-	
+	private static SoundController sfxController;
+
 	/** Keeps track of all of the allocated sound resources */
 	private IdentityMap<String,Sound> soundbank;
 	/** Keeps track of all of the "active" sounds */
@@ -137,6 +138,20 @@ public class SoundController {
 			controller = new SoundController();
 		}
 		return controller;
+	}
+
+	/**
+	 * Returns the single instance for the SoundController
+	 *
+	 * The first time this is called, it will construct the SoundController.
+	 *
+	 * @return the single instance for the SoundController
+	 */
+	public static SoundController getSFXInstance() {
+		if (sfxController == null) {
+			sfxController = new SoundController();
+		}
+		return sfxController;
 	}
 	
 	/// Properties
@@ -319,6 +334,26 @@ public class SoundController {
 		current++;
 		return true;
 	}
+
+	public boolean pause(String key, String filename){
+		// Get the sound for the file
+		if (!soundbank.containsKey(filename) || current >= frameLimit) {
+			return false;
+		}
+		Sound sound = soundbank.get(filename);
+		sound.pause();
+		return true;
+	}
+
+	public boolean resume(String key, String filename){
+		// Get the sound for the file
+		if (!soundbank.containsKey(filename) || current >= frameLimit) {
+			return false;
+		}
+		Sound sound = soundbank.get(filename);
+		sound.resume();
+		return true;
+	}
 	
 	/**
 	 * Stops the sound, allowing its key to be reused.
@@ -344,7 +379,22 @@ public class SoundController {
 		snd.sound.setVolume(snd.id, 0.0f); 
 		actives.remove(key);
 	}
-	
+
+	/**
+	 * Removes all the sounds from the playing list
+	 */
+	public void stopAll(){
+		if(actives.size == 0)
+			return;
+
+		for(String key:actives.keys()){
+			ActiveSound snd = actives.get(key);
+			snd.sound.setLooping(snd.id,false); // Will eventually garbage collect
+			snd.sound.setVolume(snd.id, 0.0f);
+			actives.remove(key);
+		}
+	}
+
 	/**
 	 * Returns true if the sound instance is currently active
 	 * 
@@ -367,7 +417,7 @@ public class SoundController {
 		for(String key : actives.keys()) {
 			ActiveSound snd = actives.get(key);
 			snd.lifespan++;
-			if (snd.lifespan > timeLimit) {
+			if (snd.lifespan > timeLimit && false) {
 				collection.add(key);
 				snd.sound.setLooping(snd.id,false); // Will eventually garbage collect
 				snd.sound.setVolume(snd.id, 0.0f); 
