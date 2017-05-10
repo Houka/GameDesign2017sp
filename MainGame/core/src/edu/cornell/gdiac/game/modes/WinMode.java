@@ -158,18 +158,6 @@ public class WinMode extends Mode {
 	}
 
 	@Override
-	public void pauseGame() {
-		listener.switchToScreen(this, GameModeManager.GAME_MODE);
-		gameMode.resume();
-	}
-
-	@Override
-	public void resume() {
-		listener.switchToScreen(this, GameModeManager.GAME_MODE);
-		gameMode.resume();
-	}
-
-	@Override
 	public void preLoadContent(AssetManager manager) {
 		manager.load(BACKGROUND_FILE,Texture.class);
 
