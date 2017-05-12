@@ -88,13 +88,14 @@ public class MenuMode extends Mode {
 		SoundController.getSFXInstance().update();
 		if (input.didDown()) {
 			selected = (selected + 1) % modeNames.length;
-			SoundController.getSFXInstance().play("menuMenu",Constants.SFX_ENEMY_SHOT,false);
+			SoundController.getSFXInstance().play("menuMenu",Constants.SFX_UI_HOVER,false);
 		}
 		else if (input.didUp()) {
 			selected = (selected - 1 < 0) ? modeNames.length - 1 : selected - 1;
-			SoundController.getSFXInstance().play("menuMenu",Constants.SFX_ENEMY_SHOT,false);
+			SoundController.getSFXInstance().play("menuMenu",Constants.SFX_UI_HOVER,false);
 		}
 		else if (input.didSelect()) {
+			SoundController.getSFXInstance().play("menuMenu",Constants.SFX_UI_SELECT,false);
 			if (selected == modeNames.length-1)
 				setExit(true);
 			else
@@ -131,12 +132,16 @@ public class MenuMode extends Mode {
 		manager.load(Constants.MENU_FONT_FILE, BitmapFont.class, size2Params);
 		manager.load(Constants.MENU_MUSIC_FILE, Sound.class);
 		manager.load(Constants.SFX_ENEMY_SHOT, Sound.class);
+		manager.load(Constants.SFX_UI_HOVER, Sound.class);
+		manager.load(Constants.SFX_UI_SELECT, Sound.class);
 	}
 
 	@Override
 	public void loadContent(AssetManager manager) {
 		soundController.allocate(manager, Constants.MENU_MUSIC_FILE);
 		SoundController.getSFXInstance().allocate(manager, Constants.SFX_ENEMY_SHOT);
+		SoundController.getSFXInstance().allocate(manager, Constants.SFX_UI_SELECT);
+		SoundController.getSFXInstance().allocate(manager, Constants.SFX_UI_HOVER);
 		background = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true).getTexture();
 
 		// Allocate the font
@@ -147,7 +152,7 @@ public class MenuMode extends Mode {
 
 		if(!soundController.isActive("menuMode")) {
 			soundController.stopAll();
-			soundController.play("menuMode", Constants.MENU_MUSIC_FILE, true);
+			soundController.play("menuMode", Constants.MENU_MUSIC_FILE, true,0.5f);
 		}
 	}
 
