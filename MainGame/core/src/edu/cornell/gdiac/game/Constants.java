@@ -37,6 +37,11 @@ public class Constants {
 
     /** Filenames for sprites of objects */
     public static String PLATFORM_FILE = "sprites/fixtures/window_tile.png";
+    public static String PLATFORM_LEFT_CAP_FILE = "sprites/fixtures/beams/horizontal_l.png";
+    public static String PLATFORM_RIGHT_CAP_FILE = "sprites/fixtures/beams/horizontal_r.png";
+    public static String PLATFORM_CENTER_FILE = "sprites/fixtures/beams/horizontal_m.png";
+    public static String PLATFORM_SINGLE_FILE = "sprites/fixtures/beams/horizontal_single.png";
+    public static String PLATFORM_VERTICAL_FILE = "sprites/fixtures/window_tile.png";
     public static String WALL_FILE = "sprites/fixtures/solid.png";
     public static String GOAL_FILE = CAMERA_FILE;
     public static String BACKGROUND_FILE = "sprites/bg/brick_wall_tile.png";
@@ -98,5 +103,7 @@ public class Constants {
     public static final String SPIKES_LEFT_STILL_FILE = "sprites/fixtures/spikes/spikes_left.png";
     public static final String SPIKES_RIGHT_STILL_FILE = "sprites/fixtures/spikes/spikes_right.png";
     public static final String SPIKES_UP_STILL_FILE = "sprites/fixtures/spikes/spikes_up.png";
+
+    public static final int DEFAULT_GRID = 48;
 
 }
