@@ -11,10 +11,21 @@ public class Constants {
     public static String MENU_MUSIC_FILE = "music/menu_background.mp3";
 
     /** Sound effects*/
+    public static String SFX_CAMERA_EXPLODE = "sfx/camera_explode.wav";
+    public static String SFX_ENEMY_ALERT = "sfx/enemy_alert.wav";
     public static String SFX_ENEMY_SHOT = "sfx/enemy_shot.wav";
     public static String SFX_PAINT_HIT_PAINT = "sfx/paint_hit_paint.wav";
+    public static String SFX_PAINT_JUMP = "sfx/paint_jump.wav";
+    public static String SFX_PAINT_JUMP_CHARGE = "sfx/paint_jump_charge.wav";
+    public static String SFX_PAINT_PLATFORM_SPWAN= "sfx/paint_platform_spawn.wav";
+    public static String SFX_PAINT_POP= "sfx/paint_pop.wav";
+    public static String SFX_PAINT_POP_LIGHT= "sfx/paint_pop_light.wav";
     public static String SFX_PAINT_RELOAD = "sfx/paint_reload.wav";
+    public static String SFX_PLAYER_DEATH = "sfx/player_death.wav";
+    public static String SFX_PLAYER_DRY_FIRE = "sfx/player_dry_fire.wav";
     public static String SFX_PLAYER_SHOT = "sfx/player_shot.wav";
+    public static String SFX_UI_HOVER = "sfx/UI_hover.wav";
+    public static String SFX_UI_SELECT = "sfx/UI_select.wav";
 
     /** Retro font for displaying messages */
     public static String SELECTION_FONT_FILE = "fonts/LightPixel7.ttf";
@@ -32,7 +43,7 @@ public class Constants {
 
     /** Textures necessary to support the loading screen */
     public static final String PLAYER_FILE = "sprites/char/char_icon.png";
-    public static final String CAMERA_FILE = "sprites/fixtures/security_camera.png";
+    public static final String CAMERA_FILE = "sprites/enemy/insignia.png";
     public static final String WHITE_PIXEL_FILE = "ui/white_pixel.png";
 
     /** Filenames for sprites of objects */
@@ -60,12 +71,12 @@ public class Constants {
     public static String PAINTBALL_STATIONARY_CHAR_FILE = "sprites/paint/trails/stationary_char.png";
 
     public static String CHARACTER_STILL_FILE = "sprites/char/char_icon.png";
-    public static String CHARACTER_RUN_FILE = "sprites/char/char_run_strip4.png";
-    public static String CHARACTER_FALLING_FILE = "sprites/char/char_fall_strip2.png";
+    public static String CHARACTER_RUN_FILE = "sprites/char/char_run_shoot_strip4.png";
+    public static String CHARACTER_FALLING_FILE = "sprites/char/char_fall_shoot_strip2.png";
     public static String CHARACTER_IDLE_FILE = "sprites/char/char_idle_strip5.png";
     public static String CHARACTER_MIDAIR_FILE = "sprites/char/char_midair_shoot.png";
-    public static String CHARACTER_RISING_FILE = "sprites/char/char_jump_strip2.png";
-    public static String CHARACTER_TRANSITION_FILE = "sprites/char/char_transition_strip2.png";
+    public static String CHARACTER_RISING_FILE = "sprites/char/char_jump_shoot_strip2.png";
+    public static String CHARACTER_TRANSITION_FILE = "sprites/char/char_transition_shoot_strip2.png";
     public static String CHARACTER_SHOOT_FILE = "sprites/char/char_shoot.png";
     public static String CHARACTER_CROUCH_FILE = "sprites/char/char_crouch.png";
     public static String CHARACTER_CROUCH_SHOOT_FILE = "sprites/char/char_crouch_shoot.png";

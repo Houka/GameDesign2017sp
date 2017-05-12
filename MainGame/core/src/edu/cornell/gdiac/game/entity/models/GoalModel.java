@@ -25,7 +25,7 @@ public class GoalModel extends BoxObstacle {
      * @param height	The object width in physics units
      */
     public GoalModel(float x, float y, float width, float height) {
-        super(x, y, width, height);
+        super(x, y, width/2, height/2);
         setBodyType(BodyDef.BodyType.StaticBody);
         setDensity(0.0f);
         setFriction(0.0f);

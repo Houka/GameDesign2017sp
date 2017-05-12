@@ -430,4 +430,14 @@ public class SoundController {
 		current = 0;
 	}
 
+	/**
+	 * Sets the volume for all sounds
+	 * @param volume from 0.0 ro 1.0
+	 */
+	public void setVolume(float volume){
+		for(String key : actives.keys()){
+			ActiveSound snd = actives.get(key);
+			snd.sound.setVolume(snd.id, volume);
+		}
+	}
 }
