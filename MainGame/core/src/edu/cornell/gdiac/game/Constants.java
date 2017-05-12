@@ -52,7 +52,10 @@ public class Constants {
     public static String PLATFORM_RIGHT_CAP_FILE = "sprites/fixtures/beams/horizontal_r.png";
     public static String PLATFORM_CENTER_FILE = "sprites/fixtures/beams/horizontal_m.png";
     public static String PLATFORM_SINGLE_FILE = "sprites/fixtures/beams/horizontal_single.png";
-    public static String PLATFORM_VERTICAL_FILE = "sprites/fixtures/window_tile.png";
+    public static String PLATFORM_BLOCK_1_FILE = "sprites/fixtures/block_tile1.png";
+    public static String PLATFORM_BLOCK_2_FILE = "sprites/fixtures/block_tile2.png";
+    public static String PLATFORM_BLOCK_3_FILE = "sprites/fixtures/block_tile3.png";
+    public static String PLATFORM_BLOCK_4_FILE = "sprites/fixtures/block_tile4.png";
     public static String WALL_FILE = "sprites/fixtures/solid.png";
     public static String GOAL_FILE = CAMERA_FILE;
     public static String BACKGROUND_FILE = "sprites/bg/brick_wall_tile.png";

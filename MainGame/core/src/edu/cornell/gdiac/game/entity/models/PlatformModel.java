@@ -107,7 +107,7 @@ public class PlatformModel extends PolygonObstacle {
     public void draw(GameCanvas canvas){
         if (texture != null) {
             if (animation == null)
-                canvas.draw(texture,Color.WHITE,origin.x,origin.y,(pointArray[6]-SPIKE_SHRINK)*
+                canvas.draw(texture,Color.WHITE,origin.x,origin.y,(pointArray[6])*
                     drawScale.x+origin.x,(pointArray[7])*drawScale.y+origin.y,angle,1,1.0f);
             else
                 canvas.draw(animation.getTextureRegion(),Color.WHITE,origin.x,origin.y,(pointArray[6]-SPIKE_SHRINK)*

@@ -31,7 +31,7 @@ public class LevelLoader implements AssetUser, Disposable{
     private TextureRegion platformRightTile;
     private TextureRegion platformCenterTile;
     private TextureRegion platformSingleTile;
-    private TextureRegion platformVerticalTile;
+    private TextureRegion[] platformBlockTiles;
     private TextureRegion wallTile;
     private TextureRegion goalTile;
     private TextureRegion bgTile;
@@ -40,6 +40,8 @@ public class LevelLoader implements AssetUser, Disposable{
     private TextureRegion playerTexture;
     private TextureRegion depotTexture;
     private TextureRegion splattererTexture;
+
+    private final int PLATFORM_BLOCKS_NUMBER = 4;
 
     /**holds background images*/
     private HashMap<String, TextureRegion> backgroundRegions;
@@ -64,6 +66,7 @@ public class LevelLoader implements AssetUser, Disposable{
         this.scale = scale;
         levelParser = new LevelParser();
         backgroundRegions = new HashMap<String, TextureRegion>();
+        platformBlockTiles = new TextureRegion[PLATFORM_BLOCKS_NUMBER];
     }
 
     // BEGIN: Setters and Getters
@@ -163,7 +166,7 @@ public class LevelLoader implements AssetUser, Disposable{
 
             TextureRegion texture;
             if(platformMap.containsKey(above) || platformMap.containsKey(below)) {
-                texture = platformVerticalTile;
+                texture = platformBlockTiles[(int)(Math.random()*PLATFORM_BLOCKS_NUMBER)];
             } else if(platformMap.containsKey(left) && platformMap.containsKey(right)) {
                 texture = platformCenterTile;
             } else if(platformMap.containsKey(left)) {
@@ -377,7 +380,10 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(Constants.PLATFORM_RIGHT_CAP_FILE,Texture.class);
         manager.load(Constants.PLATFORM_CENTER_FILE,Texture.class);
         manager.load(Constants.PLATFORM_SINGLE_FILE,Texture.class);
-        manager.load(Constants.PLATFORM_VERTICAL_FILE,Texture.class);
+        manager.load(Constants.PLATFORM_BLOCK_1_FILE,Texture.class);
+        manager.load(Constants.PLATFORM_BLOCK_2_FILE,Texture.class);
+        manager.load(Constants.PLATFORM_BLOCK_3_FILE,Texture.class);
+        manager.load(Constants.PLATFORM_BLOCK_4_FILE,Texture.class);
         manager.load(Constants.WALL_FILE,Texture.class);
         manager.load(Constants.GOAL_FILE,Texture.class);
         manager.load(Constants.BACKGROUND_FILE,Texture.class);
@@ -432,7 +438,10 @@ public class LevelLoader implements AssetUser, Disposable{
         platformRightTile = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_RIGHT_CAP_FILE,false);
         platformCenterTile = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_CENTER_FILE,false);
         platformSingleTile = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_SINGLE_FILE,false);
-        platformVerticalTile = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_VERTICAL_FILE,false);
+        platformBlockTiles[0] = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_BLOCK_1_FILE,false);
+        platformBlockTiles[1] = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_BLOCK_2_FILE,false);
+        platformBlockTiles[2] = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_BLOCK_3_FILE,false);
+        platformBlockTiles[3] = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_BLOCK_4_FILE,false);
         wallTile = AssetRetriever.createTextureRegion(manager,Constants.WALL_FILE,true);
         goalTile  = AssetRetriever.createTextureRegion(manager,Constants.GOAL_FILE,false);
         enemyIntervalTexture  = AssetRetriever.createTextureRegion(manager,Constants.ENEMY_INTERVAL_FILE,false);
@@ -503,7 +512,10 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.unload(Constants.PLATFORM_RIGHT_CAP_FILE);
         manager.unload(Constants.PLATFORM_CENTER_FILE);
         manager.unload(Constants.PLATFORM_SINGLE_FILE);
-        manager.unload(Constants.PLATFORM_VERTICAL_FILE);
+        manager.unload(Constants.PLATFORM_BLOCK_1_FILE);
+        manager.unload(Constants.PLATFORM_BLOCK_2_FILE);
+        manager.unload(Constants.PLATFORM_BLOCK_3_FILE);
+        manager.unload(Constants.PLATFORM_BLOCK_4_FILE);
         manager.unload(Constants.SPIKES_DOWN_SPIN_FILE);
         manager.unload(Constants.SPIKES_UP_SPIN_FILE);
         manager.unload(Constants.SPIKES_LEFT_SPIN_FILE);
