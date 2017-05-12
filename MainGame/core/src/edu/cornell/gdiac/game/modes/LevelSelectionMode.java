@@ -29,7 +29,7 @@ public class LevelSelectionMode extends Mode {
 	private static final int TOTAL_COLUMNS = 3;
 	private static final int BORDER_X = 100;
 	private static final int BORDER_Y = 50;
-	private static final int PADDING_Y = 90;
+	private static final int PADDING_Y = 150;
 
 	/** Textures necessary to support the screen */
 	private static final String BACKGROUND_FILE = "ui/bg/level_selection.png";
@@ -105,7 +105,7 @@ public class LevelSelectionMode extends Mode {
 	@Override
 	protected void draw() {
 		super.draw();
-		drawSelectionSingle();
+		drawSelectionMatrix();
 	}
 
 	private void drawSelectionSingle(){
@@ -155,6 +155,7 @@ public class LevelSelectionMode extends Mode {
 		// load levels
 		NUM_LEVELS = FileReaderWriter.getJsonFiles();
 		TOTAL_ROWS = (int)Math.ceil((float)NUM_LEVELS.length/TOTAL_COLUMNS);
+		selected = gameMode.getLevelNum();
 	}
 
 	@Override

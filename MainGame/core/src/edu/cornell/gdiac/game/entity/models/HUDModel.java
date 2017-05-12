@@ -126,12 +126,5 @@ public class HUDModel extends BoxObstacle {
     public void draw(GameCanvas canvas){
         font.setColor(Color.DARK_GRAY);
         canvas.drawText("Ammo:"+ammoLeft, font, 30, getY()-30);
-        canvas.drawText(time.toString().substring(3), font, canvas.getWidth()-250, getY()-30);
-
-        if (state == STATE_WIN)
-            canvas.drawTextCentered("VICTORY", font, getY()-canvas.getHeight());
-        else if (state == STATE_LOSE)
-            canvas.drawTextCentered("FAILURE", font, getY()-canvas.getHeight());
-
     }
 }

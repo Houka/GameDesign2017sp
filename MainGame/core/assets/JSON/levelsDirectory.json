@@ -1,1 +1,17 @@
-{"levels":["JSON/tutorial_jumping.json","JSON/tutorial_shooting.json","JSON/tutorial_ammo_depot.json","JSON/tutorial_bullet.json","JSON/tutorial_trampoline.json"]}
+{
+  "levels": [
+    "JSON/tutorial_jumping.json",
+    "JSON/tutorial_shooting.json",
+    "JSON/tutorial_ammo_depot.json",
+    "JSON/tutorial_bullet.json",
+    "JSON/tutorial_trampoline.json",
+    "JSON/bumpers.json",
+    "JSON/pathway.json",
+    "JSON/ceceMed.json",
+    "JSON/level3.json",
+    "JSON/tunnel.json",
+    "JSON/level5.json",
+    "JSON/ryan1.json",
+    "JSON/tower.json"
+  ]
+}

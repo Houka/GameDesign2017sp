@@ -1,5 +1,7 @@
 package edu.cornell.gdiac.game;
 
+import com.badlogic.gdx.graphics.Color;
+
 /**
  * Created by Lu on 4/14/2017.
  */
@@ -26,16 +28,22 @@ public class Constants {
     public static String SFX_UI_SELECT = "sfx/UI_select.wav";
 
     /** Retro font for displaying messages */
-    public static String FONT_FILE = "fonts/RetroGame.ttf";
-    public static int FONT_SIZE = 64;
     public static String SELECTION_FONT_FILE = "fonts/LightPixel7.ttf";
-    public static int SELECTION_FONT_SIZE = 200;
+    public static int SELECTION_FONT_SIZE = 104;
     public static String MENU_FONT_FILE = "fonts/RealGraffiti.ttf";
     public static int MENU_FONT_SIZE = 64;
+    public static String FONT_FILE = SELECTION_FONT_FILE;
+    public static int FONT_SIZE = SELECTION_FONT_SIZE;
+
+    public static Color SELECTED_COLOR = new Color(183/255f, 81/255f, 46/255f, 1f);
+    public static Color SELECTED_COLOR_LIGHT = new Color(236/255f, 239/255f, 218/255f, 1f);
+    public static Color UNSELECTED_COLOR = new Color(36/255f, 39/255f, 18/255f, 1f);
+    public static Color ALPHA = new Color(1f,1f,1f,0.5f);
+    public static Color WHITE = new Color(1f,1f,1f,1f);
 
     /** Textures necessary to support the loading screen */
     public static final String PLAYER_FILE = "sprites/char/char_icon.png";
-    public static final String CAMERA_FILE = "sprites/fixtures/security_camera.png";
+    public static final String CAMERA_FILE = "sprites/enemy/insignia.png";
     public static final String WHITE_PIXEL_FILE = "ui/white_pixel.png";
 
     /** Filenames for sprites of objects */
@@ -63,12 +71,12 @@ public class Constants {
     public static String PAINTBALL_STATIONARY_CHAR_FILE = "sprites/paint/trails/stationary_char.png";
 
     public static String CHARACTER_STILL_FILE = "sprites/char/char_icon.png";
-    public static String CHARACTER_RUN_FILE = "sprites/char/char_run_strip4.png";
-    public static String CHARACTER_FALLING_FILE = "sprites/char/char_fall_strip2.png";
+    public static String CHARACTER_RUN_FILE = "sprites/char/char_run_shoot_strip4.png";
+    public static String CHARACTER_FALLING_FILE = "sprites/char/char_fall_shoot_strip2.png";
     public static String CHARACTER_IDLE_FILE = "sprites/char/char_idle_strip5.png";
     public static String CHARACTER_MIDAIR_FILE = "sprites/char/char_midair_shoot.png";
-    public static String CHARACTER_RISING_FILE = "sprites/char/char_jump_strip2.png";
-    public static String CHARACTER_TRANSITION_FILE = "sprites/char/char_transition_strip2.png";
+    public static String CHARACTER_RISING_FILE = "sprites/char/char_jump_shoot_strip2.png";
+    public static String CHARACTER_TRANSITION_FILE = "sprites/char/char_transition_shoot_strip2.png";
     public static String CHARACTER_SHOOT_FILE = "sprites/char/char_shoot.png";
     public static String CHARACTER_CROUCH_FILE = "sprites/char/char_crouch.png";
     public static String CHARACTER_CROUCH_SHOOT_FILE = "sprites/char/char_crouch_shoot.png";

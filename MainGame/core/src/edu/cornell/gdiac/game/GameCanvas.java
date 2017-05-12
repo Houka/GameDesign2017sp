@@ -684,6 +684,14 @@ public class GameCanvas {
 		spriteBatch.draw(region, region.getRegionWidth(), region.getRegionHeight(), local);
 	}
 
+	public void setColor(Color tint){
+		if (active != DrawPass.STANDARD) {
+			Gdx.app.error("GameCanvas", "Cannot draw without active begin()", new IllegalStateException());
+			return;
+		}
+		spriteBatch.setColor(tint);
+	}
+
 	/**
 	 * Draws the tinted texture with the given transformations
 	 *
@@ -954,7 +962,6 @@ public class GameCanvas {
 
 		Color color = new Color();
 		color.set(font.getColor());
-		color.sub(0,0,0,0.3f);
 		GlyphLayout layout = new GlyphLayout(font,text,color,0, Align.left, false);
 		float x = (getWidth()  - layout.width) / 2.0f;
 		float y = (getHeight() + layout.height) / 2.0f;
