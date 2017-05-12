@@ -11,10 +11,21 @@ public class Constants {
     public static String MENU_MUSIC_FILE = "music/menu_background.mp3";
 
     /** Sound effects*/
+    public static String SFX_CAMERA_EXPLODE = "sfx/camera_explode.wav";
+    public static String SFX_ENEMY_ALERT = "sfx/enemy_alert.wav";
     public static String SFX_ENEMY_SHOT = "sfx/enemy_shot.wav";
     public static String SFX_PAINT_HIT_PAINT = "sfx/paint_hit_paint.wav";
+    public static String SFX_PAINT_JUMP = "sfx/paint_jump.wav";
+    public static String SFX_PAINT_JUMP_CHARGE = "sfx/paint_jump_charge.wav";
+    public static String SFX_PAINT_PLATFORM_SPWAN= "sfx/paint_platform_spawn.wav";
+    public static String SFX_PAINT_POP= "sfx/paint_pop.wav";
+    public static String SFX_PAINT_POP_LIGHT= "sfx/paint_pop_light.wav";
     public static String SFX_PAINT_RELOAD = "sfx/paint_reload.wav";
+    public static String SFX_PLAYER_DEATH = "sfx/player_death.wav";
+    public static String SFX_PLAYER_DRY_FIRE = "sfx/player_dry_fire.wav";
     public static String SFX_PLAYER_SHOT = "sfx/player_shot.wav";
+    public static String SFX_UI_HOVER = "sfx/UI_hover.wav";
+    public static String SFX_UI_SELECT = "sfx/UI_select.wav";
 
     /** Retro font for displaying messages */
     public static String SELECTION_FONT_FILE = "fonts/LightPixel7.ttf";

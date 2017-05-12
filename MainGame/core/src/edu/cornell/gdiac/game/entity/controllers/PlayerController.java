@@ -1,8 +1,10 @@
 package edu.cornell.gdiac.game.entity.controllers;
 
 import com.sun.scenario.Settings;
+import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.entity.models.PlayerModel;
 import edu.cornell.gdiac.game.input.PlayerInputController;
+import edu.cornell.gdiac.util.SoundController;
 import edu.cornell.gdiac.util.sidebar.Sidebar;
 
 /**
@@ -64,6 +66,7 @@ public class PlayerController extends EntityController {
             if (player.isDoubleJumping())
                 player.getAnimation().setPlayingAnimation("still");
             player.getAnimation().play("rising", true);
+            SoundController.getSFXInstance().play("gameMode", Constants.SFX_PAINT_JUMP, false);
         }
         else if (!player.isGrounded() &&
                 player.getVY() <= OFF_GROUND_THRESHOLD + 1 && player.getVY() >= OFF_GROUND_THRESHOLD-1)
