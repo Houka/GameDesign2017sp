@@ -32,7 +32,7 @@ public class Constants {
 
     /** Textures necessary to support the loading screen */
     public static final String PLAYER_FILE = "sprites/char/char_icon.png";
-    public static final String CAMERA_FILE = "sprites/fixtures/security_camera.png";
+    public static final String CAMERA_FILE = "sprites/enemy/insignia.png";
     public static final String WHITE_PIXEL_FILE = "ui/white_pixel.png";
 
     /** Filenames for sprites of objects */
@@ -60,12 +60,12 @@ public class Constants {
     public static String PAINTBALL_STATIONARY_CHAR_FILE = "sprites/paint/trails/stationary_char.png";
 
     public static String CHARACTER_STILL_FILE = "sprites/char/char_icon.png";
-    public static String CHARACTER_RUN_FILE = "sprites/char/char_run_strip4.png";
-    public static String CHARACTER_FALLING_FILE = "sprites/char/char_fall_strip2.png";
+    public static String CHARACTER_RUN_FILE = "sprites/char/char_run_shoot_strip4.png";
+    public static String CHARACTER_FALLING_FILE = "sprites/char/char_fall_shoot_strip2.png";
     public static String CHARACTER_IDLE_FILE = "sprites/char/char_idle_strip5.png";
     public static String CHARACTER_MIDAIR_FILE = "sprites/char/char_midair_shoot.png";
-    public static String CHARACTER_RISING_FILE = "sprites/char/char_jump_strip2.png";
-    public static String CHARACTER_TRANSITION_FILE = "sprites/char/char_transition_strip2.png";
+    public static String CHARACTER_RISING_FILE = "sprites/char/char_jump_shoot_strip2.png";
+    public static String CHARACTER_TRANSITION_FILE = "sprites/char/char_transition_shoot_strip2.png";
     public static String CHARACTER_SHOOT_FILE = "sprites/char/char_shoot.png";
     public static String CHARACTER_CROUCH_FILE = "sprites/char/char_crouch.png";
     public static String CHARACTER_CROUCH_SHOOT_FILE = "sprites/char/char_crouch_shoot.png";
