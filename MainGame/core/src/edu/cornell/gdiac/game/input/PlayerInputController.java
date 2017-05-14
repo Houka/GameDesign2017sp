@@ -37,6 +37,7 @@ public class PlayerInputController {
     private boolean downPressed;
     private boolean shootPressed;
     private boolean jumpPressed;
+    private boolean jumpReleased;
 
     private boolean upPrevious;
     private boolean downPrevious;
@@ -64,6 +65,7 @@ public class PlayerInputController {
         return shootPressed && !shootPrevious;
     }
     public boolean didJump() { return jumpPressed && !jumpPrevious; }
+    public boolean didStopJump() { return jumpReleased; }
     /**
      * Returns the amount of sideways movement.
      *
@@ -120,6 +122,7 @@ public class PlayerInputController {
         downPressed  = (secondary && downPressed) || (Gdx.input.isKeyPressed(Input.Keys.DOWN));
         shootPressed = (secondary && shootPressed) || (Gdx.input.isKeyPressed(Input.Keys.Z) || (Gdx.input.isKeyPressed(Input.Keys.SPACE)));
         jumpPressed = (secondary && jumpPressed) || (Gdx.input.isKeyPressed(Input.Keys.X) || upPressed);
+        jumpReleased = (!jumpPressed && jumpPrevious);
 
         // Directional controls
         horizontal = (secondary ? horizontal : 0.0f);

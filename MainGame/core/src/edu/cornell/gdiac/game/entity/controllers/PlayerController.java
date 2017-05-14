@@ -44,8 +44,12 @@ public class PlayerController extends EntityController {
         else {
             player.setMovement(0f);
         }
+
         player.applyForce();
-            updateAnimation();
+        updateAnimation();
+
+        if(input.didStopJump())
+            player.stopJump();
 
     }
 
