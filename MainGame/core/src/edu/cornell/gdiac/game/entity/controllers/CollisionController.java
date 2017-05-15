@@ -110,11 +110,9 @@ public class CollisionController implements ContactListener {
     }
 
     private void playerDie(PlayerModel player){
-        if (!hasDied) {
-            player.getAnimation().playOnce("death");
-            player.setDead(true);
-            hasDied = true;
-        }
+        player.getAnimation().playOnce("death");
+        player.setDead(true);
+        hasDied = true;
     }
     // END: helper functions
 
@@ -122,8 +120,10 @@ public class CollisionController implements ContactListener {
     private void handleCollision(PlayerModel obj1, SplattererModel obj2) {}
     private void handleCollision(PlayerModel obj1, EnemyModel obj2){
         if (!obj2.isStunned()) {
-            playerDie(obj1);
-            lose();
+            if (!hasDied) {
+                playerDie(obj1);
+                lose();
+            }
         }
     }
     private void handleCollision(PlayerModel obj1, GoalModel obj2){
@@ -133,8 +133,10 @@ public class CollisionController implements ContactListener {
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
         touchedGround(obj1,obj2,userData1,userData2);
         if (obj2.getType() != PlatformModel.NORMAL_PLATFORM && obj1.fixtureIsActive(userData1)) {
-            playerDie(obj1);
-            lose();
+            if (!hasDied) {
+                playerDie(obj1);
+                lose();
+            }
         }
     }
     private void handleCollision(PlayerModel obj1, WallModel obj2){
