@@ -89,6 +89,7 @@ public class Constants {
     public static String CHARACTER_CROUCH_FILE = "sprites/char/char_crouch.png";
     public static String CHARACTER_CROUCH_SHOOT_FILE = "sprites/char/char_crouch_shoot.png";
     public static String CHARACTER_STUNNED_FILE = "sprites/char/char_stunned.png";
+    public static String CHARACTER_DEATH_FILE = "sprites/char/char_death_strip8.png";
 
     public static String TUTORIAL_JUMP_FILE = "sprites/tutorials/tutor_jump.png";
     public static String TUTORIAL_CROUCH_FILE = "sprites/tutorials/tutor_crouch.png";
