@@ -78,6 +78,9 @@ public class GameMode extends Mode implements Settable {
 	private final float TIME_TO_RESET = 2f;
 	private final float START_TIME = 2f;
 
+	private boolean hasLost = false;
+	private float timeOfLoss;
+
 	/** Timer for a race the clock situation (in seconds) **/
 	private float time = 0;
 
@@ -300,6 +303,14 @@ public class GameMode extends Mode implements Settable {
 		if (!hud.isLose() && !hud.isWin() && time > START_TIME)
 			for (EntityController e : entityControllers)
 				e.update(dt);
+		if (hud.isLose() && !hasLost) {
+			for (EntityController e : entityControllers)
+				if (e instanceof PlayerController) {
+					e.update(dt);
+					hasLost = true;
+					timeOfLoss = time;
+				}
+		}
 
 		applySettings();
 		paintballFactory.applySettings();
@@ -333,8 +344,9 @@ public class GameMode extends Mode implements Settable {
 		if (player.getY() < -player.getHeight())
 			hud.setLose(true);
 
-		if(hud.isLose()) {
+		if(hud.isLose() && time - timeOfLoss > 2) {
 			hud.reset();
+			collisionController.setHasDied(false);
 			listener.switchToScreen(this, GameModeManager.LOSS);
 		}
 
