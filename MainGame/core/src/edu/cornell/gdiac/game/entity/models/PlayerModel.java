@@ -109,6 +109,8 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private boolean canDoubleJump;
     /** Whether we are actively shooting */
     private boolean isShooting;
+
+    private boolean isDead;
     /** Ground sensor to represent our feet */
     private Fixture sensorFixture;
     private Fixture runningSensorFixture;
@@ -321,6 +323,13 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
         }
     }
 
+    public boolean isDead(){
+        return isDead;
+    }
+
+    public void setDead(boolean b){
+        isDead = b;
+    }
     @Override
     public boolean isShooting() {
         return (isShooting && shootCooldown <= 0 );
@@ -640,6 +649,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
         boolean stunned = false;
 
+
         if(isKnockedBack()) {
             stunned = true;
 
@@ -724,6 +734,11 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
      */
     public void update(float dt) {
         // Apply cooldowns
+        if (isDead()){
+            setVX(0);
+            setVY(0);
+        }
+
         if (isJumping()) {
             jumpCooldown = JUMP_COOLDOWN;
             freeJumpFrame = 0;

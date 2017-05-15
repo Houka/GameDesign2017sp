@@ -11,6 +11,8 @@ import edu.cornell.gdiac.util.SoundController;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 import javafx.util.Pair;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by Lu on 3/17/2017.
  *
@@ -35,6 +37,7 @@ public class CollisionController implements ContactListener {
     /** paintball factory for splatterers */
     private PaintballFactory paintballFactory;
 
+    private boolean hasDied = false;
     private PooledList<PaintballModel> objectsToAdd;
 
 
@@ -97,17 +100,31 @@ public class CollisionController implements ContactListener {
     public boolean aboveGround(PlayerModel obj1, PaintballModel obj2, float buffer) {
         return obj1.getY()-obj1.getHeight()/2>=obj2.getY()+obj2.getHeight()/2-buffer;
     }
+
+    public void setHasDied(boolean b){
+        hasDied = b;
+    }
     private void lose(){
         hud.setLose(true);
         SoundController.getSFXInstance().play("gameMode",Constants.SFX_PLAYER_DEATH, false);
+    }
+
+    private void playerDie(PlayerModel player){
+        player.getAnimation().playOnce("death");
+        player.setDead(true);
+        hasDied = true;
     }
     // END: helper functions
 
     // BEGIN: Simple Collision handlers
     private void handleCollision(PlayerModel obj1, SplattererModel obj2) {}
     private void handleCollision(PlayerModel obj1, EnemyModel obj2){
-        if (!obj2.isStunned())
-            lose();
+        if (!obj2.isStunned()) {
+            if (!hasDied) {
+                playerDie(obj1);
+                lose();
+            }
+        }
     }
     private void handleCollision(PlayerModel obj1, GoalModel obj2){
         SoundController.getSFXInstance().play("gameMode",Constants.SFX_CAMERA_EXPLODE, false);
@@ -115,8 +132,12 @@ public class CollisionController implements ContactListener {
     }
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
         touchedGround(obj1,obj2,userData1,userData2);
-        if (obj2.getType() != PlatformModel.NORMAL_PLATFORM && obj1.fixtureIsActive(userData1))
-            lose();
+        if (obj2.getType() != PlatformModel.NORMAL_PLATFORM && obj1.fixtureIsActive(userData1)) {
+            if (!hasDied) {
+                playerDie(obj1);
+                lose();
+            }
+        }
     }
     private void handleCollision(PlayerModel obj1, WallModel obj2){
         obj1.setKnockedBack(0);
