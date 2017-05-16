@@ -64,6 +64,7 @@ public class PaintballModel extends BoxObstacle {
 
     /** Counter from death until removal**/
     private float timeToDie;
+    private float startingTimeToDie;
 
     /** Screen scale**/
     private Vector2 scale;
@@ -190,6 +191,7 @@ public class PaintballModel extends BoxObstacle {
         fixX(0);
         if(!dying) {
             timeToDie = xd + deathDuration;
+            startingTimeToDie = xd;
             dying = true;
             growing = false;
             platformOrigin.x=origin.x-texture.getRegionWidth()/2f + platformTexture.getRegionWidth()/2f;
@@ -486,8 +488,10 @@ public class PaintballModel extends BoxObstacle {
         if(!popped) {
             if (dying) {
                 float vscale = (texture.getRegionHeight() * getScaledY()) / platformTexture.getRegionHeight();
-                canvas.draw(platformTexture, paintcolor, 0, 0, (getX()+5) * drawScale.x, (getY()+29) * drawScale.y, getAngle(), getScaledPlatformX(), 1/vscale);
-                //canvas.draw(timerTexture, paintcolor, platformOrigin.x, platformOrigin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), getScaledPlatformX(), 1/vscale);
+                float timePercent =  Math.max((timeToDie-deathDuration)/startingTimeToDie,0);
+                canvas.draw(platformTexture, paintcolor, platformOrigin.x, platformOrigin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), getScaledPlatformX(), 1/vscale);
+                canvas.draw(timerTexture, paintcolor, 0, 0, getX()* drawScale.x-(platformOrigin.x-28f)*getScaledPlatformX(), getY() * drawScale.y -(platformOrigin.y-25)/vscale, getAngle(), getScaledPlatformX()*2.6f*timePercent, 1/vscale);
+                canvas.draw(timerTexture, paintcolor, 0, 0, getX()* drawScale.x-(platformOrigin.x-154f)*getScaledPlatformX(), getY() * drawScale.y -(platformOrigin.y-25)/vscale, getAngle(), getScaledPlatformX()*-2.6f*timePercent, 1/vscale);
             } else {
                 if (texture != null && trailEnabled) {
                     float xPos = getX();
