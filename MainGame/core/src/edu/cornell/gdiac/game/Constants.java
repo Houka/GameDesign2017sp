@@ -77,6 +77,7 @@ public class Constants {
     public static String PAINTBALL_STATIONARY_MINE_FILE = "sprites/paint/trails/stationary_mine.png";
     public static String PAINTBALL_STATIONARY_NORMAL_FILE = "sprites/paint/trails/stationary_normal.png";
     public static String PAINTBALL_STATIONARY_CHAR_FILE = "sprites/paint/trails/stationary_char.png";
+    public static String PAINTBALL_TIMER_FILE = "sprites/paint/trails/timer.png";
 
     public static String CHARACTER_STILL_FILE = "sprites/char/char_icon.png";
     public static String CHARACTER_RUN_FILE = "sprites/char/char_run_shoot_strip4.png";

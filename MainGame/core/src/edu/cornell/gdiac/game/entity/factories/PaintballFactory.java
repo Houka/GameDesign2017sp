@@ -58,6 +58,7 @@ public class PaintballFactory implements AssetUser, Settable {
     private TextureRegion charSplatEffectTexture;
     private TextureRegion enemySplatEffectTexture;
     private TextureRegion mineSplatEffectTexture;
+    private TextureRegion timerTexture;
 
     public PaintballFactory(Vector2 scale){
         this.scale = scale;
@@ -92,6 +93,7 @@ public class PaintballFactory implements AssetUser, Settable {
         paintball.setPaintballToPaintballDuration(paintballToPaintballDuration);
         paintball.setPaintballToWallDuration(paintballToWallDuration);
         paintball.setPaintballToPlatformDuration(paintballToPlatformDuration);
+        paintball.setTimerTexture(timerTexture);
 
         if(paintballType.equals("trampoline")) {
             paintball.setTrailTexture(mineTrailTexture);
@@ -246,6 +248,7 @@ public class PaintballFactory implements AssetUser, Settable {
         charSplatEffectTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_CHAR_SPLAT_EFFECT_FILE, false);
         enemySplatEffectTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_ENEMY_SPLAT_EFFECT_FILE, false);
         mineSplatEffectTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_MINE_ENEMY_SPLAT_EFFECT_FILE, false);
+        timerTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_TIMER_FILE, false);
 
     }
 
@@ -255,6 +258,7 @@ public class PaintballFactory implements AssetUser, Settable {
             manager.unload(Constants.PAINTBALL_FILE);
             manager.unload(Constants.PAINTBALL_STATIONARY_NORMAL_FILE);
             manager.unload(Constants.PAINTBALL_STATIONARY_CHAR_FILE);
+            manager.unload(Constants.PAINTBALL_STATIONARY_MINE_FILE);
             manager.unload(Constants.PAINTBALL_NORMAL_TRAIL_FILE);
             manager.unload(Constants.PAINTBALL_MINE_TRAIL_FILE);
             manager.unload(Constants.PAINTBALL_ENEMY_NORMAL_FILE);
@@ -264,6 +268,7 @@ public class PaintballFactory implements AssetUser, Settable {
             manager.unload(Constants.PAINTBALL_CHAR_SPLAT_EFFECT_FILE);
             manager.unload(Constants.PAINTBALL_ENEMY_SPLAT_EFFECT_FILE);
             manager.unload(Constants.PAINTBALL_MINE_ENEMY_SPLAT_EFFECT_FILE);
+            manager.unload(Constants.PAINTBALL_TIMER_FILE);
         }
     }
 }

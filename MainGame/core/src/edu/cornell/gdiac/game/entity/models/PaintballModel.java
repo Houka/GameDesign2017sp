@@ -97,6 +97,7 @@ public class PaintballModel extends BoxObstacle {
     private Animation splatEffectTexture;
     private Animation trailTexture;
     private TextureRegion platformTexture;
+    private TextureRegion timerTexture;
     private Animation platformSplatEffectTexture;
 
     private int currTrailFrame;
@@ -258,6 +259,8 @@ public class PaintballModel extends BoxObstacle {
     public void setPlatformTexture(TextureRegion tex) {
         platformTexture = tex;
     }
+
+    public void setTimerTexture(TextureRegion tex) { timerTexture = tex;}
 
     public void setSplatEffectTexture(TextureRegion tex) {
        splatEffectTexture.addTexture("splat",tex.getTexture(),1,10);
@@ -483,7 +486,8 @@ public class PaintballModel extends BoxObstacle {
         if(!popped) {
             if (dying) {
                 float vscale = (texture.getRegionHeight() * getScaledY()) / platformTexture.getRegionHeight();
-                canvas.draw(platformTexture, paintcolor, platformOrigin.x, platformOrigin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), getScaledPlatformX(), 1/vscale);
+                canvas.draw(platformTexture, paintcolor, 0, 0, (getX()+5) * drawScale.x, (getY()+29) * drawScale.y, getAngle(), getScaledPlatformX(), 1/vscale);
+                //canvas.draw(timerTexture, paintcolor, platformOrigin.x, platformOrigin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), getScaledPlatformX(), 1/vscale);
             } else {
                 if (texture != null && trailEnabled) {
                     float xPos = getX();
