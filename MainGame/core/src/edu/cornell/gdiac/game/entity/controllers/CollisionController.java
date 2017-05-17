@@ -3,11 +3,15 @@ package edu.cornell.gdiac.game.entity.controllers;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.ObjectSet;
+import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
 import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.util.PooledList;
+import edu.cornell.gdiac.util.SoundController;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 import javafx.util.Pair;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Lu on 3/17/2017.
@@ -33,6 +37,7 @@ public class CollisionController implements ContactListener {
     /** paintball factory for splatterers */
     private PaintballFactory paintballFactory;
 
+    private boolean hasDied = false;
     private PooledList<PaintballModel> objectsToAdd;
 
 
@@ -95,18 +100,44 @@ public class CollisionController implements ContactListener {
     public boolean aboveGround(PlayerModel obj1, PaintballModel obj2, float buffer) {
         return obj1.getY()-obj1.getHeight()/2>=obj2.getY()+obj2.getHeight()/2-buffer;
     }
+
+    public void setHasDied(boolean b){
+        hasDied = b;
+    }
+    private void lose(){
+        hud.setLose(true);
+        SoundController.getSFXInstance().play("gameMode",Constants.SFX_PLAYER_DEATH, false);
+    }
+
+    private void playerDie(PlayerModel player){
+        player.getAnimation().playOnce("death");
+        player.setDead(true);
+        hasDied = true;
+    }
     // END: helper functions
 
     // BEGIN: Simple Collision handlers
     private void handleCollision(PlayerModel obj1, SplattererModel obj2) {}
     private void handleCollision(PlayerModel obj1, EnemyModel obj2){
-        if (!obj2.isStunned())
-            hud.setLose(true);
+        if (!obj2.isStunned()) {
+            if (!hasDied) {
+                playerDie(obj1);
+                lose();
+            }
+        }
     }
-    private void handleCollision(PlayerModel obj1, GoalModel obj2){ hud.setWin(true); }
+    private void handleCollision(PlayerModel obj1, GoalModel obj2){
+        SoundController.getSFXInstance().play("gameMode",Constants.SFX_CAMERA_EXPLODE, false);
+        hud.setWin(true);
+    }
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
         touchedGround(obj1,obj2,userData1,userData2);
-        if (obj2.getType() != PlatformModel.NORMAL_PLATFORM && obj1.fixtureIsActive(userData1)) {hud.setLose(true);}
+        if (obj2.getType() != PlatformModel.NORMAL_PLATFORM && obj1.fixtureIsActive(userData1)) {
+            if (!hasDied) {
+                playerDie(obj1);
+                lose();
+            }
+        }
     }
     private void handleCollision(PlayerModel obj1, WallModel obj2){
         obj1.setKnockedBack(0);
@@ -129,6 +160,7 @@ public class CollisionController implements ContactListener {
                 obj1.setMyPlatform(obj2);
                 obj1.setTrampGrounded(true);
                 obj2.setUsed(true);
+                SoundController.getSFXInstance().play("gameMode", Constants.SFX_PAINT_JUMP_CHARGE, false);
             }
         }
     }
@@ -140,6 +172,7 @@ public class CollisionController implements ContactListener {
     }
     private void handleCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}
     private void handleCollision(GoalModel obj1, PaintballModel obj2){
+        SoundController.getSFXInstance().play("gameMode",Constants.SFX_CAMERA_EXPLODE, false);
         hud.setWin(true);
         obj2.pop();
     }
@@ -181,6 +214,7 @@ public class CollisionController implements ContactListener {
                 survives = obj1;
                 dies = obj2;
             }
+            SoundController.getSFXInstance().play("gameMode", Constants.SFX_PAINT_HIT_PAINT, false);
 
             if(obj1.getPaintballType().equals("trampoline") || obj2.getPaintballType().equals("trampoline")) {
                survives.setPaintballType("trampolineComb");
@@ -229,6 +263,7 @@ public class CollisionController implements ContactListener {
         if (!obj2.isUsed()) {
             obj2.setUsed(true);
             hud.addAmmo(obj2.getAmmoAmount());
+            SoundController.getSFXInstance().play("gameMode", Constants.SFX_PAINT_RELOAD,false);
         }
     }
     private void handleCollision(SplattererModel obj1, PaintballModel obj2) {

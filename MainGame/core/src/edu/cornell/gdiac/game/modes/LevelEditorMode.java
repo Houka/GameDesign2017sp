@@ -50,15 +50,13 @@ public class LevelEditorMode extends Mode {
     /** Textures necessary to support the screen */
     private static final String BACKGROUND_FILE = "ui/bg/level_editor.png";
 
-    /** size of the grid */
-    private static final int DEFAULT_GRID = 48;
     /** Width of the game world in Box2d units	 */
     private static final float DEFAULT_WIDTH = 32.0f;
     /** Height of the game world in Box2d units	 */
     private static final float DEFAULT_HEIGHT = 18.0f;
 
     /** Speed at which to move the camera */
-    private static final int CAMERA_SPEED = DEFAULT_GRID;
+    private static final int CAMERA_SPEED = Constants.DEFAULT_GRID;
 
     /** Texture for sidebar background*/
     private TextureRegion sidebarTexture;
@@ -81,7 +79,7 @@ public class LevelEditorMode extends Mode {
     private int[] startHeights;
 
     /** grid size and shape */
-    private int gridCell = DEFAULT_GRID;
+    private int gridCell = Constants.DEFAULT_GRID;
 
     /** Level loader */
     private LevelLoader levelLoader;

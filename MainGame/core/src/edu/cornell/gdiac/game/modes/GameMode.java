@@ -10,6 +10,7 @@
  */
 package edu.cornell.gdiac.game.modes;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -74,7 +75,14 @@ public class GameMode extends Mode implements Settable {
 	/** offset for enemies to shoot without hitting themselves in the arm*/
 	private static final float SHOOT_OFFSET = 0.4f;
 	/** The time until reset after loss*/
-	private final float TIME_TO_RESET = 3f;
+	private final float TIME_TO_RESET = 2f;
+	private final float START_TIME = 2f;
+
+	private boolean hasLost = false;
+	private float timeOfLoss;
+
+	/** Timer for a race the clock situation (in seconds) **/
+	private float time = 0;
 
 	/** All the objects in the world.	 */
 	private PooledList<Obstacle> objects = new PooledList<Obstacle>();
@@ -87,6 +95,7 @@ public class GameMode extends Mode implements Settable {
 	private Rectangle bounds;
 	/** The player	 */
 	private PlayerModel player;
+	private GoalModel goal;
 	/** The factory that creates projectiles	 */
 	private PaintballFactory paintballFactory;
 	/** The hud of this world	 */
@@ -112,6 +121,7 @@ public class GameMode extends Mode implements Settable {
 
 	/** Sound controller */
 	private SoundController soundController;
+	private SoundController sfxSoundController;
 
 	/** An array to store the levels **/
 	private static final String[] NUM_LEVELS = FileReaderWriter.getJsonFiles();
@@ -184,6 +194,7 @@ public class GameMode extends Mode implements Settable {
 		hudCamera.setAutosnap(true);
 
 		soundController = SoundController.getInstance();
+		sfxSoundController = SoundController.getSFXInstance();
 		soundController.setTimeLimit(20000);
 
 		succeeded = false;
@@ -220,6 +231,19 @@ public class GameMode extends Mode implements Settable {
 			}
 		}
 
+		return false;
+	}
+
+	/**
+	 * trys to set the goal of the world
+	 */
+	private boolean trySetGoal(){
+		for (Obstacle obj : levelLoader.getAddQueue()) {
+			if (obj.getName().equals("goal")) {
+				goal = (GoalModel) obj;
+				return true;
+			}
+		}
 		return false;
 	}
 	// END: Setters and Getters
@@ -267,15 +291,26 @@ public class GameMode extends Mode implements Settable {
 		gameCamera.snap();
 		canvas.end();
 		hud.reset();
+		time = 0;
 	}
 
 	@Override
 	public void update(float dt) {
+		time+=dt;
 		soundController.update();
+		sfxSoundController.update();
 
-		if (!hud.isLose() && !hud.isWin())
+		if (!hud.isLose() && !hud.isWin() && time > START_TIME)
 			for (EntityController e : entityControllers)
 				e.update(dt);
+		if (hud.isLose() && !hasLost) {
+			for (EntityController e : entityControllers)
+				if (e instanceof PlayerController) {
+					e.update(dt);
+					hasLost = true;
+					timeOfLoss = time;
+				}
+		}
 
 		applySettings();
 		paintballFactory.applySettings();
@@ -309,8 +344,9 @@ public class GameMode extends Mode implements Settable {
 		if (player.getY() < -player.getHeight())
 			hud.setLose(true);
 
-		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isLose()) {
+		if(hud.isLose() && time - timeOfLoss > 2) {
 			hud.reset();
+			collisionController.setHasDied(false);
 			listener.switchToScreen(this, GameModeManager.LOSS);
 		}
 
@@ -328,8 +364,13 @@ public class GameMode extends Mode implements Settable {
 		canvas.end();
 		canvas.begin(gameCamera);
 		float cameraBufferWidth = gameCamera.viewportWidth/scaleVector.x/30f;
-		canvas.setCamera(Math.max(Math.min(player.getX()+cameraBufferWidth,gameCamera.position.x/scaleVector.x),player.getX()-cameraBufferWidth)*scaleVector.x,
-				player.getY() * scaleVector.y, gameCamera.viewportHeight/2);
+
+		if (hud.isWin() || time <= START_TIME)
+			canvas.setCamera(Math.max(Math.min(goal.getX()+cameraBufferWidth,gameCamera.position.x/scaleVector.x),goal.getX()-cameraBufferWidth)*scaleVector.x,
+					goal.getY() * scaleVector.y, gameCamera.viewportHeight/2);
+		else
+			canvas.setCamera(Math.max(Math.min(player.getX()+cameraBufferWidth,gameCamera.position.x/scaleVector.x),player.getX()-cameraBufferWidth)*scaleVector.x,
+					player.getY() * scaleVector.y, gameCamera.viewportHeight/2);
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
@@ -354,16 +395,45 @@ public class GameMode extends Mode implements Settable {
 		paintballFactory.preLoadContent(manager);
 		levelLoader.preLoadContent(manager);
 		manager.load(Constants.GAME_MUSIC_FILE, Sound.class);
+		manager.load(Constants.SFX_PLAYER_SHOT, Sound.class);
+		manager.load(Constants.SFX_ENEMY_SHOT, Sound.class);
+		manager.load(Constants.SFX_PAINT_HIT_PAINT, Sound.class);
+		manager.load(Constants.SFX_PAINT_RELOAD, Sound.class);
+		manager.load(Constants.SFX_CAMERA_EXPLODE , Sound.class);
+		manager.load(Constants.SFX_ENEMY_ALERT , Sound.class);
+		manager.load(Constants.SFX_PAINT_JUMP , Sound.class);
+		manager.load(Constants.SFX_PAINT_JUMP_CHARGE , Sound.class);
+		manager.load(Constants.SFX_PAINT_PLATFORM_SPWAN, Sound.class);
+		manager.load(Constants.SFX_PAINT_POP, Sound.class);
+		manager.load(Constants.SFX_PAINT_POP_LIGHT, Sound.class);
+		manager.load(Constants.SFX_PLAYER_DEATH , Sound.class);
+		manager.load(Constants.SFX_PLAYER_DRY_FIRE, Sound.class);
 	}
 
 	@Override
 	public void loadContent(AssetManager manager) {
 		soundController.allocate(manager, Constants.GAME_MUSIC_FILE);
+		sfxSoundController.allocate(manager, Constants.SFX_PLAYER_SHOT);
+		sfxSoundController.allocate(manager, Constants.SFX_ENEMY_SHOT);
+		sfxSoundController.allocate(manager, Constants.SFX_PAINT_HIT_PAINT);
+		sfxSoundController.allocate(manager, Constants.SFX_PAINT_RELOAD);
+		sfxSoundController.allocate(manager, Constants.SFX_CAMERA_EXPLODE);
+		sfxSoundController.allocate(manager, Constants.SFX_ENEMY_ALERT);
+		sfxSoundController.allocate(manager, Constants.SFX_PAINT_JUMP);
+		sfxSoundController.allocate(manager, Constants.SFX_PAINT_JUMP_CHARGE);
+		sfxSoundController.allocate(manager, Constants.SFX_PAINT_PLATFORM_SPWAN);
+		sfxSoundController.allocate(manager, Constants.SFX_PAINT_POP);
+		sfxSoundController.allocate(manager, Constants.SFX_PAINT_POP_LIGHT);
+		sfxSoundController.allocate(manager, Constants.SFX_PLAYER_DEATH);
+		sfxSoundController.allocate(manager, Constants.SFX_PLAYER_DRY_FIRE);
 		paintballFactory.loadContent(manager);
 		levelLoader.loadContent(manager);
 		if (manager.isLoaded(Constants.FONT_FILE))
 			hud.setFont(manager.get(Constants.FONT_FILE, BitmapFont.class));
-		soundController.play("gameMode", Constants.GAME_MUSIC_FILE, true);
+		if (!soundController.isActive("gameMode")){
+			soundController.stopAll();
+			soundController.play("gameMode", Constants.GAME_MUSIC_FILE, true, 0.5f);
+		}
 	}
 
 	@Override
@@ -385,11 +455,6 @@ public class GameMode extends Mode implements Settable {
 
 	}
 
-	@Override
-	public void hide(){
-		soundController.stop("gameMode");
-	}
-
 
 	public void nextLevel() {
 		int nextLevel = (levelNumber+1)%NUM_LEVELS.length;
@@ -408,7 +473,7 @@ public class GameMode extends Mode implements Settable {
 		bounds = levelLoader.getBounds();
 		hud.setStartingAmmo(levelLoader.getStartingAmmo());
 		gameCamera.snap();
-		if (!trySetPlayer())
+		if (!trySetPlayer() || !trySetGoal())
 			System.out.println("Error: level file (" + levelFile + ") does not have a player");
 	}
 
@@ -426,12 +491,16 @@ public class GameMode extends Mode implements Settable {
 					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY()+player.getHeight()/8, ((Shooter) obj).isFacingRight(), "player"));
 				else
 					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY()-player.getHeight()/4, ((Shooter) obj).isFacingRight(), "player"));
+				sfxSoundController.play("gameMode",Constants.SFX_PLAYER_SHOT,false);
 			}
 			else if (obj.getName().equals("enemy")) {
 				int direction = ((Shooter) obj).isFacingRight() ? 1 : 0;
 				EnemyModel enemy = (EnemyModel) obj;
 				addObject(paintballFactory.createPaintball(enemy.getX()+ direction * SHOOT_OFFSET, enemy.getY()-enemy.getHeight()/16,
 						enemy.isFacingRight(),enemy.getEnemyType()));
+			}
+			else{
+				sfxSoundController.play("gameMode",Constants.SFX_PLAYER_DRY_FIRE,false);
 			}
 		}
 	}
@@ -452,7 +521,7 @@ public class GameMode extends Mode implements Settable {
 
 		accumulator += (float) Math.min(dt,FRAME_CAP);
 		// Turn the physics engine crank.
-		if (!hud.isLose() && !hud.isWin() && accumulator >=WORLD_STEP) {
+		if (!hud.isWin() && accumulator >=WORLD_STEP) {
 			world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
 			accumulator-=WORLD_STEP;
 		}
@@ -469,6 +538,19 @@ public class GameMode extends Mode implements Settable {
 				entry.remove();
 			} else {
 				obj.update(dt);
+
+				// make infinite background
+				if (obj instanceof BackgroundModel){
+					if(goal.getX()*scaleVector.x >= ((BackgroundModel) obj).getMaxWidth())
+						((BackgroundModel) obj).incBgWidth(1);
+					if(goal.getY()*scaleVector.y >= ((BackgroundModel) obj).getMaxHeight())
+						((BackgroundModel) obj).incBgHeight(1);
+					if (player.getX()*scaleVector.x <= -((BackgroundModel) obj).getMaxWidth()||
+							player.getX()*scaleVector.x >= ((BackgroundModel) obj).getMaxWidth())
+						((BackgroundModel) obj).incBgWidth(1);
+					if (player.getY()*scaleVector.y >= ((BackgroundModel) obj).getMaxHeight())
+						((BackgroundModel) obj).incBgHeight(1);
+				}
 			}
 		}
 	}

@@ -1,8 +1,10 @@
 package edu.cornell.gdiac.game.entity.controllers;
 
 import com.badlogic.gdx.math.Vector2;
+import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.entity.models.EnemyModel;
 import edu.cornell.gdiac.game.entity.models.PlayerModel;
+import edu.cornell.gdiac.util.SoundController;
 
 /**
  * Created by Lu on 3/16/2017.
@@ -37,8 +39,10 @@ public class EnemyController extends EntityController {
 
     private void updateAnimation(){
         if(enemy.isShooting()) {
-            if (enemy.isOnSight() && getInLineOfSight())
+            if (enemy.isOnSight() && getInLineOfSight()) {
+                //SoundController.getSFXInstance().play("gameMode", Constants.SFX_ENEMY_ALERT, false);
                 enemy.getAnimation().playOnce("shoot");
+            }
             else if (!enemy.isOnSight())
                 enemy.getAnimation().playOnce("shoot");
         }
@@ -47,6 +51,8 @@ public class EnemyController extends EntityController {
     }
 
     private boolean getInLineOfSight(){
+        boolean right = enemy.isFacingRight() && enemy.getPosition().x > (player.getPosition().x);
+        boolean left = !enemy.isFacingRight() && enemy.getPosition().x < (player.getPosition().x);
         return enemy.getPosition().y < (player.getPosition().y + 1)
                 && enemy.getPosition().y > (player.getPosition().y - 1);
     }

@@ -1,6 +1,7 @@
 package edu.cornell.gdiac.game.entity.models;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.util.Animation;
@@ -104,9 +105,10 @@ public class PlatformModel extends PolygonObstacle {
 
     @Override
     public void draw(GameCanvas canvas){
-        if (region != null) {
+        if (texture != null) {
             if (animation == null)
-                canvas.draw(region,Color.WHITE,0,0,getX()*drawScale.x,getY()*drawScale.y,getAngle(),1,1);
+                canvas.draw(texture,Color.WHITE,origin.x,origin.y,(pointArray[6])*
+                    drawScale.x+origin.x,(pointArray[7])*drawScale.y+origin.y,angle,1,1.0f);
             else
                 canvas.draw(animation.getTextureRegion(),Color.WHITE,origin.x,origin.y,(pointArray[6]-SPIKE_SHRINK)*
                         drawScale.x+origin.x,(pointArray[7]-SPIKE_SHRINK)*drawScale.y+origin.y,angle,1,1.0f);

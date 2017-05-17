@@ -1,5 +1,7 @@
 package edu.cornell.gdiac.util.sidebar;
 
+import edu.cornell.gdiac.util.SoundController;
+
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import java.awt.*;

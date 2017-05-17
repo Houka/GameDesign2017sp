@@ -16,6 +16,7 @@ import edu.cornell.gdiac.util.PooledList;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 import edu.cornell.gdiac.util.obstacles.Obstacle;
 import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
+import java.util.HashMap;
 
 
 /**
@@ -26,6 +27,11 @@ import edu.cornell.gdiac.util.obstacles.PolygonObstacle;
 public class LevelLoader implements AssetUser, Disposable{
     /** Textures */
     private TextureRegion platformTile;
+    private TextureRegion platformLeftTile;
+    private TextureRegion platformRightTile;
+    private TextureRegion platformCenterTile;
+    private TextureRegion platformSingleTile;
+    private TextureRegion[] platformBlockTiles;
     private TextureRegion wallTile;
     private TextureRegion goalTile;
     private TextureRegion bgTile;
@@ -35,6 +41,10 @@ public class LevelLoader implements AssetUser, Disposable{
     private TextureRegion depotTexture;
     private TextureRegion splattererTexture;
 
+    private final int PLATFORM_BLOCKS_NUMBER = 4;
+
+    /**holds background images*/
+    private HashMap<String, TextureRegion> backgroundRegions;
     /** Animations */
     private Animation playerAnimation;
     private Animation enemyOnsightAnimation;
@@ -55,6 +65,8 @@ public class LevelLoader implements AssetUser, Disposable{
     public LevelLoader(Vector2 scale){
         this.scale = scale;
         levelParser = new LevelParser();
+        backgroundRegions = new HashMap<String, TextureRegion>();
+        platformBlockTiles = new TextureRegion[PLATFORM_BLOCKS_NUMBER];
     }
 
     // BEGIN: Setters and Getters
@@ -80,6 +92,7 @@ public class LevelLoader implements AssetUser, Disposable{
      */
     private void populateLevel() {
         addBackground();
+        addBackgroundObjects();
         addPlatforms();
         addWalls();
         addPlayer();
@@ -87,6 +100,7 @@ public class LevelLoader implements AssetUser, Disposable{
         addResources();
         addTarget();
         addSplatterers();
+
     }
 
     /**
@@ -116,6 +130,10 @@ public class LevelLoader implements AssetUser, Disposable{
         addQueuedObject(bg);
     }
 
+    private float mod(float x,int n) {
+        return x>0 ? x % n : x % n + n;
+    }
+
     /**
      * Adds the platforms to the insertion queue
      */
@@ -124,11 +142,42 @@ public class LevelLoader implements AssetUser, Disposable{
         JsonValue dflt = platforms.get("default");
         JsonValue.JsonIterator iter = dflt.iterator();
         JsonValue vertices;
+        HashMap<Vector2,float[]> platformMap = new HashMap<Vector2, float[]>();
         while (iter.hasNext()){
             vertices = iter.next();
-            PolygonObstacle obj = new PlatformModel(vertices.asFloatArray(), PlatformModel.NORMAL_PLATFORM);
+            float[] verts = vertices.asFloatArray();
+            Vector2 vec = new Vector2(verts[0]*scale.x,verts[1]*scale.y);
+            vec.x = (int) (vec.x-mod(vec.x,Constants.DEFAULT_GRID))/Constants.DEFAULT_GRID;
+            vec.y = (int) (vec.y-mod(vec.y,Constants.DEFAULT_GRID))/Constants.DEFAULT_GRID;
+            platformMap.put(vec,verts);
+        }
+        Vector2 left = new Vector2();
+        Vector2 right = new Vector2();
+        Vector2 above = new Vector2();
+        Vector2 below = new Vector2();
+        for(Vector2 k : platformMap.keySet()) {
+            float[] verts = platformMap.get(k);
+            PolygonObstacle obj = new PlatformModel(verts, PlatformModel.NORMAL_PLATFORM);
             obj.setDrawScale(scale);
-            obj.setTexture(platformTile);
+            left.set(k.x-1,k.y);
+            right.set(k.x+1,k.y);
+            above.set(k.x,k.y+1);
+            below.set(k.x,k.y-1);
+
+            TextureRegion texture;
+            if(platformMap.containsKey(above) || platformMap.containsKey(below)) {
+                texture = platformBlockTiles[(int)(Math.random()*PLATFORM_BLOCKS_NUMBER)];
+            } else if(platformMap.containsKey(left) && platformMap.containsKey(right)) {
+                texture = platformCenterTile;
+            } else if(platformMap.containsKey(left)) {
+                texture = platformRightTile;
+            } else if(platformMap.containsKey(right)) {
+                texture = platformLeftTile;
+            } else{
+                texture = platformSingleTile;
+            }
+
+            obj.setTexture(texture);
             addQueuedObject(obj);
         }
 
@@ -269,7 +318,7 @@ public class LevelLoader implements AssetUser, Disposable{
     }
 
     /**
-     * Adds the resources to the insertion queue. Currently only handles ammo depots.
+     * Adds the splatterers to the insertion queue.
      */
     public void addSplatterers(){
         JsonValue splatterers = levelParser.getSplatterers();
@@ -285,6 +334,28 @@ public class LevelLoader implements AssetUser, Disposable{
             splatterer.setDrawScale(scale);
             splatterer.setTexture(splattererTexture);
             addQueuedObject(splatterer);
+        }
+    }
+
+    /**
+     * Adds the background objects to the insertion queue.
+     */
+    public void addBackgroundObjects(){
+        if (levelParser.backgroundObjectsExist()) {
+            JsonValue bgObjects = levelParser.getBackgroundObjects();
+
+            JsonValue.JsonIterator iter = bgObjects.iterator();
+            JsonValue bgObject;
+            while (iter.hasNext()){
+                bgObject = iter.next();
+                String id = bgObject.get("path").asString();
+                TextureRegion current = backgroundRegions.get(id);
+                BackgroundObjectModel bg = new BackgroundObjectModel(bgObject.get("x").asFloat(), bgObject.get("y").asFloat(),
+                        current.getRegionWidth()/scale.x, current.getRegionHeight()/scale.y);
+                bg.setDrawScale(scale);
+                bg.setTexture(current);
+                addQueuedObject(bg);
+            }
         }
     }
 
@@ -305,6 +376,14 @@ public class LevelLoader implements AssetUser, Disposable{
     public void preLoadContent(AssetManager manager) {
         // Load the shared tiles.
         manager.load(Constants.PLATFORM_FILE,Texture.class);
+        manager.load(Constants.PLATFORM_LEFT_CAP_FILE,Texture.class);
+        manager.load(Constants.PLATFORM_RIGHT_CAP_FILE,Texture.class);
+        manager.load(Constants.PLATFORM_CENTER_FILE,Texture.class);
+        manager.load(Constants.PLATFORM_SINGLE_FILE,Texture.class);
+        manager.load(Constants.PLATFORM_BLOCK_1_FILE,Texture.class);
+        manager.load(Constants.PLATFORM_BLOCK_2_FILE,Texture.class);
+        manager.load(Constants.PLATFORM_BLOCK_3_FILE,Texture.class);
+        manager.load(Constants.PLATFORM_BLOCK_4_FILE,Texture.class);
         manager.load(Constants.WALL_FILE,Texture.class);
         manager.load(Constants.GOAL_FILE,Texture.class);
         manager.load(Constants.BACKGROUND_FILE,Texture.class);
@@ -322,6 +401,7 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(Constants.CHARACTER_CROUCH_FILE, Texture.class);
         manager.load(Constants.CHARACTER_STUNNED_FILE, Texture.class);
         manager.load(Constants.CHARACTER_CROUCH_SHOOT_FILE, Texture.class);
+        manager.load(Constants.CHARACTER_DEATH_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_CHARACTER_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_ENEMY_MINE_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_ENEMY_NORMAL_FILE, Texture.class);
@@ -344,6 +424,10 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(Constants.PAINTBALL_CHAR_SPLAT_EFFECT_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_ENEMY_SPLAT_EFFECT_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_MINE_ENEMY_SPLAT_EFFECT_FILE, Texture.class);
+
+        for (String s: Constants.TUTORIAL_FILES) {
+            manager.load(s, Texture.class);
+        }
     }
 
     @Override
@@ -351,6 +435,14 @@ public class LevelLoader implements AssetUser, Disposable{
         // static texture loading
         bgTile  = AssetRetriever.createTextureRegion(manager, Constants.BACKGROUND_FILE,true);
         platformTile = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_FILE,true);
+        platformLeftTile = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_LEFT_CAP_FILE,false);
+        platformRightTile = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_RIGHT_CAP_FILE,false);
+        platformCenterTile = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_CENTER_FILE,false);
+        platformSingleTile = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_SINGLE_FILE,false);
+        platformBlockTiles[0] = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_BLOCK_1_FILE,false);
+        platformBlockTiles[1] = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_BLOCK_2_FILE,false);
+        platformBlockTiles[2] = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_BLOCK_3_FILE,false);
+        platformBlockTiles[3] = AssetRetriever.createTextureRegion(manager,Constants.PLATFORM_BLOCK_4_FILE,false);
         wallTile = AssetRetriever.createTextureRegion(manager,Constants.WALL_FILE,true);
         goalTile  = AssetRetriever.createTextureRegion(manager,Constants.GOAL_FILE,false);
         enemyIntervalTexture  = AssetRetriever.createTextureRegion(manager,Constants.ENEMY_INTERVAL_FILE,false);
@@ -359,6 +451,9 @@ public class LevelLoader implements AssetUser, Disposable{
         depotTexture = AssetRetriever.createTextureRegion(manager, Constants.AMMO_DEPOT_FILE, false);
         splattererTexture = AssetRetriever.createTextureRegion(manager, Constants.SPLATTERER_FILE, false);
 
+        for (String s: Constants.TUTORIAL_FILES) {
+            backgroundRegions.put(s, AssetRetriever.createTextureRegion(manager, s, false));
+        }
         // animation spritesheet loading
         playerAnimation = new Animation();
         playerAnimation.addTexture("idle", AssetRetriever.createTexture(manager, Constants.CHARACTER_IDLE_FILE, false), 1,5);
@@ -372,6 +467,7 @@ public class LevelLoader implements AssetUser, Disposable{
         playerAnimation.addTexture("midair shoot", AssetRetriever.createTexture(manager, Constants.CHARACTER_MIDAIR_FILE, false), 1,1);
         playerAnimation.addTexture("crouch", AssetRetriever.createTexture(manager, Constants.CHARACTER_CROUCH_FILE, false), 1,1);
         playerAnimation.addTexture("crouch_shoot", AssetRetriever.createTexture(manager, Constants.CHARACTER_CROUCH_SHOOT_FILE, false), 1,1);
+        playerAnimation.addTexture("death", AssetRetriever.createTexture(manager, Constants.CHARACTER_DEATH_FILE, false), 1,8);
         playerAnimation.addTexture("still", playerTexture.getTexture(), 1, 1);
         playerAnimation.setPlaying(false);
         playerAnimation.setPlayingAnimation("idle");
@@ -391,7 +487,7 @@ public class LevelLoader implements AssetUser, Disposable{
         enemyOnsightAnimation.setPlayingAnimation("still");
 
         spikeAnimation = new Animation();
-        spikeAnimation.addTexture("spin", AssetRetriever.createTexture(manager, Constants.SPIKES_UP_SPIN_FILE, false), 1 , 8);
+        spikeAnimation.addTexture("spin", AssetRetriever.createTexture(manager, Constants.SPIKES_UP_STILL_FILE, false), 1 , 1);
         spikeAnimation.setPlaying(false);
         spikeAnimation.setPlayingAnimation("spin");
     }
@@ -414,6 +510,35 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.unload(Constants.CHARACTER_SHOOT_FILE);
         manager.unload(Constants.CHARACTER_CROUCH_FILE);
         manager.unload(Constants.SPLATTERER_FILE);
+        manager.unload(Constants.PLATFORM_LEFT_CAP_FILE);
+        manager.unload(Constants.PLATFORM_RIGHT_CAP_FILE);
+        manager.unload(Constants.PLATFORM_CENTER_FILE);
+        manager.unload(Constants.PLATFORM_SINGLE_FILE);
+        manager.unload(Constants.PLATFORM_BLOCK_1_FILE);
+        manager.unload(Constants.PLATFORM_BLOCK_2_FILE);
+        manager.unload(Constants.PLATFORM_BLOCK_3_FILE);
+        manager.unload(Constants.PLATFORM_BLOCK_4_FILE);
+        manager.unload(Constants.SPIKES_DOWN_SPIN_FILE);
+        manager.unload(Constants.SPIKES_UP_SPIN_FILE);
+        manager.unload(Constants.SPIKES_LEFT_SPIN_FILE);
+        manager.unload(Constants.SPIKES_RIGHT_SPIN_FILE);
+        manager.unload(Constants.SPIKES_RIGHT_STILL_FILE);
+        manager.unload(Constants.SPIKES_LEFT_STILL_FILE);
+        manager.unload(Constants.SPIKES_UP_STILL_FILE);
+        manager.unload(Constants.SPIKES_DOWN_STILL_FILE);
+        manager.unload(Constants.PAINTBALL_CHARACTER_FILE);
+        manager.unload(Constants.PAINTBALL_ENEMY_MINE_FILE);
+        manager.unload(Constants.PAINTBALL_ENEMY_NORMAL_FILE);
+        manager.unload(Constants.PAINTBALL_MINE_TRAIL_FILE);
+        manager.unload(Constants.PAINTBALL_NORMAL_TRAIL_FILE);
+        manager.unload(Constants.PAINTBALL_STATIONARY_MINE_FILE);
+        manager.unload(Constants.PAINTBALL_STATIONARY_NORMAL_FILE);
+        manager.unload(Constants.PAINTBALL_STATIONARY_CHAR_FILE);
+        manager.unload(Constants.PAINTBALL_SPLAT_EFFECT_FILE);
+        manager.unload(Constants.PAINTBALL_CHAR_SPLAT_EFFECT_FILE);
+        manager.unload(Constants.PAINTBALL_ENEMY_SPLAT_EFFECT_FILE);
+        manager.unload(Constants.PAINTBALL_MINE_ENEMY_SPLAT_EFFECT_FILE);
+        manager.unload(Constants.AMMO_DEPOT_FILE);
     }
 
     @Override

@@ -8,6 +8,7 @@ import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import edu.cornell.gdiac.game.Constants;
 import edu.cornell.gdiac.game.GameCanvas;
 import edu.cornell.gdiac.util.Animation;
+import edu.cornell.gdiac.util.SoundController;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 
 /**
@@ -392,12 +393,14 @@ public class PaintballModel extends BoxObstacle {
         timeToDie = 0;
         fixX(0);
         splatEffectTexture.playOnce("splat");
+        SoundController.getSFXInstance().play("gameMode", Constants.SFX_PAINT_POP,false);
     }
 
     public void platformPop() {
         platformPopped = true;
         fixX(0);
         platformSplatEffectTexture.playOnce("platform splat");
+        //SoundController.getSFXInstance().play("gameMode", Constants.SFX_PAINT_PLATFORM_SPWAN,false);
     }
 
     public void snap(){
