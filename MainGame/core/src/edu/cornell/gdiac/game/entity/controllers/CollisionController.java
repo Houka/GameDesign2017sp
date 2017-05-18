@@ -218,6 +218,7 @@ public class CollisionController implements ContactListener {
 
             if(obj1.getPaintballType().equals("trampoline") || obj2.getPaintballType().equals("trampoline")) {
                survives.setPaintballType("trampolineComb");
+               survives.arm();
             }
           
             survives.setTimeToDie(obj1.getPaintballToPaintballDuration());
