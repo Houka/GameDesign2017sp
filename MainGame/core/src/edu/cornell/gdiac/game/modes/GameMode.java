@@ -282,6 +282,7 @@ public class GameMode extends Mode implements Settable {
 		objects.clear();
 		entityControllers.clear();
 
+		collisionController.setHasDied(false);
 		if (!levelFile.isEmpty())
 			loadLevel();
 
