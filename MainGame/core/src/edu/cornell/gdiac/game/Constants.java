@@ -58,6 +58,7 @@ public class Constants {
     public static String PLATFORM_BLOCK_4_FILE = "sprites/fixtures/block_tile4.png";
     public static String WALL_FILE = "sprites/fixtures/solid.png";
     public static String GOAL_FILE = CAMERA_FILE;
+    public static String GOAL_EXPLOSION = "sprites/enemy/insignia_explode_strip8.png";
     public static String BACKGROUND_FILE = "sprites/bg/brick_wall_tile.png";
     public static String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
 

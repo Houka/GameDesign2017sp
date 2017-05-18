@@ -81,6 +81,8 @@ public class GameMode extends Mode implements Settable {
 	private boolean hasLost = false;
 	private float timeOfLoss;
 
+	private boolean hasWon = false;
+	private float timeOfWin;
 	/** Timer for a race the clock situation (in seconds) **/
 	private float time = 0;
 
@@ -304,6 +306,16 @@ public class GameMode extends Mode implements Settable {
 		if (!hud.isLose() && !hud.isWin() && time > START_TIME)
 			for (EntityController e : entityControllers)
 				e.update(dt);
+
+		if (hud.isWin() && !hasWon){
+			for (EntityController e : entityControllers)
+				if (e instanceof PlayerController) {
+					e.update(dt);
+					hasWon = true;
+					timeOfWin = time;
+				}
+		}
+
 		if (hud.isLose() && !hasLost) {
 			for (EntityController e : entityControllers)
 				if (e instanceof PlayerController) {
@@ -351,7 +363,7 @@ public class GameMode extends Mode implements Settable {
 			listener.switchToScreen(this, GameModeManager.LOSS);
 		}
 
-		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isWin()) {
+		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isWin() && time - timeOfWin > 2) {
 			hud.reset();
 			listener.switchToScreen(this, GameModeManager.WIN);
 		}
