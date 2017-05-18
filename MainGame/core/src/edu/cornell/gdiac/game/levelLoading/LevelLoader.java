@@ -50,7 +50,7 @@ public class LevelLoader implements AssetUser, Disposable{
     private Animation enemyOnsightAnimation;
     private Animation enemyIntervalAnimation;
     private Animation spikeAnimation;
-
+    private Animation goalAnimation;
     /** Bounds of the window*/
     private Rectangle bounds;
     /** Queue for adding objects */
@@ -366,9 +366,10 @@ public class LevelLoader implements AssetUser, Disposable{
         float dwidth  = goalTile.getRegionWidth()/scale.x;
         float dheight = goalTile.getRegionHeight()/scale.y;
         JsonValue target = levelParser.getTarget();
-        BoxObstacle goalDoor = new GoalModel(target.get("x").asFloat(),target.get("y").asFloat(),dwidth, dheight);
+        GoalModel goalDoor = new GoalModel(target.get("x").asFloat(),target.get("y").asFloat(),dwidth, dheight);
         goalDoor.setDrawScale(scale);
         goalDoor.setTexture(goalTile);
+        goalDoor.setAnimation(goalAnimation);
         addQueuedObject(goalDoor);
     }
 
@@ -429,6 +430,7 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(Constants.PAINTBALL_CHAR_SPLAT_EFFECT_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_ENEMY_SPLAT_EFFECT_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_MINE_ENEMY_SPLAT_EFFECT_FILE, Texture.class);
+        manager.load(Constants.GOAL_EXPLOSION, Texture.class);
 
         for (String s: Constants.TUTORIAL_FILES) {
             manager.load(s, Texture.class);
@@ -487,7 +489,7 @@ public class LevelLoader implements AssetUser, Disposable{
         enemyOnsightAnimation= new Animation();
         enemyOnsightAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, Constants.ENEMY_ONSIGHT_FILE, false), 1,1);
         enemyOnsightAnimation.addTexture("spotted", AssetRetriever.createTexture(manager, Constants.ENEMY_SPOTTED_FILE, false), 1,1);
-        enemyOnsightAnimation.addTexture("still", enemyOnsightTexture.getTexture(), 1, 1);
+        enemyOnsightAnimation.addTexture("still", goalTile.getTexture(), 1, 1);
         enemyOnsightAnimation.setPlaying(false);
         enemyOnsightAnimation.setPlayingAnimation("still");
 
@@ -495,6 +497,12 @@ public class LevelLoader implements AssetUser, Disposable{
         spikeAnimation.addTexture("spin", AssetRetriever.createTexture(manager, Constants.SPIKES_UP_STILL_FILE, false), 1 , 1);
         spikeAnimation.setPlaying(false);
         spikeAnimation.setPlayingAnimation("spin");
+
+        goalAnimation = new Animation();
+        goalAnimation.addTexture("idle", AssetRetriever.createTexture(manager, Constants.GOAL_FILE, false), 1, 1);
+        goalAnimation.addTexture("explosion", AssetRetriever.createTexture(manager, Constants.GOAL_EXPLOSION, false), 1, 8);
+        goalAnimation.setPlaying(false);
+        goalAnimation.setPlayingAnimation("idle");
     }
 
     @Override

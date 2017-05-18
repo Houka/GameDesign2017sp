@@ -128,6 +128,7 @@ public class CollisionController implements ContactListener {
     }
     private void handleCollision(PlayerModel obj1, GoalModel obj2){
         SoundController.getSFXInstance().play("gameMode",Constants.SFX_CAMERA_EXPLODE, false);
+        obj2.getAnimation().playOnce("explosion");
         hud.setWin(true);
     }
     private void handleCollision(PlayerModel obj1, PlatformModel obj2, Object userData1, Object userData2){
@@ -173,6 +174,7 @@ public class CollisionController implements ContactListener {
     private void handleCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}
     private void handleCollision(GoalModel obj1, PaintballModel obj2){
         SoundController.getSFXInstance().play("gameMode",Constants.SFX_CAMERA_EXPLODE, false);
+        obj1.getAnimation().playOnce("explosion");
         hud.setWin(true);
         obj2.pop();
     }
