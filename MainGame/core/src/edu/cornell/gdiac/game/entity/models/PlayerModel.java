@@ -90,7 +90,10 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     private float knockbackStunDuration = 5;
     private float defaultKnockbackDuration = 60;
 
+    private float lastJump = 0;
     private static final float FREE_JUMP_FRAMES = 9;
+    private static final float SHORT_HOP_REDUCTION = 1.5f;
+    private static final float TIME_BEFORE_FULL_JUMP = .15f;
     private float freeJumpFrame;
 
     /** Duration that player will pass through bullets**/
@@ -234,6 +237,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
 
         shootCooldown = 0;
         jumpCooldown = 0;
+        lastJump = 0;
         jumpForce = PLAYER_JUMP;
         maxSpeed = PLAYER_MAXSPEED;
         freeJumpFrame = 0;
@@ -641,6 +645,11 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
     }
     public PaintballModel getRidingBullet(){return ridingBullet;}
 
+    public void stopJump() {
+        if(getVY()>0 && lastJump<=TIME_BEFORE_FULL_JUMP)
+            setVY(getVY()/SHORT_HOP_REDUCTION);
+    }
+
     /** Applies forces to the player*/
     public void applyForce() {
         if (!isActive()) {
@@ -690,6 +699,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
             setLinearVelocity(zeroVector);
             body.applyLinearImpulse(forceCache,getPosition(),true);
             setCanDoubleJump(false);
+            lastJump = 0;
         }
 
         // Jump!
@@ -708,6 +718,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
             body.applyLinearImpulse(forceCache,getPosition(),true);
             setCanDoubleJump(true);
             freeJumpFrame = 0;
+            lastJump = 0;
             jumpCooldown = JUMP_COOLDOWN;
         }
 
@@ -744,6 +755,7 @@ public class PlayerModel extends PolygonObstacle implements Shooter, Settable, A
             freeJumpFrame = 0;
         } else {
             jumpCooldown = Math.max(0, jumpCooldown - 1);
+            lastJump = Math.max(0, lastJump + dt);
             freeJumpFrame=Math.max(0,freeJumpFrame-1);
         }
 
