@@ -408,6 +408,11 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(Constants.PAINTBALL_MINE_TRAIL_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_NORMAL_TRAIL_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_STATIONARY_MINE_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_MOVING_MINE_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_ARMED_MINE_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_ARMED_MINE_WARNING_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_PRIMED_MINE_FILE, Texture.class);
+        manager.load(Constants.PAINTBALL_PRIMED_MINE_WARNING_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_STATIONARY_NORMAL_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_STATIONARY_CHAR_FILE, Texture.class);
         manager.load(Constants.PAINTBALL_SPLAT_EFFECT_FILE, Texture.class);
@@ -530,6 +535,11 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.unload(Constants.PAINTBALL_ENEMY_MINE_FILE);
         manager.unload(Constants.PAINTBALL_ENEMY_NORMAL_FILE);
         manager.unload(Constants.PAINTBALL_MINE_TRAIL_FILE);
+        manager.unload(Constants.PAINTBALL_MOVING_MINE_FILE);
+        manager.unload(Constants.PAINTBALL_ARMED_MINE_FILE);
+        manager.unload(Constants.PAINTBALL_ARMED_MINE_WARNING_FILE);
+        manager.unload(Constants.PAINTBALL_PRIMED_MINE_FILE);
+        manager.unload(Constants.PAINTBALL_PRIMED_MINE_WARNING_FILE);
         manager.unload(Constants.PAINTBALL_NORMAL_TRAIL_FILE);
         manager.unload(Constants.PAINTBALL_STATIONARY_MINE_FILE);
         manager.unload(Constants.PAINTBALL_STATIONARY_NORMAL_FILE);

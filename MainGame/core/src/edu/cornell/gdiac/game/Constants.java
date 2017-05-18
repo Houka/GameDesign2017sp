@@ -69,6 +69,11 @@ public class Constants {
     public static String PAINTBALL_ENEMY_MINE_FILE = "sprites/bullets/enemy_paintball_mine_strip5.png";
     public static String PAINTBALL_ENEMY_NORMAL_FILE = "sprites/bullets/enemy_paintball_normal_strip5.png";
     public static String PAINTBALL_MINE_TRAIL_FILE = "sprites/trails/moving_mine_strip5.png";
+    public static String PAINTBALL_MOVING_MINE_FILE = "sprites/paint/trails/moving_mine_strip5.png";
+    public static String PAINTBALL_ARMED_MINE_FILE = "sprites/paint/trails/armed_mine_strip4.png";
+    public static String PAINTBALL_ARMED_MINE_WARNING_FILE = "sprites/paint/trails/armed_mine_warning_strip4.png";
+    public static String PAINTBALL_PRIMED_MINE_FILE = "sprites/paint/trails/primed_mine_strip6.png";
+    public static String PAINTBALL_PRIMED_MINE_WARNING_FILE = "sprites/paint/trails/primed_mine_warning_strip6.png";
     public static String PAINTBALL_NORMAL_TRAIL_FILE = "sprites/trails/moving_normal_strip5.png";
     public static String PAINTBALL_SPLAT_EFFECT_FILE = "sprites/paint_splat_ef_strip10.png";
     public static String PAINTBALL_CHAR_SPLAT_EFFECT_FILE = "sprites/paint/effects/char_splatter_strip15.png";

@@ -93,12 +93,18 @@ public class PaintballModel extends BoxObstacle {
     private boolean passThrough;
     private boolean popped;
     private boolean platformPopped;
+    private boolean armed;
 
     private Animation headTexture;
     private Animation splatEffectTexture;
     private Animation trailTexture;
     private Animation platformTexture;
     private Animation platformSplatEffectTexture;
+    private Animation movingAnimation;
+    private Animation armedAnimation;
+    private Animation armedWarningAnimation;
+    private Animation primedAnimation;
+    private Animation primedWarningAnimation;
 
     private int currTrailFrame;
 
@@ -177,6 +183,7 @@ public class PaintballModel extends BoxObstacle {
         platformOrigin=new Vector2();
         direction = true;
         litUp = false;
+        armed = false;
     }
 
     //BEGIN: GETTERS AND SETTERS
@@ -244,6 +251,10 @@ public class PaintballModel extends BoxObstacle {
         maxXScale=val;
     }
 
+    public void arm() {
+        armed = true;
+    }
+
     public void setPaintballToWallDuration(float paintballToWallDuration) {
         this.paintballToWallDuration = paintballToWallDuration;
     }
@@ -277,6 +288,36 @@ public class PaintballModel extends BoxObstacle {
     public void setTrailTexture(TextureRegion tex) {
         trailTexture.addTexture("trail",tex.getTexture(),1,5);
         trailTexture.playOnce("trail");
+    }
+
+    public void setMovingAnimationTexture(TextureRegion tex) {
+        movingAnimation = new Animation();
+        movingAnimation.addTexture("trail",tex.getTexture(),1,5);
+        movingAnimation.play("trail",true);
+    }
+
+    public void setArmedAnimation(TextureRegion tex) {
+        armedAnimation = new Animation();
+        armedAnimation.addTexture("stationary",tex.getTexture(),1,4);
+        armedAnimation.play("stationary",true);
+    }
+
+    public void setArmedWarningAnimation(TextureRegion tex) {
+        armedWarningAnimation = new Animation();
+        armedWarningAnimation.addTexture("stationary",tex.getTexture(),1,4);
+        armedWarningAnimation.play("stationary",true);
+    }
+
+    public void setPrimedAnimation(TextureRegion tex) {
+        primedAnimation = new Animation();
+        primedAnimation.addTexture("stationary",tex.getTexture(),1,6);
+        primedAnimation.play("stationary",true);
+    }
+
+    public void setPrimedWarningAnimation(TextureRegion tex) {
+        primedWarningAnimation = new Animation();
+        primedWarningAnimation.addTexture("stationary", tex.getTexture(), 1, 6);
+        primedWarningAnimation.play("stationary", true);
     }
 
     public float getMaxLifeTime() {
@@ -417,6 +458,22 @@ public class PaintballModel extends BoxObstacle {
         recentCollision = false;
         recentCreation = false;
 
+        if(movingAnimation!=null && !growing) {
+            trailTexture = movingAnimation;
+            movingAnimation.update(delta);
+        }
+        if(dying && armed) {
+            if(armedAnimation!=null) {
+                platformTexture = armedAnimation;
+                armedAnimation.update(delta);
+            }
+            if(primedAnimation!=null) {
+                if(isUsed)
+                    platformTexture = primedAnimation;
+                primedAnimation.update(delta);
+            }
+        }
+
         if(popped){
             releaseFixtures();
             if(!splatEffectTexture.isPlaying())
@@ -453,17 +510,27 @@ public class PaintballModel extends BoxObstacle {
                 this.setMass(0);
                 opacity *= .97;
             } else if (timeToDie<deathDuration+FLASHING_TIME){
-                if(((int)(timeToDie/FLASHING_RATE))%2 == 0) {
-                    if(!litUp)
-                        platformTexture.advanceFrame();
-                    //opacity = .75f;
-                    litUp = true;
-                }
-                else {
-                    if(litUp)
-                        platformTexture.advanceFrame();
-                    litUp = false;
-                    //opacity = 1;
+                if(armed) {
+                    if(armedWarningAnimation!=null) {
+                        platformTexture = armedWarningAnimation;
+                        armedWarningAnimation.update(delta);
+                    }
+                    if(isUsed && primedWarningAnimation!=null) {
+                        platformTexture = primedWarningAnimation;
+                        primedWarningAnimation.update(delta);
+                    }
+                }else {
+                    if (((int) (timeToDie / FLASHING_RATE)) % 2 == 0) {
+                        if (!litUp)
+                            platformTexture.advanceFrame();
+                        //opacity = .75f;
+                        litUp = true;
+                    } else {
+                        if (litUp)
+                            platformTexture.advanceFrame();
+                        litUp = false;
+                        //opacity = 1;
+                    }
                 }
             }
 

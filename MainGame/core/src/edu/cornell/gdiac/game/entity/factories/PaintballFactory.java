@@ -54,6 +54,11 @@ public class PaintballFactory implements AssetUser, Settable {
     private TextureRegion trailTexture;
     private TextureRegion enemyMineHeadTexture;
     private TextureRegion minePlatformTexture;
+    private TextureRegion movingMineTexture;
+    private TextureRegion primedMineTexture;
+    private TextureRegion primedMineWarningTexture;
+    private TextureRegion armedMineTexture;
+    private TextureRegion armedMineWarningTexture;
     private TextureRegion mineTrailTexture;
     private TextureRegion charSplatEffectTexture;
     private TextureRegion enemySplatEffectTexture;
@@ -95,6 +100,11 @@ public class PaintballFactory implements AssetUser, Settable {
 
         if(paintballType.equals("trampoline")) {
             paintball.setTrailTexture(mineTrailTexture);
+            paintball.setMovingAnimationTexture(movingMineTexture);
+            paintball.setArmedAnimation(armedMineTexture);
+            paintball.setArmedWarningAnimation(armedMineWarningTexture);
+            paintball.setPrimedAnimation(primedMineTexture);
+            paintball.setPrimedWarningAnimation(primedMineWarningTexture);
             paintball.setHeadTexture(enemyMineHeadTexture);
             paintball.setPlatformTexture(minePlatformTexture);
             paintball.setPlatformSplatEffectTexture(mineSplatEffectTexture);
@@ -239,6 +249,11 @@ public class PaintballFactory implements AssetUser, Settable {
         minePlatformTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_STATIONARY_MINE_FILE, false);
         charPlatformTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_STATIONARY_CHAR_FILE, false);
         mineTrailTexture =  AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_MINE_TRAIL_FILE, false);
+        armedMineTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_ARMED_MINE_FILE, false);
+        armedMineWarningTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_ARMED_MINE_WARNING_FILE, false);
+        primedMineTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_PRIMED_MINE_FILE, false);
+        primedMineWarningTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_PRIMED_MINE_WARNING_FILE, false);
+        movingMineTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_MOVING_MINE_FILE, false);
         playerTextureHead = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_CHARACTER_FILE, false);
         normalPlatformTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_STATIONARY_NORMAL_FILE, false);
         splatEffectTexture = AssetRetriever.createTextureRegion(manager, Constants.PAINTBALL_SPLAT_EFFECT_FILE, false);
@@ -257,6 +272,11 @@ public class PaintballFactory implements AssetUser, Settable {
             manager.unload(Constants.PAINTBALL_STATIONARY_CHAR_FILE);
             manager.unload(Constants.PAINTBALL_NORMAL_TRAIL_FILE);
             manager.unload(Constants.PAINTBALL_MINE_TRAIL_FILE);
+            manager.unload(Constants.PAINTBALL_ARMED_MINE_FILE);
+            manager.unload(Constants.PAINTBALL_ARMED_MINE_WARNING_FILE);
+            manager.unload(Constants.PAINTBALL_PRIMED_MINE_FILE);
+            manager.unload(Constants.PAINTBALL_PRIMED_MINE_WARNING_FILE);
+            manager.unload(Constants.PAINTBALL_MOVING_MINE_FILE);
             manager.unload(Constants.PAINTBALL_ENEMY_NORMAL_FILE);
             manager.unload(Constants.PAINTBALL_ENEMY_MINE_FILE);
             manager.unload(Constants.PAINTBALL_CHARACTER_FILE);
