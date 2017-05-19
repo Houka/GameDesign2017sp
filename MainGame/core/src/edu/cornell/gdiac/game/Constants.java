@@ -14,6 +14,7 @@ public class Constants {
     public static String SFX_CAMERA_EXPLODE = "sfx/camera_explode.wav";
     public static String SFX_ENEMY_ALERT = "sfx/enemy_alert.wav";
     public static String SFX_ENEMY_SHOT = "sfx/enemy_shot.wav";
+    public static String SFX_ENEMY_STUN= "sfx/enemy_stun.wav";
     public static String SFX_PAINT_HIT_PAINT = "sfx/paint_hit_paint.wav";
     public static String SFX_PAINT_JUMP = "sfx/paint_jump.wav";
     public static String SFX_PAINT_JUMP_CHARGE = "sfx/paint_jump_charge.wav";
@@ -23,7 +24,11 @@ public class Constants {
     public static String SFX_PAINT_RELOAD = "sfx/paint_reload.wav";
     public static String SFX_PLAYER_DEATH = "sfx/player_death.wav";
     public static String SFX_PLAYER_DRY_FIRE = "sfx/player_dry_fire.wav";
+    public static String SFX_PLAYER_JUMP_LONG= "sfx/player_jump_long.wav";
+    public static String SFX_PLAYER_JUMP_SHORT= "sfx/player_jump_short.wav";
+    public static String SFX_PLAYER_LAND= "sfx/player_stun.wav";
     public static String SFX_PLAYER_SHOT = "sfx/player_shot.wav";
+    public static String SFX_PLAYER_STUN= "sfx/player_land.wav";
     public static String SFX_UI_HOVER = "sfx/UI_hover.wav";
     public static String SFX_UI_SELECT = "sfx/UI_select.wav";
 
@@ -32,8 +37,8 @@ public class Constants {
     public static int SELECTION_FONT_SIZE = 104;
     public static String MENU_FONT_FILE = "fonts/RealGraffiti.ttf";
     public static int MENU_FONT_SIZE = 64;
-    public static String FONT_FILE = SELECTION_FONT_FILE;
-    public static int FONT_SIZE = SELECTION_FONT_SIZE;
+    public static String FONT_FILE = MENU_FONT_FILE;
+    public static int FONT_SIZE = MENU_FONT_SIZE;
 
     public static Color SELECTED_COLOR = new Color(183/255f, 81/255f, 46/255f, 1f);
     public static Color SELECTED_COLOR_LIGHT = new Color(236/255f, 239/255f, 218/255f, 1f);
@@ -62,8 +67,13 @@ public class Constants {
     public static String BACKGROUND_FILE = "sprites/bg/brick_wall_tile.png";
     public static String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
 
-    public static String ENEMY_ONSIGHT_FILE = "sprites/enemy/enemy_onsight.png";
-    public static String ENEMY_INTERVAL_FILE = "sprites/enemy/enemy_interval.png";
+    public static String ENEMY_ONSIGHT_FILE = "sprites/enemy/enemy_onsight2.png";
+    public static String ENEMY_ONSIGHT_ALERTED_FILE = "sprites/enemy/enemy_onsight_alerted_strip5.png";
+    public static String ENEMY_ONSIGHT_SHOOTING_FILE = "sprites/enemy/enemy_onsight_shooting_strip6.png";
+    public static String ENEMY_ONSIGHT_SHOOT_FILE = "sprites/enemy/enemy_onsight.png";
+    public static String ENEMY_INTERVAL_FILE = "sprites/enemy/enemy_interval2.png";
+    public static String ENEMY_INTERVAL_SHOOT_FILE = "sprites/enemy/enemy_interval.png";
+    public static String ENEMY_INTERVAL_SHOOTING_FILE = "sprites/enemy/enemy_interval_shoot_strip10.png";
     public static String ENEMY_SPOTTED_FILE = "sprites/enemy/enemy_spotted.png";
 
     public static String PAINTBALL_CHARACTER_FILE = "sprites/bullets/char_paintball_strip5.png";
@@ -91,7 +101,7 @@ public class Constants {
     public static String CHARACTER_MIDAIR_FILE = "sprites/char/char_midair_shoot.png";
     public static String CHARACTER_RISING_FILE = "sprites/char/char_jump_shoot_strip2.png";
     public static String CHARACTER_TRANSITION_FILE = "sprites/char/char_transition_shoot_strip2.png";
-    public static String CHARACTER_SHOOT_FILE = "sprites/char/char_shoot.png";
+    public static String CHARACTER_SHOOT_FILE = "sprites/char/char_shoot_strip2.png";
     public static String CHARACTER_CROUCH_FILE = "sprites/char/char_crouch.png";
     public static String CHARACTER_CROUCH_SHOOT_FILE = "sprites/char/char_crouch_shoot.png";
     public static String CHARACTER_STUNNED_FILE = "sprites/char/char_stunned.png";
@@ -127,4 +137,8 @@ public class Constants {
 
     public static final int DEFAULT_GRID = 48;
 
+    /**Ammo bar for hud*/
+    public static final String AMMO_BAR = "ui/hud/ammo_bar.png";
+    public static final String AMMO_EMPTY= "ui/hud/ammo_empty.png";
+    public static final String AMMO_FILLED= "ui/hud/ammo_filled_strip4.png";
 }

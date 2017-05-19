@@ -26,7 +26,7 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
 
     /** Cooldown constants */
     private static final int DEFAULT_SHOOT_COOLDOWN = 75;
-    private static final int DEFAULT_STUN_COOLDOWN = 500;
+    private static final int DEFAULT_STUN_COOLDOWN = 300;
 
     // This is to fit the image to a tigher hitbox
     /** The amount to shrink the body fixture (vertically) relative to the image */
@@ -201,6 +201,8 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
 
     @Override
     public boolean isShooting() {return isShooting && shootCooldownCounter <= 0 && !isStunned();}
+
+    public int getShootCooldownCounter(){return shootCooldownCounter;}
 
     @Override
     public void setShooting(boolean value) { isShooting = value; }

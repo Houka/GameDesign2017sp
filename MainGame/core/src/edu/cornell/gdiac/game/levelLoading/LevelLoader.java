@@ -60,13 +60,16 @@ public class LevelLoader implements AssetUser, Disposable{
     /** LevelParser scale at which everything is drawn*/
     private Vector2 scale;
 
+    private AssetManager manager;
+
     /** Constructor that specifies scale.
      * @param scale Scale at which the level is drawn*/
-    public LevelLoader(Vector2 scale){
+    public LevelLoader(Vector2 scale, AssetManager manager){
         this.scale = scale;
         levelParser = new LevelParser();
         backgroundRegions = new HashMap<String, TextureRegion>();
         platformBlockTiles = new TextureRegion[PLATFORM_BLOCKS_NUMBER];
+        this.manager = manager;
     }
 
     // BEGIN: Setters and Getters
@@ -277,6 +280,15 @@ public class LevelLoader implements AssetUser, Disposable{
             obj.setTexture(enemyIntervalTexture);
             obj.setAnimation(enemyIntervalAnimation);
             addQueuedObject(obj);
+
+
+            enemyIntervalAnimation= new Animation();
+            enemyIntervalAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, Constants.ENEMY_INTERVAL_SHOOT_FILE, false), 1,1);
+            enemyIntervalAnimation.addTexture("shooting", AssetRetriever.createTexture(manager, Constants.ENEMY_INTERVAL_SHOOTING_FILE, false), 1,10);
+            enemyIntervalAnimation.addTexture("spotted", AssetRetriever.createTexture(manager, Constants.ENEMY_SPOTTED_FILE, false), 1,1);
+            enemyIntervalAnimation.addTexture("still", enemyIntervalTexture.getTexture(), 1, 1);
+            enemyIntervalAnimation.setPlaying(false);
+            enemyIntervalAnimation.setPlayingAnimation("still");
         }
         dwidth  = enemyOnsightTexture.getRegionWidth()/scale.x;
         dheight = enemyOnsightTexture.getRegionHeight()/scale.y;
@@ -293,6 +305,15 @@ public class LevelLoader implements AssetUser, Disposable{
             obj.setTexture(enemyOnsightTexture);
             obj.setAnimation(enemyOnsightAnimation);
             addQueuedObject(obj);
+
+            enemyOnsightAnimation= new Animation();
+            enemyOnsightAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, Constants.ENEMY_ONSIGHT_SHOOT_FILE, false), 1,1);
+            enemyOnsightAnimation.addTexture("shooting", AssetRetriever.createTexture(manager, Constants.ENEMY_ONSIGHT_SHOOTING_FILE, false), 1,6);
+            enemyOnsightAnimation.addTexture("alert", AssetRetriever.createTexture(manager, Constants.ENEMY_ONSIGHT_ALERTED_FILE, false), 1,5);
+            enemyOnsightAnimation.addTexture("spotted", AssetRetriever.createTexture(manager, Constants.ENEMY_SPOTTED_FILE, false), 1,1);
+            enemyOnsightAnimation.addTexture("still", enemyOnsightTexture.getTexture(), 1, 1);
+            enemyOnsightAnimation.setPlaying(false);
+            enemyOnsightAnimation.setPlayingAnimation("still");
         }
     }
 
@@ -389,7 +410,12 @@ public class LevelLoader implements AssetUser, Disposable{
         manager.load(Constants.GOAL_FILE,Texture.class);
         manager.load(Constants.BACKGROUND_FILE,Texture.class);
         manager.load(Constants.ENEMY_INTERVAL_FILE,Texture.class);
+        manager.load(Constants.ENEMY_INTERVAL_SHOOT_FILE,Texture.class);
+        manager.load(Constants.ENEMY_INTERVAL_SHOOTING_FILE,Texture.class);
         manager.load(Constants.ENEMY_ONSIGHT_FILE,Texture.class);
+        manager.load(Constants.ENEMY_ONSIGHT_SHOOT_FILE,Texture.class);
+        manager.load(Constants.ENEMY_ONSIGHT_SHOOTING_FILE,Texture.class);
+        manager.load(Constants.ENEMY_ONSIGHT_ALERTED_FILE,Texture.class);
         manager.load(Constants.ENEMY_SPOTTED_FILE,Texture.class);
         manager.load(Constants.CHARACTER_STILL_FILE, Texture.class);
         manager.load(Constants.CHARACTER_FALLING_FILE, Texture.class);
@@ -465,7 +491,7 @@ public class LevelLoader implements AssetUser, Disposable{
         playerAnimation = new Animation();
         playerAnimation.addTexture("idle", AssetRetriever.createTexture(manager, Constants.CHARACTER_IDLE_FILE, false), 1,5);
         playerAnimation.addTexture("run", AssetRetriever.createTexture(manager, Constants.CHARACTER_RUN_FILE, false), 1,4);
-        playerAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, Constants.CHARACTER_SHOOT_FILE, false), 1,1);
+        playerAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, Constants.CHARACTER_SHOOT_FILE, false), 1,2);
         playerAnimation.addTexture("crouch", AssetRetriever.createTexture(manager, Constants.CHARACTER_CROUCH_FILE, false), 1,1);
         playerAnimation.addTexture("stunned", AssetRetriever.createTexture(manager, Constants.CHARACTER_STUNNED_FILE, false), 1,1);
         playerAnimation.addTexture("rising", AssetRetriever.createTexture(manager, Constants.CHARACTER_RISING_FILE, false), 1,2);
@@ -480,16 +506,19 @@ public class LevelLoader implements AssetUser, Disposable{
         playerAnimation.setPlayingAnimation("idle");
 
         enemyIntervalAnimation= new Animation();
-        enemyIntervalAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, Constants.ENEMY_INTERVAL_FILE, false), 1,1);
+        enemyIntervalAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, Constants.ENEMY_INTERVAL_SHOOT_FILE, false), 1,1);
+        enemyIntervalAnimation.addTexture("shooting", AssetRetriever.createTexture(manager, Constants.ENEMY_INTERVAL_SHOOTING_FILE, false), 1,10);
         enemyIntervalAnimation.addTexture("spotted", AssetRetriever.createTexture(manager, Constants.ENEMY_SPOTTED_FILE, false), 1,1);
         enemyIntervalAnimation.addTexture("still", enemyIntervalTexture.getTexture(), 1, 1);
         enemyIntervalAnimation.setPlaying(false);
         enemyIntervalAnimation.setPlayingAnimation("still");
 
         enemyOnsightAnimation= new Animation();
-        enemyOnsightAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, Constants.ENEMY_ONSIGHT_FILE, false), 1,1);
+        enemyOnsightAnimation.addTexture("shoot", AssetRetriever.createTexture(manager, Constants.ENEMY_ONSIGHT_SHOOT_FILE, false), 1,1);
+        enemyOnsightAnimation.addTexture("shooting", AssetRetriever.createTexture(manager, Constants.ENEMY_ONSIGHT_SHOOTING_FILE, false), 1,6);
+        enemyOnsightAnimation.addTexture("alert", AssetRetriever.createTexture(manager, Constants.ENEMY_ONSIGHT_ALERTED_FILE, false), 1,5);
         enemyOnsightAnimation.addTexture("spotted", AssetRetriever.createTexture(manager, Constants.ENEMY_SPOTTED_FILE, false), 1,1);
-        enemyOnsightAnimation.addTexture("still", goalTile.getTexture(), 1, 1);
+        enemyOnsightAnimation.addTexture("still", enemyOnsightTexture.getTexture(), 1, 1);
         enemyOnsightAnimation.setPlaying(false);
         enemyOnsightAnimation.setPlayingAnimation("still");
 

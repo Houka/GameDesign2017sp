@@ -66,6 +66,7 @@ public class PlayerInputController {
     }
     public boolean didJump() { return jumpPressed && !jumpPrevious; }
     public boolean didStopJump() { return jumpReleased; }
+    public boolean anyKeyPressed(){ return didShoot() || didJump() || didDown() || didUp() ||getHorizontal()!=0 || getVertical()!= 0;}
     /**
      * Returns the amount of sideways movement.
      *

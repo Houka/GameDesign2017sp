@@ -120,7 +120,7 @@ public class LevelEditorMode extends Mode {
         scaleVector = new Vector2(canvas.getWidth() / DEFAULT_WIDTH, canvas.getHeight() / DEFAULT_HEIGHT);
         debug = true;
 
-        levelLoader = new LevelLoader(scaleVector);
+        levelLoader = new LevelLoader(scaleVector,manager);
         levelCreator = new LevelCreator();
 
         input = EditorInputController.getInstance();

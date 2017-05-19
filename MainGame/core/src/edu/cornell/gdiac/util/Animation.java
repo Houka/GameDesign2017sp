@@ -147,6 +147,8 @@ public class Animation implements Disposable{
         return currentStrip;
     }
 
+    public int getCurrentFrame(){return currentFrame;}
+
     @Override
     public void dispose(){
         filmStrips.clear();

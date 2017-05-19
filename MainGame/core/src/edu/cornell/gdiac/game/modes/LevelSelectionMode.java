@@ -19,8 +19,8 @@ import edu.cornell.gdiac.game.input.SelectionInputController;
 import edu.cornell.gdiac.util.AssetRetriever;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
 import edu.cornell.gdiac.util.FileReaderWriter;
+import edu.cornell.gdiac.util.SoundController;
 
-import java.util.ArrayList;
 
 /**
  * Class that provides a Level Selection screen for the state of the game.
@@ -29,7 +29,7 @@ public class LevelSelectionMode extends Mode {
 	private static final int TOTAL_COLUMNS = 3;
 	private static final int BORDER_X = 100;
 	private static final int BORDER_Y = 50;
-	private static final int PADDING_Y = 150;
+	private static final int PADDING_Y = 240;
 
 	/** Textures necessary to support the screen */
 	private static final String BACKGROUND_FILE = "ui/bg/level_selection.png";
@@ -80,18 +80,30 @@ public class LevelSelectionMode extends Mode {
 	@Override
 	protected void update(float delta) {
 		input.readInput();
+		SoundController.getSFXInstance().update();
 
 		canvas.getCamera().setAutosnap(true);
-		if (input.didDown())
-			selected = (selected+TOTAL_COLUMNS >= NUM_LEVELS.length)?	selected : selected+TOTAL_COLUMNS;
-		else if (input.didUp())
+		if (input.didDown()) {
+			SoundController.getSFXInstance().stopAll();
+			SoundController.getSFXInstance().play("selectionMenu",Constants.SFX_UI_HOVER,false);
+			selected = (selected + TOTAL_COLUMNS >= NUM_LEVELS.length) ? selected : selected + TOTAL_COLUMNS;
+		}else if (input.didUp()) {
+			SoundController.getSFXInstance().stopAll();
+			SoundController.getSFXInstance().play("selectionMenu",Constants.SFX_UI_HOVER,false);
 			selected = (selected < TOTAL_COLUMNS) ? selected : selected - TOTAL_COLUMNS;
-		else if (input.didRight())
-			selected=(selected+1) % NUM_LEVELS.length;
-		else if (input.didLeft())
-			selected=(selected <= 0)? NUM_LEVELS.length -1 : selected-1;
-		else if (input.didSelect())
+		}else if (input.didRight()) {
+			SoundController.getSFXInstance().stopAll();
+			SoundController.getSFXInstance().play("selectionMenu",Constants.SFX_UI_HOVER,false);
+			selected = (selected + 1) % NUM_LEVELS.length;
+		}else if (input.didLeft()) {
+			SoundController.getSFXInstance().stopAll();
+			SoundController.getSFXInstance().play("selectionMenu",Constants.SFX_UI_HOVER,false);
+			selected = (selected <= 0) ? NUM_LEVELS.length - 1 : selected - 1;
+		}else if (input.didSelect()) {
+			SoundController.getSFXInstance().stopAll();
+			SoundController.getSFXInstance().play("selectionMenu",Constants.SFX_UI_SELECT,false);
 			setComplete(true);
+		}
 	}
 
 	@Override
@@ -148,8 +160,9 @@ public class LevelSelectionMode extends Mode {
 		background = AssetRetriever.createTextureRegion(manager, BACKGROUND_FILE, true).getTexture();
 
 		// Allocate the font
-		if (manager.isLoaded(Constants.SELECTION_FONT_FILE)) {
+		if (manager.isLoaded(Constants.SELECTION_FONT_FILE) && displayFont==null) {
 			displayFont = manager.get(Constants.SELECTION_FONT_FILE, BitmapFont.class);
+			displayFont.getData().scale(1.1f);
 		}
 
 		// load levels
