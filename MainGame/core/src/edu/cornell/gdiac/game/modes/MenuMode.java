@@ -35,7 +35,7 @@ public class MenuMode extends Mode {
 
 	/** Player modes that are selectable from menu mode */
 	private String[] modes = {GameModeManager.GAME_MODE, GameModeManager.LEVEL_SELECTION, GameModeManager.LEVEL_EDITOR};
-	private String[] modeNames = {"PLAY", "LEVEL SELECT","Level Editor",  "QUIT"};
+	private String[] modeNames = {"PLAY", "LEVEL SELECT","QUIT"};
 	private int selected = 0;
 
 	/** Input controller for menu selection */
@@ -60,12 +60,13 @@ public class MenuMode extends Mode {
 	}
 
 	// BEGIN: Setters and Getters
-	// END: Setters and Getters
 
 	@Override
 	public void setScreenListener(ScreenListener listener) {
 		super.setScreenListener(listener);
 	}
+
+	// END: Setters and Getters
 
 	@Override
 	protected void onComplete(){
@@ -88,13 +89,16 @@ public class MenuMode extends Mode {
 		SoundController.getSFXInstance().update();
 		if (input.didDown()) {
 			selected = (selected + 1) % modeNames.length;
+			SoundController.getSFXInstance().stopAll();
 			SoundController.getSFXInstance().play("menuMenu",Constants.SFX_UI_HOVER,false);
 		}
 		else if (input.didUp()) {
 			selected = (selected - 1 < 0) ? modeNames.length - 1 : selected - 1;
+			SoundController.getSFXInstance().stopAll();
 			SoundController.getSFXInstance().play("menuMenu",Constants.SFX_UI_HOVER,false);
 		}
 		else if (input.didSelect()) {
+			SoundController.getSFXInstance().stopAll();
 			SoundController.getSFXInstance().play("menuMenu",Constants.SFX_UI_SELECT,false);
 			if (selected == modeNames.length-1)
 				setExit(true);

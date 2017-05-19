@@ -2,12 +2,13 @@ package edu.cornell.gdiac.game.entity.models;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import edu.cornell.gdiac.game.GameCanvas;
+import edu.cornell.gdiac.util.Animation;
 import edu.cornell.gdiac.util.obstacles.BoxObstacle;
 
 import java.sql.Time;
-import java.util.Calendar;
 
 /**
  * Created by Lu on 3/17/2017.
@@ -17,6 +18,8 @@ import java.util.Calendar;
 public class HUDModel extends BoxObstacle {
     /** Default amount of ammo the player starts with*/
     private static final int DEFAULT_STARTING_AMMO = 10;
+    /** Default y location for ammo bar*/
+    private static final int AMMO_BAR_Y = 75;
 
     //Constants for states
     /** We are playing the game*/
@@ -40,6 +43,10 @@ public class HUDModel extends BoxObstacle {
 
     /** Timer for a race the clock situation (in seconds) **/
     private Time time;
+
+    private Animation ammoFilledAnimation;
+    private TextureRegion ammoEmpty;
+    private TextureRegion ammoBar;
 
     /**
      * Creates a new HUD at the given position.
@@ -91,6 +98,12 @@ public class HUDModel extends BoxObstacle {
         ammoLeft = startingAmmo;
     }
 
+    public void setAnimationAndTexture(Animation a, TextureRegion bar, TextureRegion empty){
+        ammoFilledAnimation = a;
+        ammoBar = bar;
+        ammoEmpty = empty;
+    }
+
     public void setAmmoLeft(int value){ ammoLeft = Math.min(value, startingAmmo); }
 
     public int getAmmoLeft(){ return ammoLeft; }
@@ -120,11 +133,23 @@ public class HUDModel extends BoxObstacle {
     public void update(float delta) {
         lastStateChange+=delta;
         time.setTime((int)lastStateChange * 1000);
+        if(ammoFilledAnimation != null)
+            ammoFilledAnimation.update(delta);
     }
 
     @Override
     public void draw(GameCanvas canvas){
-        font.setColor(Color.DARK_GRAY);
-        canvas.drawText("Ammo:"+ammoLeft, font, 30, getY()-30);
+        if (ammoFilledAnimation != null && ammoBar != null){
+            if (startingAmmo > 0)
+                canvas.draw(ammoBar, Color.WHITE,0,0, 30, getY()-AMMO_BAR_Y,0,1.5f,1.5f);
+            for(int i = 0; i<startingAmmo; i++){
+                canvas.draw(ammoEmpty, Color.WHITE,0,0, 30+(10+ammoEmpty.getRegionWidth())*i, getY()-ammoBar.getRegionHeight()*1.5f-AMMO_BAR_Y,
+                        0,1.5f,1.5f);
+                if (i<ammoLeft){
+                    canvas.draw(ammoFilledAnimation.getTextureRegion(), Color.WHITE,0,0, 30+(10+ammoEmpty.getRegionWidth())*i,
+                            getY()-ammoBar.getRegionHeight()*1.5f-AMMO_BAR_Y, 0,1.5f,1.5f);
+                }
+            }
+        }
     }
 }

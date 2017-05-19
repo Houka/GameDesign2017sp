@@ -15,7 +15,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.assets.*;
@@ -31,6 +33,8 @@ import edu.cornell.gdiac.game.entity.controllers.PlayerController;
 import edu.cornell.gdiac.game.entity.factories.PaintballFactory;
 import edu.cornell.gdiac.game.entity.models.*;
 import edu.cornell.gdiac.game.input.MainInputController;
+import edu.cornell.gdiac.game.input.PlayerInputController;
+import edu.cornell.gdiac.game.interfaces.Animatable;
 import edu.cornell.gdiac.game.interfaces.ScreenListener;
 import edu.cornell.gdiac.game.interfaces.Settable;
 import edu.cornell.gdiac.game.interfaces.Shooter;
@@ -77,6 +81,8 @@ public class GameMode extends Mode implements Settable {
 	/** The time until reset after loss*/
 	private final float TIME_TO_RESET = 2f;
 	private final float START_TIME = 2f;
+	private final float SKIP_INTRO_THRESHOLD= 0.5f;
+	private final float ANIMATION_END_TIME= 1.5f;
 
 	private boolean hasLost = false;
 	private float timeOfLoss;
@@ -294,6 +300,7 @@ public class GameMode extends Mode implements Settable {
 		gameCamera.snap();
 		canvas.end();
 		hud.reset();
+		goal.getAnimation().setPlayingAnimation("idle");
 		time = 0;
 	}
 
@@ -303,27 +310,12 @@ public class GameMode extends Mode implements Settable {
 		soundController.update();
 		sfxSoundController.update();
 
+		if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) && time>SKIP_INTRO_THRESHOLD && time<START_TIME)
+			time+=START_TIME;
+
 		if (!hud.isLose() && !hud.isWin() && time > START_TIME)
 			for (EntityController e : entityControllers)
 				e.update(dt);
-
-		if (hud.isWin() && !hasWon){
-			for (EntityController e : entityControllers)
-				if (e instanceof PlayerController) {
-					e.update(dt);
-					hasWon = true;
-					timeOfWin = time;
-				}
-		}
-
-		if (hud.isLose() && !hasLost) {
-			for (EntityController e : entityControllers)
-				if (e instanceof PlayerController) {
-					e.update(dt);
-					hasLost = true;
-					timeOfLoss = time;
-				}
-		}
 
 		applySettings();
 		paintballFactory.applySettings();
@@ -357,13 +349,13 @@ public class GameMode extends Mode implements Settable {
 		if (player.getY() < -player.getHeight())
 			hud.setLose(true);
 
-		if(hud.isLose() && time - timeOfLoss > 2) {
+		if(hud.getLastStateChange()>ANIMATION_END_TIME && hud.isLose()) {
 			hud.reset();
 			collisionController.setHasDied(false);
 			listener.switchToScreen(this, GameModeManager.LOSS);
 		}
 
-		if(hud.getLastStateChange()>TIME_TO_RESET && hud.isWin() && time - timeOfWin > 2) {
+		if(hud.getLastStateChange()>ANIMATION_END_TIME && hud.isWin()) {
 			hud.reset();
 			listener.switchToScreen(this, GameModeManager.WIN);
 		}
@@ -421,6 +413,9 @@ public class GameMode extends Mode implements Settable {
 		manager.load(Constants.SFX_PAINT_POP_LIGHT, Sound.class);
 		manager.load(Constants.SFX_PLAYER_DEATH , Sound.class);
 		manager.load(Constants.SFX_PLAYER_DRY_FIRE, Sound.class);
+		manager.load(Constants.AMMO_BAR, Texture.class);
+		manager.load(Constants.AMMO_EMPTY, Texture.class);
+		manager.load(Constants.AMMO_FILLED, Texture.class);
 	}
 
 	@Override
@@ -447,6 +442,13 @@ public class GameMode extends Mode implements Settable {
 			soundController.stopAll();
 			soundController.play("gameMode", Constants.GAME_MUSIC_FILE, true, 0.5f);
 		}
+
+		Animation ammo = new Animation();
+		ammo.addTexture("filled", AssetRetriever.createTexture(manager,Constants.AMMO_FILLED,false),1,4);
+		ammo.play("filled", true);
+		hud.setAnimationAndTexture(ammo,
+				AssetRetriever.createTextureRegion(manager, Constants.AMMO_BAR, false),
+				AssetRetriever.createTextureRegion(manager,Constants.AMMO_EMPTY,false));
 	}
 
 	@Override
@@ -504,6 +506,7 @@ public class GameMode extends Mode implements Settable {
 					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY()+player.getHeight()/8, ((Shooter) obj).isFacingRight(), "player"));
 				else
 					addObject(paintballFactory.createPaintball(obj.getX(), obj.getY()-player.getHeight()/4, ((Shooter) obj).isFacingRight(), "player"));
+				sfxSoundController.stopAll();
 				sfxSoundController.play("gameMode",Constants.SFX_PLAYER_SHOT,false);
 			}
 			else if (obj.getName().equals("enemy")) {
@@ -513,6 +516,7 @@ public class GameMode extends Mode implements Settable {
 						enemy.isFacingRight(),enemy.getEnemyType()));
 			}
 			else{
+				sfxSoundController.stopAll();
 				sfxSoundController.play("gameMode",Constants.SFX_PLAYER_DRY_FIRE,false);
 			}
 		}
