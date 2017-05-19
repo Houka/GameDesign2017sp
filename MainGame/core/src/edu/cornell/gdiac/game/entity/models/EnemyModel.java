@@ -202,6 +202,8 @@ public class EnemyModel extends PolygonObstacle implements Shooter, Animatable {
     @Override
     public boolean isShooting() {return isShooting && shootCooldownCounter <= 0 && !isStunned();}
 
+    public int getShootCooldownCounter(){return shootCooldownCounter;}
+
     @Override
     public void setShooting(boolean value) { isShooting = value; }
 

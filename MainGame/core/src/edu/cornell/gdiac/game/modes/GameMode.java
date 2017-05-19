@@ -193,7 +193,7 @@ public class GameMode extends Mode implements Settable {
 		paintballFactory = new PaintballFactory(scaleVector);
 		collisionController = new CollisionController(hud,paintballFactory);
 		world.setContactListener(collisionController);
-		levelLoader = new LevelLoader(scaleVector);
+		levelLoader = new LevelLoader(scaleVector,manager);
 		this.bounds = new Rectangle(bounds);
 		hud.setDrawScale(scaleVector);
 		gameCamera = new Camera2(WORLD_WIDTH,(int)((float)WORLD_WIDTH/canvas.getWidth()*canvas.getHeight()));

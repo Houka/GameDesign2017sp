@@ -67,8 +67,13 @@ public class Constants {
     public static String BACKGROUND_FILE = "sprites/bg/brick_wall_tile.png";
     public static String AMMO_DEPOT_FILE = "sprites/paint_repo.png";
 
-    public static String ENEMY_ONSIGHT_FILE = "sprites/enemy/enemy_onsight.png";
-    public static String ENEMY_INTERVAL_FILE = "sprites/enemy/enemy_interval.png";
+    public static String ENEMY_ONSIGHT_FILE = "sprites/enemy/enemy_onsight2.png";
+    public static String ENEMY_ONSIGHT_ALERTED_FILE = "sprites/enemy/enemy_onsight_alerted_strip5.png";
+    public static String ENEMY_ONSIGHT_SHOOTING_FILE = "sprites/enemy/enemy_onsight_shooting_strip6.png";
+    public static String ENEMY_ONSIGHT_SHOOT_FILE = "sprites/enemy/enemy_onsight.png";
+    public static String ENEMY_INTERVAL_FILE = "sprites/enemy/enemy_interval2.png";
+    public static String ENEMY_INTERVAL_SHOOT_FILE = "sprites/enemy/enemy_interval.png";
+    public static String ENEMY_INTERVAL_SHOOTING_FILE = "sprites/enemy/enemy_interval_shoot_strip10.png";
     public static String ENEMY_SPOTTED_FILE = "sprites/enemy/enemy_spotted.png";
 
     public static String PAINTBALL_CHARACTER_FILE = "sprites/bullets/char_paintball_strip5.png";
