@@ -29,7 +29,7 @@ public class LevelSelectionMode extends Mode {
 	private static final int TOTAL_COLUMNS = 3;
 	private static final int BORDER_X = 100;
 	private static final int BORDER_Y = 50;
-	private static final int PADDING_Y = 240;
+	private static final int PADDING_Y = 200;
 
 	/** Textures necessary to support the screen */
 	private static final String BACKGROUND_FILE = "ui/bg/level_selection.png";
@@ -162,7 +162,7 @@ public class LevelSelectionMode extends Mode {
 		// Allocate the font
 		if (manager.isLoaded(Constants.SELECTION_FONT_FILE) && displayFont==null) {
 			displayFont = manager.get(Constants.SELECTION_FONT_FILE, BitmapFont.class);
-			displayFont.getData().scale(1.1f);
+			//displayFont.getData().scale(1.1f);
 		}
 
 		// load levels
