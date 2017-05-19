@@ -120,7 +120,7 @@ public class CollisionController implements ContactListener {
     private void handleCollision(PlayerModel obj1, SplattererModel obj2) {}
     private void handleCollision(PlayerModel obj1, EnemyModel obj2){
         if (!obj2.isStunned()) {
-            obj1.setKnockedBack(-obj1.getVX()/Math.abs(obj1.getVX()));
+            obj1.setKnockedBack(obj1.getVX()!=0? (float)Math.sin(-obj1.getVX()):(float)Math.sin(-obj1.getVY()));
         }
     }
     private void handleCollision(PlayerModel obj1, GoalModel obj2){
@@ -167,6 +167,7 @@ public class CollisionController implements ContactListener {
         if(obj2.isPlayerBullet()) {
             obj2.pop();
             obj1.setStunned(true);
+            SoundController.getSFXInstance().play("gameMode",Constants.SFX_ENEMY_STUN, false);
         }
     }
     private void handleCollision(EnemyModel obj1, PlatformModel obj2, Object userData1){}

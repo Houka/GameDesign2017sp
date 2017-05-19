@@ -402,6 +402,7 @@ public class GameMode extends Mode implements Settable {
 		manager.load(Constants.GAME_MUSIC_FILE, Sound.class);
 		manager.load(Constants.SFX_PLAYER_SHOT, Sound.class);
 		manager.load(Constants.SFX_ENEMY_SHOT, Sound.class);
+		manager.load(Constants.SFX_ENEMY_STUN, Sound.class);
 		manager.load(Constants.SFX_PAINT_HIT_PAINT, Sound.class);
 		manager.load(Constants.SFX_PAINT_RELOAD, Sound.class);
 		manager.load(Constants.SFX_CAMERA_EXPLODE , Sound.class);
@@ -413,6 +414,10 @@ public class GameMode extends Mode implements Settable {
 		manager.load(Constants.SFX_PAINT_POP_LIGHT, Sound.class);
 		manager.load(Constants.SFX_PLAYER_DEATH , Sound.class);
 		manager.load(Constants.SFX_PLAYER_DRY_FIRE, Sound.class);
+		manager.load(Constants.SFX_PLAYER_JUMP_LONG, Sound.class);
+		manager.load(Constants.SFX_PLAYER_JUMP_SHORT, Sound.class);
+		manager.load(Constants.SFX_PLAYER_LAND, Sound.class);
+		manager.load(Constants.SFX_PLAYER_STUN, Sound.class);
 		manager.load(Constants.AMMO_BAR, Texture.class);
 		manager.load(Constants.AMMO_EMPTY, Texture.class);
 		manager.load(Constants.AMMO_FILLED, Texture.class);
@@ -422,7 +427,12 @@ public class GameMode extends Mode implements Settable {
 	public void loadContent(AssetManager manager) {
 		soundController.allocate(manager, Constants.GAME_MUSIC_FILE);
 		sfxSoundController.allocate(manager, Constants.SFX_PLAYER_SHOT);
+		sfxSoundController.allocate(manager, Constants.SFX_PLAYER_STUN);
+		sfxSoundController.allocate(manager, Constants.SFX_PLAYER_LAND);
+		sfxSoundController.allocate(manager, Constants.SFX_PLAYER_JUMP_SHORT);
+		sfxSoundController.allocate(manager, Constants.SFX_PLAYER_JUMP_LONG);
 		sfxSoundController.allocate(manager, Constants.SFX_ENEMY_SHOT);
+		sfxSoundController.allocate(manager, Constants.SFX_ENEMY_STUN);
 		sfxSoundController.allocate(manager, Constants.SFX_PAINT_HIT_PAINT);
 		sfxSoundController.allocate(manager, Constants.SFX_PAINT_RELOAD);
 		sfxSoundController.allocate(manager, Constants.SFX_CAMERA_EXPLODE);

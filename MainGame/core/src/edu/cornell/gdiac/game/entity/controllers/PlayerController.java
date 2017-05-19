@@ -19,6 +19,7 @@ public class PlayerController extends EntityController {
     /** The input controller associated with the PlayerModel **/
     private PlayerInputController input;
     private boolean superJumpEnabled;
+    private boolean wasGrounded = false;
 
     /**
      * PlayerController's contructor
@@ -27,6 +28,7 @@ public class PlayerController extends EntityController {
     public PlayerController(PlayerModel player){
         super(player);
         input = PlayerInputController.getInstance();
+        wasGrounded = player.isGrounded();
     }
 
     @Override
@@ -58,7 +60,11 @@ public class PlayerController extends EntityController {
 
     private void updateAnimation(){
 
-        if (player.isShooting() && player.isCrouching())
+        if(!wasGrounded &&player.isGrounded()) {
+            SoundController.getSFXInstance().stopAll();
+            SoundController.getSFXInstance().play("gameMode",Constants.SFX_PLAYER_LAND,false,0.3f);
+        }
+        else if (player.isShooting() && player.isCrouching())
             player.getAnimation().playOnce("crouch_shoot");
         else if(player.isGrounded() && player.isCrouching())
             player.getAnimation().play("crouch",false);
@@ -68,18 +74,21 @@ public class PlayerController extends EntityController {
             if (player.isDoubleJumping())
                 player.getAnimation().setPlayingAnimation("still");
             player.getAnimation().play("rising", true);
-            SoundController.getSFXInstance().play("gameMode", Constants.SFX_PAINT_JUMP, false);
         }
         else if (!player.isGrounded() &&
                 player.getVY() <= OFF_GROUND_THRESHOLD + 1 && player.getVY() >= OFF_GROUND_THRESHOLD-1)
             player.getAnimation().playOnce("peak");
-        else if (!player.isGrounded() && player.isKnockedBack())
+        else if (!player.isGrounded() && player.isKnockedBack()) {
             player.getAnimation().playOnce("stunned");
+            SoundController.getSFXInstance().play("gameMode", Constants.SFX_PLAYER_STUN, false);
+        }
         else if (player.isGrounded() && input.getHorizontal() != 0 && !player.isGhosting())
             player.getAnimation().play("run", true);
         else if (player.isShooting() && !player.isCrouching())
             player.getAnimation().playOnce("shoot");
         else if (player.isGrounded() || player.recentlyGrounded())
             player.getAnimation().play("idle", true);
+
+        wasGrounded = player.isGrounded();
     }
 }
