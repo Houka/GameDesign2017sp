@@ -1,0 +1,9 @@
+{
+  "classPath": [
+    "MainGame.jar"
+  ],
+  "mainClass": "edu.cornell.gdiac.physics.desktop.DesktopLauncher",
+  "vmArgs": [
+    "-Xmx1G"
+  ]
+}
